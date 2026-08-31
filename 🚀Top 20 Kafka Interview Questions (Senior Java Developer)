@@ -1,0 +1,396 @@
+Top 20 Kafka Interview Questions (Senior Java Developer)
+
+1. What is Apache Kafka?
+Answer
+Apache Kafka is a distributed event-streaming platform used for:
+Real-time messaging
+Event-driven architecture
+Data pipelines
+Log aggregation
+Kafka stores records in partitioned and replicated logs. [Kafka_Ulti...t_40_Pages | Word], [Kafka-Ebook | PDF]
+Interview One-Liner
+Kafka is a distributed event streaming platform designed for high throughput, scalability, durability, and fault tolerance.
+2. What are the main components of Kafka?
+Answer
+ 
+Producer
+ 
+Topic
+ 
+Partition
+ 
+Broker
+ 
+Consumer
+ 
+Consumer Group
+ 
+Offset
+ 
+ 
+ 
+Producer → Topic → Partition → Broker → Consumer. [Kafka_Ulti...t_40_Pages | Word], [Kafka-Ebook | PDF]
+3. What is a Kafka Topic?
+Answer
+A Topic is a logical channel where messages are stored.
+Example:
+ 
+payments
+ 
+customers
+ 
+transactions
+ 
+Producers write to topics and consumers read from them. [The Ultima...book Ebook | Word], [The Ultima...book Ebook | Word]
+4. What is a Kafka Partition?
+Answer
+Partitions divide a topic into multiple pieces.
+ 
+Payments Topic
+ 
+
+ 
+Partition-0
+ 
+Partition-1
+ 
+Partition-2
+ 
+Benefits:
+✅ Parallel Processing
+✅ Scalability
+✅ High Throughput
+Partitions are the unit of parallelism. [The Ultima...book Ebook | Word], [Java_Inter...ced_Topics | PDF]
+5. What is a Kafka Broker?
+Answer
+A Broker is a Kafka server that stores partitions and serves producer/consumer requests. [Kafka_Ulti...t_40_Pages | Word], [Kafka-Ebook | PDF]
+6. What is a Kafka Producer?
+Answer
+Producer publishes messages to Kafka topics.
+ 
+producer.send(
+ 
+new ProducerRecord<>(
+ 
+   "payments",
+ 
+   accountId,
+ 
+   event));
+ 
+``
+ 
+[Java_Inter...heat_Sheet | PDF]
+7. What is a Kafka Consumer?
+Answer
+Consumer reads and processes messages from topics.
+Responsibilities:
+Poll messages
+Process messages
+Manage offsets
+Consumers enable scalable and fault-tolerant consumption. [Kafka-Ebook | Word], [java full...sion guide | PDF]
+8. What is an Offset?
+Answer
+Offset is the position of a record inside a partition.
+ 
+Partition-0
+ 
+
+ 
+Message 1 -> Offset 0
+ 
+Message 2 -> Offset 1
+ 
+Message 3 -> Offset 2
+ 
+ 
+ 
+Consumers use offsets for replay and recovery. [The Ultima...book Ebook | Word], [Kafka_Ulti...t_40_Pages | PDF]
+9. What is a Consumer Group?
+Answer
+A consumer group is a set of consumers sharing work.
+ 
+Topic
+ 
+  ↓
+ 
+Consumer Group
+ 
+
+ 
+Consumer-1
+ 
+Consumer-2
+ 
+Consumer-3
+ 
+Each partition is assigned to only one consumer within a group. [Kafka-Ebook | Word], [The Ultima...book Ebook | Word]
+10. How Does Kafka Achieve Scalability?
+Answer
+Using:
+ 
+Partitions
+ 
+Consumer Groups
+ 
+Multiple Brokers
+ 
+More partitions → more parallel processing. [The Ultima...book Ebook | Word], [Kafka-Ebook | Word]
+11. How Does Kafka Guarantee Ordering?
+Answer
+Ordering is guaranteed only within a partition. [Java_Inter...heat_Sheet | PDF], [Java_Inter...heat_Sheet | Word]
+Use a key:
+ 
+accountId
+ 
+customerId
+ 
+Same key → same partition → ordered events.
+12. What Happens if a Consumer Crashes?
+Answer
+Kafka rebalances partitions.
+ 
+Consumer Dies
+ 
+     ↓
+ 
+Rebalance
+ 
+     ↓
+ 
+Partitions assigned
+ 
+to another consumer
+ 
+ 
+ 
+Consumer-group rebalancing redistributes partitions when consumers join, leave, or crash. [Java Inter...one place | Word], [Java_Inter...ced_Topics | PDF]
+13. What is Rebalancing?
+Answer
+Rebalancing happens when:
+ 
+Consumer Added
+ 
+Consumer Removed
+ 
+Consumer Crash
+ 
+Partitions Added
+ 
+``
+ 
+Kafka redistributes partitions among consumers. [Java Inter...one place | Word]
+14. What are Delivery Guarantees in Kafka?
+Answer
+Type	Meaning
+At Most Once	No duplicates, possible loss
+At Least Once	No loss, possible duplicates
+Exactly Once	No loss and no duplicates
+Kafka consumers can be configured for different delivery guarantees. [Kafka-Ebook | Word], [java full...sion guide | PDF]
+15. Difference Between Auto Commit and Manual Commit?
+Auto Commit
+ 
+enable.auto.commit=true
+ 
+Easy but less control.
+Manual Commit
+ 
+consumer.commitSync();
+ 
+More control and reliability. [Kafka_Ulti...t_40_Pages | PDF], [Kafka_Ulti...t_40_Pages | PDF]
+Interview One-Liner
+Commit timing determines the trade-off between message loss and duplication.
+16. What is Replication?
+Answer
+Kafka copies partitions across brokers.
+ 
+Leader
+ 
+Follower-1
+ 
+Follower-2
+ 
+Benefits:
+✅ Fault Tolerance
+✅ Durability
+✅ High Availability
+Kafka uses replicated logs across brokers. [Kafka_Ulti...t_40_Pages | Word], [wecreateproblems.com]
+17. What is ISR (In-Sync Replica)?
+Answer
+ISR contains replicas fully synchronized with the leader.
+ 
+Leader
+ 
+Follower-1
+ 
+Follower-2
+ 
+All up-to-date replicas belong to ISR.
+Used with:
+ 
+acks=all
+ 
+``
+ 
+18. Explain Producer ACK Settings
+Answer
+ 
+acks=0
+ 
+No acknowledgment.
+ 
+acks=1
+ 
+ 
+ 
+Leader acknowledgment.
+ 
+acks=all
+ 
+Leader + ISR acknowledgment.
+Kafka producer acknowledgment modes include 0, 1, and all. [Java Inter...one place | Word], [Java_Inter...heat_Sheet | Word]
+19. How Do You Ensure Event Order Is Not Broken?
+(This is often asked in banking projects.)
+Answer
+Use message key.
+ 
+producer.send(
+ 
+new ProducerRecord<>(
+ 
+   "payments",
+ 
+   accountId,
+ 
+   event));
+ 
+``
+ 
+All events for the same account go to the same partition.
+Interview Answer
+I use business key partitioning such as AccountId or CustomerId to ensure related events are always written to the same partition, preserving ordering. [Java_Inter...heat_Sheet | PDF], [Java Inter...one place | Word]
+20. How Do You Achieve Exactly-Once Processing?
+Answer
+Use:
+ 
+enable.idempotence=true
+ 
+acks=all
+ 
+and producer transactions.
+ 
+producer.initTransactions();
+ 
+producer.beginTransaction();
+ 
+producer.send(...);
+ 
+producer.commitTransaction();
+ 
+``
+ 
+Kafka supports transactions and idempotent producers for exactly-once processing. [Interview...reparation | Word], [DataEngine..._Interview | Word]
+Top 5 Advanced Kafka Questions
+Q1. Kafka vs RabbitMQ?
+Kafka	RabbitMQ
+Event Streaming	Message Queue
+High Throughput	Lower Throughput
+Replay Supported	Limited Replay
+Partition Based	Queue Based
+Q2. What is Consumer Lag?
+ 
+Latest Offset - Consumed Offset
+ 
+``
+ 
+High lag means consumers are behind.
+Q3. What is a Dead Letter Topic (DLT)?
+Failed messages go to:
+ 
+payments.DLT
+ 
+Used for troubleshooting.
+Q4. How Do You Handle Message Duplication?
+Use:
+ 
+Idempotent Consumer
+ 
+Unique Event Id
+ 
+Dedup Table
+ 
+``
+ 
+Message duplication can occur and should be mitigated with idempotency. [Java Inter...one place | Word], [DataEngine..._Interview | Word]
+Q5. What is Schema Registry?
+Used for managing:
+ 
+Avro
+ 
+Protobuf
+ 
+JSON Schemas
+ 
+Schema Registry helps manage schema compatibility for Kafka topics. [Java Inter...one place | Word]
+30-Second Kafka Interview Revision
+ 
+Producer → Topic → Partition → Broker → Consumer
+ 
+
+ 
+Partition
+ 
+→ Scalability
+ 
+
+ 
+Offset
+ 
+→ Position of Message
+ 
+
+ 
+Consumer Group
+ 
+→ Parallel Processing
+ 
+
+ 
+Ordering
+ 
+→ Per Partition
+ 
+
+ 
+Replication
+ 
+→ Fault Tolerance
+ 
+
+ 
+acks=all
+ 
+→ Highest Durability
+ 
+
+ 
+enable.idempotence=true
+ 
+→ Prevent Duplicate Writes
+ 
+
+ 
+Transactions
+ 
+→ Exactly Once
+ 
+For JPMC, RBC, MUFG, and other banking interviews, the most frequently asked advanced topics are: ✅ Partitions & Ordering
+✅ Consumer Groups & Rebalancing
+✅ Offsets & Commits
+✅ At-Least-Once vs Exactly-Once
+✅ Idempotent Producer
+✅ Kafka vs RabbitMQ
+✅ Handling Update/Delete Event Ordering
+✅ Consumer Lag
+✅ Retry & Dead Letter Topics (DLT)
+✅ Schema Registry.
