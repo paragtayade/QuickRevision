@@ -1,0 +1,416 @@
+Top 20 Mockito Interview Questions for Spring Boot
+
+These are the questions most commonly asked when interviewers ask you to write Service layer test classes.
+1. What is Mockito?
+Answer
+Mockito is a Java mocking framework used to create mock objects and test classes in isolation without calling actual dependencies.
+ 
+@Mock
+
+EmployeeRepository repository;
+ 
+Interview One-Liner
+Mockito helps unit test a class by mocking its dependencies.
+2. Why Do We Use Mockito?
+Answer
+Avoid testing:
+ 
+Database
+
+REST APIs
+
+Kafka
+
+External Services
+ 
+Test only business logic.
+ 
+when(repo.findById(1L))
+
+        .thenReturn(employee);
+ 
+3. Difference Between Mock and Stub?
+Answer
+Stub
+Provides predefined behavior.
+ 
+when(repo.findById(1L))
+
+      .thenReturn(emp);
+ 
+Mock
+Provides behavior + interaction verification.
+ 
+verify(repo).findById(1L);
+ 
+4. What is @Mock?
+Answer
+Creates a mock object.
+ 
+@Mock
+
+EmployeeRepository repository;
+ 
+Mockito annotations such as @Mock are commonly used to create mock instances. [The Ultima...book Ebook | Word], [Mastering...ial Topics | Word]
+5. What is @InjectMocks?
+Answer
+Injects mock dependencies into the class under test.
+ 
+@InjectMocks
+
+EmployeeService service;
+ 
+Mockito automatically injects mocked dependencies. [The Ultima...book Ebook | Word], [Mastering...ial Topics | Word]
+6. What is @ExtendWith(MockitoExtension.class)?
+Answer
+Integrates Mockito with JUnit 5.
+ 
+@ExtendWith(MockitoExtension.class)
+
+ 
+ 
+Mockito and JUnit 5 integration is done using MockitoExtension. [The Ultima...book Ebook | Word], [Mastering...ial Topics | Word]
+7. What is when().thenReturn()?
+Answer
+Used for stubbing method responses.
+ 
+when(repo.findById(1L))
+
+      .thenReturn(employee);
+ 
+8. Difference Between thenReturn() and thenAnswer()?
+Answer
+thenReturn()
+Fixed value.
+ 
+when(service.getName())
+
+      .thenReturn("Parag");
+ 
+thenAnswer()
+Dynamic value using arguments.
+ 
+when(service.getName(anyString()))
+
+      .thenAnswer(i -> i.getArgument(0));
+ 
+Advanced Mockito scenarios often use thenAnswer() for dynamic behavior. [Java Inter...one place | Word], [Java Inter...one place | Word]
+9. How Do You Verify Method Calls?
+Answer
+ 
+verify(repo).save(employee);
+ 
+Verify exactly once:
+ 
+verify(repo, times(1))
+
+        .save(employee);
+ 
+10. What is verifyNoMoreInteractions()?
+Answer
+Ensures no unexpected method calls.
+ 
+verifyNoMoreInteractions(repo);
+ 
+11. How Do You Verify a Method Was Never Called?
+Answer
+ 
+verify(repo, never())
+
+       .deleteById(anyLong());
+ 
+12. How Do You Mock Exceptions?
+Answer
+ 
+when(repo.findById(1L))
+
+    .thenThrow(
+
+        new RuntimeException("Error"));
+ 
+13. How Do You Test Exception Scenarios?
+Answer
+ 
+assertThrows(
+
+RuntimeException.class,
+
+() -> service.getEmployee(1L));
+ 
+14. How Do You Mock Optional?
+Answer
+ 
+when(repo.findById(1L))
+
+      .thenReturn(Optional.of(emp));
+
+``
+ 
+Not Found:
+ 
+when(repo.findById(1L))
+
+      .thenReturn(Optional.empty());
+
+ 
+ 
+15. How Do You Mock a List?
+Answer
+ 
+List<Employee> list =
+
+     Arrays.asList(emp1, emp2);
+
+
+when(repo.findAll())
+
+     .thenReturn(list);
+ 
+16. How Do You Mock Void Methods?
+Answer
+ 
+doNothing()
+
+.when(repo)
+
+.deleteById(1L);
+
+``
+ 
+Exception:
+ 
+doThrow(
+
+new RuntimeException())
+
+.when(repo)
+
+.deleteById(1L);
+
+``
+ 
+17. How Do You Mock Reactive Mono/Flux?
+Answer
+ 
+when(service.getData())
+
+       .thenReturn(
+
+           Mono.just("Success"));
+ 
+Mockito can be used with Reactor Mono/Flux responses. [Java Inter...one place | Word], [Java Inter...one place | Word]
+18. How Do You Mock Streams?
+Answer
+ 
+Stream<String> streamMock =
+
+      mock(Stream.class);
+
+
+when(streamMock.count())
+
+      .thenReturn(100L);
+
+ 
+ 
+Mockito supports mocking streams and collections. [Java Inter...one place | Word], [Java Inter...questions | Word]
+19. Difference Between @Mock and @MockBean?
+Answer
+@Mock
+ 
+@Mock
+
+EmployeeRepository repo;
+ 
+Used in Unit Testing.
+@MockBean
+ 
+@MockBean
+
+EmployeeRepository repo;
+ 
+Used in Spring Boot Integration Testing.
+Interview One-Liner
+@Mock is Mockito-specific; @MockBean replaces a Spring bean inside the Spring application context.
+20. Write a Complete Service Test Class
+Service
+ 
+@Service
+
+public class EmployeeService {
+
+
+    @Autowired
+
+    EmployeeRepository repo;
+
+
+    public Employee getEmployee(Long id){
+
+        return repo.findById(id)
+
+                   .orElseThrow();
+
+    }
+
+}
+
+``
+ 
+Test
+ 
+@ExtendWith(MockitoExtension.class)
+
+class EmployeeServiceTest {
+
+
+    @Mock
+
+    private EmployeeRepository repo;
+
+
+    @InjectMocks
+
+    private EmployeeService service;
+
+
+    @Test
+
+    void shouldReturnEmployee() {
+
+
+        Employee emp =
+
+             new Employee(1L,"Parag");
+
+
+        when(repo.findById(1L))
+
+              .thenReturn(Optional.of(emp));
+
+
+        Employee result =
+
+             service.getEmployee(1L);
+
+
+        assertEquals(
+
+             "Parag",
+
+             result.getName());
+
+
+        verify(repo)
+
+             .findById(1L);
+
+    }
+
+}
+
+ 
+ 
+This pattern uses @Mock, @InjectMocks, and @ExtendWith(MockitoExtension.class) which are highlighted in your Mockito preparation materials. [The Ultima...book Ebook | Word], [System Des...Scnearios | Word]
+Most Important Senior-Level Mockito Questions
+Q1. Difference Between Unit Test and Integration Test?
+Unit Test	Integration Test
+Uses Mockito	Uses Spring Context
+Fast	Slower
+No DB	Real DB/Test DB
+Q2. Difference Between @SpringBootTest and Mockito?
+ 
+@SpringBootTest
+ 
+Loads Spring Context.
+Mockito:
+ 
+@Mock
+
+@InjectMocks
+ 
+No Spring Context.
+Faster.
+Q3. What Should Be Mocked?
+✅ Repository
+✅ REST Clients
+✅ Kafka Producer
+✅ External APIs
+❌ DTOs
+❌ Entities
+❌ POJOs
+Q4. When Not to Use Mockito?
+Do not mock:
+ 
+String
+
+DTO
+
+Entity
+
+Collection
+
+``
+ 
+Mock only external dependencies.
+Q5. Common Mockito Annotations to Remember
+ 
+@Mock
+
+
+@InjectMocks
+
+
+@MockBean
+
+
+@Spy
+
+
+@Captor
+
+
+@ExtendWith(MockitoExtension.class)
+ 
+30-Second Interview Revision
+ 
+@Mock
+
+→ Create mock dependency
+
+
+@InjectMocks
+
+→ Inject mocks
+
+
+when().thenReturn()
+
+→ Stub behavior
+
+
+verify()
+
+→ Verify method call
+
+
+doThrow()
+
+→ Mock exception
+
+
+@MockBean
+
+→ Spring Context Mock
+
+
+Mockito
+
+→ Unit Testing
+
+
+@SpringBootTest
+
+→ Integration Testing
+ 
+For your Spring Boot + JPA + Banking interviews, if you can confidently write test classes using**@Mock, @InjectMocks, when(), verify(), Optional mocking, exception testing, and @MockBean vs @Mock**, you will cover about 90% of Mockito coding interview questions.
