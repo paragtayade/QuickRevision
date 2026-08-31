@@ -1,0 +1,561 @@
+🚀 SPRING BOOT DOCKER DEPLOYMENT ON AWS ECS / EC2
+Interview + Real Project Cheat Sheet
+
+═══════════════════════════════════════════════════════════════
+📦 DEPLOYMENT FLOW
+═══════════════════════════════════════════════════════════════
+
+Spring Boot JAR
+       ↓
+Docker Image
+       ↓
+Amazon ECR
+       ↓
+ECS Cluster
+       ↓
+Task Definition
+       ↓
+ECS Service
+       ↓
+Application Load Balancer (ALB)
+       ↓
+Production
+
+═══════════════════════════════════════════════════════════════
+1️⃣ SPRING BOOT DOCKERFILE (BASIC)
+═══════════════════════════════════════════════════════════════
+
+Dockerfile
+
+    FROM eclipse-temurin:21-jre
+
+    WORKDIR /app
+
+    COPY target/*.jar app.jar
+
+    EXPOSE 8080
+
+    ENTRYPOINT ["java","-jar","app.jar"]
+
+✅ Used For
+
+    • AWS ECS
+    • AWS EC2
+    • Docker Desktop
+    • Kubernetes
+
+───────────────────────────────────────────────────────────────
+
+2️⃣ PRODUCTION DOCKERFILE (RECOMMENDED)
+═══════════════════════════════════════════════════════════════
+
+Multi-Stage Build
+
+    # Build Stage
+
+    FROM maven:3.9-eclipse-temurin-21 AS build
+
+    WORKDIR /application
+
+    COPY . .
+
+    RUN mvn clean package -DskipTests
+
+
+    # Runtime Stage
+
+    FROM eclipse-temurin:21-jre
+
+    WORKDIR /application
+
+    COPY --from=build \
+    /application/target/*.jar app.jar
+
+    EXPOSE 8080
+
+    ENTRYPOINT ["java","-jar","app.jar"]
+
+✅ Benefits
+
+    • Smaller Image
+    • Faster Deployment
+    • Better Security
+    • Less Storage
+
+───────────────────────────────────────────────────────────────
+
+3️⃣ SPRING BOOT application.yml
+═══════════════════════════════════════════════════════════════
+
+    server:
+      port: 8080
+
+    spring:
+
+      application:
+        name: payment-service
+
+      datasource:
+        url: jdbc:postgresql://dbhost:5432/mydb
+        username: admin
+        password: secret
+
+    management:
+
+      endpoints:
+        web:
+          exposure:
+            include: health,info
+
+      endpoint:
+        health:
+          probes:
+            enabled: true
+
+✅ Used For
+
+    • Health Checks
+    • Spring Actuator
+    • Database Connectivity
+
+───────────────────────────────────────────────────────────────
+
+4️⃣ BUILD DOCKER IMAGE
+═══════════════════════════════════════════════════════════════
+
+Step 1: Package Application
+
+    mvn clean package
+
+Step 2: Build Docker Image
+
+    docker build -t springboot-app .
+
+Step 3: Verify Image
+
+    docker images
+
+Flow
+
+    Source Code
+          ↓
+    Maven Package
+          ↓
+    Spring Boot JAR
+          ↓
+    Docker Build
+          ↓
+    Docker Image
+
+───────────────────────────────────────────────────────────────
+
+5️⃣ RUN LOCALLY
+═══════════════════════════════════════════════════════════════
+
+Command
+
+    docker run -p 8080:8080 springboot-app
+
+Test URL
+
+    http://localhost:8080
+
+═══════════════════════════════════════════════════════════════
+☁️ AWS ECS COMPLETE SETUP
+═══════════════════════════════════════════════════════════════
+
+6️⃣ STEP 1 : CREATE ECR REPOSITORY
+
+AWS Console
+
+    Elastic Container Registry (ECR)
+            ↓
+    Create Repository
+            ↓
+    springboot-app
+
+Purpose
+
+    Store Docker Images
+
+───────────────────────────────────────────────────────────────
+
+7️⃣ STEP 2 : LOGIN TO ECR
+
+Command
+
+    aws ecr get-login-password \
+        --region ap-south-1 |
+    docker login \
+        --username AWS \
+        --password-stdin \
+        <account>.dkr.ecr.ap-south-1.amazonaws.com
+
+Purpose
+
+    Authenticate Docker with ECR
+
+───────────────────────────────────────────────────────────────
+
+8️⃣ STEP 3 : TAG DOCKER IMAGE
+
+Command
+
+    docker tag springboot-app:latest \
+      <account>.dkr.ecr.ap-south-1.amazonaws.com/
+      springboot-app:latest
+
+Purpose
+
+    Associate Local Image With ECR Repository
+
+───────────────────────────────────────────────────────────────
+
+9️⃣ STEP 4 : PUSH IMAGE TO ECR
+
+Command
+
+    docker push \
+      <account>.dkr.ecr.ap-south-1.amazonaws.com/
+      springboot-app:latest
+
+Flow
+
+    Local Image
+          ↓
+    Docker Push
+          ↓
+    Amazon ECR
+
+───────────────────────────────────────────────────────────────
+
+🔟 STEP 5 : CREATE ECS CLUSTER
+
+AWS Console
+
+    Amazon ECS
+         ↓
+    Create Cluster
+         ↓
+    Choose Fargate
+         ↓
+    Cluster Name
+         ↓
+    Create
+
+Launch Types
+
+    • Fargate (Serverless)
+    • EC2 (Managed Servers)
+
+═══════════════════════════════════════════════════════════════
+🏆 ECS TASK DEFINITION (MOST ASKED INTERVIEW QUESTION)
+═══════════════════════════════════════════════════════════════
+
+    {
+      "family": "springboot-task",
+
+      "networkMode": "awsvpc",
+
+      "requiresCompatibilities": [
+        "FARGATE"
+      ],
+
+      "cpu": "512",
+
+      "memory": "1024",
+
+      "containerDefinitions": [
+
+        {
+          "name": "springboot-app",
+
+          "image": "ECR-IMAGE-URI",
+
+          "essential": true,
+
+          "portMappings": [
+            {
+              "containerPort": 8080
+            }
+          ],
+
+          "environment": [
+            {
+              "name": "SPRING_PROFILES_ACTIVE",
+              "value": "prod"
+            }
+          ]
+        }
+      ]
+    }
+
+Contains
+
+    • Docker Image
+    • CPU
+    • Memory
+    • Network Settings
+    • Container Ports
+    • Environment Variables
+
+───────────────────────────────────────────────────────────────
+
+STEP 7 : CREATE ECS SERVICE
+═══════════════════════════════════════════════════════════════
+
+Flow
+
+    Cluster
+        ↓
+    Create Service
+        ↓
+    Select Task Definition
+        ↓
+    Desired Count = 2
+
+Purpose
+
+    • Deploy Containers
+    • Maintain Desired Count
+    • Self Healing
+    • Auto Recovery
+
+───────────────────────────────────────────────────────────────
+
+STEP 8 : ATTACH APPLICATION LOAD BALANCER
+═══════════════════════════════════════════════════════════════
+
+Flow
+
+    Internet
+         ↓
+       ALB
+         ↓
+    ECS Tasks
+
+Benefits
+
+    • Load Distribution
+    • SSL Termination
+    • Health Checks
+    • High Availability
+
+───────────────────────────────────────────────────────────────
+
+STEP 9 : CONFIGURE HEALTH CHECKS
+═══════════════════════════════════════════════════════════════
+
+Spring Boot Endpoint
+
+    /actuator/health
+
+ALB Configuration
+
+    Health Check Path:
+        /actuator/health
+
+Flow
+
+    ALB
+      ↓
+    Health Endpoint
+      ↓
+    Healthy / Unhealthy
+
+───────────────────────────────────────────────────────────────
+
+STEP 10 : CONFIGURE CLOUDWATCH LOGS
+═══════════════════════════════════════════════════════════════
+
+Task Definition
+
+    {
+      "logConfiguration": {
+
+        "logDriver": "awslogs",
+
+        "options": {
+
+          "awslogs-group":
+            "/ecs/springboot-app",
+
+          "awslogs-region":
+            "ap-south-1",
+
+          "awslogs-stream-prefix":
+            "ecs"
+        }
+      }
+    }
+
+Flow
+
+    Spring Boot Logs
+            ↓
+      CloudWatch Logs
+            ↓
+     Monitoring & Alerts
+
+═══════════════════════════════════════════════════════════════
+🔐 AWS SECRETS MANAGER
+═══════════════════════════════════════════════════════════════
+
+❌ Avoid
+
+    password=admin123
+
+✅ Use
+
+    AWS Secrets Manager
+
+Injected Through
+
+    • ECS Task Definition
+    • IAM Task Role
+
+Stores
+
+    • Database Passwords
+    • API Keys
+    • JWT Secrets
+    • Certificates
+
+═══════════════════════════════════════════════════════════════
+📈 ECS AUTO SCALING
+═══════════════════════════════════════════════════════════════
+
+Configuration
+
+    CPU > 70%
+
+Flow
+
+    Min Tasks = 2
+          ↓
+    Auto Scaling
+          ↓
+    Max Tasks = 10
+
+Configured Using
+
+    • CloudWatch Metrics
+    • CloudWatch Alarms
+    • Target Tracking Policies
+
+═══════════════════════════════════════════════════════════════
+🖥️ DEPLOY TO EC2 INSTEAD OF ECS
+═══════════════════════════════════════════════════════════════
+
+EC2 Flow
+
+    Create EC2
+          ↓
+    Install Docker
+          ↓
+    Login To ECR
+          ↓
+    Pull Image
+          ↓
+    Run Container
+          ↓
+    Expose Port 8080
+
+Run Container
+
+    docker run -d \
+      -p 8080:8080 \
+      springboot-app
+
+═══════════════════════════════════════════════════════════════
+🎯 COMPLETE PRODUCTION ARCHITECTURE
+═══════════════════════════════════════════════════════════════
+
+    GitHub
+       ↓
+
+    Jenkins / GitHub Actions
+       ↓
+
+    Maven Build
+       ↓
+
+    Spring Boot JAR
+       ↓
+
+    Docker Image
+       ↓
+
+    AWS ECR
+       ↓
+
+    ECS Task Definition
+       ↓
+
+    ECS Service
+       ↓
+
+    Application Load Balancer
+       ↓
+
+    CloudWatch
+       ↓
+
+    Users
+
+═══════════════════════════════════════════════════════════════
+⭐ TOP 10 ECS INTERVIEW ONE-LINERS
+═══════════════════════════════════════════════════════════════
+
+ECR                 → Docker Image Repository
+
+Cluster             → Logical Group Of Services
+
+Task Definition     → Blueprint Of Container
+
+Service             → Maintains Desired Task Count
+
+Fargate             → Serverless Container Runtime
+
+ALB                 → Routes Traffic To Healthy Tasks
+
+CloudWatch          → Centralized Logging
+
+Secrets Manager     → Secure Credential Storage
+
+Task Role           → Application AWS Permissions
+
+Execution Role      → ECS Runtime Permissions
+
+═══════════════════════════════════════════════════════════════
+🧠 30-SECOND ECS REVISION
+═══════════════════════════════════════════════════════════════
+
+    Spring Boot JAR
+           ↓
+    Docker Image
+           ↓
+    ECR
+           ↓
+    ECS Cluster
+           ↓
+    Task Definition
+           ↓
+    ECS Service
+           ↓
+    ALB
+           ↓
+    CloudWatch
+
+Remember:
+
+    ECR
+    Cluster
+    Task Definition
+    Service
+    ALB
+    CloudWatch
+    Secrets Manager
+    Auto Scaling
+
+This covers the most commonly asked Spring Boot + Docker + AWS ECS + EC2 deployment interview questions for Senior Java Developers in banking projects (JPMC, RBC, MUFG, etc.).
