@@ -1,0 +1,377 @@
+🚀 Top 15 Java Streams, Lambda & Functional Programming Questions
+With Code + Output (Interview Revision)
+1. Filter Even Numbers
+Question
+
+Filter all even numbers from a list.
+
+Code
+List<Integer> nums = Arrays.asList(1,2,3,4,5,6);
+
+List<Integer> result =
+        nums.stream()
+            .filter(n -> n % 2 == 0)
+            .toList();
+
+System.out.println(result);
+
+Output
+[2, 4, 6]
+
+2. Convert Names to Uppercase using map()
+Code
+List<String> names =
+        Arrays.asList("john","mary");
+
+List<String> result =
+        names.stream()
+             .map(String::toUpperCase)
+             .toList();
+
+System.out.println(result);
+
+Output
+[JOHN, MARY]
+
+3. Find Sum of Numbers
+Code
+List<Integer> list =
+        Arrays.asList(10,20,30);
+
+int sum =
+        list.stream()
+            .mapToInt(Integer::intValue)
+            .sum();
+
+System.out.println(sum);
+
+Output
+60
+
+4. Find Maximum Number
+Code
+int max =
+Arrays.asList(5,2,9,4)
+      .stream()
+      .max(Integer::compare)
+      .get();
+
+System.out.println(max);
+
+Output
+9
+
+5. Count Elements
+Code
+long count =
+Arrays.asList(1,2,3,4,5)
+      .stream()
+      .count();
+
+System.out.println(count);
+
+Output
+5
+
+6. Remove Duplicates
+Code
+List<Integer> result =
+
+Arrays.asList(1,2,2,3,3,4)
+      .stream()
+      .distinct()
+      .toList();
+
+System.out.println(result);
+
+Output
+[1, 2, 3, 4]
+
+7. Sort Numbers
+Code
+List<Integer> result =
+
+Arrays.asList(5,3,9,1)
+      .stream()
+      .sorted()
+      .toList();
+
+System.out.println(result);
+
+Output
+[1, 3, 5, 9]
+
+8. Reverse Sort
+Code
+List<Integer> result =
+
+Arrays.asList(5,3,9,1)
+      .stream()
+      .sorted(Comparator.reverseOrder())
+      .toList();
+
+System.out.println(result);
+
+Output
+[9, 5, 3, 1]
+
+9. Find First Element
+Code
+int value =
+
+Arrays.asList(10,20,30)
+      .stream()
+      .findFirst()
+      .get();
+
+System.out.println(value);
+
+Output
+10
+
+10. Check Any Match
+Code
+boolean found =
+
+Arrays.asList(10,20,30)
+      .stream()
+      .anyMatch(n -> n > 25);
+
+System.out.println(found);
+
+Output
+true
+
+11. Group Employees by Department
+Code
+Map<String,List<Employee>> result =
+
+employees.stream()
+
+.collect(Collectors.groupingBy(
+        Employee::getDept));
+
+Output
+IT=[John,Mary]
+
+HR=[Steve,Tom]
+
+
+This is one of the most commonly asked Streams interview questions. Functional interfaces and Stream operations such as grouping are covered extensively in your Java interview materials.
+
+12. Convert List to Map
+Code
+Map<Integer,String> result =
+
+employees.stream()
+
+.collect(Collectors.toMap(
+Employee::getId,
+Employee::getName));
+
+System.out.println(result);
+
+Output
+{
+1=John,
+2=Mary,
+3=Steve
+}
+
+13. Find Duplicate Elements
+Code
+List<Integer> nums =
+Arrays.asList(1,2,2,3,4,4,5);
+
+Set<Integer> set =
+new HashSet<>();
+
+List<Integer> duplicates =
+
+nums.stream()
+
+.filter(n -> !set.add(n))
+
+.toList();
+
+System.out.println(duplicates);
+
+Output
+[2, 4]
+
+
+✅ Banking Interview Favorite
+
+14. Find Second Highest Number
+Code
+int value =
+
+Arrays.asList(10,5,20,40,30)
+
+.stream()
+
+.sorted(Comparator.reverseOrder())
+
+.skip(1)
+
+.findFirst()
+
+.get();
+
+System.out.println(value);
+
+Output
+30
+
+15. Find Highest Salary Employee
+Code
+Employee employee =
+
+employees.stream()
+
+.max(Comparator.comparing(
+Employee::getSalary))
+
+.get();
+
+System.out.println(
+employee.getName());
+
+Output
+David
+
+
+✅ Extremely common in 10+ years interviews
+
+Functional Interface Examples
+Predicate
+Code
+Predicate<Integer> even =
+        n -> n % 2 == 0;
+
+System.out.println(even.test(10));
+
+Output
+true
+
+
+Predicate is used for condition testing.
+
+Function
+Code
+Function<String,Integer> len =
+        String::length;
+
+System.out.println(
+        len.apply("Java"));
+
+Output
+4
+
+
+Function is used for transformations.
+
+Consumer
+Code
+Consumer<String> print =
+        System.out::println;
+
+print.accept("Hello");
+
+Output
+Hello
+
+Supplier
+Code
+Supplier<String> supplier =
+        () -> "Spring Boot";
+
+System.out.println(
+supplier.get());
+
+Output
+Spring Boot
+
+ROW-WISE SUM OF TWO LISTS
+
+(Asked by you recently)
+
+Code
+List<Integer> list1 =
+Arrays.asList(1,2,5);
+
+List<Integer> list2 =
+Arrays.asList(6,4,3);
+
+List<Integer> result =
+
+IntStream.range(0, list1.size())
+
+.mapToObj(i ->
+      list1.get(i)
+    + list2.get(i))
+
+.toList();
+
+System.out.println(result);
+
+Output
+[7, 6, 8]
+
+🧠 30-Second Memory Trick
+filter()
+→ Select
+
+map()
+→ Transform
+
+flatMap()
+→ Flatten
+
+reduce()
+→ Aggregate
+
+collect()
+→ Convert
+
+groupingBy()
+→ Group
+
+toMap()
+→ Map
+
+sorted()
+→ Sort
+
+distinct()
+→ Remove Duplicates
+
+max()
+→ Maximum
+
+skip()
+→ Nth Highest
+
+Predicate
+→ Test
+
+Function
+→ Transform
+
+Consumer
+→ Use
+
+Supplier
+→ Provide
+
+
+For senior Java/Spring Boot interviews, the most frequently asked coding questions are: ✅ Duplicate Elements
+ ✅ Second Highest Salary
+ ✅ Highest Salary Employee
+ ✅ Group By Department
+ ✅ List → Map
+ ✅ Predicate/Function/Consumer/Supplier
+ ✅ filter/map/reduce/collect
+ ✅ Method References (::)
+ ✅ Optional + Streams
+ ✅ Parallel Streams.
