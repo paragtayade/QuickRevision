@@ -1,0 +1,584 @@
+🚀 TOP 30 PL/SQL INTERVIEW QUESTIONS
+Senior Java Developer | Banking Domain | Quick Revision Sheet
+
+═══════════════════════════════════════════════════════════════
+1. WHAT IS PL/SQL?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    PL/SQL (Procedural Language SQL) is Oracle's
+    procedural extension to SQL.
+
+Features:
+
+    • Variables
+    • Loops
+    • Conditions
+    • Procedures
+    • Functions
+    • Exception Handling
+
+Interview One-Liner:
+
+    SQL + Programming Constructs = PL/SQL
+
+═══════════════════════════════════════════════════════════════
+2. DIFFERENCE BETWEEN SQL AND PL/SQL?
+═══════════════════════════════════════════════════════════════
+
+SQL
+
+    • Declarative
+    • Executes One Statement
+    • No Variables
+
+PL/SQL
+
+    • Procedural
+    • Block Based
+    • Supports Variables & Logic
+
+═══════════════════════════════════════════════════════════════
+3. STRUCTURE OF PL/SQL BLOCK?
+═══════════════════════════════════════════════════════════════
+
+Syntax:
+
+    DECLARE
+        -- Variables
+
+    BEGIN
+        -- Business Logic
+
+    EXCEPTION
+        -- Error Handling
+
+    END;
+
+Sections:
+
+    • DECLARE (Optional)
+    • BEGIN (Mandatory)
+    • EXCEPTION (Optional)
+    • END (Mandatory)
+
+═══════════════════════════════════════════════════════════════
+4. HOW TO DECLARE VARIABLES?
+═══════════════════════════════════════════════════════════════
+
+Example:
+
+    DECLARE
+        v_name VARCHAR2(50);
+        v_salary NUMBER;
+    BEGIN
+        NULL;
+    END;
+
+═══════════════════════════════════════════════════════════════
+5. WHAT IS %TYPE?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Inherits datatype from table column.
+
+Example:
+
+    v_salary Employee.Salary%TYPE;
+
+Benefit:
+
+    Column datatype changes automatically reflected.
+
+═══════════════════════════════════════════════════════════════
+6. WHAT IS %ROWTYPE?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Stores complete row structure.
+
+Example:
+
+    v_emp Employee%ROWTYPE;
+
+Benefit:
+
+    Access all columns using single variable.
+
+═══════════════════════════════════════════════════════════════
+7. WHAT IS A PROCEDURE?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Named PL/SQL block that performs an action.
+
+Example:
+
+    CREATE PROCEDURE get_emp
+    AS
+    BEGIN
+        NULL;
+    END;
+
+Use Cases:
+
+    • Data Processing
+    • Batch Jobs
+    • Banking Transactions
+
+═══════════════════════════════════════════════════════════════
+8. WHAT IS A FUNCTION?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Named PL/SQL block that returns a value.
+
+Example:
+
+    CREATE FUNCTION get_bonus
+    RETURN NUMBER
+    AS
+    BEGIN
+        RETURN 1000;
+    END;
+
+═══════════════════════════════════════════════════════════════
+9. PROCEDURE VS FUNCTION?
+═══════════════════════════════════════════════════════════════
+
+Procedure
+
+    • May Not Return Value
+    • Called Explicitly
+
+Function
+
+    • Must Return Value
+    • Can Be Used In SQL
+
+═══════════════════════════════════════════════════════════════
+10. WHAT ARE CURSORS?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Cursor stores result set returned by query.
+
+Types:
+
+    • Implicit Cursor
+    • Explicit Cursor
+
+Used for:
+
+    Row-by-row processing
+
+═══════════════════════════════════════════════════════════════
+11. EXPLICIT CURSOR EXAMPLE
+═══════════════════════════════════════════════════════════════
+
+    CURSOR c_emp IS
+    SELECT *
+    FROM Employee;
+
+Steps:
+
+    OPEN
+       ↓
+    FETCH
+       ↓
+    CLOSE
+
+═══════════════════════════════════════════════════════════════
+12. WHAT IS AN IMPLICIT CURSOR?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Oracle automatically creates cursor.
+
+Example:
+
+    SELECT
+    INSERT
+    UPDATE
+    DELETE
+
+Cursor Attributes:
+
+    SQL%FOUND
+    SQL%NOTFOUND
+    SQL%ROWCOUNT
+
+═══════════════════════════════════════════════════════════════
+13. WHAT IS EXCEPTION HANDLING?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Handles runtime errors.
+
+Example:
+
+    EXCEPTION
+       WHEN NO_DATA_FOUND THEN
+           DBMS_OUTPUT.PUT_LINE('No Data');
+
+═══════════════════════════════════════════════════════════════
+14. COMMON PREDEFINED EXCEPTIONS?
+═══════════════════════════════════════════════════════════════
+
+    • NO_DATA_FOUND
+    • TOO_MANY_ROWS
+    • ZERO_DIVIDE
+    • INVALID_NUMBER
+    • VALUE_ERROR
+
+═══════════════════════════════════════════════════════════════
+15. WHAT IS RAISE_APPLICATION_ERROR?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Creates custom exceptions.
+
+Example:
+
+    RAISE_APPLICATION_ERROR
+    (-20001,
+     'Invalid Account');
+
+Banking Example:
+
+    Account Balance Negative
+
+═══════════════════════════════════════════════════════════════
+16. WHAT IS A TRIGGER?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Trigger executes automatically when event occurs.
+
+Events:
+
+    INSERT
+    UPDATE
+    DELETE
+
+═══════════════════════════════════════════════════════════════
+17. BEFORE VS AFTER TRIGGER?
+═══════════════════════════════════════════════════════════════
+
+BEFORE
+
+    Executes Before DML
+
+AFTER
+
+    Executes After DML
+
+Example:
+
+    Audit Logging
+
+═══════════════════════════════════════════════════════════════
+18. WHAT IS A PACKAGE?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Collection of Procedures, Functions and Variables.
+
+Structure:
+
+    Package Specification
+          ↓
+    Package Body
+
+Benefits:
+
+    • Reusability
+    • Security
+    • Better Performance
+
+═══════════════════════════════════════════════════════════════
+19. PACKAGE SPECIFICATION VS BODY?
+═══════════════════════════════════════════════════════════════
+
+Specification
+
+    Declaration Part
+
+Body
+
+    Implementation Part
+
+═══════════════════════════════════════════════════════════════
+20. WHAT IS BULK COLLECT?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Fetches multiple rows at once.
+
+Example:
+
+    SELECT *
+    BULK COLLECT INTO
+    v_employees
+    FROM Employee;
+
+Benefit:
+
+    Improves performance.
+
+═══════════════════════════════════════════════════════════════
+21. WHAT IS FORALL?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Performs bulk DML operations.
+
+Example:
+
+    FORALL i IN 1..10
+      INSERT INTO Employee
+      VALUES (...);
+
+Benefit:
+
+    Faster than row-by-row operations.
+
+═══════════════════════════════════════════════════════════════
+22. WHAT IS A COLLECTION?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    PL/SQL in-memory data structure.
+
+Types:
+
+    • Associative Array
+    • Nested Table
+    • VARRAY
+
+═══════════════════════════════════════════════════════════════
+23. WHAT IS AN AUTONOMOUS TRANSACTION?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Independent transaction inside another transaction.
+
+Example:
+
+    Audit Logging
+
+Keyword:
+
+    PRAGMA AUTONOMOUS_TRANSACTION;
+
+═══════════════════════════════════════════════════════════════
+24. WHAT IS COMMIT?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Permanently saves transaction changes.
+
+Example:
+
+    COMMIT;
+
+═══════════════════════════════════════════════════════════════
+25. WHAT IS ROLLBACK?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Reverts uncommitted changes.
+
+Example:
+
+    ROLLBACK;
+
+═══════════════════════════════════════════════════════════════
+26. WHAT IS SAVEPOINT?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Creates rollback checkpoint.
+
+Example:
+
+    SAVEPOINT SP1;
+
+    ROLLBACK TO SP1;
+
+═══════════════════════════════════════════════════════════════
+27. WHAT IS A MUTATING TABLE ERROR?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Trigger attempts to modify/read same table.
+
+Error:
+
+    ORA-04091
+
+Interview Favorite
+
+═══════════════════════════════════════════════════════════════
+28. HOW TO IMPROVE PL/SQL PERFORMANCE?
+═══════════════════════════════════════════════════════════════
+
+Techniques:
+
+    • BULK COLLECT
+    • FORALL
+    • Proper Indexes
+    • Avoid Frequent Commits
+    • Use Packages
+    • Use Bind Variables
+
+═══════════════════════════════════════════════════════════════
+29. WHAT ARE BIND VARIABLES?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Reuse SQL execution plan.
+
+Example:
+
+    SELECT *
+    FROM Employee
+    WHERE EmpId = :id;
+
+Benefits:
+
+    • Faster Execution
+    • Less Parsing
+    • Reduced Memory Usage
+
+═══════════════════════════════════════════════════════════════
+30. REAL-TIME BANKING SCENARIO QUESTION
+═══════════════════════════════════════════════════════════════
+
+Question:
+
+    How do you process millions of records in PL/SQL?
+
+Answer:
+
+    • Use BULK COLLECT
+    • Use FORALL
+    • Process In Batches
+    • Commit At Intervals
+    • Use Parallel Processing
+    • Proper Indexing
+
+Example Flow:
+
+    Read Accounts
+           ↓
+    BULK COLLECT
+           ↓
+    Validation
+           ↓
+    FORALL Update
+           ↓
+    Commit
+
+═══════════════════════════════════════════════════════════════
+🏦 TOP 10 BANKING DOMAIN PL/SQL SCENARIOS
+═══════════════════════════════════════════════════════════════
+
+1. Fund Transfer Procedure
+
+2. Interest Calculation Function
+
+3. Daily Batch Processing
+
+4. Audit Trigger
+
+5. Transaction History Package
+
+6. Duplicate Payment Detection
+
+7. Fraud Validation Rules
+
+8. End Of Day (EOD) Processing
+
+9. Bulk Customer Migration
+
+10. Account Reconciliation
+
+═══════════════════════════════════════════════════════════════
+⭐ MOST ASKED PL/SQL KEYWORDS
+═══════════════════════════════════════════════════════════════
+
+    %TYPE
+    %ROWTYPE
+    CURSOR
+    PROCEDURE
+    FUNCTION
+    PACKAGE
+    TRIGGER
+    EXCEPTION
+    BULK COLLECT
+    FORALL
+    COMMIT
+    ROLLBACK
+    SAVEPOINT
+    COLLECTION
+    AUTONOMOUS_TRANSACTION
+    RAISE_APPLICATION_ERROR
+
+═══════════════════════════════════════════════════════════════
+🧠 30-SECOND PL/SQL REVISION
+═══════════════════════════════════════════════════════════════
+
+PL/SQL Block
+    ↓
+Variables
+    ↓
+Procedure
+    ↓
+Function
+    ↓
+Cursor
+    ↓
+Exception
+    ↓
+Trigger
+    ↓
+Package
+    ↓
+Bulk Collect
+    ↓
+FORALL
+    ↓
+Commit / Rollback
+    ↓
+Performance Tuning
+
+═══════════════════════════════════════════════════════════════
+🎯 GOLDEN INTERVIEW LINE
+═══════════════════════════════════════════════════════════════
+
+"For enterprise banking projects, the most important PL/SQL
+topics are Procedures, Functions, Cursors, Exception Handling,
+Triggers, Packages, Bulk Collect, FORALL, Transactions, and
+Performance Tuning. These cover approximately 80-90% of
+PL/SQL interview questions asked for Senior Java Developers."
