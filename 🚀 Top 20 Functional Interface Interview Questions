@@ -1,0 +1,455 @@
+🚀 Top 20 Functional Interface Interview Questions
+(Question + Full One-Line Code + Input + Output)
+No 1
+Question : Check Even Number
+
+Code :
+Predicate<Integer> even = n -> n % 2 == 0;
+
+Input  : 10
+Output : true
+
+
+No 2
+Question : Check Odd Number
+
+Code :
+Predicate<Integer> odd = n -> n % 2 != 0;
+
+Input  : 11
+Output : true
+
+
+No 3
+Question : Check Number Greater Than 100
+
+Code :
+Predicate<Integer> greaterThan100 = n -> n > 100;
+
+Input  : 150
+Output : true
+
+
+No 4
+Question : Check String Is Empty
+
+Code :
+Predicate<String> empty = s -> s.isEmpty();
+
+Input  : ""
+Output : true
+
+
+No 5
+Question : Check String Starts With A
+
+Code :
+Predicate<String> startsWithA = s -> s.startsWith("A");
+
+Input  : "AWS"
+Output : true
+
+
+No 6
+Question : Find Length Of String
+
+Code :
+Function<String,Integer> length = String::length;
+
+Input  : "Java"
+Output : 4
+
+
+No 7
+Question : Convert String To Uppercase
+
+Code :
+Function<String,String> upper = String::toUpperCase;
+
+Input  : "spring"
+Output : SPRING
+
+
+No 8
+Question : Square A Number
+
+Code :
+Function<Integer,Integer> square = n -> n * n;
+
+Input  : 5
+Output : 25
+
+
+No 9
+Question : Double A Number
+
+Code :
+Function<Integer,Integer> doubler = n -> n * 2;
+
+Input  : 20
+Output : 40
+
+
+No 10
+Question : Convert Integer To String
+
+Code :
+Function<Integer,String> convert = n -> String.valueOf(n);
+
+Input  : 100
+Output : "100"
+
+
+No 11
+Question : Print Name
+
+Code :
+Consumer<String> print = System.out::println;
+
+Input  : "Parag"
+Output : Parag
+
+
+No 12
+Question : Print Employee Id
+
+Code :
+Consumer<Integer> printId = id -> System.out.println(id);
+
+Input  : 101
+Output : 101
+
+
+No 13
+Question : Save Data
+
+Code :
+Consumer<String> saveData = s -> System.out.println("Saved : " + s);
+
+Input  : "Payment"
+Output : Saved : Payment
+
+
+No 14
+Question : Return Constant Value
+
+Code :
+Supplier<String> constant = () -> "Java";
+
+Input  : No Input
+Output : Java
+
+
+No 15
+Question : Generate Random Number
+
+Code :
+Supplier<Integer> randomNum = () -> new Random().nextInt(10);
+
+Input  : No Input
+Output : 7
+
+
+No 16
+Question : Get Current Date
+
+Code :
+Supplier<LocalDate> today = () -> LocalDate.now();
+
+Input  : No Input
+Output : 2026-08-31
+
+
+No 17
+Question : Add Two Numbers
+
+Code :
+BiFunction<Integer,Integer,Integer> add = (a,b) -> a+b;
+
+Input  : 10,20
+Output : 30
+
+
+No 18
+Question : Multiply Two Numbers
+
+Code :
+BiFunction<Integer,Integer,Integer> multiply = (a,b) -> a*b;
+
+Input  : 5,6
+Output : 30
+
+
+No 19
+Question : Find Maximum Number
+
+Code :
+BinaryOperator<Integer> max = Integer::max;
+
+Input  : 20,50
+Output : 50
+
+
+No 20
+Question : Convert String To Uppercase
+
+Code :
+UnaryOperator<String> upperCase = s -> s.toUpperCase();
+
+Input  : "java"
+Output : JAVA
+
+🎯 Most Important Built-In Functional Interfaces
+Predicate<T>
+
+Code :
+Predicate<Integer> even = n -> n % 2 == 0;
+
+Input  : 10
+Output : true
+
+Method : test()
+
+
+
+Function<T,R>
+
+Code :
+Function<String,Integer> len = String::length;
+
+Input  : "Java"
+Output : 4
+
+Method : apply()
+
+
+
+Consumer<T>
+
+Code :
+Consumer<String> print = System.out::println;
+
+Input  : "Hello"
+Output : Hello
+
+Method : accept()
+
+
+
+Supplier<T>
+
+Code :
+Supplier<String> supplier = () -> "Java";
+
+Input  : No Input
+Output : Java
+
+Method : get()
+
+
+
+BiFunction<T,U,R>
+
+Code :
+BiFunction<Integer,Integer,Integer> add =
+(a,b) -> a+b;
+
+Input  : 10,20
+Output : 30
+
+Method : apply()
+
+
+
+BinaryOperator<T>
+
+Code :
+BinaryOperator<Integer> max =
+Integer::max;
+
+Input  : 20,50
+Output : 50
+
+Method : apply()
+
+
+
+UnaryOperator<T>
+
+Code :
+UnaryOperator<String> upper =
+s -> s.toUpperCase();
+
+Input  : "java"
+Output : JAVA
+
+Method : apply()
+
+⭐ Most Asked Stream Questions Using Functional Interfaces
+Filter Even Numbers
+
+Code :
+list.stream()
+    .filter(n -> n % 2 == 0)
+    .toList();
+
+Input  : [1,2,3,4,5,6]
+
+Output :
+[2,4,6]
+
+
+Convert To Uppercase
+
+Code :
+names.stream()
+     .map(String::toUpperCase)
+     .toList();
+
+Input  : [java,spring]
+
+Output :
+[JAVA,SPRING]
+
+
+Find Length Of Strings
+
+Code :
+names.stream()
+     .map(String::length)
+     .toList();
+
+Input  : [Java,AWS]
+
+Output :
+[4,3]
+
+
+Sum Numbers
+
+Code :
+list.stream()
+    .reduce(0,Integer::sum);
+
+Input  : [10,20,30]
+
+Output :
+60
+
+
+Find Maximum Number
+
+Code :
+list.stream()
+    .max(Integer::compareTo)
+    .get();
+
+Input  : [10,50,30]
+
+Output :
+50
+
+
+Group Employees By Department
+
+Code :
+employees.stream()
+.collect(Collectors.groupingBy(Employee::getDept));
+
+Input :
+John IT
+Mary IT
+Tom HR
+
+Output :
+{IT=[John,Mary], HR=[Tom]}
+
+
+Convert List To Map
+
+Code :
+employees.stream()
+.collect(Collectors.toMap(Employee::getId,Employee::getName));
+
+Input :
+1 John
+2 Mary
+
+Output :
+{1=John, 2=Mary}
+
+
+Find Duplicate Elements
+
+Code :
+list.stream()
+.collect(Collectors.groupingBy(Function.identity(),
+Collectors.counting()));
+
+Input :
+[1,2,2,3,3,3]
+
+Output :
+{1=1,2=2,3=3}
+
+🧠 Ultimate Interview Memory Trick
+Predicate
+→ Test Data
+
+Function
+→ Transform Data
+
+Consumer
+→ Use Data
+
+Supplier
+→ Provide Data
+
+BiFunction
+→ Two Inputs
+
+UnaryOperator
+→ Same Input/Output Type
+
+BinaryOperator
+→ Two Inputs Same Type
+
+P F C S
+
+P → Predicate → Test
+
+F → Function → Transform
+
+C → Consumer → Consume
+
+S → Supplier → Supply
+
+
+✅ Most Asked Java 8 Interview Topics
+
+Predicate
+Function
+Consumer
+Supplier
+
+Lambda Expressions
+
+Method References (::)
+
+filter()
+
+map()
+
+reduce()
+
+collect()
+
+groupingBy()
+
+toMap()
+
+flatMap()
+
+Optional
+
+Streams API
