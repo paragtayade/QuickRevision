@@ -1,0 +1,573 @@
+I found several Docker interview preparation resources in your enterprise documents, including Docker questions for Java/Spring Boot on AWS ECS. [Interview...reparation | Word], [Java Inter...one place | Word]
+Top 20 Docker Interview Questions (with Short Answers)
+1. What is Docker?
+Answer:Docker is a containerization platform that packages an application along with its dependencies into lightweight containers that run consistently across environments. [geeksforgeeks.org], [Java Inter...one place | Word]
+2. What is a Docker Container?
+Answer:A container is a running instance of a Docker image. It is lightweight, isolated, and shares the host OS kernel. [geeksforgeeks.org]
+3. Difference between Docker Image and Container?
+Answer:
+Image	Container
+Blueprint	Running Instance
+Read-only	Read-Write
+Created by build	Created by run
+Memory Trick:
+ 
+Image = Class
+
+Container = Object
+
+ 
+ 
+[geeksforgeeks.org]
+4. Difference between Docker and Virtual Machine?
+Answer:
+Docker	VM
+Shares OS Kernel	Own Guest OS
+Lightweight	Heavy
+Starts in seconds	Starts in minutes
+Less memory	More memory
+[dataquest.io], [edureka.co]
+5. What is Dockerfile?
+Answer:A text file containing instructions to build a Docker image. [Java Inter...one place | Word], [Interview...reparation | Word]
+Example:
+ 
+FROM eclipse-temurin:21
+
+COPY app.jar app.jar
+
+ENTRYPOINT ["java","-jar","app.jar"]
+ 
+6. What is Docker Hub?
+Answer:A public registry where Docker images are stored and shared.
+ 
+docker pull nginx
+ 
+[wecreateproblems.com]
+7. Explain Docker Architecture.
+Answer:
+ 
+Docker Client
+
+      |
+
+Docker Daemon
+
+      |
+
+Images -> Containers
+ 
+Components:
+Docker Client
+Docker Daemon
+Images
+Containers
+Registry
+8. How do you build a Docker Image?
+ 
+docker build -t myapp .
+ 
+-t = tag name
+[Java Inter...one place | Word]
+9. How do you run a Container?
+ 
+docker run myapp
+ 
+Port mapping:
+ 
+docker run -p 8080:8080 myapp
+ 
+10. What are Docker Volumes?
+Answer:Volumes provide persistent storage outside the container lifecycle.
+ 
+docker volume create app-data
+ 
+11. Why are Volumes needed?
+Answer:
+Without volume:
+ 
+Container deleted
+
+↓
+
+Data deleted
+ 
+With volume:
+ 
+Container deleted
+
+↓
+
+Data remains
+
+``
+ 
+12. What is Docker Networking?
+Answer:Allows containers to communicate with each other and external systems.
+Common Networks:
+Bridge
+Host
+Overlay
+None
+13. Difference Between COPY and ADD?
+COPY
+ 
+COPY app.jar app.jar
+
+``
+ 
+Copies files only.
+ADD
+ 
+ADD my.zip /
+
+``
+ 
+Can extract archives and fetch URLs.
+Best Practice: Use COPY whenever possible.
+14. What is Multi-Stage Build?
+Answer:Uses multiple FROM statements to reduce image size dramatically. [Interview...reparation | Word], [Java Inter...one place | Word]
+Example:
+ 
+FROM maven:3.9 AS build
+
+RUN mvn package
+
+
+FROM eclipse-temurin:21
+
+COPY --from=build target/app.jar app.jar
+ 
+15. How do you check running containers?
+ 
+docker ps
+ 
+All containers:
+ 
+docker ps -a
+ 
+16. Difference Between CMD and ENTRYPOINT?
+CMD
+ 
+CMD ["java","-jar","app.jar"]
+ 
+Can be overridden.
+ENTRYPOINT
+ 
+ENTRYPOINT ["java","-jar","app.jar"]
+ 
+Harder to override.
+17. How can you reduce Docker Image Size?
+Answer:
+Multi-stage builds
+Alpine/slim images
+Remove temporary files
+Minimize layers
+Example:
+ 
+FROM eclipse-temurin:21-jre-alpine
+ 
+[Java Inter...one place | Word], [Interview...reparation | Word]
+18. How do Environment Variables work?
+Dockerfile:
+ 
+ENV SPRING_PROFILES_ACTIVE=prod
+ 
+Runtime:
+ 
+docker run -e DB_URL=mysql app
+ 
+For AWS ECS, environment variables and secrets are commonly configured through task definitions. [Java Inter...one place | Word]
+19. What is Docker Compose?
+Answer:Used to run multiple containers together.
+Example:
+ 
+version: '3'
+
+services:
+
+  app:
+
+    image: myapp
+
+
+  mysql:
+
+    image: mysql
+ 
+Run:
+ 
+docker-compose up
+ 
+20. Explain Docker in a Spring Boot Microservices Project.
+Interview Answer (Banking Domain):
+We package each Spring Boot microservice as a Docker image using a Dockerfile. The image is pushed to a registry (Docker Hub/ECR). Containers are deployed on AWS ECS/EKS. Docker ensures consistent deployment across DEV, QA, UAT, and PROD environments while simplifying scaling and rollback. [Interview...reparation | Word], [Java Inter...one place | Word]
+Most Important Commands for Quick Revision
+ 
+docker build -t app .
+
+
+docker images
+
+
+docker run -p 8080:8080 app
+
+
+docker ps
+
+
+docker ps -a
+
+
+docker logs <container-id>
+
+
+docker exec -it <container-id> bash
+
+
+docker stop <container-id>
+
+
+docker rm <container-id>
+
+
+docker rmi <image-id>
+
+
+docker pull nginx
+
+
+docker push myrepo/app
+
+
+docker-compose up
+
+
+docker-compose down
+
+ 
+ 
+Top 5 Advanced Docker Questions Asked in Banking Interviews
+Difference between Docker and Kubernetes?
+What is a multi-stage Docker build?
+How do you handle secrets in Docker containers?
+How do you optimize Spring Boot Docker images?
+How would you deploy a Dockerized Spring Boot application on AWS ECS/EKS?
+These are especially relevant for your Java + Spring Boot + AWS banking interviews. [Interview...reparation | Word], [Java Inter...one place | Word], [Rushikanth...gi in chat | Teams]
+ 
+These are very common Docker + Spring Boot + AWS interview questions for senior Java developers. Below are concise interview-ready answers.
+1. Difference Between Docker and Kubernetes?
+Short Answer
+Docker is used to create and run containers, while Kubernetes is used to manage and orchestrate containers at scale.
+Detailed Answer
+Docker	Kubernetes
+Containerization platform	Container orchestration platform
+Creates images and containers	Manages containers
+Runs on single machine	Runs across cluster of machines
+Handles packaging	Handles deployment & scaling
+No self-healing	Self-healing supported
+No auto-scaling	Auto-scaling supported
+Example
+Suppose a banking application has:
+ 
+Account Service
+
+Payment Service
+
+Customer Service
+
+Notification Service
+ 
+Docker:
+ 
+Creates containers for each service
+ 
+Kubernetes:
+ 
+Deploys
+
+Scales
+
+Monitors
+
+Restarts failed containers
+ 
+Interview One-Liner
+Docker packages applications; Kubernetes manages those containers in production.
+2. What is a Multi-Stage Docker Build?
+Short Answer
+Multi-stage build uses multiple FROM statements to separate build and runtime environments, reducing image size. [Interview...reparation | Word], [Java Inter...one place | Word]
+Problem Without Multi-Stage Build
+ 
+FROM maven:3.9
+
+COPY .
+
+RUN mvn clean package
+ 
+Final image contains:
+ 
+Maven
+
+Source Code
+
+Dependencies
+
+Jar
+ 
+Large image.
+Multi-Stage Build
+ 
+# Build Stage
+
+FROM maven:3.9-eclipse-temurin-21 AS build
+
+
+COPY . .
+
+
+RUN mvn clean package
+
+
+# Runtime Stage
+
+FROM eclipse-temurin:21-jre
+
+
+COPY --from=build </span>
+
+target/app.jar app.jar
+
+
+ENTRYPOINT ["java","-jar","app.jar"]
+ 
+Benefits
+✅ Smaller Image
+✅ Faster Deployment
+✅ Better Security
+✅ Less Storage
+Interview One-Liner
+Multi-stage builds keep only the final artifact in the runtime image and remove unnecessary build dependencies. [Interview...reparation | Word], [Java Inter...one place | Word]
+3. How Do You Handle Secrets in Docker Containers?
+Wrong Approach
+ 
+ENV DB_PASSWORD=password123
+ 
+or
+ 
+spring.datasource.password=password123
+ 
+Never store secrets in code.
+Better Approaches
+Docker Secrets
+ 
+docker secret create db_password
+ 
+Kubernetes Secrets
+ 
+kind: Secret
+ 
+AWS Secrets Manager
+ 
+Database Password
+
+API Keys
+
+OAuth Secrets
+ 
+AWS Systems Manager Parameter Store
+ 
+SecureString
+ 
+Enterprise recommendation: use Secrets Manager or Parameter Store for secrets rather than embedding them in images. [Java Inter...one place | Word]
+Spring Boot Example
+ 
+@Value("${db.password}")
+
+private String password;
+ 
+Read from:
+ 
+Environment Variable
+
+Secrets Manager
+
+Parameter Store
+ 
+Interview One-Liner
+Secrets should never be baked into Docker images; store them in AWS Secrets Manager, Kubernetes Secrets, or environment-based secret stores. [Java Inter...one place | Word]
+4. How Do You Optimize Spring Boot Docker Images?
+Best Practices
+1. Use Lightweight Base Images
+ 
+FROM eclipse-temurin:21-jre
+ 
+instead of:
+ 
+FROM ubuntu
+ 
+Smaller footprint.
+2. Use Multi-Stage Builds
+Build and runtime separation. [Interview...reparation | Word], [Java Inter...one place | Word]
+3. Use JRE Instead of JDK
+ 
+FROM eclipse-temurin:21-jre
+ 
+No compiler required in production.
+4. Layer Dependencies
+Spring Boot supports layered JARs.
+Benefits:
+ 
+Better caching
+
+Faster builds
+
+Smaller deployments
+ 
+5. Remove Unnecessary Files
+Don't include:
+ 
+.git
+
+docs
+
+tests
+
+target backups
+ 
+Use:
+ 
+```
+ 
+6. Container JVM Settings
+ 
+JAVA_OPTS="-Xms512m -Xmx1g"
+ 
+Avoid unnecessary memory usage.
+Interview One-Liner
+I optimize Spring Boot images using multi-stage builds, lightweight JRE images, layered JARs, and Docker caching techniques. [Interview...reparation | Word], [Java Inter...one place | Word]
+5. How Would You Deploy a Dockerized Spring Boot Application on AWS ECS/EKS?
+ECS Deployment Flow
+ 
+Spring Boot App
+
+      ↓
+
+Dockerfile
+
+      ↓
+
+Docker Image
+
+      ↓
+
+AWS ECR
+
+      ↓
+
+ECS Task Definition
+
+      ↓
+
+ECS Service
+
+      ↓
+
+Application Load Balancer
+
+      ↓
+
+Users
+ 
+This aligns with the deployment flow documented in your interview preparation materials. [Java Inter...one place | Word], [Interview...reparation | Word]
+Step 1: Create Docker Image
+ 
+docker build -t account-service .
+ 
+Step 2: Test Locally
+ 
+docker run -p 8080:8080 account-service
+ 
+Step 3: Push to AWS ECR
+ 
+docker tag account-service:1.0 </span>
+
+<ecr-url>
+
+
+docker push <ecr-url>
+ 
+Your preparation notes explicitly mention pushing images to a registry such as AWS ECR before ECS deployment. [Java Inter...one place | Word], [Interview...reparation | Word]
+Step 4: Create ECS Task Definition
+Configure:
+ 
+CPU
+
+Memory
+
+Container Port
+
+Environment Variables
+
+Secrets
+ 
+Step 5: Create ECS Service
+ 
+Desired Count = 2
+ 
+ECS launches containers.
+Step 6: Configure Load Balancer
+ 
+ALB
+
+Target Group
+
+Health Checks
+ 
+Step 7: Enable Auto Scaling
+Scale based on:
+ 
+CPU Usage
+
+Memory Usage
+
+Request Count
+ 
+EKS Deployment Flow
+ 
+Docker Image
+
+      ↓
+
+AWS ECR
+
+      ↓
+
+Kubernetes Deployment
+
+      ↓
+
+Pods
+
+      ↓
+
+Service
+
+      ↓
+
+Ingress / Load Balancer
+ 
+Kubernetes manages:
+ 
+Scaling
+
+Self-Healing
+
+Rolling Updates
+
+Auto Recovery
+ 
+30-Second Interview Summary
+Docker packages applications into portable containers. Kubernetes orchestrates those containers at scale. I use multi-stage Docker builds to reduce image size, store credentials in AWS Secrets Manager instead of images, optimize Spring Boot images using lightweight JRE and layered builds, then deploy the image to AWS ECR and run it through ECS Services or EKS Deployments behind a load balancer. [Interview...reparation | Word], [Java Inter...one place | Word]
+This answer is typically strong enough for JPMC, RBC, MUFG, Cognizant banking project interviews where Docker, ECS, microservices, and AWS deployment experience are discussed.
+
+ 
