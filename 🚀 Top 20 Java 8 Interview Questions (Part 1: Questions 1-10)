@@ -1,0 +1,325 @@
+I found an internal interview-discussion record mentioning Java 8, Spring, and microservices topics relevant to your interview preparation, including a question about explaining Java 7/8/11/17 features.
+
+Top 20 Java 8 Interview Questions (Part 1: Questions 1-10)
+1. What are the important features introduced in Java 8?
+Answer
+
+Java 8 introduced several revolutionary features that brought functional programming capabilities to Java.
+
+Features
+Lambda Expressions
+Functional Interfaces
+Stream API
+Method References
+Default Methods
+Static Methods in Interfaces
+Optional Class
+Date and Time API
+Parallel Streams
+Nashorn JavaScript Engine
+
+Interview Answer
+
+"Java 8 introduced Lambda Expressions, Stream API, Functional Interfaces, Method References, Optional Class, Default Methods, and the new Date-Time API, making Java more concise and functional."
+
+2. What is a Lambda Expression?
+Answer
+
+A lambda expression is an anonymous function used to implement functional interfaces.
+
+Syntax
+(parameters) -> expression
+
+Example
+
+Before Java 8
+
+Runnable r = new Runnable() {
+    @Override
+    public void run() {
+        System.out.println("Hello");
+    }
+};
+
+
+After Java 8
+
+Runnable r = () -> System.out.println("Hello");
+
+Advantages
+Less Code
+Better Readability
+Functional Programming Support
+
+Interview Answer
+
+"A Lambda Expression is an anonymous function that provides a concise way to implement functional interfaces."
+
+3. What is a Functional Interface?
+Answer
+
+A Functional Interface contains exactly one abstract method.
+
+Examples
+Runnable
+Callable
+Comparator
+Predicate
+Function
+Consumer
+Supplier
+
+Custom Functional Interface
+@FunctionalInterface
+interface Calculator {
+    int add(int a, int b);
+}
+
+Lambda Usage
+Calculator c = (a,b) -> a+b;
+
+Interview Answer
+
+"A Functional Interface contains exactly one abstract method and can be implemented using lambda expressions."
+
+4. What is @FunctionalInterface Annotation?
+Answer
+
+This annotation indicates that the interface is intended to be a Functional Interface.
+
+Example
+@FunctionalInterface
+interface Test {
+    void display();
+}
+
+Benefits
+Compile-time Validation
+Better Readability
+Prevents Extra Abstract Methods
+
+Interview Answer
+
+"@FunctionalInterface ensures the interface contains only one abstract method and provides compile-time validation."
+
+5. What are predefined Functional Interfaces in Java 8?
+Answer
+
+Java 8 introduced interfaces under:
+
+java.util.function
+
+Most Important Interfaces
+Predicate<T>
+Function<T,R>
+Consumer<T>
+Supplier<T>
+UnaryOperator<T>
+BinaryOperator<T>
+
+Examples
+
+Predicate
+
+Predicate<Integer> even = n -> n%2==0;
+
+
+Function
+
+Function<String,Integer> f = String::length;
+
+
+Consumer
+
+Consumer<String> c = System.out::println;
+
+
+Supplier
+
+Supplier<String> s = () -> "Hello";
+
+Interview Answer
+
+"Predicate, Function, Consumer, and Supplier are the most commonly used predefined functional interfaces in Java 8."
+
+6. What is Stream API?
+Answer
+
+Stream API is used to process collections in a functional style.
+
+Example
+List<String> names =
+Arrays.asList("John","Mike","Tom");
+
+names.stream()
+     .filter(n -> n.startsWith("J"))
+     .forEach(System.out::println);
+
+Output
+John
+
+Advantages
+Less Code
+Lazy Evaluation
+Parallel Processing
+Improved Readability
+
+Interview Answer
+
+"Stream API provides a declarative way to process collections using operations such as filter, map, reduce, and collect."
+
+7. Difference Between Collection and Stream?
+Collection
+Stores Data
+Eager Processing
+
+Stream
+Processes Data
+Lazy Processing
+
+Example
+
+Collection
+
+list.add("A");
+
+
+Stream
+
+list.stream()
+    .filter(x -> x.startsWith("A"));
+
+Interview Answer
+
+"A Collection stores data, whereas a Stream processes data without modifying the original collection."
+
+8. What is Lazy Evaluation in Streams?
+Answer
+
+Intermediate operations are not executed until a terminal operation is called.
+
+Example
+Stream.of(1,2,3,4)
+      .filter(n -> {
+          System.out.println(n);
+          return n%2==0;
+      });
+
+
+Output
+
+No Output
+
+
+Because terminal operation is missing.
+
+Correct
+Stream.of(1,2,3,4)
+      .filter(n -> n%2==0)
+      .count();
+
+Interview Answer
+
+"Streams use lazy evaluation, meaning operations execute only when a terminal operation is invoked."
+
+9. What are Intermediate and Terminal Operations?
+Intermediate Operations
+
+Return Stream.
+
+Examples:
+
+filter()
+map()
+sorted()
+distinct()
+limit()
+skip()
+
+Terminal Operations
+
+Return Result.
+
+Examples:
+
+collect()
+count()
+forEach()
+reduce()
+findFirst()
+
+Example
+list.stream()
+    .filter(x -> x>10)
+    .map(x -> x*2)
+    .collect(Collectors.toList());
+
+Interview Answer
+
+"Intermediate operations produce another stream, whereas terminal operations produce the final result."
+
+10. What is map() in Stream API?
+Answer
+
+map() transforms each element into another form.
+
+Example
+List<String> names =
+Arrays.asList("john","mike");
+
+List<String> upper =
+names.stream()
+     .map(String::toUpperCase)
+     .collect(Collectors.toList());
+
+Output
+[JOHN, MIKE]
+
+Real Banking Example
+
+Convert Account Entities into DTOs.
+
+accounts.stream()
+        .map(AccountDTO::new)
+        .toList();
+
+Interview Answer
+
+"map() transforms each stream element into another object while preserving the number of elements."
+
+Java 8 Revision Cheat Sheet
+Lambda               → Anonymous Function
+
+Functional Interface → One Abstract Method
+
+@FunctionalInterface → Compile-Time Validation
+
+Predicate            → Input → Boolean
+
+Function             → Input → Output
+
+Consumer             → Input, No Output
+
+Supplier             → No Input, Output
+
+Stream               → Functional Collection Processing
+
+Intermediate Ops     → filter, map, sorted
+
+Terminal Ops         → collect, count, reduce
+
+map()                → Transform Data
+
+
+Part 2 (Questions 11-20) will cover:
+
+filter()
+flatMap()
+reduce()
+Method References
+Optional
+Default Methods
+Static Methods
+Date-Time API
+Parallel Streams
+findFirst vs findAny
