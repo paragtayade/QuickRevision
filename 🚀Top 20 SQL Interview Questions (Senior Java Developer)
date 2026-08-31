@@ -1,0 +1,497 @@
+Top 20 SQL Interview Questions (Senior Java Developer)
+
+1. What is the Difference Between WHERE and HAVING?
+Answer
+WHERE	HAVING
+Filters rows	Filters groups
+Before GROUP BY	After GROUP BY
+No aggregate functions	Aggregate functions allowed
+ 
+SELECT DeptId, COUNT()
+ 
+FROM Employee
+ 
+WHERE Status='ACTIVE'
+ 
+GROUP BY DeptId
+ 
+HAVING COUNT() > 5;
+ 
+WHERE filters rows before grouping; HAVING filters groups after aggregation.
+2. Difference Between INNER JOIN and LEFT JOIN?
+INNER JOIN
+Returns matching data only.
+ 
+SELECT *
+ 
+FROM Employee e
+ 
+INNER JOIN Department d
+ 
+ON e.DeptId=d.DeptId;
+ 
+LEFT JOIN
+Returns all rows from left table.
+ 
+SELECT *
+ 
+FROM Employee e
+ 
+LEFT JOIN Department d
+ 
+ON e.DeptId=d.DeptId;
+ 
+``
+ 
+Joins are a common interview topic. [Java Inter...one place | Word], [SQL_Comple...t_29_Pages | PDF]
+3. Difference Between UNION and UNION ALL?
+UNION
+Removes duplicates.
+ 
+SELECT Name FROM A
+ 
+UNION
+ 
+SELECT Name FROM B;
+ 
+UNION ALL
+Keeps duplicates.
+ 
+SELECT Name FROM A
+ 
+UNION ALL
+ 
+SELECT Name FROM B;
+ 
+[Java Inter...questions | Word], [Java Inter...one place | Word]
+4. What is a Primary Key?
+Answer
+Unique
+Not NULL
+One per table
+ 
+PRIMARY KEY (EmpId)
+ 
+Primary keys uniquely identify rows. [intellipaat.com], [dataquest.io]
+5. What is a Foreign Key?
+Answer
+Creates relationship between tables.
+ 
+FOREIGN KEY (DeptId)
+ 
+REFERENCES Department(DeptId)
+ 
+[dataquest.io], [wecreateproblems.com]
+6. Difference Between DELETE, TRUNCATE and DROP?
+DELETE	TRUNCATE	DROP
+Removes rows	Removes all rows	Removes table
+WHERE allowed	No WHERE	Deletes structure
+Logged	Minimal logging	Removes object
+[intellipaat.com], [SQL_Comple...t_29_Pages | Word]
+7. What is GROUP BY?
+Answer
+Groups rows for aggregation.
+ 
+SELECT DeptId,
+ 
+       COUNT(*),
+ 
+       AVG(Salary)
+ 
+FROM Employee
+ 
+GROUP BY DeptId;
+ 
+[SQL_Comple...t_29_Pages | PDF]
+8. What are Aggregate Functions?
+Answer
+ 
+COUNT()
+ 
+SUM()
+ 
+AVG()
+ 
+MIN()
+ 
+MAX()
+ 
+Used with GROUP BY. [SQL_Comple...t_29_Pages | PDF], [The Ultima...book Ebook | Word]
+9. What is a Subquery?
+Answer
+Query inside another query.
+ 
+SELECT Name
+ 
+FROM Employee
+ 
+WHERE Salary >
+ 
+(
+ 
+  SELECT AVG(Salary)
+ 
+  FROM Employee
+ 
+);
+ 
+``
+ 
+Subqueries can be used in SELECT, WHERE, and FROM clauses. [Java Inter...questions | Word], [Java Inter...one place | Word]
+10. What are Window Functions?
+Answer
+Window functions calculate across related rows without collapsing the result set.
+ 
+SELECT Name,
+ 
+       Salary,
+ 
+       ROW_NUMBER() OVER
+ 
+       (ORDER BY Salary DESC)
+ 
+FROM Employee;
+ 
+Common functions:
+ 
+ROW_NUMBER()
+ 
+RANK()
+ 
+DENSE_RANK()
+ 
+LAG()
+ 
+LEAD()
+ 
+SUM() OVER()
+ 
+``
+ 
+Window functions are heavily used in interviews. [SQL_Interv..._Questions | Word], [SQL interv...tions 2025 | Word]
+11. Difference Between GROUP BY and PARTITION BY?
+GROUP BY
+Returns fewer rows.
+ 
+SELECT DeptId,
+ 
+       AVG(Salary)
+ 
+FROM Employee
+ 
+GROUP BY DeptId;
+ 
+PARTITION BY
+Keeps all rows.
+ 
+SELECT Name,
+ 
+       Salary,
+ 
+       AVG(Salary)
+ 
+       OVER(PARTITION BY DeptId)
+ 
+FROM Employee;
+ 
+PARTITION BY preserves detail rows. [DataEngine..._Interview | Word], [SQL_Interv..._Questions | Word]
+12. How Do You Find the Nth Highest Salary?
+Answer
+ 
+WITH X AS
+ 
+(
+ 
+SELECT Salary,
+ 
+ROW_NUMBER() OVER
+ 
+(ORDER BY Salary DESC) rn
+ 
+FROM Employee
+ 
+)
+ 
+SELECT Salary
+ 
+FROM X
+ 
+WHERE rn = 3;
+ 
+Common interview question. [Interview...reparation | Word]
+13. What is an Index?
+Answer
+Improves query performance.
+ 
+CREATE INDEX IDX_EMP_NAME
+ 
+ON Employee(Name);
+ 
+Indexes speed up data retrieval. [SQL interv...tions 2025 | Word]
+14. Difference Between Index and Key?
+Index	Key
+Performance	Data integrity
+Faster search	Uniqueness
+Multiple allowed	Business rule
+[SQL interv...tions 2025 | Word], [SQL interv...tions 2025 | Word]
+15. What is NULL?
+Answer
+Represents:
+ 
+Unknown
+ 
+Missing
+ 
+Not Available
+ 
+Not:
+ 
+0
+ 
+''
+ 
+FALSE
+ 
+[SQL_Comple...t_29_Pages | Word]
+16. Difference Between CHAR and VARCHAR?
+CHAR
+Fixed length.
+ 
+CHAR(10)
+ 
+VARCHAR
+Variable length.
+ 
+VARCHAR(10)
+ 
+VARCHAR saves storage. [geeksforgeeks.org]
+17. What is a View?
+Answer
+Virtual table.
+ 
+CREATE VIEW ActiveEmployee AS
+ 
+SELECT *
+ 
+FROM Employee
+ 
+WHERE Status='ACTIVE';
+ 
+View simplifies queries and improves security. [geeksforgeeks.org], [The Ultima...book Ebook | Word]
+18. What are SQL Joins?
+Types
+ 
+INNER JOIN
+ 
+LEFT JOIN
+ 
+RIGHT JOIN
+ 
+FULL OUTER JOIN
+ 
+CROSS JOIN
+ 
+Interview Tip:
+ 
+INNER = Matching Rows
+ 
+
+ 
+LEFT = All Left Rows
+ 
+
+ 
+RIGHT = All Right Rows
+ 
+
+ 
+FULL = Everything
+ 
+[SQL_Comple...t_29_Pages | PDF], [geeksforgeeks.org]
+19. What Are ACID Properties?
+Answer
+ 
+A = Atomicity
+ 
+C = Consistency
+ 
+I = Isolation
+ 
+D = Durability
+ 
+Important for transactions.
+ 
+COMMIT;
+ 
+ROLLBACK;
+ 
+Transaction topics are highlighted in SQL interview guides. [The Ultima...book Ebook | Word], [SQL_Comple...t_29_Pages | Word]
+20. What is a CTE?
+Answer
+Common Table Expression.
+ 
+WITH EmpCTE AS
+ 
+(
+ 
+   SELECT *
+ 
+   FROM Employee
+ 
+)
+ 
+SELECT *
+ 
+FROM EmpCTE;
+ 
+Benefits:
+✅ Readability
+✅ Recursive Queries
+✅ Reusable Logic
+Top 5 Advanced SQL Questions
+Q1. ROW_NUMBER vs RANK vs DENSE_RANK?
+ 
+ROW_NUMBER()
+ 
+Unique sequence.
+ 
+RANK()
+ 
+Skips rankings after ties.
+ 
+DENSE_RANK()
+ 
+No gaps.
+[Interview...reparation | Word], [SQL_Interv..._Questions | Word]
+Q2. Explain Execution Order of SQL
+ 
+FROM
+ 
+JOIN
+ 
+WHERE
+ 
+GROUP BY
+ 
+HAVING
+ 
+SELECT
+ 
+DISTINCT
+ 
+ORDER BY
+ 
+LIMIT
+ 
+Logical processing starts with FROM. [SQL_Comple...t_29_Pages | Word]
+Q3. How Do You Remove Duplicates?
+ 
+SELECT DISTINCT Name
+ 
+FROM Employee;
+ 
+or
+ 
+ROW_NUMBER()
+ 
+Q4. How Do You Find Duplicate Records?
+ 
+SELECT Email,
+ 
+       COUNT()
+ 
+FROM Customer
+ 
+GROUP BY Email
+ 
+HAVING COUNT() > 1;
+ 
+Q5. How Do You Improve SQL Performance?
+✅ Proper Indexes
+✅ Avoid SELECT *
+✅ Use WHERE Filters
+✅ Analyze Execution Plans
+✅ Proper Join Columns
+30-Second SQL Interview Revision
+ 
+WHERE
+ 
+→ Before GROUP BY
+ 
+
+ 
+HAVING
+ 
+→ After GROUP BY
+ 
+
+ 
+INNER JOIN
+ 
+→ Matching Rows
+ 
+
+ 
+LEFT JOIN
+ 
+→ Keep Left
+ 
+
+ 
+UNION
+ 
+→ Remove Duplicates
+ 
+
+ 
+UNION ALL
+ 
+→ Keep Duplicates
+ 
+
+ 
+ROW_NUMBER
+ 
+→ Unique Rank
+ 
+
+ 
+RANK
+ 
+→ Skip Gaps
+ 
+
+ 
+DENSE_RANK
+ 
+→ No Gaps
+ 
+
+ 
+INDEX
+ 
+→ Performance
+ 
+
+ 
+PRIMARY KEY
+ 
+→ Unique + Not Null
+ 
+
+ 
+FOREIGN KEY
+ 
+→ Relationship
+ 
+For banking interviews (JPMC, RBC, MUFG), the most frequently asked SQL topics are:
+✅ Joins
+✅ GROUP BY / HAVING
+✅ Window Functions
+✅ ROW_NUMBER / RANK
+✅ Nth Highest Salary
+✅ CTEs
+✅ Indexes
+✅ Transactions (ACID)
+✅ Query Optimization
+✅ Duplicate Record Scenarios
