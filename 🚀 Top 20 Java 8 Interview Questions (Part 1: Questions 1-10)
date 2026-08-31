@@ -1,6 +1,7 @@
 I found an internal interview-discussion record mentioning Java 8, Spring, and microservices topics relevant to your interview preparation, including a question about explaining Java 7/8/11/17 features.
-
+-----------------------------------------------------------
 Top 20 Java 8 Interview Questions (Part 1: Questions 1-10)
+-----------------------------------------------------------
 1. What are the important features introduced in Java 8?
 Answer
 
@@ -323,3 +324,395 @@ Static Methods
 Date-Time API
 Parallel Streams
 findFirst vs findAny
+
+
+-----------------------------------------------------------
+Top 20 Java 8 Interview Questions (Part 2: Questions 11-20)
+-----------------------------------------------------------
+11. What is filter() in Stream API?
+Answer
+
+filter() is used to select elements that satisfy a given condition.
+
+Syntax
+stream.filter(condition)
+
+Example
+List<Integer> numbers =
+Arrays.asList(1,2,3,4,5,6);
+
+numbers.stream()
+       .filter(n -> n%2==0)
+       .forEach(System.out::println);
+
+Output
+2
+4
+6
+
+Banking Example
+
+Get active accounts only.
+
+accounts.stream()
+        .filter(Account::isActive)
+        .toList();
+
+Interview Answer
+
+"filter() is an intermediate operation used to select elements matching a specific condition."
+
+12. What is flatMap()?
+Answer
+
+map() returns one object for one input.
+
+flatMap() converts multiple collections into a single stream.
+
+Example
+List<List<String>> data =
+Arrays.asList(
+ Arrays.asList("A","B"),
+ Arrays.asList("C","D")
+);
+
+data.stream()
+    .flatMap(List::stream)
+    .forEach(System.out::println);
+
+Output
+A
+B
+C
+D
+
+Interview Answer
+
+"flatMap() flattens nested collections into a single stream."
+
+13. What is reduce()?
+Answer
+
+reduce() combines stream elements into a single result.
+
+Example
+List<Integer> nums =
+Arrays.asList(1,2,3,4,5);
+
+int sum = nums.stream()
+              .reduce(0, Integer::sum);
+
+System.out.println(sum);
+
+Output
+15
+
+Find Maximum
+int max =
+nums.stream()
+    .reduce(Integer.MIN_VALUE,
+            Integer::max);
+
+Interview Answer
+
+"reduce() performs aggregation operations such as sum, max, min, or custom calculations."
+
+14. What is Method Reference?
+Answer
+
+Method Reference is a short form of Lambda Expression.
+
+Syntax
+ClassName::methodName
+
+Lambda
+list.forEach(x ->
+System.out.println(x));
+
+Method Reference
+list.forEach(System.out::println);
+
+Types
+Static Method Reference
+Instance Method Reference
+Constructor Reference
+
+Interview Answer
+
+"Method references provide a concise way of referring to existing methods using the :: operator."
+
+15. What is Optional Class?
+Answer
+
+Optional helps avoid NullPointerException.
+
+Without Optional
+String name = null;
+System.out.println(name.length());
+
+Result
+NullPointerException
+
+With Optional
+Optional<String> name =
+Optional.ofNullable(null);
+
+System.out.println(
+name.orElse("Unknown"));
+
+Output
+Unknown
+
+Important Methods
+isPresent()
+get()
+orElse()
+orElseGet()
+orElseThrow()
+ifPresent()
+
+Interview Answer
+
+"Optional is a container object used to safely handle null values and reduce NullPointerException."
+
+16. Difference Between orElse() and orElseGet()?
+orElse()
+
+Always executes.
+
+Optional.of("Java")
+        .orElse(getValue());
+
+
+Even if value exists.
+
+orElseGet()
+
+Executes only when value is absent.
+
+Optional.of("Java")
+        .orElseGet(() -> getValue());
+
+Interview Answer
+
+"orElse() eagerly evaluates the default value, whereas orElseGet() lazily evaluates it only when required."
+
+17. What are Default Methods in Interfaces?
+Answer
+
+Default methods allow interfaces to contain implementation.
+
+Example
+interface Vehicle {
+
+    default void start() {
+        System.out.println("Starting");
+    }
+}
+
+Implementation
+class Car implements Vehicle {
+}
+
+Usage
+new Car().start();
+
+Output
+Starting
+
+Advantage
+Backward Compatibility
+
+Interview Answer
+
+"Default methods allow adding method implementations to interfaces without breaking existing classes."
+
+18. What are Static Methods in Interfaces?
+Answer
+
+Java 8 allows static methods inside interfaces.
+
+Example
+interface Calculator {
+
+    static int add(int a,int b) {
+        return a+b;
+    }
+}
+
+Usage
+System.out.println(
+Calculator.add(10,20));
+
+Output
+30
+
+Interview Answer
+
+"Static methods belong to interfaces and can be called without creating an object."
+
+19. What is New Date and Time API?
+Answer
+
+Java 8 introduced the java.time package.
+
+Older APIs:
+
+Date
+Calendar
+
+
+had thread-safety and design issues.
+
+New Classes
+LocalDate
+LocalTime
+LocalDateTime
+ZonedDateTime
+Period
+Duration
+
+Example
+LocalDate today =
+LocalDate.now();
+
+System.out.println(today);
+
+Output
+2026-08-31
+
+Add Days
+LocalDate.now()
+         .plusDays(10);
+
+Interview Answer
+
+"Java 8 Date-Time API provides immutable, thread-safe, and easy-to-use date handling classes."
+
+20. What are Parallel Streams?
+Answer
+
+Parallel Streams execute operations using multiple CPU cores.
+
+Normal Stream
+list.stream()
+
+Parallel Stream
+list.parallelStream()
+
+Example
+List<Integer> nums =
+IntStream.rangeClosed(1,100)
+         .boxed()
+         .toList();
+
+nums.parallelStream()
+    .forEach(System.out::println);
+
+Advantages
+Better Performance
+Parallel Processing
+Utilizes Multiple CPU Cores
+
+Disadvantages
+Thread Overhead
+Order Not Guaranteed
+Not Suitable For Small Collections
+
+Interview Answer
+
+"Parallel Streams improve performance by processing data concurrently using the ForkJoinPool framework."
+
+Java 8 Stream Operations Cheat Sheet
+filter()       → Select records
+
+map()          → Transform records
+
+flatMap()      → Flatten nested collections
+
+sorted()       → Sort records
+
+distinct()     → Remove duplicates
+
+limit()        → Restrict count
+
+skip()         → Skip records
+
+reduce()       → Aggregate result
+
+collect()      → Convert Stream to Collection
+
+count()        → Count elements
+
+findFirst()    → First element
+
+findAny()      → Any matching element
+
+Java 8 Functional Interfaces Cheat Sheet
+Predicate<T>
+Input    → T
+Output   → boolean
+
+Function<T,R>
+Input    → T
+Output   → R
+
+Consumer<T>
+Input    → T
+Output   → void
+
+Supplier<T>
+Input    → None
+Output   → T
+
+UnaryOperator<T>
+Input    → T
+Output   → T
+
+BinaryOperator<T>
+Input    → T,T
+Output   → T
+
+Senior Java Developer Quick Revision (Java 8)
+Lambda            → Anonymous Function
+
+FunctionalInterface → One Abstract Method
+
+Stream API        → Functional Collection Processing
+
+filter()          → Select Data
+
+map()             → Transform Data
+
+flatMap()         → Flatten Collections
+
+reduce()          → Aggregate Data
+
+Method Reference  → Class::Method
+
+Optional          → Null Safety
+
+Default Method    → Implementation in Interface
+
+Static Method     → Utility Method in Interface
+
+LocalDate         → New Date API
+
+Parallel Stream   → Multi-Core Processing
+
+Predicate         → Returns Boolean
+
+Function          → Converts Input to Output
+
+Consumer          → Accepts Input
+
+Supplier          → Supplies Data
+
+collect()         → Convert Stream Result
+
+findFirst()       → First Element
+
+findAny()         → Any Matching Element
+
+
+These 20 questions (Part 1 + Part 2) cover nearly 80-90% of Java 8 interview questions commonly asked for Senior Java Developer, Spring Boot, Microservices, and Banking-domain interviews.
