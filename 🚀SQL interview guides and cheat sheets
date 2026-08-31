@@ -1,0 +1,382 @@
+🚀SQL interview guides and cheat sheets
+Sample Tables
+
+Employee
+EmpId | Name  | DeptId | Salary
+------+-------+--------+--------
+1     | John  | 10     | 50000
+2     | Mary  | 10     | 70000
+3     | Steve | 20     | 60000
+4     | Tom   | 20     | 80000
+5     | David | 30     | 90000
+
+Department
+DeptId | DeptName
+-------+----------
+10     | IT
+20     | HR
+30     | Finance
+
+1. Find All Employees
+Query
+SELECT *
+FROM Employee;
+
+Output
+EmpId | Name  | Salary
+------+-------+--------
+1     | John  | 50000
+2     | Mary  | 70000
+3     | Steve | 60000
+4     | Tom   | 80000
+5     | David | 90000
+
+2. Find Employees With Salary > 60000
+Query
+SELECT Name, Salary
+FROM Employee
+WHERE Salary > 60000;
+
+Output
+Name  | Salary
+------+--------
+Mary  | 70000
+Tom   | 80000
+David | 90000
+
+3. Find Distinct Departments
+Query
+SELECT DISTINCT DeptId
+FROM Employee;
+
+Output
+10
+20
+30
+
+
+💡 DISTINCT removes duplicate values.
+
+4. Count Employees Per Department
+Query
+SELECT DeptId,
+       COUNT(*) AS EmpCount
+FROM Employee
+GROUP BY DeptId;
+
+Output
+DeptId | EmpCount
+-------+----------
+10     | 2
+20     | 2
+30     | 1
+
+
+💡 GROUP BY groups rows before applying aggregate functions.
+
+5. Departments Having More Than 1 Employee
+Query
+SELECT DeptId,
+       COUNT(*)
+FROM Employee
+GROUP BY DeptId
+HAVING COUNT(*) > 1;
+
+Output
+DeptId
+------
+10
+20
+
+
+💡 HAVING filters groups after aggregation.
+
+6. INNER JOIN Example
+Query
+SELECT e.Name,
+       d.DeptName
+FROM Employee e
+INNER JOIN Department d
+ON e.DeptId = d.DeptId;
+
+Output
+Name  | DeptName
+------+----------
+John  | IT
+Mary  | IT
+Steve | HR
+Tom   | HR
+David | Finance
+
+
+💡 INNER JOIN returns only matching rows.
+
+7. LEFT JOIN Example
+Query
+SELECT e.Name,
+       d.DeptName
+FROM Employee e
+LEFT JOIN Department d
+ON e.DeptId = d.DeptId;
+
+Output
+Name  | DeptName
+------+----------
+John  | IT
+Mary  | IT
+Steve | HR
+Tom   | HR
+David | Finance
+
+
+💡 LEFT JOIN returns all rows from the left table.
+
+8. Average Salary Per Department
+Query
+SELECT DeptId,
+       AVG(Salary) AS AvgSalary
+FROM Employee
+GROUP BY DeptId;
+
+Output
+DeptId | AvgSalary
+-------+----------
+10     | 60000
+20     | 70000
+30     | 90000
+
+9. Employees Above Average Salary
+Query
+SELECT Name
+FROM Employee
+WHERE Salary >
+(
+    SELECT AVG(Salary)
+    FROM Employee
+);
+
+Output
+Name
+-----
+Tom
+David
+
+
+💡 Example of a Subquery.
+
+10. Highest Salary
+Query
+SELECT MAX(Salary)
+FROM Employee;
+
+Output
+90000
+
+11. Second Highest Salary
+Query
+SELECT MAX(Salary)
+FROM Employee
+WHERE Salary <
+(
+    SELECT MAX(Salary)
+    FROM Employee
+);
+
+Output
+80000
+
+12. Third Highest Salary Using ROW_NUMBER
+Query
+WITH X AS
+(
+    SELECT Salary,
+           ROW_NUMBER() OVER(ORDER BY Salary DESC) rn
+    FROM Employee
+)
+SELECT Salary
+FROM X
+WHERE rn = 3;
+
+Output
+70000
+
+
+💡 ROW_NUMBER() is a frequently asked interview topic.
+
+13. ROW_NUMBER Example
+Query
+SELECT Name,
+       Salary,
+       ROW_NUMBER() OVER(ORDER BY Salary DESC) rn
+FROM Employee;
+
+Output
+Name  | Salary | rn
+------+--------+----
+David | 90000  | 1
+Tom   | 80000  | 2
+Mary  | 70000  | 3
+Steve | 60000  | 4
+John  | 50000  | 5
+
+14. RANK Example
+Query
+SELECT Name,
+       Salary,
+       RANK() OVER(ORDER BY Salary DESC) rnk
+FROM Employee;
+
+Output
+Name  | Salary | Rank
+------+--------+------
+David | 90000  | 1
+Tom   | 80000  | 2
+Mary  | 70000  | 3
+Steve | 60000  | 4
+John  | 50000  | 5
+
+
+💡 RANK() leaves gaps when ties occur.
+
+15. Running Total
+Query
+SELECT Name,
+       Salary,
+       SUM(Salary)
+       OVER(ORDER BY Salary) AS RunningTotal
+FROM Employee;
+
+Output
+Name  | Salary | RunningTotal
+------+--------+--------------
+John  | 50000  | 50000
+Steve | 60000  | 110000
+Mary  | 70000  | 180000
+Tom   | 80000  | 260000
+David | 90000  | 350000
+
+
+💡 Running totals are common window function questions.
+
+16. Department Average Using PARTITION BY
+Query
+SELECT Name,
+       Salary,
+       AVG(Salary)
+       OVER(PARTITION BY DeptId) AS DeptAvg
+FROM Employee;
+
+Output
+Name  | Salary | DeptAvg
+------+--------+---------
+John  | 50000  | 60000
+Mary  | 70000  | 60000
+Steve | 60000  | 70000
+Tom   | 80000  | 70000
+David | 90000  | 90000
+
+
+💡 PARTITION BY calculates group metrics while keeping detail rows.
+
+17. Duplicate Records
+Query
+SELECT Email,
+       COUNT(*)
+FROM Customer
+GROUP BY Email
+HAVING COUNT(*) > 1;
+
+Output
+Duplicate Emails Found
+
+
+💡 Very common production support interview question.
+
+18. UNION vs UNION ALL
+UNION
+SELECT Name FROM Employee
+UNION
+SELECT Name FROM Customer;
+
+Output
+Duplicates Removed
+
+UNION ALL
+SELECT Name FROM Employee
+UNION ALL
+SELECT Name FROM Customer;
+
+Output
+Duplicates Retained
+
+19. Find Employees Without Department
+Query
+SELECT e.*
+FROM Employee e
+LEFT JOIN Department d
+ON e.DeptId = d.DeptId
+WHERE d.DeptId IS NULL;
+
+Output
+Unmatched Employees
+
+
+💡 Useful for data-quality and support issues.
+
+20. Top 3 Highest Salaries
+Query
+SELECT Salary
+FROM Employee
+ORDER BY Salary DESC
+FETCH FIRST 3 ROWS ONLY;
+
+Output
+90000
+80000
+70000
+
+
+💡 Modern SQL equivalent of TOP 3 / LIMIT 3.
+
+Top 5 Banking Interview SQL Questions
+Q1. Second Highest Salary
+    MAX() + Subquery
+
+Q2. Nth Highest Salary
+    ROW_NUMBER()
+
+Q3. Duplicate Records
+    GROUP BY + HAVING COUNT(*) > 1
+
+Q4. Running Total
+    SUM() OVER()
+
+Q5. Department Wise Highest Salary
+    RANK() OVER(PARTITION BY DeptId)
+
+30-Second SQL Revision
+COUNT(*)
+AVG()
+SUM()
+GROUP BY
+HAVING
+INNER JOIN
+LEFT JOIN
+RIGHT JOIN
+FULL JOIN
+UNION
+UNION ALL
+ROW_NUMBER()
+RANK()
+DENSE_RANK()
+PARTITION BY
+LAG()
+LEAD()
+CTE
+Subquery
+Nth Highest Salary
+Duplicate Records
+Running Total
+
+
+✅ For JPMC, RBC, MUFG, and other banking interviews, these SQL patterns cover approximately 80-90% of frequently asked SQL coding questions.
