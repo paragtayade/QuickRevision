@@ -1,0 +1,395 @@
+Your files contain dedicated sections on Streams API, Lambda Expressions, Functional Interfaces, Method References, Optional, Flow API, Predicate, Function, Consumer, Supplier, and Reactive Streams, making these highly relevant interview topics.
+
+🚀 Top 30 Streams, Lambda & Functional Programming Interview Questions
+1. What is a Lambda Expression?
+(a,b) -> a+b
+
+
+Answer: A lambda expression is an anonymous function introduced in Java 8 that allows behavior to be passed as data.
+
+2. Why were Lambda Expressions introduced?
+
+✅ Reduce boilerplate code
+
+✅ Functional programming support
+
+✅ Cleaner collections processing
+
+3. What is a Functional Interface?
+@FunctionalInterface
+interface Calculator {
+    int calculate(int a,int b);
+}
+
+
+A functional interface contains exactly one abstract method.
+
+4. Is @FunctionalInterface mandatory?
+
+Answer: No.
+
+It is optional but recommended.
+
+5. Name Four Built-in Functional Interfaces.
+Predicate
+Function
+Consumer
+Supplier
+
+
+Memory Trick:
+
+P-F-C-S
+
+Predicate -> Test
+Function  -> Transform
+Consumer  -> Consume
+Supplier  -> Supply
+
+6. What is Predicate?
+Predicate<Integer> even =
+    n -> n % 2 == 0;
+
+
+Used for testing conditions.
+
+Method:
+
+test()
+
+7. What is Function<T,R>?
+Function<String,Integer> length =
+    String::length;
+
+
+Used for transformations.
+
+Method:
+
+apply()
+
+8. What is Consumer?
+Consumer<String> print =
+    System.out::println;
+
+
+Consumes data.
+
+Method:
+
+accept()
+
+9. What is Supplier?
+Supplier<String> s =
+    () -> "Hello";
+
+
+Provides values.
+
+Method:
+
+get()
+
+Streams API
+10. What is Stream API?
+
+Stream API processes collections using a functional style.
+
+Supports:
+
+filter()
+map()
+reduce()
+collect()
+
+11. What is Stream Pipeline?
+list.stream()
+    .filter(...)
+    .map(...)
+    .collect(...)
+
+
+Pipeline:
+
+Source
+ ↓
+Intermediate
+ ↓
+Terminal
+
+12. Difference Between Collection and Stream?
+Collection	StreamStores Data	Processes Data
+Eager	Lazy
+Reusable	One Time
+13. What are Intermediate Operations?
+filter()
+map()
+sorted()
+distinct()
+peek()
+
+
+Lazy operations.
+
+14. What are Terminal Operations?
+collect()
+count()
+reduce()
+forEach()
+findFirst()
+
+
+Terminal operations trigger execution.
+
+15. What is filter()?
+list.stream()
+    .filter(n -> n > 10)
+
+
+Filters records.
+
+Output:
+
+Only matching elements
+
+16. What is map()?
+list.stream()
+    .map(String::toUpperCase)
+
+
+Transforms elements.
+
+a → A
+b → B
+
+17. What is flatMap()?
+list.stream()
+    .flatMap(Collection::stream)
+
+
+Flattens nested collections.
+
+Interview Favorite.
+
+18. Difference Between map() and flatMap()?
+map	flatMapOne-to-one	One-to-many
+Nested output possible	Flat output
+19. What is distinct()?
+stream.distinct()
+
+
+Removes duplicates.
+
+20. What is sorted()?
+stream.sorted()
+
+
+Ascending.
+
+stream.sorted(Comparator.reverseOrder())
+
+
+Descending.
+
+Advanced Stream Questions
+21. What is reduce()?
+int sum =
+list.stream()
+    .reduce(0,Integer::sum);
+
+
+Used for aggregation.
+
+Output:
+
+Total Sum
+
+22. What is collect()?
+List<String> names =
+stream.collect(Collectors.toList());
+
+
+Collects stream results.
+
+23. What is Collectors.groupingBy()?
+employees.stream()
+.collect(
+Collectors.groupingBy(
+Employee::getDept));
+
+
+Groups data.
+
+Interview Favorite.
+
+24. What is partitioningBy()?
+Collectors.partitioningBy(
+e -> e.getSalary() > 50000)
+
+
+Produces:
+
+true
+false
+
+
+groups.
+
+25. How to Find Max Salary Using Streams?
+employees.stream()
+.max(
+Comparator.comparing(
+Employee::getSalary));
+
+
+Very common coding question.
+
+26. How to Find Duplicate Elements?
+list.stream()
+
+.collect(Collectors.groupingBy(
+Function.identity(),
+Collectors.counting()))
+
+.entrySet()
+.stream()
+
+.filter(e -> e.getValue() > 1)
+
+
+Banking Interview Favorite.
+
+27. How to Convert List to Map?
+employees.stream()
+
+.collect(Collectors.toMap(
+Employee::getId,
+Employee::getName));
+
+
+Frequently asked.
+
+28. What is Parallel Stream?
+list.parallelStream()
+
+
+Uses ForkJoinPool.
+
+Benefits:
+
+✅ Multi-core processing
+
+Risks:
+
+❌ Ordering issues
+
+❌ Synchronization overhead
+
+29. Difference Between stream() and parallelStream()?
+stream	parallelStreamSingle Thread	Multi Thread
+Predictable	Faster for large data
+Ordered	May affect ordering
+30. What is Method Reference?
+names.forEach(
+System.out::println);
+
+
+Shorthand for lambda.
+
+Instead of:
+
+x -> System.out.println(x)
+
+
+Use:
+
+System.out::println
+
+
+Method references are specifically highlighted in your Java cheat sheets.
+
+⭐ Top 5 Coding Questions
+Reverse String
+String reverse =
+Arrays.stream(str.split(""))
+      .reduce("",
+      (a,b)->b+a);
+
+Sum Of Numbers
+int sum =
+list.stream()
+    .mapToInt(Integer::intValue)
+    .sum();
+
+Find Duplicate Elements
+Collectors.groupingBy(
+Function.identity(),
+Collectors.counting())
+
+Group Employees By Department
+Collectors.groupingBy(
+Employee::getDept)
+
+Highest Salary Employee
+max(Comparator.comparing(
+Employee::getSalary))
+
+🧠 30-Second Revision
+Lambda
+→ Anonymous Function
+
+Functional Interface
+→ One Abstract Method
+
+Predicate
+→ Test
+
+Function
+→ Transform
+
+Consumer
+→ Consume
+
+Supplier
+→ Supply
+
+filter()
+→ Select
+
+map()
+→ Transform
+
+flatMap()
+→ Flatten
+
+reduce()
+→ Aggregate
+
+collect()
+→ Collect
+
+groupingBy()
+→ Group
+
+parallelStream()
+→ Multi-thread
+
+Method Reference
+→ ::
+
+
+Most asked for 13+ years Senior Java interviews:
+
+✅ Functional Interface
+ ✅ Predicate / Function / Consumer / Supplier
+ ✅ filter()
+ ✅ map()
+ ✅ flatMap()
+ ✅ reduce()
+ ✅ collect()
+ ✅ groupingBy()
+ ✅ Duplicate Elements using Streams
+ ✅ Max Salary using Streams
+ ✅ List → Map Conversion
+ ✅ Parallel Streams
+ ✅ Method References
