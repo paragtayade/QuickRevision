@@ -1,0 +1,472 @@
+🚀 Top 10 Spring Boot Deployment Configurations for Kubernetes & AWS ECS
+
+Senior Java Developer Interview Revision Sheet
+☸️ Kubernetes Deployment Configurations
+1. Deployment
+
+Purpose: Deploy and manage Spring Boot Pods.
+
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  name: springboot-app
+
+spec:
+  replicas: 2
+
+
+✅ Features:
+
+Creates Pods
+Self Healing
+Rolling Updates
+Scaling
+2. Service
+
+Purpose: Expose Spring Boot application inside/outside the cluster.
+
+apiVersion: v1
+
+kind: Service
+
+spec:
+  selector:
+    app: springboot-app
+
+  ports:
+    - port: 80
+      targetPort: 8080
+
+Flow
+Client
+  ↓
+Service
+  ↓
+Pods
+
+3. ConfigMap
+
+Purpose: Store environment-specific configuration.
+
+envFrom:
+  - configMapRef:
+      name: app-config
+
+Examples
+Database URL
+API URLs
+Feature Flags
+
+❌ Not for passwords
+
+4. Secret
+
+Purpose: Store sensitive configuration.
+
+env:
+  - name: DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: db-secret
+        key: password
+
+Examples
+Passwords
+API Keys
+Certificates
+JWT Secrets
+5. Resource Requests & Limits
+
+Purpose: Prevent resource starvation.
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "512Mi"
+
+  limits:
+    cpu: "500m"
+    memory: "1Gi"
+
+Interview Answer
+Requests = Minimum guaranteed resources
+
+Limits = Maximum permitted resources
+
+6. Readiness Probe
+
+Purpose: Checks whether application can serve traffic.
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+
+If Probe Fails
+Pod remains running
+
+Traffic is stopped
+
+7. Liveness Probe
+
+Purpose: Checks whether application is alive.
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+
+If Probe Fails
+Pod restarted automatically
+
+8. Ingress
+
+Purpose: Expose application through URL.
+
+apiVersion: networking.k8s.io/v1
+
+kind: Ingress
+
+spec:
+  rules:
+    - host: api.bank.com
+
+Flow
+Internet
+   ↓
+Ingress
+   ↓
+Service
+   ↓
+Pods
+
+9. Horizontal Pod Autoscaler (HPA)
+
+Purpose: Auto-scale Pods.
+
+apiVersion: autoscaling/v2
+
+kind: HorizontalPodAutoscaler
+
+spec:
+  minReplicas: 2
+  maxReplicas: 10
+
+Example
+CPU > 70%
+
+2 Pods
+   ↓
+10 Pods
+
+10. Persistent Volume Claim (PVC)
+
+Purpose: Persistent Storage.
+
+volumes:
+  - name: app-storage
+
+    persistentVolumeClaim:
+      claimName: app-pvc
+
+Used For
+Logs
+Files
+Uploads
+🏆 Most Asked Full Kubernetes Deployment YAML
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  name: springboot-app
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: springboot-app
+
+  template:
+
+    metadata:
+      labels:
+        app: springboot-app
+
+    spec:
+
+      containers:
+
+        - name: springboot-app
+
+          image: myrepo/springboot:1.0
+
+          ports:
+            - containerPort: 8080
+
+          envFrom:
+            - configMapRef:
+                name: app-config
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+
+☁️ AWS ECS Deployment Configurations
+1. ECS Cluster
+
+Purpose: Logical group of ECS Services.
+
+ECS Cluster
+├── Payment Service
+├── Customer Service
+└── Notification Service
+
+2. ECS Service
+
+Purpose: Maintains desired number of Tasks.
+
+Desired Count = 2
+
+If one Task crashes:
+  ↓
+Automatically recreated
+
+3. ECS Task Definition
+
+Purpose: Blueprint of container.
+
+Contains
+Docker Image
+CPU
+Memory
+Ports
+Environment Variables
+IAM Roles
+4. ECS Execution Role
+
+Used By: ECS Runtime
+
+Allows
+Pull Images from ECR
+Send Logs to CloudWatch
+5. ECS Task Role
+
+Used By: Application
+
+Allows Access To
+S3
+SNS
+SQS
+Secrets Manager
+Parameter Store
+6. Amazon ECR
+
+Purpose: Docker Image Repository
+
+docker build -t springboot-app .
+
+docker push <ecr-url>
+
+7. Application Load Balancer (ALB)
+
+Purpose: Routes traffic to healthy tasks.
+
+Flow
+User
+ ↓
+ALB
+ ↓
+ECS Tasks
+
+Supports
+SSL
+Path Routing
+Health Checks
+8. CloudWatch Logs
+
+Purpose: Centralized Logging
+
+Spring Boot Logs
+        ↓
+CloudWatch
+
+Sample Configuration
+{
+  "logConfiguration": {
+    "logDriver": "awslogs"
+  }
+}
+
+9. Secrets Manager
+
+Purpose: Store sensitive credentials.
+
+Stores
+Database Passwords
+API Tokens
+Certificates
+Never Store In
+application.yml
+Dockerfile
+GitHub
+
+10. ECS Auto Scaling
+
+Purpose: Auto-scale Tasks.
+
+Example
+CPU > 70%
+
+2 Tasks
+   ↓
+10 Tasks
+
+Configured Using
+CloudWatch Alarms
+Target Tracking
+🏆 Most Asked ECS Task Definition
+{
+  "family": "springboot-task",
+
+  "networkMode": "awsvpc",
+
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+
+  "cpu": "512",
+
+  "memory": "1024",
+
+  "containerDefinitions": [
+    {
+      "name": "springboot-app",
+
+      "image": "ecr-url/springboot:latest",
+
+      "portMappings": [
+        {
+          "containerPort": 8080
+        }
+      ],
+
+      "environment": [
+        {
+          "name": "SPRING_PROFILES_ACTIVE",
+          "value": "prod"
+        }
+      ]
+    }
+  ]
+}
+
+🎯 Complete ECS Deployment Flow
+Spring Boot App
+        ↓
+Maven Package
+        ↓
+Docker Build
+        ↓
+Docker Image
+        ↓
+Push to ECR
+        ↓
+ECS Task Definition
+        ↓
+ECS Service
+        ↓
+ALB
+        ↓
+CloudWatch
+        ↓
+Production
+
+⭐ Top 10 Interview One-Liners
+Deployment           → Manages Pods
+Service              → Exposes Pods
+ConfigMap            → Non-sensitive config
+Secret               → Sensitive config
+Readiness Probe      → Can receive traffic?
+Liveness Probe       → Is app alive?
+HPA                  → Auto scales Pods
+ECS Task Definition  → Blueprint of container
+ECS Service          → Maintains task count
+ALB                  → Routes traffic to healthy tasks
+
+🧠 30-Second Interview Revision
+Kubernetes
+Deployment
+Service
+ConfigMap
+Secret
+Ingress
+PVC
+Readiness Probe
+Liveness Probe
+Resources (CPU/Memory)
+HPA
+
+AWS ECS
+ECR
+Task Definition
+Task Role
+Execution Role
+Service
+Cluster
+ALB
+CloudWatch
+Secrets Manager
+Auto Scaling
+
+🎯 Senior Java Developer Interview Memory Trick
+Kubernetes
+
+D S C S R L I H P R
+
+Deployment
+Service
+ConfigMap
+Secret
+Readiness
+Liveness
+Ingress
+HPA
+PVC
+Resources
+
+AWS ECS
+
+C S T E T E A C S A
+
+Cluster
+Service
+Task Definition
+Execution Role
+Task Role
+ECR
+ALB
+CloudWatch
+Secrets Manager
+Auto Scaling
+
+
+✅ This cheat sheet covers the most frequently asked Kubernetes and AWS ECS deployment concepts for Spring Boot, Microservices, Docker, Kubernetes, ECS/Fargate, and Banking Domain interviews (JPMC, RBC, MUFG, Cognizant projects).
