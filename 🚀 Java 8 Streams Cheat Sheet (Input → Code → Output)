@@ -1,423 +1,328 @@
-🚀 Java 8 Streams Cheat Sheet (Input → Code → Output)
-Most Asked Programming Questions in Interviews
-1. Filter Even Numbers
-Input
-[1,2,3,4,5,6]
-
-Code
+🚀 Java 8 Programming Interview Questions (Text Format)
+Fast Revision | Question → Code
+Filter Even Numbers
 list.stream()
     .filter(n -> n % 2 == 0)
     .toList();
 
-Output
-[2,4,6]
-
-2. Filter Odd Numbers
-Input
-[1,2,3,4,5,6]
-
-Code
+Filter Odd Numbers
 list.stream()
     .filter(n -> n % 2 != 0)
     .toList();
 
-Output
-[1,3,5]
-
-3. Convert to Uppercase
-Input
-["john","mary"]
-
-Code
+Convert to Uppercase
 names.stream()
      .map(String::toUpperCase)
      .toList();
 
-Output
-["JOHN","MARY"]
+Convert to Lowercase
+names.stream()
+     .map(String::toLowerCase)
+     .toList();
 
-4. Convert to Lowercase
-Input
-["JOHN","MARY"]
-
-Output
-["john","mary"]
-
-5. Sum of Numbers
-Input
-[10,20,30]
-
-Code
+Sum of Numbers
 list.stream()
     .mapToInt(Integer::intValue)
     .sum();
 
-Output
-60
-
-6. Average of Numbers
-Input
-[10,20,30]
-
-Code
+Average of Numbers
 list.stream()
     .mapToInt(Integer::intValue)
     .average();
 
-Output
-20.0
-
-7. Maximum Number
-Input
-[5,2,9,4]
-
-Output
-9
-
-8. Minimum Number
-Input
-[5,2,9,4]
-
-Output
-2
-
-9. Count Elements
-Input
-[10,20,30,40]
-
-Output
-4
-
-10. Remove Duplicates
-Input
-[1,2,2,3,3,4]
-
-Output
-[1,2,3,4]
-
-11. Sort Ascending
-Input
-[5,3,9,1]
-
-Output
-[1,3,5,9]
-
-12. Sort Descending
-Input
-[5,3,9,1]
-
-Output
-[9,5,3,1]
-
-13. First Element
-Input
-[10,20,30]
-
-Output
-10
-
-14. Any Match
-Input
-[10,20,30]
-
-Code
-anyMatch(n -> n > 25)
-
-Output
-true
-
-15. All Match
-Input
-[10,20,30]
-
-Code
-allMatch(n -> n > 0)
-
-Output
-true
-
-16. None Match
-Input
-[10,20,30]
-
-Code
-noneMatch(n -> n < 0)
-
-Output
-true
-
-17. Skip First 2 Elements
-Input
-[1,2,3,4,5]
-
-Output
-[3,4,5]
-
-18. Limit First 3 Elements
-Input
-[1,2,3,4,5]
-
-Output
-[1,2,3]
-
-19. Join Strings
-Input
-["A","B","C"]
-
-Output
-A,B,C
-
-20. Convert List to Set
-Input
-[1,2,2,3]
-
-Output
-[1,2,3]
-
-21. Group Employees by Department
-Input
-John  IT
-Mary  IT
-Tom   HR
-
-Code
-Collectors.groupingBy(Employee::getDept)
-
-Output
-{
- IT=[John,Mary],
- HR=[Tom]
-}
-
-22. Partition By Salary
-Input
-John 40000
-Mary 70000
-Tom  90000
-
-Code
-partitioningBy(e -> e.getSalary()>50000)
-
-Output
-true=[Mary,Tom]
-
-false=[John]
-
-23. Highest Salary Employee
-Input
-John 50000
-Mary 70000
-David 90000
-
-Output
-David
-
-24. Lowest Salary Employee
-Input
-John 50000
-Mary 70000
-David 90000
-
-Output
-John
-
-25. Second Highest Number
-Input
-[10,5,20,40,30]
-
-Output
-30
-
-26. Third Highest Number
-Input
-[10,5,20,40,30]
-
-Output
-20
-
-27. Find Duplicate Elements
-Input
-[1,2,2,3,4,4,5]
-
-Output
-[2,4]
-
-28. Find Unique Elements
-Input
-[1,2,2,3,4,4,5]
-
-Output
-[1,3,5]
-
-29. Frequency Of Elements
-Input
-[1,2,2,3,3,3]
-
-Output
-{
-1=1,
-2=2,
-3=3
-}
-
-30. Longest String
-Input
-["Java","SpringBoot","AWS"]
-
-Output
-SpringBoot
-
-31. Shortest String
-Input
-["Java","SpringBoot","AWS"]
-
-Output
-AWS
-
-32. Sum Employee Salary
-Input
-50000
-70000
-90000
-
-Output
-210000
-
-33. Extract Employee Names
-Input
-John
-Mary
-Tom
-
-Output
-[John,Mary,Tom]
-
-34. Flatten Nested Lists
-Input
-[[1,2],[3,4],[5,6]]
-
-Output
-[1,2,3,4,5,6]
-
-35. Count Words
-Input
-"Java Spring Boot AWS"
-
-Output
-4
-
-36. Reverse String
-Input
-JAVA
-
-Output
-AVAJ
-
-37. Palindrome Check
-Input
-MADAM
-
-Output
-true
-
-38. Count Vowels
-Input
-"HELLO"
-
-Output
-2
-
-39. Remove Null Values
-Input
-[1,null,2,null,3]
-
-Output
-[1,2,3]
-
-40. Row-wise Sum Of Two Lists
-Input
-List1=[1,2,5]
-
-List2=[6,4,3]
-
-Code
-IntStream.range(0,list1.size())
-         .mapToObj(i ->
-            list1.get(i)+list2.get(i))
+Maximum Number
+list.stream()
+    .max(Integer::compareTo)
+    .get();
+
+Minimum Number
+list.stream()
+    .min(Integer::compareTo)
+    .get();
+
+Count Elements
+list.stream()
+    .count();
+
+Remove Duplicates
+list.stream()
+    .distinct()
+    .toList();
+
+Sort Ascending
+list.stream()
+    .sorted()
+    .toList();
+
+Sort Descending
+list.stream()
+    .sorted(Comparator.reverseOrder())
+    .toList();
+
+Get First Element
+list.stream()
+    .findFirst()
+    .get();
+
+Check Any Match
+list.stream()
+    .anyMatch(n -> n > 50);
+
+Check All Match
+list.stream()
+    .allMatch(n -> n > 0);
+
+Check None Match
+list.stream()
+    .noneMatch(n -> n < 0);
+
+Skip First 2 Elements
+list.stream()
+    .skip(2)
+    .toList();
+
+Get First 3 Elements
+list.stream()
+    .limit(3)
+    .toList();
+
+Sort String By Length
+names.stream()
+     .sorted(Comparator.comparing(String::length))
+     .toList();
+
+Join Strings
+names.stream()
+     .collect(Collectors.joining(","));
+
+Convert List To Set
+list.stream()
+    .collect(Collectors.toSet());
+
+Convert List To Map
+employees.stream()
+         .collect(Collectors.toMap(
+             Employee::getId,
+             Employee::getName));
+
+Group Employees By Department
+employees.stream()
+         .collect(Collectors.groupingBy(
+             Employee::getDept));
+
+Partition Employees By Salary
+employees.stream()
+         .collect(Collectors.partitioningBy(
+             e -> e.getSalary() > 50000));
+
+Highest Salary Employee
+employees.stream()
+         .max(Comparator.comparing(
+             Employee::getSalary))
+         .get();
+
+Lowest Salary Employee
+employees.stream()
+         .min(Comparator.comparing(
+             Employee::getSalary))
+         .get();
+
+Second Highest Number
+list.stream()
+    .sorted(Comparator.reverseOrder())
+    .skip(1)
+    .findFirst();
+
+Third Highest Number
+list.stream()
+    .sorted(Comparator.reverseOrder())
+    .skip(2)
+    .findFirst();
+
+Nth Highest Number
+list.stream()
+    .sorted(Comparator.reverseOrder())
+    .skip(n - 1)
+    .findFirst();
+
+Find Duplicate Elements
+Set<Integer> set = new HashSet<>();
+
+list.stream()
+    .filter(n -> !set.add(n))
+    .toList();
+
+Find Unique Elements
+list.stream()
+    .filter(n ->
+      Collections.frequency(list,n)==1)
+    .toList();
+
+Frequency Of Elements
+list.stream()
+    .collect(Collectors.groupingBy(
+        Function.identity(),
+        Collectors.counting()));
+
+Longest String
+names.stream()
+     .max(Comparator.comparing(
+        String::length));
+
+Shortest String
+names.stream()
+     .min(Comparator.comparing(
+        String::length));
+
+Sum Employee Salaries
+employees.stream()
+         .mapToDouble(
+            Employee::getSalary)
+         .sum();
+
+Average Employee Salary
+employees.stream()
+         .collect(
+           Collectors.averagingDouble(
+           Employee::getSalary));
+
+Extract Employee Names
+employees.stream()
+         .map(Employee::getName)
          .toList();
 
-Output
-[7,6,8]
+Employee Names To Uppercase
+employees.stream()
+         .map(e ->
+          e.getName().toUpperCase())
+         .toList();
 
-Functional Interface Examples
+Flatten Nested Lists
+lists.stream()
+     .flatMap(List::stream)
+     .toList();
+
+Count Words In String
+Arrays.stream(str.split(" "))
+      .count();
+
+Count Characters
+str.chars()
+   .count();
+
+Array To List
+Arrays.stream(arr)
+      .toList();
+
+List To Array
+list.toArray(String[]::new);
+
+Reverse String
+new StringBuilder(str)
+    .reverse()
+    .toString();
+
+Palindrome Check
+str.equals(
+new StringBuilder(str)
+.reverse()
+.toString());
+
+Count Vowels
+str.chars()
+   .filter(c ->
+      "aeiou".indexOf(c) >= 0)
+   .count();
+
+Remove Null Values
+list.stream()
+    .filter(Objects::nonNull)
+    .toList();
+
+Method Reference
+names.forEach(
+    System.out::println);
+
+Parallel Stream
+list.parallelStream()
+    .forEach(System.out::println);
+
+Reduce For Sum
+list.stream()
+    .reduce(0,
+       Integer::sum);
+
+Reduce For Product
+list.stream()
+    .reduce(1,
+      (a,b)->a*b);
+
+Functional Interface Questions
 Predicate
-Input
-10
+Predicate<Integer> even =
+    n -> n % 2 == 0;
 
-Code
-Predicate<Integer> p =
-      n -> n%2==0;
-
-p.test(10);
-
-Output
-true
+even.test(10);
 
 Function
-Input
-"Java"
+Function<String,Integer> len =
+    String::length;
 
-Output
-4
+len.apply("Java");
 
 Consumer
-Input
-"Hello"
+Consumer<String> print =
+    System.out::println;
 
-Output
-Hello
+print.accept("Hello");
 
 Supplier
-Input
-No Input
+Supplier<String> s =
+    () -> "Java";
 
-Output
-Java
+s.get();
 
 BiFunction
-Input
-5,3
+BiFunction<Integer,Integer,Integer> add =
+    (a,b) -> a+b;
 
-Output
-8
+add.apply(5,3);
 
-⭐ Top 10 Most Asked Stream Programs
+BinaryOperator
+BinaryOperator<Integer> add =
+    (a,b) -> a+b;
+
+UnaryOperator
+UnaryOperator<String> upper =
+    s -> s.toUpperCase();
+
+⭐ Top 10 Most Asked Programs
 1. Duplicate Elements
 2. Second Highest Number
 3. Nth Highest Number
 4. Highest Salary Employee
 5. Group By Department
-6. Frequency Count
-7. List → Map
+6. Count Frequency
+7. List To Map
 8. Flatten List
-9. Sum of Numbers
+9. Sum Of Numbers
 10. Predicate / Function / Consumer / Supplier
 
-🧠 Ultimate Memory Trick
-filter()      → Select
-map()         → Transform
-flatMap()     → Flatten
-reduce()      → Aggregate
-collect()     → Collect
-groupingBy()  → Group
-toMap()       → Convert
-distinct()    → Remove Duplicates
-sorted()      → Sort
+🧠 One-Line Memory Trick
+filter      → Select
+map         → Transform
+flatMap     → Flatten
+reduce      → Aggregate
+collect     → Convert
+groupingBy  → Group
+toMap       → Map
+distinct    → Remove Duplicates
+sorted      → Sort
 
-Predicate     → Test
-Function      → Transform
-Consumer      → Use
-Supplier      → Provide
+Predicate   → Test
+Function    → Transform
+Consumer    → Use
+Supplier    → Provide
 
 
-This set covers most Java 8 Streams/Lambda coding questions typically asked in Senior Java, Spring Boot, Microservices, and Banking interviews.
+These are the most common Java 8 coding patterns typically asked in Senior Java, Spring Boot, Microservices, and Banking domain interviews.
