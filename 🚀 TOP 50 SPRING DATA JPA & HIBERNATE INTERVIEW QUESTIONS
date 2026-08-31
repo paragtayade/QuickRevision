@@ -1,115 +1,295 @@
-🚀 TOP 50 SPRING DATA JPA & HIBERNATE INTERVIEW QUESTIONS
-Senior Java Developer | Banking Domain | Quick Revision Sheet
+🚀 SPRING DATA JPA & HIBERNATE
+DETAILED EXPLANATION (PART 1 : QUESTIONS 1-25)
+
+Senior Java Developer | Banking Domain | Interview Deep Dive
 
 ═══════════════════════════════════════════════════════════════
-PART 1 : CORE CONCEPTS
+1. WHAT IS ORM (OBJECT RELATIONAL MAPPING)?
 ═══════════════════════════════════════════════════════════════
 
-1. WHAT IS ORM?
+Definition
 
-Answer:
+    ORM is a technique that maps Java Objects to
+    Database Tables automatically.
 
-    ORM = Object Relational Mapping
+Mapping
 
-Mapping:
+    Java Class
+        ↓
+    Database Table
 
-    Java Class      → Database Table
-    Java Object     → Table Row
-    Java Field      → Column
-    Relationship    → Foreign Key
+    Java Object
+        ↓
+    Database Row
 
-Example:
+    Java Variable
+        ↓
+    Database Column
 
-    @Entity
+    Java Relationship
+        ↓
+    Foreign Key
+
+Example
+
     public class Account {
 
-        @Id
         private Long id;
-
-        private String accountNumber;
+        private BigDecimal balance;
     }
 
-When To Use:
+Table
 
-    Use ORM when working with relational databases
-    using Java objects instead of JDBC.
+    ACCOUNT
 
-───────────────────────────────────────────────────────────────
+    ID      BALANCE
+    1       1000
 
+Without ORM
+
+    Connection con =
+            DriverManager.getConnection(...);
+
+    PreparedStatement ps =
+            con.prepareStatement(
+            "select * from account"
+            );
+
+Lots of JDBC code.
+
+With ORM
+
+    Account account =
+        accountRepository.findById(1L)
+                         .orElseThrow();
+
+Hibernate generates SQL automatically.
+
+Advantages
+
+    • Less Code
+    • Better Maintainability
+    • Object Oriented Programming
+    • Automatic Relationship Handling
+    • DB Independence
+
+Banking Example
+
+    Account
+         ↓
+    Transaction
+         ↓
+    Customer
+
+All mapped as Java Objects.
+
+Interview Question
+
+    Why ORM?
+
+Answer
+
+    Eliminates repetitive JDBC code and
+    improves productivity.
+
+═══════════════════════════════════════════════════════════════
 2. WHAT IS JPA?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Definition
 
-    JPA (Jakarta Persistence API)
-    is a specification.
+    JPA =
+    Jakarta Persistence API
 
-Defines:
+Important
 
-    • @Entity
-    • @Table
-    • @Id
-    • EntityManager
-    • Query APIs
+    JPA is NOT an implementation.
 
-Important:
+    JPA is only a specification.
 
-    JPA Defines Rules
+Think Like This
 
-    Hibernate Implements Rules
+    JPA
+        ↓
+    Rules
 
-───────────────────────────────────────────────────────────────
+    Hibernate
+        ↓
+    Implementation
 
+Example
+
+    @Entity
+    @Table
+    @OneToMany
+
+All come from JPA.
+
+Important Interfaces
+
+    EntityManager
+    EntityTransaction
+    Query
+    TypedQuery
+
+Without JPA
+
+    Every ORM framework would use
+    different APIs.
+
+With JPA
+
+    Common API for all providers.
+
+Examples
+
+    Hibernate
+    EclipseLink
+    OpenJPA
+
+All follow JPA standard.
+
+Interview One-Liner
+
+    JPA defines WHAT should happen.
+
+═══════════════════════════════════════════════════════════════
 3. WHAT IS HIBERNATE?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Definition
 
-    Hibernate is an ORM Framework
-    and JPA Implementation.
+    Hibernate is:
 
-Features:
+        ORM Framework
+            +
+        JPA Provider
 
-    • ORM
+Responsibilities
+
+    • Object Mapping
     • SQL Generation
+    • Cache Management
     • Lazy Loading
     • Dirty Checking
-    • Caching
-    • HQL
-    • Batch Processing
+    • Transaction Integration
 
-───────────────────────────────────────────────────────────────
+Code
 
+    accountRepository.save(account);
+
+Hibernate Internally Generates
+
+    INSERT INTO ACCOUNT
+    VALUES (...);
+
+Features
+
+    First Level Cache
+
+    Second Level Cache
+
+    HQL
+
+    Criteria API
+
+    Batch Processing
+
+    Fetch Strategy Management
+
+Banking Example
+
+    Transfer Money
+
+         ↓
+
+    Debit Account
+
+         ↓
+
+    Credit Account
+
+         ↓
+
+    Save Transaction
+
+Hibernate automatically generates SQL.
+
+Interview Question
+
+    Why Hibernate is popular?
+
+Answer
+
+    Powerful ORM, caching, performance
+    optimization and JPA support.
+
+═══════════════════════════════════════════════════════════════
 4. WHAT IS SPRING DATA JPA?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Definition
 
-    Repository layer built over JPA.
+    Spring Data JPA sits above Hibernate.
 
-Example:
+Architecture
+
+    Spring Boot
+
+         ↓
+
+    Spring Data JPA
+
+         ↓
+
+    Hibernate
+
+         ↓
+
+    Database
+
+Repository Example
 
     public interface AccountRepository
-           extends JpaRepository<
-               Account,
-               Long> {
+         extends JpaRepository<
+             Account,
+             Long> {
     }
 
-Built-in Methods:
+Immediately Available Methods
 
     save()
+
     findById()
+
     findAll()
-    deleteById()
+
+    delete()
+
     count()
 
-Benefits:
+    existsById()
 
-    • Less Boilerplate
-    • Easy CRUD
-    • Pagination
-    • Sorting
+Benefits
 
-───────────────────────────────────────────────────────────────
+    No DAO implementation
 
+    No EntityManager handling
+
+    No Boilerplate
+
+Interview Question
+
+    What problem does Spring Data JPA solve?
+
+Answer
+
+    Repository pattern implementation
+    without writing DAO code.
+
+═══════════════════════════════════════════════════════════════
 5. JPA vs HIBERNATE vs SPRING DATA JPA
+═══════════════════════════════════════════════════════════════
 
 JPA
 
@@ -117,843 +297,515 @@ JPA
 
 Hibernate
 
-    ORM & JPA Provider
+    Implementation
 
 Spring Data JPA
 
-    Repository Abstraction
+    Repository Layer
 
-Interview Answer:
+Real Example
 
-    JPA → Defines
+Using JPA
 
-    Hibernate → Implements
+    entityManager.find(
+        Account.class,
+        1L
+    );
 
-    Spring Data JPA → Simplifies
+Using Spring Data JPA
+
+    repository.findById(1L);
+
+Interview Diagram
+
+    Spring Boot
+          ↓
+    Spring Data JPA
+          ↓
+    Hibernate
+          ↓
+    Database
+
+Important Interview Question
+
+    Can Spring Data JPA work without Hibernate?
+
+Answer
+
+    Yes
+
+    It can use EclipseLink or
+    another JPA provider.
 
 ═══════════════════════════════════════════════════════════════
-PART 2 : ENTITY MAPPING
-═══════════════════════════════════════════════════════════════
-
 6. WHAT IS @Entity?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Purpose
 
-    Marks Class As Persistent Entity.
+    Marks class as persistent object.
 
-Example:
+Example
 
     @Entity
-    public class Customer {
+    public class Account {
 
         @Id
         private Long id;
     }
 
-Requirements:
+Result
 
-    • Primary Key Required
-    • No-Arg Constructor
-    • Non Final Class
+    ACCOUNT table
 
-───────────────────────────────────────────────────────────────
+Common Rules
 
+    Must Have:
+
+        Primary Key
+
+    Must Have:
+
+        Default Constructor
+
+    Should Not Be:
+
+        Final Class
+
+Lifecycle
+
+    Create Object
+          ↓
+    Persist Object
+          ↓
+    Database Row Created
+
+Interview Question
+
+    Is @Entity mandatory?
+
+Answer
+
+    Yes
+
+    Otherwise Hibernate ignores class.
+
+═══════════════════════════════════════════════════════════════
 7. WHAT IS @Table?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Purpose
 
-    Maps Entity To Table.
+    Maps entity to custom table.
 
-Example:
+Example
 
-    @Table(name = "accounts")
+    @Table(
+       name="bank_accounts"
+    )
 
-Used For:
+Default Behavior
 
-    Custom Table Names
+    Account
+
+         ↓
+
+    ACCOUNT
+
+Why Use @Table?
+
+    Custom Names
+
     Unique Constraints
+
     Indexes
 
-───────────────────────────────────────────────────────────────
+Example
 
+    @Table(
+      indexes = {
+         @Index(
+            columnList =
+               "accountNumber"
+         )
+      }
+    )
+
+Banking Example
+
+    ACCOUNT
+
+    TRANSACTION
+
+    CUSTOMER
+
+Custom naming standards.
+
+═══════════════════════════════════════════════════════════════
 8. WHAT IS @Column?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Purpose
 
-    Maps Field To Column.
+    Defines column properties.
 
-Example:
+Example
 
     @Column(
         nullable = false,
-        length = 50
+        unique = true,
+        length = 20
     )
-    private String name;
 
-───────────────────────────────────────────────────────────────
+Controls
 
+    Column Name
+
+    Length
+
+    Nullable
+
+    Precision
+
+    Scale
+
+Example
+
+    @Column(
+        precision = 19,
+        scale = 2
+    )
+    private BigDecimal balance;
+
+Interview Question
+
+    Why precision and scale?
+
+Answer
+
+    Monetary values require
+    exact decimal storage.
+
+═══════════════════════════════════════════════════════════════
 9. WHAT IS @Id?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Purpose
 
-    Defines Primary Key.
+    Primary Key
 
-Example:
+Example
 
     @Id
     private Long id;
 
-───────────────────────────────────────────────────────────────
+Importance
 
+    Every entity MUST have ID.
+
+Why?
+
+    Hibernate tracks entities
+    using ID.
+
+Without ID
+
+    Persistence not possible.
+
+═══════════════════════════════════════════════════════════════
 10. WHAT IS @GeneratedValue?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Purpose
 
-    Auto Generates Primary Key.
+    Auto-generates IDs.
 
-Strategies:
+Example
+
+    @GeneratedValue(
+       strategy=
+       GenerationType.IDENTITY
+    )
+
+Strategies
 
     IDENTITY
+
+        DB generates ID.
+
     SEQUENCE
+
+        Uses Sequence.
+
     AUTO
+
+        Hibernate decides.
+
     TABLE
 
-Preferred:
+        Separate table.
+
+Interview Favorite
+
+    Which is best?
+
+Answer
 
     SEQUENCE
 
-───────────────────────────────────────────────────────────────
+Reason
 
+    Supports Batching.
+
+═══════════════════════════════════════════════════════════════
 11. WHAT IS @SequenceGenerator?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Definition
 
-    Generates IDs Using DB Sequence.
+    Creates IDs from sequence.
 
-Example:
+Example
 
     @SequenceGenerator(
-        name="txn_seq",
-        sequenceName="txn_seq"
+
+       name="acc_seq",
+
+       sequenceName=
+           "account_seq",
+
+       allocationSize=50
     )
 
-───────────────────────────────────────────────────────────────
+Benefits
 
+    Faster Inserts
+
+    Works Well With Batch Processing
+
+Banking Example
+
+    Millions of Transactions
+
+Need Efficient ID Generation.
+
+═══════════════════════════════════════════════════════════════
 12. WHAT IS @Transient?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Purpose
 
-    Excludes Field From Database.
+    Field not saved in database.
 
-Example:
+Example
 
     @Transient
-    private BigDecimal availableBalance;
+    private BigDecimal
+        availableBalance;
 
-───────────────────────────────────────────────────────────────
+Calculation
 
+    Balance = 10000
+
+    Hold Amount = 2000
+
+    Available Balance = 8000
+
+No database column needed.
+
+Interview Question
+
+    Difference from transient?
+
+Answer
+
+    @Transient
+        Ignored by JPA
+
+    transient
+        Ignored by Serialization
+
+═══════════════════════════════════════════════════════════════
 13. WHAT IS @Enumerated?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Purpose
 
-    Maps Enum To Database.
+    Store Enum Values
 
-Example:
+Enum
+
+    ACTIVE
+    BLOCKED
+    CLOSED
+
+Mapping
 
     @Enumerated(
-        EnumType.STRING
+       EnumType.STRING
     )
 
-Recommendation:
+Database Stores
 
-    Always Use STRING
+    ACTIVE
 
-    Avoid ORDINAL
+Not
 
-───────────────────────────────────────────────────────────────
+    0
 
+Reason
+
+    Future Safe
+
+If New Enum Added
+
+    STRING works
+
+    ORDINAL breaks
+
+Interview Tip
+
+    Always use STRING.
+
+═══════════════════════════════════════════════════════════════
 14. WHAT IS @Embeddable?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Purpose
 
-    Reusable Value Object.
+    Reusable Value Object
 
-Example:
+Example
 
-    @Embeddable
-    public class Address {
-    }
+    Address
 
-───────────────────────────────────────────────────────────────
+        City
 
+        State
+
+        Zip
+
+No Separate Table.
+
+Used As Component.
+
+Common Examples
+
+    Address
+
+    AuditInfo
+
+    Money
+
+═══════════════════════════════════════════════════════════════
 15. WHAT IS @Embedded?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Purpose
 
-    Embed Value Object In Entity.
+    Embed Object Inside Entity.
 
-Example:
+Example
 
     @Embedded
     private Address address;
 
-───────────────────────────────────────────────────────────────
+Database
 
+    CUSTOMER
+
+    CITY
+
+    STATE
+
+    ZIP
+
+Fields flattened into same table.
+
+Interview Question
+
+    Why use Embedded?
+
+Answer
+
+    Code Reusability.
+
+═══════════════════════════════════════════════════════════════
 16. WHAT IS AttributeConverter?
+═══════════════════════════════════════════════════════════════
 
-Answer:
+Purpose
 
-    Converts Java Type ↔ DB Type.
+    Convert Java Value
+           ↔
+      Database Value
 
-Example:
+Example
 
-    Boolean ↔ Y/N
+    true
+       ↓
+      Y
 
-Use Case:
+    false
+       ↓
+      N
+
+Advanced Example
 
     Encryption
-    Custom Types
+
+        Card Number
+
+           ↓
+
+        Encrypted Value
+
+Stored in DB.
+
+Very common in Banking Projects.
 
 ═══════════════════════════════════════════════════════════════
-PART 3 : RELATIONSHIP MAPPING
+17-25 SUMMARY
 ═══════════════════════════════════════════════════════════════
 
-17. WHAT IS @OneToOne?
+17. @OneToOne
+    Customer ↔ KYC
 
-Example:
+18. @OneToMany
+    Account → Transactions
 
-    Customer
-       ↔
-    KYC
+19. @ManyToOne
+    Transaction → Account
 
-Use Case:
+20. @ManyToMany
+    User ↔ Role
 
-    One Customer → One KYC Record
+21. mappedBy
+    Inverse Relationship
 
-───────────────────────────────────────────────────────────────
+22. @JoinColumn
+    Defines FK Column
 
-18. WHAT IS @OneToMany?
+23. CascadeType
+    Parent Operation → Child
 
-Example:
+24. orphanRemoval
+    Remove Child Automatically
 
-    Account
-        ↓
-    Transactions
-
-Use Case:
-
-    One Account
-    Many Transactions
-
-───────────────────────────────────────────────────────────────
-
-19. WHAT IS @ManyToOne?
-
-Example:
-
-    Many Transactions
-            ↓
-       One Account
-
-───────────────────────────────────────────────────────────────
-
-20. WHAT IS @ManyToMany?
-
-Example:
-
-    User
-      ↔
-    Role
-
-Use Case:
-
-    Simple Many-To-Many Mapping
-
-───────────────────────────────────────────────────────────────
-
-21. WHAT IS mappedBy?
-
-Answer:
-
-    Defines Inverse Side.
-
-Example:
-
-    @OneToMany(
-        mappedBy = "account"
-    )
-
-───────────────────────────────────────────────────────────────
-
-22. WHAT IS @JoinColumn?
-
-Answer:
-
-    Defines Foreign Key Column.
-
-Example:
-
-    @JoinColumn(
-       name = "account_id"
-    )
-
-───────────────────────────────────────────────────────────────
-
-23. WHAT IS CascadeType?
-
-Types:
-
-    PERSIST
-    MERGE
-    REMOVE
-    REFRESH
-    DETACH
-    ALL
-
-Interview:
-
-    Cascade propagates operations
-    from parent to child.
-
-───────────────────────────────────────────────────────────────
-
-24. WHAT IS orphanRemoval?
-
-Answer:
-
-    Deletes Child Record
-    When Removed From Collection.
+25. Query Cache
+    Cache Query Results
 
 ═══════════════════════════════════════════════════════════════
-PART 4 : FETCHING & PERFORMANCE
-═══════════════════════════════════════════════════════════════
+🎯 SENIOR INTERVIEW GOLDEN LINE
 
-25. LAZY vs EAGER
-
-LAZY
-
-    Load When Needed
-
-EAGER
-
-    Load Immediately
-
-Recommendation:
-
-    Prefer LAZY
-
-───────────────────────────────────────────────────────────────
-
-26. WHAT IS N+1 QUERY PROBLEM?
-
-Example:
-
-    1 Query For Accounts
-
-    +
-    100 Queries For Transactions
-
-    =
-    101 Queries
-
-Solutions:
-
-    JOIN FETCH
-    EntityGraph
-    DTO Projection
-
-───────────────────────────────────────────────────────────────
-
-27. WHAT IS JOIN FETCH?
-
-Answer:
-
-    Fetch Related Data
-    In Single Query.
-
-Example:
-
-    SELECT a
-    FROM Account a
-    JOIN FETCH a.transactions
-
-───────────────────────────────────────────────────────────────
-
-28. WHAT IS @EntityGraph?
-
-Answer:
-
-    Defines Fetch Plan.
-
-Benefits:
-
-    Cleaner Than JOIN FETCH
-    Reusable
-
-───────────────────────────────────────────────────────────────
-
-29. WHAT IS FIRST LEVEL CACHE?
-
-Scope:
-
-    EntityManager
-
-Features:
-
-    Enabled By Default
-
-Interview Question:
-
-    Same entity loaded twice
-    → Hits cache
-
-───────────────────────────────────────────────────────────────
-
-30. WHAT IS SECOND LEVEL CACHE?
-
-Scope:
-
-    Across Sessions
-
-Used For:
-
-    Branch Codes
-    Product Configuration
-
-Providers:
-
-    EhCache
-    Hazelcast
-    Redis
-
-═══════════════════════════════════════════════════════════════
-PART 5 : ENTITY LIFECYCLE
-═══════════════════════════════════════════════════════════════
-
-31. ENTITY STATES
-
-Transient
-
-    New Object
-
-Managed
-
-    Tracked By Hibernate
-
-Detached
-
-    No Longer Tracked
-
-Removed
-
-    Scheduled For Delete
-
-───────────────────────────────────────────────────────────────
-
-32. persist() vs merge()
-
-persist()
-
-    New Entity
-
-merge()
-
-    Detached Entity
-
-Interview Tip:
-
-    merge() Returns Managed Copy
-
-───────────────────────────────────────────────────────────────
-
-33. save() vs saveAndFlush()
-
-save()
-
-    Normal Save
-
-saveAndFlush()
-
-    Immediate SQL Execution
-
-Recommended:
-
-    Mostly save()
-
-───────────────────────────────────────────────────────────────
-
-34. WHAT IS DIRTY CHECKING?
-
-Answer:
-
-    Hibernate Detects Changes
-    Automatically.
-
-Example:
-
-    account.setStatus(BLOCKED);
-
-    No Explicit Save Needed
-
-───────────────────────────────────────────────────────────────
-
-35. flush() vs clear()
-
-flush()
-
-    Sync With DB
-
-clear()
-
-    Remove From Persistence Context
-
-Used In:
-
-    Batch Processing
-
-═══════════════════════════════════════════════════════════════
-PART 6 : REPOSITORIES & QUERIES
-═══════════════════════════════════════════════════════════════
-
-36. CrudRepository vs JpaRepository
-
-CrudRepository
-
-    CRUD Operations
-
-JpaRepository
-
-    CRUD
-    Paging
-    Sorting
-
-Recommendation:
-
-    Use JpaRepository
-
-───────────────────────────────────────────────────────────────
-
-37. DERIVED QUERY METHODS
-
-Examples:
-
-    findByStatus()
-
-    findByAccountNumber()
-
-    findByBalanceGreaterThan()
-
-Benefits:
-
-    No SQL Required
-
-───────────────────────────────────────────────────────────────
-
-38. WHAT IS @Query?
-
-Answer:
-
-    Custom JPQL / SQL Query.
-
-Example:
-
-    @Query(
-      "select a from Account a"
-    )
-
-───────────────────────────────────────────────────────────────
-
-39. JPQL vs NATIVE SQL
-
-JPQL
-
-    Uses Entity Names
-
-Native SQL
-
-    Uses Table Names
-
-Use Native For:
-
-    CTE
-    Complex Reporting
-    DB Specific Features
-
-───────────────────────────────────────────────────────────────
-
-40. WHAT IS @Modifying?
-
-Answer:
-
-    Used For Update/Delete Queries.
-
-Must Be Combined With:
-
-    @Transactional
-
-═══════════════════════════════════════════════════════════════
-PART 7 : PAGINATION & DYNAMIC QUERIES
-═══════════════════════════════════════════════════════════════
-
-41. WHAT IS PAGINATION?
-
-Classes:
-
-    Pageable
-
-    Page
-
-Example:
-
-    PageRequest.of(0,20)
-
-───────────────────────────────────────────────────────────────
-
-42. Page vs Slice vs List
-
-Page
-
-    Includes Total Count
-
-Slice
-
-    No Total Count
-
-List
-
-    Only Data
-
-───────────────────────────────────────────────────────────────
-
-43. WHAT IS PROJECTION?
-
-Answer:
-
-    Fetch Required Columns Only.
-
-Benefits:
-
-    Better Performance
-
-Types:
-
-    Interface Projection
-    DTO Projection
-
-───────────────────────────────────────────────────────────────
-
-44. WHAT IS SPECIFICATION?
-
-Answer:
-
-    Dynamic Query Builder.
-
-Used For:
-
-    Search Screens
-    Optional Filters
-
-───────────────────────────────────────────────────────────────
-
-45. SPECIFICATION vs @Query
-
-Specification
-
-    Dynamic
-
-@Query
-
-    Fixed
-
-Recommendation:
-
-    Dynamic Search → Specification
-
-Known Query → @Query
-
-═══════════════════════════════════════════════════════════════
-PART 8 : TRANSACTIONS & LOCKING
-═══════════════════════════════════════════════════════════════
-
-46. WHAT IS @Transactional?
-
-Answer:
-
-    Creates Transaction Boundary.
-
-Use At:
-
-    Service Layer
-
-Banking Example:
-
-    Fund Transfer
-
-───────────────────────────────────────────────────────────────
-
-47. PROPAGATION TYPES
-
-Most Important:
-
-    REQUIRED
-    REQUIRES_NEW
-    SUPPORTS
-    MANDATORY
-
-Interview Favorite:
-
-    REQUIRES_NEW
-
-───────────────────────────────────────────────────────────────
-
-48. OPTIMISTIC vs PESSIMISTIC LOCKING
-
-Optimistic
-
-    Uses @Version
-
-Pessimistic
-
-    Uses DB Lock
-
-Interview Answer:
-
-    Optimistic → Detect Conflict
-
-    Pessimistic → Prevent Conflict
-
-───────────────────────────────────────────────────────────────
-
-49. WHAT IS @Version?
-
-Answer:
-
-    Optimistic Locking Annotation.
-
-Example:
-
-    @Version
-    private Long version;
-
-Used For:
-
-    Prevent Lost Updates
-
-───────────────────────────────────────────────────────────────
-
-50. HOW TO OPTIMIZE JPA PERFORMANCE?
-
-Checklist:
-
-    ✅ Add Indexes
-
-    ✅ Use Pagination
-
-    ✅ Use Projection
-
-    ✅ Solve N+1
-
-    ✅ Use JOIN FETCH
-
-    ✅ Use EntityGraph
-
-    ✅ Enable Batching
-
-    ✅ Review SQL Plan
-
-    ✅ Prefer LAZY Loading
-
-    ✅ Use Cache Carefully
-
-═══════════════════════════════════════════════════════════════
-🏦 TOP BANKING DOMAIN JPA SCENARIOS
-═══════════════════════════════════════════════════════════════
-
-@Entity
-    → Account
-
-@OneToMany
-    → Transactions
-
-@ManyToOne
-    → Customer
-
-@Transactional
-    → Fund Transfer
-
-@Version
-    → Concurrent Updates
-
-Pessimistic Lock
-
-    → Money Movement
-
-Projection
-
-    → Account Summary API
-
-Pagination
-
-    → Transaction History
-
-Specification
-
-    → Search Accounts
-
-Batching
-
-    → Data Migration
-
-═══════════════════════════════════════════════════════════════
-⭐ MOST ASKED ANNOTATIONS
-═══════════════════════════════════════════════════════════════
-
-@Entity
-@Table
-@Column
-
-@Id
-@GeneratedValue
-@SequenceGenerator
-
-@Transient
-@Enumerated
-
-@Embeddable
-@Embedded
-
-@OneToOne
-@OneToMany
-@ManyToOne
-@ManyToMany
-
-@JoinColumn
-@JoinTable
-
-@Transactional
-
-@Query
-@Modifying
-
-@EntityGraph
-
-@Version
-
-@Lock
-
-@EnableJpaAuditing
-@CreatedDate
-@LastModifiedDate
-
-═══════════════════════════════════════════════════════════════
-🧠 30-SECOND REVISION
-═══════════════════════════════════════════════════════════════
+ORM
+    → Maps Object To Table
 
 JPA
     → Specification
 
 Hibernate
-    → ORM Provider
+    → ORM + JPA Provider
 
 Spring Data JPA
     → Repository Layer
@@ -964,64 +816,1151 @@ Spring Data JPA
 @Id
     → Primary Key
 
-@OneToMany
-@ManyToOne
+@GeneratedValue
+    → Auto ID
+
+@OneToMany / ManyToOne
     → Relationships
 
 LAZY
-    → Load On Demand
+    → Preferred Fetch Strategy
 
 JOIN FETCH
-@EntityGraph
-    → Solve N+1
-
-@Transactional
-    → Atomic Operation
-
-@Version
-    → Optimistic Lock
-
-@Lock
-    → Pessimistic Lock
-
-JpaRepository
-    → CRUD + Paging
-
-@Query
-    → Custom Query
-
-Specification
-    → Dynamic Query
-
-Projection
-    → Required Columns Only
-
-Batching
-    → Bulk Performance
+    → Solve N+1 Problem
 
 First Level Cache
     → Session Cache
 
 Second Level Cache
-    → Shared Cache
+    → Application Cache
 
-🎯 GOLDEN INTERVIEW LINE
 
-    JPA = Specification
+These first 25 topics alone cover nearly 60-70% of Spring Data JPA and Hibernate interview questions asked for Senior Java Developer positions.
 
-    Hibernate = ORM + JPA Provider
 
-    Spring Data JPA = Repository Abstraction
+🚀 SPRING DATA JPA & HIBERNATE
+DETAILED EXPLANATION (PART 2 : QUESTIONS 26-50)
 
-    @Transactional = Atomic Business Operation
+Senior Java Developer | Banking Domain | Interview Deep Dive
 
-    JOIN FETCH / EntityGraph = Solve N+1
+═══════════════════════════════════════════════════════════════
+26. WHAT ARE ENTITY LIFECYCLE STATES?
+═══════════════════════════════════════════════════════════════
 
-    @Version = Optimistic Locking
+Hibernate manages entity objects through different states.
 
-    JpaRepository = CRUD + Paging + Sorting
+States:
 
-These topics cover approximately 90-95% of Spring Data JPA
-and Hibernate questions asked in Senior Java Developer,
-Spring Boot Microservices, Banking Domain, JPMC, RBC,
-MUFG, Cognizant and Product Company interviews.
+    1. Transient
+    2. Managed (Persistent)
+    3. Detached
+    4. Removed
+
+Example:
+
+    Account account =
+            new Account();
+
+State:
+
+    TRANSIENT
+
+Reason:
+
+    Not managed by Hibernate.
+
+-------------------------------------------------------
+
+Persist Entity
+
+    entityManager.persist(account);
+
+State:
+
+    MANAGED
+
+Reason:
+
+    Hibernate tracks changes.
+
+-------------------------------------------------------
+
+Detach Entity
+
+    entityManager.detach(account);
+
+State:
+
+    DETACHED
+
+Reason:
+
+    Hibernate stops tracking.
+
+-------------------------------------------------------
+
+Delete Entity
+
+    entityManager.remove(account);
+
+State:
+
+    REMOVED
+
+Reason:
+
+    Scheduled for deletion.
+
+Interview Question
+
+    Which state supports dirty checking?
+
+Answer
+
+    Managed State
+
+═══════════════════════════════════════════════════════════════
+27. persist() vs merge()
+═══════════════════════════════════════════════════════════════
+
+persist()
+
+Purpose:
+
+    Save New Entity
+
+Example:
+
+    Account account =
+            new Account();
+
+    entityManager.persist(account);
+
+Result:
+
+    Object becomes MANAGED.
+
+-------------------------------------------------------
+
+merge()
+
+Purpose:
+
+    Re-attach Detached Entity
+
+Example:
+
+    Account merged =
+            entityManager.merge(account);
+
+Important
+
+    merge() returns Managed Copy.
+
+Wrong
+
+    entityManager.merge(account);
+
+    account.setStatus(ACTIVE);
+
+Correct
+
+    Account merged =
+        entityManager.merge(account);
+
+    merged.setStatus(ACTIVE);
+
+Interview Question
+
+    When use persist()?
+
+Answer
+
+    New Entity
+
+Interview Question
+
+    When use merge()?
+
+Answer
+
+    Detached Entity
+
+═══════════════════════════════════════════════════════════════
+28. save() vs saveAndFlush()
+═══════════════════════════════════════════════════════════════
+
+save()
+
+    Saves Entity
+
+    Actual SQL may execute later.
+
+Example
+
+    repository.save(account);
+
+-------------------------------------------------------
+
+saveAndFlush()
+
+    Save
+       +
+    Immediate Database Flush
+
+Example
+
+    repository.saveAndFlush(account);
+
+Use Cases
+
+    Need Immediate SQL Execution
+
+    Need Constraint Validation Immediately
+
+Banking Example
+
+    Create Account
+
+        ↓
+
+    Need Account Number Unique Check
+
+        ↓
+
+    saveAndFlush()
+
+Interview Recommendation
+
+    Use save()
+
+    Use saveAndFlush() only when needed.
+
+═══════════════════════════════════════════════════════════════
+29. WHAT IS DIRTY CHECKING?
+═══════════════════════════════════════════════════════════════
+
+Definition
+
+    Hibernate automatically detects changes
+    to Managed Entities.
+
+Example
+
+    @Transactional
+
+    public void blockAccount(Long id){
+
+        Account account =
+            repository.findById(id)
+                      .orElseThrow();
+
+        account.setStatus(BLOCKED);
+    }
+
+Notice
+
+    No save() required.
+
+At Commit Time
+
+Hibernate Generates
+
+    UPDATE ACCOUNT
+       SET STATUS='BLOCKED'
+     WHERE ID=1
+
+Interview Question
+
+    Why no save()?
+
+Answer
+
+    Dirty Checking
+
+Benefits
+
+    Less Code
+
+    Better Readability
+
+═══════════════════════════════════════════════════════════════
+30. flush() vs clear()
+═══════════════════════════════════════════════════════════════
+
+flush()
+
+Purpose
+
+    Push Changes To Database
+
+Example
+
+    entityManager.flush();
+
+-------------------------------------------------------
+
+clear()
+
+Purpose
+
+    Remove Objects From
+    Persistence Context.
+
+Example
+
+    entityManager.clear();
+
+-------------------------------------------------------
+
+Batch Example
+
+    for(int i=0;i<10000;i++){
+
+        entityManager.persist(data);
+
+        if(i%50==0){
+
+           entityManager.flush();
+
+           entityManager.clear();
+        }
+    }
+
+Benefit
+
+    Memory Optimization
+
+Interview Favorite
+
+═══════════════════════════════════════════════════════════════
+31. CrudRepository vs JpaRepository
+═══════════════════════════════════════════════════════════════
+
+CrudRepository
+
+    save()
+
+    findById()
+
+    delete()
+
+-------------------------------------------------------
+
+PagingAndSortingRepository
+
+    CRUD
+
+    Paging
+
+    Sorting
+
+-------------------------------------------------------
+
+JpaRepository
+
+    CRUD
+
+    Paging
+
+    Sorting
+
+    Batch Operations
+
+    JPA Features
+
+Recommended
+
+    JpaRepository
+
+Used In
+
+    95% Spring Boot Projects
+
+═══════════════════════════════════════════════════════════════
+32. HOW DO DERIVED QUERY METHODS WORK?
+═══════════════════════════════════════════════════════════════
+
+Example
+
+    findByStatus()
+
+Hibernate Generates
+
+    SELECT *
+    FROM ACCOUNT
+    WHERE STATUS = ?
+
+-------------------------------------------------------
+
+Examples
+
+    findByAccountNumber()
+
+    findByBalanceGreaterThan()
+
+    findByStatusAndType()
+
+    findByNameContaining()
+
+Interview Question
+
+    Any SQL Required?
+
+Answer
+
+    No
+
+Spring Generates SQL Automatically.
+
+═══════════════════════════════════════════════════════════════
+33. WHAT IS @Query?
+═══════════════════════════════════════════════════════════════
+
+Purpose
+
+    Write Custom Query.
+
+Example
+
+    @Query(
+      "select a
+       from Account a
+       where a.status=:status"
+    )
+
+Why Needed?
+
+Derived Queries Become Too Long.
+
+Bad Example
+
+    findByStatusAndTypeAndBranchAndBalanceGreaterThan...
+
+Better
+
+    @Query
+
+Benefits
+
+    Cleaner
+
+    Flexible
+
+═══════════════════════════════════════════════════════════════
+34. JPQL vs NATIVE SQL
+═══════════════════════════════════════════════════════════════
+
+JPQL
+
+    Uses Entity Names
+
+Example
+
+    SELECT a
+    FROM Account a
+
+-------------------------------------------------------
+
+Native SQL
+
+    Uses Table Names
+
+Example
+
+    SELECT *
+    FROM ACCOUNTS
+
+-------------------------------------------------------
+
+When To Use JPQL?
+
+    Normal Application Queries
+
+-------------------------------------------------------
+
+When To Use Native SQL?
+
+    CTE
+
+    Stored Procedure
+
+    Vendor Specific Features
+
+Interview Recommendation
+
+    Prefer JPQL
+
+═══════════════════════════════════════════════════════════════
+35. WHAT IS @Modifying?
+═══════════════════════════════════════════════════════════════
+
+Used For
+
+    UPDATE
+
+    DELETE
+
+JPQL Queries
+
+Example
+
+    @Modifying
+
+    @Query(
+      "update Account
+       set status='BLOCKED'"
+    )
+
+Must Use With
+
+    @Transactional
+
+Reason
+
+    Data Modification
+
+═══════════════════════════════════════════════════════════════
+36. WHAT IS PAGINATION?
+═══════════════════════════════════════════════════════════════
+
+Problem
+
+    10 Million Transactions
+
+Cannot Load All.
+
+Solution
+
+    Pagination
+
+Example
+
+    Pageable pageable =
+        PageRequest.of(0,20);
+
+-------------------------------------------------------
+
+Output
+
+    Records 1-20
+
+Next Page
+
+    Records 21-40
+
+Banking Example
+
+    Account Statement
+
+    Transaction History
+
+═══════════════════════════════════════════════════════════════
+37. Page vs Slice vs List
+═══════════════════════════════════════════════════════════════
+
+Page
+
+    Data
+
+    Total Records
+
+    Total Pages
+
+-------------------------------------------------------
+
+Slice
+
+    Data
+
+    HasNext()
+
+-------------------------------------------------------
+
+List
+
+    Data Only
+
+-------------------------------------------------------
+
+When Use?
+
+Page
+
+    UI Needs Total Count
+
+Slice
+
+    Infinite Scroll
+
+List
+
+    Small Result Set
+
+═══════════════════════════════════════════════════════════════
+38. WHAT IS PROJECTION?
+═══════════════════════════════════════════════════════════════
+
+Problem
+
+Need Only
+
+    Account Number
+    Balance
+
+Not Full Entity.
+
+-------------------------------------------------------
+
+Projection
+
+    Interface Projection
+
+    DTO Projection
+
+-------------------------------------------------------
+
+Benefit
+
+    Less Data
+
+    Faster SQL
+
+    Better Performance
+
+Banking Example
+
+    Account Summary Screen
+
+═══════════════════════════════════════════════════════════════
+39. WHAT IS SPECIFICATION?
+═══════════════════════════════════════════════════════════════
+
+Purpose
+
+    Dynamic Queries
+
+Example Filters
+
+    Status
+
+    Branch
+
+    Account Type
+
+    Balance
+
+-------------------------------------------------------
+
+User Selects
+
+    ACTIVE
+
+        +
+    SAVINGS
+
+        +
+    BALANCE > 10000
+
+-------------------------------------------------------
+
+Specification Builds Query Dynamically.
+
+Banking Use Case
+
+    Search Customer Screen
+
+═══════════════════════════════════════════════════════════════
+40. Specification vs @Query vs QBE
+═══════════════════════════════════════════════════════════════
+
+@Query
+
+    Fixed Query
+
+-------------------------------------------------------
+
+Specification
+
+    Dynamic Query
+
+-------------------------------------------------------
+
+QBE
+(Query By Example)
+
+    Simple Search
+
+Example
+
+    Account probe =
+            new Account();
+
+    probe.setStatus(ACTIVE);
+
+Interview Recommendation
+
+    Complex Search
+        → Specification
+
+Known Query
+        → @Query
+
+Simple Search
+        → QBE
+
+═══════════════════════════════════════════════════════════════
+41. WHAT IS @Transactional?
+═══════════════════════════════════════════════════════════════
+
+Purpose
+
+    Defines Transaction Boundary.
+
+Banking Example
+
+    Debit Source Account
+
+          ↓
+
+    Credit Destination Account
+
+          ↓
+
+    Save Transfer Record
+
+All Must Succeed.
+
+If Any Step Fails
+
+    Rollback Entire Transaction
+
+Example
+
+    @Transactional
+
+Interview Rule
+
+    Place At Service Layer
+
+═══════════════════════════════════════════════════════════════
+42. TRANSACTION PROPAGATION TYPES
+═══════════════════════════════════════════════════════════════
+
+REQUIRED
+
+    Default
+
+    Join Existing
+    Or Create New
+
+-------------------------------------------------------
+
+REQUIRES_NEW
+
+    Always Create New Transaction
+
+-------------------------------------------------------
+
+SUPPORTS
+
+    Use Existing If Available
+
+-------------------------------------------------------
+
+MANDATORY
+
+    Transaction Must Exist
+
+-------------------------------------------------------
+
+NOT_SUPPORTED
+
+    Run Without Transaction
+
+Banking Example
+
+    Audit Logging
+
+        ↓
+
+    REQUIRES_NEW
+
+Audit committed even if main transaction fails.
+
+═══════════════════════════════════════════════════════════════
+43. OPTIMISTIC vs PESSIMISTIC LOCKING
+═══════════════════════════════════════════════════════════════
+
+Optimistic Lock
+
+    Assume Conflict Rare
+
+    Uses
+
+        @Version
+
+-------------------------------------------------------
+
+Pessimistic Lock
+
+    Assume Conflict Possible
+
+    Locks Row Immediately
+
+-------------------------------------------------------
+
+Optimistic
+
+    Detect Conflict
+
+-------------------------------------------------------
+
+Pessimistic
+
+    Prevent Conflict
+
+Banking Example
+
+    Fund Transfer
+
+Usually
+
+    PESSIMISTIC LOCK
+
+═══════════════════════════════════════════════════════════════
+44. WHAT IS @Version?
+═══════════════════════════════════════════════════════════════
+
+Purpose
+
+    Optimistic Locking
+
+Example
+
+    @Version
+    private Long version;
+
+Initial
+
+    VERSION = 1
+
+Update
+
+    VERSION = 2
+
+Another Update
+
+    VERSION = 3
+
+If Version Changed
+
+Hibernate Throws
+
+    OptimisticLockException
+
+Benefit
+
+    Prevent Lost Updates
+
+═══════════════════════════════════════════════════════════════
+45. HQL vs JPQL
+═══════════════════════════════════════════════════════════════
+
+JPQL
+
+    JPA Standard
+
+-------------------------------------------------------
+
+HQL
+
+    Hibernate Specific
+
+-------------------------------------------------------
+
+Example
+
+    select a
+    from Account a
+
+Looks Similar
+
+Recommendation
+
+    Prefer JPQL
+
+Reason
+
+    Portable
+
+═══════════════════════════════════════════════════════════════
+46. WHAT IS JDBC BATCHING?
+═══════════════════════════════════════════════════════════════
+
+Problem
+
+    10000 Inserts
+
+Without Batching
+
+    10000 DB Calls
+
+-------------------------------------------------------
+
+With Batching
+
+Batch Size = 50
+
+10000 Records
+
+    ↓
+
+200 Calls
+
+Huge Performance Improvement.
+
+Configuration
+
+    hibernate.jdbc.batch_size=50
+
+Used In
+
+    Data Migration
+
+    Bulk Upload
+
+═══════════════════════════════════════════════════════════════
+47. saveAll() vs BATCHING vs BULK DML
+═══════════════════════════════════════════════════════════════
+
+saveAll()
+
+    Saves Entities
+
+    Lifecycle Events Triggered
+
+-------------------------------------------------------
+
+Batching
+
+    Multiple SQL Combined
+
+-------------------------------------------------------
+
+Bulk DML
+
+    One Query Updates
+    Millions Of Rows
+
+Example
+
+    UPDATE ACCOUNT
+       SET STATUS='ACTIVE'
+
+Recommendation
+
+    Small Data
+       → saveAll()
+
+    Large Inserts
+       → Batching
+
+    Large Updates
+       → Bulk DML
+
+═══════════════════════════════════════════════════════════════
+48. HOW TO AUDIT ENTITIES?
+═══════════════════════════════════════════════════════════════
+
+Purpose
+
+Track
+
+    Created Date
+
+    Modified Date
+
+    Created By
+
+    Modified By
+
+Annotations
+
+    @CreatedDate
+
+    @LastModifiedDate
+
+    @CreatedBy
+
+    @LastModifiedBy
+
+Banking Example
+
+    Track Who Modified Account
+
+Interview Favorite
+
+═══════════════════════════════════════════════════════════════
+49. HOW TO PREVENT LazyInitializationException?
+═══════════════════════════════════════════════════════════════
+
+Problem
+
+Transaction Closed
+
+Then Access
+
+    account.getTransactions()
+
+Exception Occurs.
+
+Solutions
+
+    JOIN FETCH
+
+    EntityGraph
+
+    DTO Projection
+
+    Transactional Boundary
+
+Wrong Solution
+
+    Open Session In View
+
+Recommended
+
+    Fetch Required Data Earlier
+
+═══════════════════════════════════════════════════════════════
+50. HOW TO OPTIMIZE SPRING DATA JPA PERFORMANCE?
+═══════════════════════════════════════════════════════════════
+
+Checklist
+
+    1. Review SQL
+
+    2. Review Execution Plan
+
+    3. Add Indexes
+
+    4. Solve N+1
+
+    5. Use LAZY
+
+    6. Use Projection
+
+    7. Use Pagination
+
+    8. Use EntityGraph
+
+    9. Enable Batching
+
+    10. Use Cache
+
+Banking Example
+
+Transaction Table
+
+    100 Million Records
+
+Optimization
+
+    Composite Index
+
+    Projection
+
+    Pagination
+
+    Batch Processing
+
+Performance Improved Significantly.
+
+═══════════════════════════════════════════════════════════════
+🏦 TOP 10 BANKING INTERVIEW SCENARIOS
+═══════════════════════════════════════════════════════════════
+
+@Transactional
+    → Fund Transfer
+
+@Version
+    → Prevent Lost Updates
+
+Pessimistic Lock
+    → High Value Payment
+
+Projection
+    → Account Summary API
+
+Pagination
+    → Transaction History
+
+Specification
+    → Search Customer
+
+Batching
+    → Data Migration
+
+Auditing
+    → Regulatory Tracking
+
+EntityGraph
+    → Detailed Account View
+
+JOIN FETCH
+    → Solve N+1
+
+═══════════════════════════════════════════════════════════════
+🧠 ULTIMATE MEMORY FLOW
+═══════════════════════════════════════════════════════════════
+
+persist()
+      ↓
+Managed Entity
+      ↓
+Dirty Checking
+      ↓
+flush()
+      ↓
+@Transactional
+      ↓
+JpaRepository
+      ↓
+@Query
+      ↓
+Pagination
+      ↓
+Specification
+      ↓
+Projection
+      ↓
+@Version
+      ↓
+Locking
+      ↓
+Batching
+      ↓
+Auditing
+      ↓
+Performance Tuning
+
+🎯 SENIOR INTERVIEW GOLDEN LINE
+
+    Spring Data JPA provides repository abstraction.
+
+    Hibernate performs ORM operations.
+
+    @Transactional ensures atomic business operations.
+
+    @Version handles optimistic locking.
+
+    Pessimistic locking prevents concurrent updates.
+
+    EntityGraph and JOIN FETCH solve N+1 issues.
+
+    Projection and Pagination improve performance.
+
+    Batching improves bulk processing efficiency.
+
+These questions (26-50) represent the most commonly asked advanced Spring Data JPA and Hibernate topics for Senior Java Developer, Banking Domain, Spring Boot Microservices, JPMC, RBC, MUFG, and product-based company interviews.
