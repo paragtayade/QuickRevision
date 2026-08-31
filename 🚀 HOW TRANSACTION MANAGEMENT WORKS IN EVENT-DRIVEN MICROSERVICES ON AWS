@@ -5,9 +5,16 @@
 1. FIRST UNDERSTAND THE PROBLEM
 ═══════════════════════════════════════════════════════════════
 
-In a traditional monolithic application, a business operation such as fund transfer is executed inside a single application and a single database. All related operations, such as debit, credit, and transaction creation, are part of one database transaction. If any operation fails, the transaction is rolled back and the database returns to its original state.
+In a traditional monolithic application, a business operation such as fund transfer
+is executed inside a single application and a single database. 
+All related operations, such as debit, credit, and transaction creation, 
+are part of one database transaction. If any operation fails, the transaction
+is rolled back and the database returns to its original state.
 
-This model works very well because there is only one database and one transaction manager controlling the entire business process. The transaction guarantees ACID properties, ensuring that all operations either succeed together or fail together. As a result, maintaining consistency is relatively simple.
+This model works very well because there is only one database and one transaction manager
+controlling the entire business process. The transaction guarantees ACID properties,
+ensuring that all operations either succeed together or fail together. 
+As a result, maintaining consistency is relatively simple.
 
 Example:
 
@@ -37,9 +44,13 @@ Result:
 2. WHY DOES THIS NOT WORK IN MICROSERVICES?
 ═══════════════════════════════════════════════════════════════
 
-Microservices are designed around the principle that every service owns its own database. This allows teams to deploy, scale, and maintain services independently without affecting other services. However, it also introduces challenges when a business process spans multiple services.
+Microservices are designed around the principle that every service owns its own database. 
+This allows teams to deploy, scale, and maintain services independently without affecting other services.
+However, it also introduces challenges when a business process spans multiple services.
 
-For example, a fund transfer may involve Account Service, Transfer Service, and Notification Service. Since each service updates a different database, there is no single transaction manager capable of controlling the entire workflow. Therefore, a global transaction covering all services is not practical.
+For example, a fund transfer may involve Account Service, Transfer Service, and Notification Service.
+Since each service updates a different database, there is no single transaction manager capable of controlling
+the entire workflow. Therefore, a global transaction covering all services is not practical.
 
 Example:
 
@@ -61,9 +72,13 @@ Each service updates its own database independently.
 3. WHAT DOES @Transactional DO NOW?
 ═══════════════════════════════════════════════════════════════
 
-The @Transactional annotation still plays an important role in microservices. It guarantees consistency for operations that occur within a single service and a single database. It ensures that multiple database actions either all succeed or all fail together.
+The @Transactional annotation still plays an important role in microservices. It guarantees consistency for operations
+that occur within a single service and a single database. It ensures that multiple database actions either all succeed
+or all fail together.
 
-However, @Transactional cannot control transactions happening in another microservice. If Account Service commits its work successfully and Payment Service fails later, the Account Service transaction cannot be rolled back automatically because it has already been committed.
+However, @Transactional cannot control transactions happening in another microservice. If Account Service commits
+its work successfully and Payment Service fails later, the Account Service transaction cannot be rolled back automatically
+because it has already been committed.
 
 Example:
 
@@ -84,9 +99,13 @@ If saveAuditRecord() fails:
 4. HOW DO MICROSERVICES COMMUNICATE?
 ═══════════════════════════════════════════════════════════════
 
-Microservices communicate through events instead of sharing database transactions. When a service completes its work, it publishes an event describing what happened. Other services subscribe to that event and continue processing their own part of the workflow.
+Microservices communicate through events instead of sharing database transactions. When a service completes its work,
+it publishes an event describing what happened. Other services subscribe to that event and continue processing their
+own part of the workflow.
 
-This communication style is called Event-Driven Architecture. Services do not call each other directly for every operation, which reduces coupling and improves scalability. It also allows each service to evolve independently while still participating in larger business processes.
+This communication style is called Event-Driven Architecture. Services do not call each other directly for every operation,
+which reduces coupling and improves scalability. It also allows each service to evolve independently while still 
+participating in larger business processes.
 
 Example:
 
@@ -106,9 +125,11 @@ Example:
 5. WHAT IS SAGA PATTERN?
 ═══════════════════════════════════════════════════════════════
 
-The Saga Pattern is the most common approach for managing transactions across multiple microservices. Instead of having one large distributed transaction, the business process is split into multiple local transactions.
+The Saga Pattern is the most common approach for managing transactions across multiple microservices. 
+nstead of having one large distributed transaction, the business process is split into multiple local transactions.
 
-Each service performs its own database update, commits the result, and then publishes an event for the next service. Together, these small transactions achieve the overall business goal while keeping services independent and scalable.
+Each service performs its own database update, commits the result, and then publishes an event for the next service. 
+Together, these small transactions achieve the overall business goal while keeping services independent and scalable.
 
 Example:
 
@@ -125,9 +146,11 @@ Example:
 6. WHAT HAPPENS IF A STEP FAILS?
 ═══════════════════════════════════════════════════════════════
 
-A failure becomes more complex in microservices because previous transactions may already be committed. For example, Account Service may have successfully debited money before Transfer Service encounters an error.
+A failure becomes more complex in microservices because previous transactions may already be committed. 
+For example, Account Service may have successfully debited money before Transfer Service encounters an error.
 
-Since the debit transaction is already committed, it cannot be rolled back using traditional transaction management. The system therefore needs another way to restore consistency without depending on a distributed transaction.
+Since the debit transaction is already committed, it cannot be rolled back using traditional transaction management. 
+The system therefore needs another way to restore consistency without depending on a distributed transaction.
 
 Example:
 
@@ -141,9 +164,11 @@ Example:
 7. WHAT IS COMPENSATION?
 ═══════════════════════════════════════════════════════════════
 
-Compensation is the mechanism used by Saga to recover from failures. Instead of rolling back a committed transaction, the system performs a new business operation that reverses the effect of the previous operation.
+Compensation is the mechanism used by Saga to recover from failures. Instead of rolling back a committed transaction, 
+the system performs a new business operation that reverses the effect of the previous operation.
 
-For example, if money was debited successfully but a later service fails, the compensation action may credit the same amount back to the account. This makes the business state consistent again without relying on distributed rollback.
+For example, if money was debited successfully but a later service fails, the compensation action may credit the 
+same amount back to the account. This makes the business state consistent again without relying on distributed rollback.
 
 Examples:
 
@@ -159,9 +184,12 @@ Examples:
 8. WHAT IS TRANSACTIONAL OUTBOX?
 ═══════════════════════════════════════════════════════════════
 
-A common problem in event-driven systems occurs when a database update succeeds but event publication fails. If the application crashes immediately after updating the database, other services never receive the event and the workflow stops.
+A common problem in event-driven systems occurs when a database update succeeds but event publication fails. 
+If the application crashes immediately after updating the database, other services never receive the event and the workflow stops.
 
-The Transactional Outbox Pattern solves this issue by storing event information in a dedicated outbox table within the same database transaction as the business update. This ensures that business data and event information remain synchronized.
+The Transactional Outbox Pattern solves this issue by storing event information in a dedicated outbox table 
+within the same database transaction as the business update. This ensures that business data and event information 
+remain synchronized.
 
 Example:
 
@@ -180,9 +208,11 @@ Result:
 9. HOW OUTBOX SOLVES THE PROBLEM?
 ═══════════════════════════════════════════════════════════════
 
-Instead of publishing events immediately, the application first saves them in an outbox table together with the business changes. Because both operations occur in the same transaction, they either succeed together or fail together.
+Instead of publishing events immediately, the application first saves them in an outbox table together with the 
+business changes. Because both operations occur in the same transaction, they either succeed together or fail together.
 
-After the transaction commits, a background publisher reads the outbox table and sends events to Kafka, SQS, SNS, or EventBridge. This guarantees reliable event delivery even if the application crashes temporarily.
+After the transaction commits, a background publisher reads the outbox table and sends events to Kafka, 
+SQS, SNS, or EventBridge. This guarantees reliable event delivery even if the application crashes temporarily.
 
 Example:
 
@@ -198,9 +228,11 @@ Example:
 10. WHAT IS IDEMPOTENCY?
 ═══════════════════════════════════════════════════════════════
 
-Idempotency means that processing the same event multiple times produces the same final result. This is a critical requirement in financial systems because messaging platforms may redeliver messages during failures.
+Idempotency means that processing the same event multiple times produces the same final result. 
+This is a critical requirement in financial systems because messaging platforms may redeliver messages during failures.
 
-Without idempotency, duplicate messages could trigger duplicate account credits, duplicate debits, or duplicate transfers. By tracking unique event identifiers, services can detect repeated messages and safely ignore them.
+Without idempotency, duplicate messages could trigger duplicate account credits, duplicate debits, 
+or duplicate transfers. By tracking unique event identifiers, services can detect repeated messages and safely ignore them.
 
 Example:
 
@@ -216,9 +248,11 @@ Example:
 11. WHY DO WE NEED RETRIES?
 ═══════════════════════════════════════════════════════════════
 
-Many failures in distributed systems are temporary rather than permanent. A network issue, database timeout, or overloaded service may recover automatically after a few seconds.
+Many failures in distributed systems are temporary rather than permanent. A network issue, 
+database timeout, or overloaded service may recover automatically after a few seconds.
 
-Instead of failing immediately, systems retry processing several times. This significantly improves overall reliability because many transient failures disappear without requiring human intervention.
+Instead of failing immediately, systems retry processing several times. This significantly 
+improves overall reliability because many transient failures disappear without requiring human intervention.
 
 Example:
 
@@ -232,9 +266,11 @@ Example:
 12. WHAT IS DLQ (DEAD LETTER QUEUE)?
 ═══════════════════════════════════════════════════════════════
 
-Sometimes retries are not enough and a message continues to fail. Discarding the message would cause data loss, which is unacceptable in banking systems.
+Sometimes retries are not enough and a message continues to fail. Discarding the message would 
+cause data loss, which is unacceptable in banking systems.
 
-A Dead Letter Queue stores failed messages separately for later investigation and reprocessing. This allows operations teams to analyze the problem and replay the message after fixing the root cause.
+A Dead Letter Queue stores failed messages separately for later investigation and reprocessing. 
+This allows operations teams to analyze the problem and replay the message after fixing the root cause.
 
 Flow:
 
@@ -252,9 +288,12 @@ Flow:
 13. COMPLETE BANKING FLOW
 ═══════════════════════════════════════════════════════════════
 
-When a customer initiates a transfer, Account Service first debits the account and saves an event in the outbox table. After committing the transaction, the event is published for the next service.
+When a customer initiates a transfer, Account Service first debits the account and saves an event 
+in the outbox table. After committing the transaction, the event is published for the next service.
 
-Transfer Service processes the event, creates the ledger record, and publishes another event. Notification Service then sends an SMS or email confirmation. If any critical step fails, a compensation event is triggered to restore consistency.
+Transfer Service processes the event, creates the ledger record, and publishes another event. 
+Notification Service then sends an SMS or email confirmation. If any critical step fails, 
+a compensation event is triggered to restore consistency.
 
 Flow:
 
@@ -274,9 +313,12 @@ Flow:
 14. AWS SERVICES USED
 ═══════════════════════════════════════════════════════════════
 
-AWS provides several services commonly used in event-driven architectures. SQS is used for reliable message queues, SNS for broadcasting events, and EventBridge for routing events between systems.
+AWS provides several services commonly used in event-driven architectures. SQS is used 
+for reliable message queues, SNS for broadcasting events, and EventBridge for routing events between systems.
 
-Spring Boot applications are typically deployed on ECS or Fargate, while Step Functions can coordinate complex Saga workflows. CloudWatch provides monitoring, logging, and alerting capabilities across the system.
+Spring Boot applications are typically deployed on ECS or Fargate, while Step Functions
+can coordinate complex Saga workflows. CloudWatch provides monitoring, logging, 
+and alerting capabilities across the system.
 
 Common Stack:
 
@@ -292,8 +334,13 @@ Common Stack:
 🎯 FINAL INTERVIEW ANSWER
 ═══════════════════════════════════════════════════════════════
 
-In microservices, @Transactional works only within a single database and cannot manage transactions across multiple services. Each service completes its own local transaction and communicates changes through events.
+In microservices, @Transactional works only within a single database and cannot manage
+transactions across multiple services. Each service completes its own local transaction
+and communicates changes through events.
 
-To maintain business consistency, most organizations use the Saga Pattern with compensation logic. Reliable event publishing is achieved using the Transactional Outbox Pattern, while Idempotency, Retries, and DLQs ensure messages are processed safely and reliably.
+To maintain business consistency, most organizations use the Saga Pattern with compensation logic.
+Reliable event publishing is achieved using the Transactional Outbox Pattern, while Idempotency, 
+Retries, and DLQs ensure messages are processed safely and reliably.
 
-The overall objective is to build scalable, fault-tolerant systems that achieve eventual consistency instead of relying on expensive distributed ACID transactions.
+The overall objective is to build scalable, fault-tolerant systems that achieve eventual consistency
+instead of relying on expensive distributed ACID transactions.
