@@ -1,0 +1,423 @@
+🚀 Java 8 Streams Cheat Sheet (Input → Code → Output)
+Most Asked Programming Questions in Interviews
+1. Filter Even Numbers
+Input
+[1,2,3,4,5,6]
+
+Code
+list.stream()
+    .filter(n -> n % 2 == 0)
+    .toList();
+
+Output
+[2,4,6]
+
+2. Filter Odd Numbers
+Input
+[1,2,3,4,5,6]
+
+Code
+list.stream()
+    .filter(n -> n % 2 != 0)
+    .toList();
+
+Output
+[1,3,5]
+
+3. Convert to Uppercase
+Input
+["john","mary"]
+
+Code
+names.stream()
+     .map(String::toUpperCase)
+     .toList();
+
+Output
+["JOHN","MARY"]
+
+4. Convert to Lowercase
+Input
+["JOHN","MARY"]
+
+Output
+["john","mary"]
+
+5. Sum of Numbers
+Input
+[10,20,30]
+
+Code
+list.stream()
+    .mapToInt(Integer::intValue)
+    .sum();
+
+Output
+60
+
+6. Average of Numbers
+Input
+[10,20,30]
+
+Code
+list.stream()
+    .mapToInt(Integer::intValue)
+    .average();
+
+Output
+20.0
+
+7. Maximum Number
+Input
+[5,2,9,4]
+
+Output
+9
+
+8. Minimum Number
+Input
+[5,2,9,4]
+
+Output
+2
+
+9. Count Elements
+Input
+[10,20,30,40]
+
+Output
+4
+
+10. Remove Duplicates
+Input
+[1,2,2,3,3,4]
+
+Output
+[1,2,3,4]
+
+11. Sort Ascending
+Input
+[5,3,9,1]
+
+Output
+[1,3,5,9]
+
+12. Sort Descending
+Input
+[5,3,9,1]
+
+Output
+[9,5,3,1]
+
+13. First Element
+Input
+[10,20,30]
+
+Output
+10
+
+14. Any Match
+Input
+[10,20,30]
+
+Code
+anyMatch(n -> n > 25)
+
+Output
+true
+
+15. All Match
+Input
+[10,20,30]
+
+Code
+allMatch(n -> n > 0)
+
+Output
+true
+
+16. None Match
+Input
+[10,20,30]
+
+Code
+noneMatch(n -> n < 0)
+
+Output
+true
+
+17. Skip First 2 Elements
+Input
+[1,2,3,4,5]
+
+Output
+[3,4,5]
+
+18. Limit First 3 Elements
+Input
+[1,2,3,4,5]
+
+Output
+[1,2,3]
+
+19. Join Strings
+Input
+["A","B","C"]
+
+Output
+A,B,C
+
+20. Convert List to Set
+Input
+[1,2,2,3]
+
+Output
+[1,2,3]
+
+21. Group Employees by Department
+Input
+John  IT
+Mary  IT
+Tom   HR
+
+Code
+Collectors.groupingBy(Employee::getDept)
+
+Output
+{
+ IT=[John,Mary],
+ HR=[Tom]
+}
+
+22. Partition By Salary
+Input
+John 40000
+Mary 70000
+Tom  90000
+
+Code
+partitioningBy(e -> e.getSalary()>50000)
+
+Output
+true=[Mary,Tom]
+
+false=[John]
+
+23. Highest Salary Employee
+Input
+John 50000
+Mary 70000
+David 90000
+
+Output
+David
+
+24. Lowest Salary Employee
+Input
+John 50000
+Mary 70000
+David 90000
+
+Output
+John
+
+25. Second Highest Number
+Input
+[10,5,20,40,30]
+
+Output
+30
+
+26. Third Highest Number
+Input
+[10,5,20,40,30]
+
+Output
+20
+
+27. Find Duplicate Elements
+Input
+[1,2,2,3,4,4,5]
+
+Output
+[2,4]
+
+28. Find Unique Elements
+Input
+[1,2,2,3,4,4,5]
+
+Output
+[1,3,5]
+
+29. Frequency Of Elements
+Input
+[1,2,2,3,3,3]
+
+Output
+{
+1=1,
+2=2,
+3=3
+}
+
+30. Longest String
+Input
+["Java","SpringBoot","AWS"]
+
+Output
+SpringBoot
+
+31. Shortest String
+Input
+["Java","SpringBoot","AWS"]
+
+Output
+AWS
+
+32. Sum Employee Salary
+Input
+50000
+70000
+90000
+
+Output
+210000
+
+33. Extract Employee Names
+Input
+John
+Mary
+Tom
+
+Output
+[John,Mary,Tom]
+
+34. Flatten Nested Lists
+Input
+[[1,2],[3,4],[5,6]]
+
+Output
+[1,2,3,4,5,6]
+
+35. Count Words
+Input
+"Java Spring Boot AWS"
+
+Output
+4
+
+36. Reverse String
+Input
+JAVA
+
+Output
+AVAJ
+
+37. Palindrome Check
+Input
+MADAM
+
+Output
+true
+
+38. Count Vowels
+Input
+"HELLO"
+
+Output
+2
+
+39. Remove Null Values
+Input
+[1,null,2,null,3]
+
+Output
+[1,2,3]
+
+40. Row-wise Sum Of Two Lists
+Input
+List1=[1,2,5]
+
+List2=[6,4,3]
+
+Code
+IntStream.range(0,list1.size())
+         .mapToObj(i ->
+            list1.get(i)+list2.get(i))
+         .toList();
+
+Output
+[7,6,8]
+
+Functional Interface Examples
+Predicate
+Input
+10
+
+Code
+Predicate<Integer> p =
+      n -> n%2==0;
+
+p.test(10);
+
+Output
+true
+
+Function
+Input
+"Java"
+
+Output
+4
+
+Consumer
+Input
+"Hello"
+
+Output
+Hello
+
+Supplier
+Input
+No Input
+
+Output
+Java
+
+BiFunction
+Input
+5,3
+
+Output
+8
+
+⭐ Top 10 Most Asked Stream Programs
+1. Duplicate Elements
+2. Second Highest Number
+3. Nth Highest Number
+4. Highest Salary Employee
+5. Group By Department
+6. Frequency Count
+7. List → Map
+8. Flatten List
+9. Sum of Numbers
+10. Predicate / Function / Consumer / Supplier
+
+🧠 Ultimate Memory Trick
+filter()      → Select
+map()         → Transform
+flatMap()     → Flatten
+reduce()      → Aggregate
+collect()     → Collect
+groupingBy()  → Group
+toMap()       → Convert
+distinct()    → Remove Duplicates
+sorted()      → Sort
+
+Predicate     → Test
+Function      → Transform
+Consumer      → Use
+Supplier      → Provide
+
+
+This set covers most Java 8 Streams/Lambda coding questions typically asked in Senior Java, Spring Boot, Microservices, and Banking interviews.
