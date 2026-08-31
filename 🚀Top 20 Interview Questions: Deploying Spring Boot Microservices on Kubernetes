@@ -1,0 +1,377 @@
+Top 20 Interview Questions: Deploying Spring Boot Microservices on Kubernetes
+1. How do you deploy a Spring Boot application on Kubernetes?
+Answer
+ 
+Spring Boot App
+
+      ↓
+
+Docker Image
+
+      ↓
+
+Container Registry (ECR)
+
+      ↓
+
+Kubernetes Deployment
+
+      ↓
+
+Pod
+
+      ↓
+
+Service
+
+      ↓
+
+Ingress / Load Balancer
+ 
+Deploy using:
+ 
+kubectl apply -f deployment.yaml
+ 
+Spring Boot applications are commonly deployed as a Deployment behind a Service. [Kubernetes...t_80_Pages | PDF]
+2. What is a Pod?
+Answer
+A Pod is the smallest deployable unit in Kubernetes.
+ 
+Pod
+
+└── Spring Boot Container
+ 
+A Pod can contain one or more containers. Kubernetes runs workloads inside Pods. [Kubernetes...t_80_Pages | PDF], [Kubernetes...t_80_Pages | Word]
+3. Difference Between Pod and Deployment?
+Pod	Deployment
+Single instance	Manages Pods
+Can fail	Self-healing
+No scaling	Supports scaling
+Interview One-Liner
+Deployment manages Pods and ensures desired replica count.
+4. Why Deploy Spring Boot Using Deployment Instead of Pod?
+Answer
+Deployment provides:
+✅ Self-healing
+✅ Rolling updates
+✅ Rollbacks
+✅ Scaling
+ReplicaSets maintain desired Pod replicas. [Kubernetes...t_80_Pages | PDF]
+5. What is a Kubernetes Service?
+Answer
+A Service exposes Spring Boot Pods.
+ 
+Client
+
+   ↓
+
+Service
+
+   ↓
+
+Pods
+ 
+Services provide stable access to changing Pods. [Kubernetes...t_80_Pages | PDF], [Kubernetes...t_80_Pages | Word]
+6. Service Types in Kubernetes?
+Answer
+Type	Use
+ClusterIP	Internal
+NodePort	External via node
+LoadBalancer	Cloud LB
+ExternalName	DNS mapping
+Most Common
+ 
+type: LoadBalancer
+ 
+7. How Do You Expose a Spring Boot Application Externally?
+Answer
+Option 1:
+ 
+Service
+
+type: LoadBalancer
+ 
+Option 2:
+ 
+Ingress
+
++
+
+Ingress Controller
+ 
+Ingress is generally preferred for multiple microservices.
+8. What is Ingress?
+Answer
+Ingress acts as a reverse proxy.
+ 
+Internet
+
+    ↓
+
+Ingress
+
+    ↓
+
+Account Service
+
+Payment Service
+
+Customer Service
+ 
+Useful when many Spring Boot services share one load balancer.
+9. What is ConfigMap?
+Answer
+Stores non-sensitive configuration.
+Example:
+ 
+apiVersion: v1
+
+kind: ConfigMap
+ 
+Store:
+ 
+URLs
+
+Endpoints
+
+Feature Flags
+ 
+Configuration should be externalized. [Kubernetes...t_80_Pages | PDF]
+10. What is Secret?
+Answer
+Stores sensitive information.
+Examples:
+ 
+Database Password
+
+API Keys
+
+Certificates
+
+JWT Secrets
+ 
+Spring Boot on Kubernetes commonly uses ConfigMap for non-secret configuration and Secret for sensitive data. [Kubernetes...t_80_Pages | PDF]
+11. How Do You Pass ConfigMap Values to Spring Boot?
+Answer
+ 
+envFrom:
+
+  configMapRef:
+
+    name: app-config
+ 
+Spring Boot:
+ 
+@Value("${db.url}")
+ 
+12. How Do You Pass Secrets to Spring Boot?
+Answer
+ 
+env:
+
+- name: DB_PASSWORD
+
+  valueFrom:
+
+    secretKeyRef:
+
+      name: db-secret
+
+      key: password
+ 
+Best practice is not to hardcode secrets in images. [Kubernetes...t_80_Pages | PDF]
+13. What Are Liveness and Readiness Probes?
+Answer
+Liveness Probe
+Checks:
+ 
+Is application alive?
+ 
+If failed:
+ 
+Restart Pod
+ 
+Readiness Probe
+Checks:
+ 
+Can app accept traffic?
+ 
+If failed:
+ 
+Remove from load balancer
+ 
+Actuator readiness/liveness endpoints are recommended for Spring Boot. [Kubernetes...t_80_Pages | PDF]
+14. What is Startup Probe?
+Answer
+Startup Probe protects slow-starting Spring Boot applications.
+ 
+Application starting
+
+↓
+
+Do not execute liveness yet
+ 
+Startup probe delays liveness/readiness evaluation until startup succeeds. [Kubernetes...t_80_Pages | PDF]
+15. How Do You Scale Spring Boot Pods?
+Answer
+Manual:
+ 
+kubectl scale deployment payment-service --replicas=5
+ 
+Automatic:
+ 
+HPA
+
+(Horizontal Pod Autoscaler)
+ 
+Spring Boot on Kubernetes is commonly scaled using HPA. [Kubernetes...t_80_Pages | PDF]
+16. What is Horizontal Pod Autoscaler (HPA)?
+Answer
+Automatically scales Pods based on:
+ 
+CPU
+
+Memory
+
+Custom Metrics
+ 
+Example:
+ 
+CPU > 70%
+ 
+Scale:
+ 
+3 Pods → 10 Pods
+ 
+17. How Do You Perform Zero-Downtime Deployment?
+Answer
+Use Rolling Updates.
+ 
+strategy:
+
+  type: RollingUpdate
+ 
+Flow:
+ 
+Old Pod
+
+↓
+
+New Pod Created
+
+↓
+
+Traffic Shifted
+
+↓
+
+Old Pod Removed
+ 
+18. How Do You Roll Back a Failed Deployment?
+Answer
+Check history:
+ 
+kubectl rollout history deployment app
+ 
+Rollback:
+ 
+kubectl rollout undo deployment app
+ 
+Interview One-Liner
+Kubernetes supports instant rollback using Deployment revisions.
+19. How Do You Monitor a Spring Boot Microservice in Kubernetes?
+Answer
+Use:
+ 
+Actuator
+
+Prometheus
+
+Grafana
+
+ELK
+
+CloudWatch
+ 
+Expose:
+ 
+/actuator/health
+
+/actuator/metrics
+ 
+Actuator health endpoints are commonly integrated with Kubernetes probes. [Kubernetes...t_80_Pages | PDF]
+20. Explain Complete Spring Boot Deployment on AWS EKS
+Answer
+ 
+Developer
+
+    ↓
+
+Git
+
+    ↓
+
+Jenkins/GitHub Actions
+
+    ↓
+
+Docker Build
+
+    ↓
+
+AWS ECR
+
+    ↓
+
+EKS Deployment
+
+    ↓
+
+Pods
+
+    ↓
+
+Service
+
+    ↓
+
+Ingress ALB
+
+    ↓
+
+Users
+ 
+Your interview preparation materials specifically include Spring Boot microservice deployment topics on AWS EKS. [Interview...reparation | Word], [Java Inter...one place | Word]
+Most Important Senior-Level Kubernetes Questions
+These are asked frequently in Java + Banking + AWS interviews:
+Q1. Difference Between Deployment and StatefulSet?
+Deployment
+Stateless apps
+Spring Boot APIs
+StatefulSet
+Stateful apps
+Kafka
+MongoDB
+PostgreSQL
+Stateful workloads require stable identity and durable storage. [Kubernetes...t_80_Pages | PDF], [Kubernetes...t_80_Pages | PDF]
+Q2. Difference Between ConfigMap and Secret?
+ConfigMap	Secret
+Non-sensitive	Sensitive
+Plain text	Base64 encoded
+URLs	Passwords
+Q3. What Happens If a Pod Crashes?
+Answer:
+ 
+Pod Dies
+
+   ↓
+
+Deployment Detects
+
+   ↓
+
+ReplicaSet Creates New Pod
+ 
+Kubernetes controllers continuously reconcile actual state to desired state. [Kubernetes...t_80_Pages | PDF], [Kubernetes...t_80_Pages | Word]
+30-Second Interview Summary
+We deploy Spring Boot microservices as Docker containers in Kubernetes Deployments. Services provide stable access, Ingress handles routing, ConfigMaps and Secrets externalize configuration, Actuator endpoints support readiness/liveness probes, HPA enables auto-scaling, and Rolling Updates provide zero-downtime deployments. On AWS EKS, images are stored in ECR and deployed via Kubernetes manifests or Helm charts.
