@@ -1,0 +1,1498 @@
+🚀 TOP 60 SPRING BOOT ANNOTATION INTERVIEW QUESTIONS
+Senior Java Developer | Banking Domain | Quick Revision Sheet
+
+═══════════════════════════════════════════════════════════════
+1. WHAT IS @SpringBootApplication?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Combination Of:
+
+        @SpringBootConfiguration
+        @EnableAutoConfiguration
+        @ComponentScan
+
+Example:
+
+    @SpringBootApplication
+    public class Application {
+
+        public static void main(String[] args) {
+            SpringApplication.run(
+                Application.class,
+                args
+            );
+        }
+    }
+
+One-Liner:
+
+    Entry point of Spring Boot application.
+
+───────────────────────────────────────────────────────────────
+
+2. WHAT IS @RestController?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Combination Of:
+
+        @Controller
+        @ResponseBody
+
+Example:
+
+    @RestController
+    public class EmployeeController {
+    }
+
+Returns:
+
+    JSON
+    XML
+
+Directly to client.
+
+───────────────────────────────────────────────────────────────
+
+3. DIFFERENCE BETWEEN @Controller AND @RestController
+═══════════════════════════════════════════════════════════════
+
+@Controller
+
+    Returns View
+
+    Example:
+        JSP
+        Thymeleaf
+
+@RestController
+
+    Returns JSON/XML
+
+    Used For:
+        REST APIs
+
+───────────────────────────────────────────────────────────────
+
+4. WHAT IS @RequestMapping?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Maps HTTP Requests.
+
+Example:
+
+    @RequestMapping("/employee")
+
+Can Be Used On:
+
+    • Class Level
+    • Method Level
+
+───────────────────────────────────────────────────────────────
+
+5. WHAT IS @GetMapping?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Handles HTTP GET Requests.
+
+Example:
+
+    @GetMapping("/employees")
+
+Equivalent:
+
+    @RequestMapping(
+        method = RequestMethod.GET
+    )
+
+Use Cases:
+
+    Read Operations
+
+───────────────────────────────────────────────────────────────
+
+6. WHAT IS @PostMapping?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Handles HTTP POST Requests.
+
+Example:
+
+    @PostMapping("/employee")
+
+Use Cases:
+
+    Create Operations
+
+───────────────────────────────────────────────────────────────
+
+7. WHAT IS @PutMapping?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Handles HTTP PUT Requests.
+
+Example:
+
+    @PutMapping("/employee/{id}")
+
+Use Cases:
+
+    Update Operations
+
+───────────────────────────────────────────────────────────────
+
+8. WHAT IS @DeleteMapping?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Handles HTTP DELETE Requests.
+
+Example:
+
+    @DeleteMapping("/employee/{id}")
+
+Use Cases:
+
+    Delete Operations
+
+───────────────────────────────────────────────────────────────
+
+9. WHAT IS @PathVariable?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Reads value from URL.
+
+Example:
+
+    @GetMapping("/{id}")
+
+    public Employee get(
+        @PathVariable Long id
+    )
+
+URL:
+
+    /employees/101
+
+Result:
+
+    id = 101
+
+───────────────────────────────────────────────────────────────
+
+10. WHAT IS @RequestParam?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Reads Query Parameters.
+
+Example:
+
+    @GetMapping("/search")
+
+    public String search(
+        @RequestParam String name
+    )
+
+URL:
+
+    /search?name=John
+
+Result:
+
+    name = John
+
+───────────────────────────────────────────────────────────────
+
+11. WHAT IS @RequestBody?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Converts JSON To Java Object.
+
+Example:
+
+    @PostMapping
+
+    public Employee save(
+        @RequestBody Employee emp
+    )
+
+JSON
+
+    {
+      "id":1,
+      "name":"John"
+    }
+
+      ↓
+
+    Employee Object
+
+───────────────────────────────────────────────────────────────
+
+12. WHAT IS @ResponseBody?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Returns Data Directly To Client.
+
+Example:
+
+    @ResponseBody
+    public String hello() {
+        return "Hello";
+    }
+
+Output:
+
+    Hello
+
+───────────────────────────────────────────────────────────────
+
+13. WHAT IS @Component?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Registers Bean In Spring Container.
+
+Example:
+
+    @Component
+    public class UtilityService {
+    }
+
+Used For:
+
+    Utility Classes
+
+───────────────────────────────────────────────────────────────
+
+14. WHAT IS @Service?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Service Layer Bean.
+
+Example:
+
+    @Service
+    public class EmployeeService {
+    }
+
+Used For:
+
+    Business Logic
+
+───────────────────────────────────────────────────────────────
+
+15. WHAT IS @Repository?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    DAO Layer Bean.
+
+Example:
+
+    @Repository
+    public class EmployeeDAO {
+    }
+
+Benefits:
+
+    • Database Layer
+    • Exception Translation
+
+───────────────────────────────────────────────────────────────
+
+16. WHAT IS @Autowired?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Automatic Dependency Injection.
+
+Example:
+
+    @Autowired
+    private EmployeeService service;
+
+Purpose:
+
+    Spring Injects Dependency Automatically
+
+───────────────────────────────────────────────────────────────
+
+17. WHAT IS CONSTRUCTOR INJECTION?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Preferred Dependency Injection Technique.
+
+Example:
+
+    public EmployeeController(
+        EmployeeService service
+    ) {
+        this.service = service;
+    }
+
+Benefits:
+
+    • Immutable
+    • Better Design
+    • Easy Unit Testing
+
+───────────────────────────────────────────────────────────────
+
+18. WHAT IS @Qualifier?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Resolves Multiple Bean Conflicts.
+
+Example:
+
+    @Autowired
+    @Qualifier("oracleDB")
+    private Database db;
+
+Use When:
+
+    Multiple Implementations Exist
+
+───────────────────────────────────────────────────────────────
+
+19. WHAT IS @Primary?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Marks Default Bean.
+
+Example:
+
+    @Primary
+    @Component
+    public class OracleDB {
+    }
+
+Use Case:
+
+    Default Bean Selection
+
+───────────────────────────────────────────────────────────────
+
+20. WHAT IS @Value?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Injects Configuration Value.
+
+Example:
+
+    @Value("${server.port}")
+    private String port;
+
+Reads From:
+
+    application.properties
+    application.yml
+
+───────────────────────────────────────────────────────────────
+
+21. WHAT IS @Configuration?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Defines Configuration Class.
+
+Example:
+
+    @Configuration
+    public class AppConfig {
+    }
+
+Used For:
+
+    Bean Definitions
+
+───────────────────────────────────────────────────────────────
+
+22. WHAT IS @Bean?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Creates Bean Manually.
+
+Example:
+
+    @Bean
+    public EmployeeService service() {
+        return new EmployeeService();
+    }
+
+Used When:
+
+    Source Code Cannot Be Modified
+
+───────────────────────────────────────────────────────────────
+
+23. WHAT IS @Profile?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Creates Environment-Specific Beans.
+
+Example:
+
+    @Profile("dev")
+    @Service
+    public class DevService {
+    }
+
+Common Profiles:
+
+    • dev
+    • qa
+    • uat
+    • prod
+
+───────────────────────────────────────────────────────────────
+
+24. WHAT IS @PropertySource?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Loads Additional Property Files.
+
+Example:
+
+    @PropertySource(
+        "app.properties"
+    )
+
+───────────────────────────────────────────────────────────────
+
+25. WHAT IS @EnableScheduling?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Enables Scheduler Support.
+
+Example:
+
+    @EnableScheduling
+
+Used For:
+
+    Batch Jobs
+
+───────────────────────────────────────────────────────────────
+
+26. WHAT IS @Scheduled?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Executes Job Automatically.
+
+Example:
+
+    @Scheduled(
+       cron = "0 0 * * * *"
+    )
+
+Examples:
+
+    • Hourly Job
+    • Daily Batch
+    • Monthly Process
+
+───────────────────────────────────────────────────────────────
+
+27. WHAT IS @EnableAsync?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Enables Asynchronous Processing.
+
+Example:
+
+    @EnableAsync
+
+Purpose:
+
+    Run Background Tasks
+
+───────────────────────────────────────────────────────────────
+
+28. WHAT IS @Async?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Runs Method In Separate Thread.
+
+Example:
+
+    @Async
+    public void sendMail() {
+    }
+
+Used For:
+
+    • Email Processing
+    • Notifications
+    • Report Generation
+
+───────────────────────────────────────────────────────────────
+
+29. WHAT IS @SpringBootTest?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Used For Integration Testing.
+
+Example:
+
+    @SpringBootTest
+    class EmployeeTest {
+    }
+
+Loads:
+
+    Full Spring Context
+
+───────────────────────────────────────────────────────────────
+
+30. WHAT IS @ConditionalOnProperty?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Creates Bean Conditionally.
+
+Example:
+
+    @ConditionalOnProperty(
+        name = "feature.email",
+        havingValue = "true"
+    )
+
+Used For:
+
+    Feature Toggles
+
+═══════════════════════════════════════════════════════════════
+🏦 TOP BANKING DOMAIN ANNOTATION SCENARIOS
+═══════════════════════════════════════════════════════════════
+
+@RestController
+    → Fund Transfer API
+
+@RequestBody
+    → Customer Request JSON
+
+@PathVariable
+    → Account Number
+
+@Service
+    → Business Logic
+
+@Repository
+    → Account DAO
+
+@Transactional
+    → Fund Transfer Transaction
+
+@Async
+    → Email/SMS Notification
+
+@Scheduled
+    → End Of Day Batch Processing
+
+@Profile
+    → Dev / QA / Prod Environment
+
+@SpringBootTest
+    → Integration Testing
+
+═══════════════════════════════════════════════════════════════
+⭐ MOST ASKED SPRING BOOT ANNOTATIONS
+═══════════════════════════════════════════════════════════════
+
+@SpringBootApplication
+
+@RestController
+@Controller
+
+@RequestMapping
+@GetMapping
+@PostMapping
+@PutMapping
+@DeleteMapping
+
+@PathVariable
+@RequestParam
+@RequestBody
+@ResponseBody
+
+@Autowired
+@Qualifier
+@Primary
+
+@Component
+@Service
+@Repository
+
+@Configuration
+@Bean
+
+@Value
+@Profile
+@PropertySource
+
+@EnableScheduling
+@Scheduled
+
+@EnableAsync
+@Async
+
+@SpringBootTest
+
+@Transactional
+
+@ConditionalOnProperty
+
+═══════════════════════════════════════════════════════════════
+🧠 30-SECOND REVISION
+═══════════════════════════════════════════════════════════════
+
+Application
+      ↓
+@RestController
+      ↓
+@GetMapping
+@PostMapping
+      ↓
+@RequestBody
+@PathVariable
+      ↓
+@Service
+      ↓
+@Repository
+      ↓
+@Autowired
+      ↓
+@Configuration
+@Bean
+      ↓
+@Value
+@Profile
+      ↓
+@Scheduled
+      ↓
+@Async
+      ↓
+@SpringBootTest
+      ↓
+@Transactional
+
+═══════════════════════════════════════════════════════════════
+🧠 MEMORY TRICK
+═══════════════════════════════════════════════════════════════
+
+Controller
+    ↓
+Service
+    ↓
+Repository
+
+@Autowired
+    → Inject Dependency
+
+@RequestBody
+    → JSON To Object
+
+@PathVariable
+    → URL Value
+
+@Value
+    → Property Value
+
+@Scheduled
+    → Batch Job
+
+@Async
+    → Background Task
+
+@Transactional
+    → Commit / Rollback Automatically
+
+✅ Interview Tip:
+
+For Senior Java Developer interviews, focus heavily on:
+
+    • @SpringBootApplication
+    • @RestController
+    • @RequestBody
+    • @PathVariable
+    • @Autowired
+    • Constructor Injection
+    • @Service
+    • @Repository
+    • @Transactional
+    • @Async
+    • @Scheduled
+
+These annotations frequently appear in Spring Boot,
+Microservices, Banking Domain, and Enterprise Java interviews.
+
+
+🚀 ADDITIONAL SPRING BOOT ANNOTATIONS
+(MOSTLY MISSED IN INTERVIEWS)
+
+Senior Java Developer | Spring Boot 3.x | Microservices | Banking Domain
+
+═══════════════════════════════════════════════════════════════
+31. WHAT IS @Transactional?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Manages Database Transactions.
+
+Example:
+
+    @Transactional
+    public void transferMoney() {
+
+        debit();
+
+        credit();
+    }
+
+Benefit:
+
+    If any step fails
+    Entire transaction rolls back.
+
+Banking Example:
+
+    Fund Transfer
+
+───────────────────────────────────────────────────────────────
+
+32. WHAT IS @EnableTransactionManagement?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Enables transaction support.
+
+Example:
+
+    @Configuration
+
+    @EnableTransactionManagement
+
+    public class AppConfig {
+    }
+
+───────────────────────────────────────────────────────────────
+
+33. WHAT IS @RequestHeader?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Reads HTTP Header Values.
+
+Example:
+
+    @GetMapping
+
+    public String get(
+      @RequestHeader("Authorization")
+      String token) {
+
+        return token;
+    }
+
+Used For:
+
+    JWT Token
+    Correlation Id
+    Authorization Header
+
+───────────────────────────────────────────────────────────────
+
+34. WHAT IS @ResponseStatus?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Returns Custom HTTP Status.
+
+Example:
+
+    @ResponseStatus(HttpStatus.CREATED)
+
+Output:
+
+    201 CREATED
+
+───────────────────────────────────────────────────────────────
+
+35. WHAT IS @ExceptionHandler?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Handles Specific Exceptions.
+
+Example:
+
+    @ExceptionHandler(
+         EmployeeNotFoundException.class
+    )
+
+    public ResponseEntity<String>
+    handle() {
+
+       return ResponseEntity.notFound().build();
+    }
+
+───────────────────────────────────────────────────────────────
+
+36. WHAT IS @ControllerAdvice?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Global Exception Handler.
+
+Example:
+
+    @ControllerAdvice
+
+    public class GlobalExceptionHandler {
+    }
+
+Benefit:
+
+    Handle errors from all controllers.
+
+───────────────────────────────────────────────────────────────
+
+37. WHAT IS @RestControllerAdvice?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Combination Of:
+
+        @ControllerAdvice
+        @ResponseBody
+
+Used For:
+
+    Global REST Exception Handling
+
+───────────────────────────────────────────────────────────────
+
+38. WHAT IS @CrossOrigin?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Enables CORS Support.
+
+Example:
+
+    @CrossOrigin(
+       origins="http://localhost:3000"
+    )
+
+Use Case:
+
+    React + Spring Boot
+
+───────────────────────────────────────────────────────────────
+
+39. WHAT IS @Valid?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Triggers Bean Validation.
+
+Example:
+
+    public Employee save(
+         @Valid
+         @RequestBody Employee emp)
+
+Validation Example:
+
+    @NotNull
+    @Email
+    @Size
+
+───────────────────────────────────────────────────────────────
+
+40. WHAT IS @Validated?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Advanced Validation Support.
+
+Example:
+
+    @Validated
+    @Service
+
+Used For:
+
+    Method Parameter Validation
+
+───────────────────────────────────────────────────────────────
+
+41. WHAT IS @NotNull?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Field cannot be null.
+
+Example:
+
+    @NotNull
+    private String name;
+
+───────────────────────────────────────────────────────────────
+
+42. WHAT IS @NotBlank?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Cannot be null or empty.
+
+Example:
+
+    @NotBlank
+    private String username;
+
+───────────────────────────────────────────────────────────────
+
+43. WHAT IS @Size?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Restricts String Length.
+
+Example:
+
+    @Size(min=5,max=20)
+    private String password;
+
+───────────────────────────────────────────────────────────────
+
+44. WHAT IS @Email?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Validates Email Format.
+
+Example:
+
+    @Email
+    private String email;
+
+───────────────────────────────────────────────────────────────
+
+45. WHAT IS @ConfigurationProperties?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Maps Properties To Java Object.
+
+application.yml
+
+    app:
+
+      name: PaymentService
+
+      version: v1
+
+Java
+
+    @ConfigurationProperties(
+        prefix="app"
+    )
+
+Benefit:
+
+    Strongly Typed Properties
+
+───────────────────────────────────────────────────────────────
+
+46. WHAT IS @EnableConfigurationProperties?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Enables Configuration Properties Class.
+
+Example:
+
+    @EnableConfigurationProperties(
+         AppProperties.class
+    )
+
+───────────────────────────────────────────────────────────────
+
+47. WHAT IS @Lazy?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Bean created only when needed.
+
+Example:
+
+    @Lazy
+    @Service
+
+Benefit:
+
+    Faster Startup
+
+───────────────────────────────────────────────────────────────
+
+48. WHAT IS @Scope?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Defines Bean Scope.
+
+Example:
+
+    @Scope("prototype")
+
+Types:
+
+    singleton
+    prototype
+    request
+    session
+
+───────────────────────────────────────────────────────────────
+
+49. WHAT IS @PostConstruct?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Runs After Bean Creation.
+
+Example:
+
+    @PostConstruct
+
+    public void init() {
+
+        System.out.println("Loaded");
+    }
+
+───────────────────────────────────────────────────────────────
+
+50. WHAT IS @PreDestroy?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Runs Before Bean Destruction.
+
+Example:
+
+    @PreDestroy
+
+    public void cleanup() {
+
+    }
+
+───────────────────────────────────────────────────────────────
+
+51. WHAT IS @Order?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Defines Execution Order.
+
+Example:
+
+    @Order(1)
+
+Use Cases:
+
+    Filters
+    Interceptors
+
+───────────────────────────────────────────────────────────────
+
+52. WHAT IS @EventListener?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Handles Application Events.
+
+Example:
+
+    @EventListener
+
+    public void processEvent(
+         UserCreatedEvent event)
+
+Use Cases:
+
+    Email Notification
+    Audit Logging
+
+───────────────────────────────────────────────────────────────
+
+53. WHAT IS @EnableCaching?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Enables Cache Support.
+
+Example:
+
+    @EnableCaching
+
+Used With:
+
+    Redis
+    EhCache
+    Hazelcast
+
+───────────────────────────────────────────────────────────────
+
+54. WHAT IS @Cacheable?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Stores Method Result In Cache.
+
+Example:
+
+    @Cacheable("employees")
+
+Benefit:
+
+    Faster Response Time
+
+───────────────────────────────────────────────────────────────
+
+55. WHAT IS @CacheEvict?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Removes Cache Entry.
+
+Example:
+
+    @CacheEvict("employees")
+
+Used After:
+
+    Update
+    Delete
+
+───────────────────────────────────────────────────────────────
+
+56. WHAT IS @Conditional?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Creates Bean Based On Condition.
+
+Example:
+
+    @Conditional(MyCondition.class)
+
+───────────────────────────────────────────────────────────────
+
+57. WHAT IS @EnableWebSecurity?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Enables Spring Security.
+
+Example:
+
+    @EnableWebSecurity
+
+Common Interview Topic
+
+───────────────────────────────────────────────────────────────
+
+58. WHAT IS @PreAuthorize?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Method Level Security.
+
+Example:
+
+    @PreAuthorize(
+      "hasRole('ADMIN')"
+    )
+
+Use Case:
+
+    Access Control
+
+───────────────────────────────────────────────────────────────
+
+59. WHAT IS @Secured?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Restrict Method Access.
+
+Example:
+
+    @Secured("ROLE_ADMIN")
+
+───────────────────────────────────────────────────────────────
+
+60. WHAT IS @EnableMethodSecurity?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Enables Method Security.
+
+Example:
+
+    @EnableMethodSecurity
+
+Spring Boot 3 Preferred Annotation
+
+═══════════════════════════════════════════════════════════════
+🏦 TOP BANKING DOMAIN SCENARIOS
+═══════════════════════════════════════════════════════════════
+
+@Transactional
+    → Fund Transfer
+
+@PreAuthorize
+    → Role Based Access
+
+@RequestHeader
+    → JWT Token
+
+@ControllerAdvice
+    → Global Exception Handling
+
+@Valid
+    → Customer Validation
+
+@Async
+    → SMS / Email Notification
+
+@Scheduled
+    → End Of Day Processing (EOD)
+
+@Cacheable
+    → Account Lookup Cache
+
+@EventListener
+    → Audit Events
+
+@ConfigurationProperties
+    → Environment Configuration
+
+═══════════════════════════════════════════════════════════════
+⭐ TOP 50+ MOST ASKED SPRING BOOT ANNOTATIONS
+═══════════════════════════════════════════════════════════════
+
+Core
+
+    @SpringBootApplication
+    @Component
+    @Service
+    @Repository
+    @Controller
+    @RestController
+
+Dependency Injection
+
+    @Autowired
+    @Qualifier
+    @Primary
+    @Lazy
+
+REST
+
+    @RequestMapping
+    @GetMapping
+    @PostMapping
+    @PutMapping
+    @DeleteMapping
+    @PathVariable
+    @RequestParam
+    @RequestBody
+    @RequestHeader
+    @ResponseBody
+    @ResponseStatus
+
+Validation
+
+    @Valid
+    @Validated
+    @NotNull
+    @NotBlank
+    @Email
+    @Size
+
+Configuration
+
+    @Configuration
+    @Bean
+    @Value
+    @Profile
+    @PropertySource
+    @ConfigurationProperties
+
+Exception Handling
+
+    @ExceptionHandler
+    @ControllerAdvice
+    @RestControllerAdvice
+
+Scheduling
+
+    @EnableScheduling
+    @Scheduled
+
+Async
+
+    @EnableAsync
+    @Async
+
+Cache
+
+    @EnableCaching
+    @Cacheable
+    @CacheEvict
+
+Security
+
+    @EnableWebSecurity
+    @PreAuthorize
+    @Secured
+    @EnableMethodSecurity
+
+Transaction
+
+    @Transactional
+    @EnableTransactionManagement
+
+Lifecycle
+
+    @PostConstruct
+    @PreDestroy
+
+Events
+
+    @EventListener
+
+Testing
+
+    @SpringBootTest
+
+═══════════════════════════════════════════════════════════════
+🧠 ULTIMATE MEMORY FLOW
+═══════════════════════════════════════════════════════════════
+
+@SpringBootApplication
+       ↓
+@RestController
+       ↓
+@Get/Post/Put/DeleteMapping
+       ↓
+@PathVariable
+@RequestParam
+@RequestBody
+@RequestHeader
+       ↓
+@Valid
+       ↓
+@Service
+       ↓
+@Transactional
+       ↓
+@Repository
+       ↓
+@Cacheable
+       ↓
+@Async
+       ↓
+@Scheduled
+       ↓
+@ControllerAdvice
+       ↓
+@PreAuthorize
+       ↓
+@SpringBootTest
+
+✅ These 60 annotations cover approximately 95% of Spring Boot annotation questions asked in Senior Java Developer, Spring Boot Microservices, Banking Domain, JPMC, RBC, MUFG, Cognizant and Product Company interviews.
