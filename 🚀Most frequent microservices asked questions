@@ -1,0 +1,676 @@
+--------------------------------------------------------------------------------------
+Microservices System Design Interview Guide (Senior Java Developer)
+--------------------------------------------------------------------------------------
+
+This format is designed for quick interview revision and detailed understanding for banking clients such as JPMC, RBC, MUFG, Goldman Sachs, and Morgan Stanley.
+
+CDN (Content Delivery Network)
+What is CDN?
+
+A Content Delivery Network (CDN) is a geographically distributed network of servers that stores copies of static content closer to users. Instead of every request traveling to the origin server, users receive content from the nearest CDN edge location.
+-------------------------------------------
+Why is CDN Needed?
+
+Without CDN, a user in the USA accessing a server hosted in Mumbai experiences high latency.
+
+With CDN:
+--------
+
+User
+  ↓
+Nearest CDN Edge Server
+  ↓
+Origin Server
+
+
+This significantly reduces response time.
+
+Benefits
+--------
+Lower latency
+Faster page load
+Reduced backend load
+Improved user experience
+Better global performance
+Popular CDN Providers
+AWS CloudFront
+Akamai
+Cloudflare
+Azure CDN
+Banking Use Cases
+Online banking portal images
+Monthly account statements (PDFs)
+Customer reports
+Static web assets
+
+Interview Answer
+
+"CDN improves application performance by caching static content at edge locations closer to users, reducing latency and minimizing traffic to backend services."
+-------------------------------------------
+Caching
+What is Caching?
+
+Caching stores frequently accessed data in memory so that applications do not repeatedly fetch data from a database.
+-------------------------------------------
+Architecture
+Request
+   ↓
+Redis Cache
+   ↓
+Database (Cache Miss)
+-------------------------------------------
+Cache Types
+
+L1 Cache
+--------
+
+Local JVM Cache
+
+Examples:
+
+Hibernate First Level Cache
+
+L2 Cache
+--------
+
+Shared Cache
+
+Examples:
+
+EhCache
+Hazelcast
+
+Distributed Cache
+----------------
+
+Shared across multiple microservices
+
+Examples:
+
+Redis
+Memcached
+
+Advantages
+Reduced database load
+Faster response time
+Better throughput
+Reduced application cost
+Banking Examples
+Customer profile data
+Currency exchange rates
+Product catalog information
+Session data
+Interview Answer
+
+"Redis is widely used in microservices because it stores data in memory, offers sub-millisecond latency, and supports distributed caching."
+-------------------------------------------
+High Throughput
+What is High Throughput?
+
+Throughput is the number of requests or transactions a system can process per second.
+
+Examples:
+
+100,000 transactions per second
+500,000 payments per hour
+
+--------------------------------
+How to Achieve High Throughput?
+Horizontal Scaling
+1 Server
+ ↓
+10 Servers
+ ↓
+100 Servers
+
+Kafka Partitioning
+
+Messages processed in parallel.
+
+Asynchronous Processing
+
+Examples:
+
+Kafka
+RabbitMQ
+SQS
+
+Redis Caching
+
+Eliminates database bottlenecks.
+
+Database Optimization
+Indexing
+Sharding
+Partitioning
+Banking Example
+
+Real-time payment systems process thousands of transactions every second.
+
+Interview Answer
+
+"High throughput is achieved through horizontal scaling, asynchronous processing,
+Kafka partitioning, caching, and database optimization."
+-------------------------------------------
+Global Scale
+What is Global Scale?
+
+Ability of an application to serve users across multiple countries and regions efficiently.
+
+Example:
+
+India
+USA
+Europe
+Singapore
+Australia
+-------------------------------------------
+Techniques
+Multi-Region Deployment
+US-East
+EU-West
+AP-South
+
+Geo Routing
+
+Route traffic to nearest data center.
+-------------------------------------------
+CDN
+
+Distribute content globally.
+
+Replicated Databases
+Primary
+   ↓
+Read Replicas
+
+Advantages
+Reduced latency
+Higher availability
+Better disaster recovery
+Interview Answer
+
+"Global scale is achieved using multi-region deployments, CDN, geo-routing, replicated databases, and container orchestration platforms like Kubernetes."
+-------------------------------------------
+Top 10 Follow-Up Questions
+-------------------------------------------
+1. Why Kafka Instead of REST?
+
+REST communication is synchronous.
+
+Order Service
+      ↓
+Payment Service
+
+
+If Payment Service is down, Order processing fails.
+
+Kafka is asynchronous.
+
+Order Service
+      ↓
+Kafka
+      ↓
+Payment Service
+
+
+Payment Service can process later.
+
+Advantages
+Loose coupling
+Better scalability
+Fault tolerance
+High throughput
+Event-driven architecture
+Interview Answer
+
+"Kafka decouples producers and consumers and provides asynchronous communication, making the system more scalable and resilient."
+---------------------------------------------------------------------------------------------------------------------------------
+2. Why Eventual Consistency?
+
+In microservices:
+
+Order Service
+Payment Service
+Inventory Service
+
+
+Each service owns its own database.
+
+Traditional ACID transactions are difficult across multiple services.
+
+Instead:
+
+Service A Updated
+      ↓
+Event Published
+      ↓
+Service B Updated
+
+
+Consistency is achieved eventually.
+
+Interview Answer
+
+"Eventual consistency improves scalability and availability while allowing independent service ownership."
+
+---------------------------------------------------------------------------------------------------------------------------------
+3. Why Saga Choreography Over Orchestration?
+Orchestration
+
+A central coordinator controls all services.
+
+Orchestrator
+   ↓
+Order
+   ↓
+Payment
+   ↓
+Inventory
+
+Problem
+
+Single point of failure.
+
+Choreography
+
+Each service publishes events.
+
+OrderCreated
+      ↓
+InventoryUpdated
+      ↓
+PaymentCompleted
+      ↓
+NotificationSent
+
+Advantages
+Loosely coupled
+Better scalability
+No central controller
+Interview Answer
+
+"Choreography promotes autonomous services and avoids single points of failure, making it suitable for event-driven architectures."
+---------------------------------------------------------------------------------------------------------------------------------
+4. When Would You Use gRPC?
+
+Use gRPC for:
+
+Internal service communication
+Low latency requirements
+High throughput systems
+Real-time processing
+
+gRPC uses:
+
+HTTP/2
+Protocol Buffers
+
+
+Instead of:
+
+HTTP/JSON
+
+Banking Example
+
+Payment Service ↔ Fraud Service
+
+Interview Answer
+
+"gRPC is preferred for internal microservice communication because it offers lower latency and higher performance than REST."
+---------------------------------------------------------------------------------------------------------------------------------
+5. How Do You Handle Retries?
+Retry Pattern
+
+Automatically retry transient failures.
+
+Exponential Backoff
+1 sec
+2 sec
+4 sec
+8 sec
+
+Dead Letter Queue
+
+Failed messages moved to DLQ.
+
+Tools
+Resilience4j
+Kafka Retry Topics
+AWS SQS DLQ
+Interview Answer
+
+"Retries should include exponential backoff and DLQ support to avoid overwhelming downstream services."
+-------------------------------------------
+6. How Do You Avoid Duplicate Events?
+
+Critical in payment systems.
+
+Solutions
+Idempotency Key
+TXN-1001
+
+Deduplication Table
+event_id
+---------
+101
+102
+103
+
+Kafka Exactly Once Semantics (EOS)
+
+Prevents duplicate processing.
+
+Interview Answer
+
+"Idempotency, deduplication tables, and Kafka EOS are commonly used to prevent duplicate event processing."
+---------------------------------------------------------------------------------------------------------------------------------
+7. How Do You Monitor Microservices?
+Metrics
+
+Prometheus
+
+CPU
+Memory
+Latency
+TPS
+
+Logs
+
+ELK Stack
+
+Elasticsearch
+Logstash
+Kibana
+
+Distributed Tracing
+OpenTelemetry
+Jaeger
+Zipkin
+
+Monitoring Dashboards
+Grafana
+CloudWatch
+Datadog
+
+Interview Answer
+
+"Microservices are monitored using metrics, centralized logging, distributed tracing, and alerting systems."
+--------------------------------------------------------------------------------------
+8. How Do You Secure Service-to-Service Communication?
+JWT Authentication
+Service A
+   ↓ JWT
+Service B
+
+Mutual TLS (mTLS)
+
+Both services validate certificates.
+
+Service Mesh
+Istio
+Linkerd
+
+Secret Storage
+AWS Secrets Manager
+HashiCorp Vault
+
+Interview Answer
+
+"Service-to-service communication is secured using JWTs, mTLS, service meshes, and centralized secret management."
+---------------------------------------------------------------------------------------------------------------------------------
+9. How Do You Version APIs?
+URI Versioning
+/api/v1/customer
+/api/v2/customer
+
+Header Versioning
+Accept: application/vnd.v2+json
+
+Best Practice
+
+Maintain backward compatibility.
+
+Interview Answer
+
+"API versioning allows changes without breaking existing consumers and ensures backward compatibility."
+---------------------------------------------------------------------------------------------------------------------------------
+10. How Do You Deploy Microservices Without Downtime?
+Rolling Deployment
+
+Pods replaced gradually.
+
+Blue-Green Deployment
+Blue  = Current Version
+Green = New Version
+
+
+Traffic switched instantly.
+
+Canary Deployment
+5%
+10%
+25%
+50%
+100%
+
+
+Gradual rollout.
+
+Interview Answer
+
+"Zero downtime deployments are achieved using rolling, blue-green, or canary deployment strategies."
+
+--------------------------------------------------------------------------------------
+Most Important Banking Interview Topics
+--------------------------------------------------------------------------------------
+1. Saga Pattern
+
+Manages distributed transactions using compensating actions.
+
+Example:
+
+Debit Account
+Credit Account
+Send Notification
+
+
+Rollback if any step fails.
+--------------------------------------------------------------------------------------
+2. Outbox Pattern
+
+Ensures database and Kafka remain consistent.
+
+Business Table
+Outbox Table
+
+
+CDC tools publish events reliably.
+--------------------------------------------------------------------------------------
+3. Kafka Exactly Once Semantics (EOS)
+
+Guarantees:
+
+No Lost Events
+No Duplicate Events
+
+
+Mandatory in payment systems.
+--------------------------------------------------------------------------------------
+4. Event Sourcing
+
+Store events instead of current state.
+
+AccountCreated
+MoneyDeposited
+MoneyWithdrawn
+
+
+Provides complete audit history.
+--------------------------------------------------------------------------------------
+5. CQRS
+
+Separate Read and Write operations.
+
+Write Model
+Read Model
+
+
+Improves scalability and performance.
+--------------------------------------------------------------------------------------
+6. Circuit Breaker
+
+Protects systems from cascading failures.
+
+States:
+
+Closed
+Open
+Half-Open
+
+
+Implemented using Resilience4j.
+--------------------------------------------------------------------------------------
+7. Idempotency
+
+Repeated requests produce the same result.
+
+Example:
+
+Pay ₹10,000
+
+
+Executed once even if submitted multiple times.
+--------------------------------------------------------------------------------------
+8. Distributed Tracing
+
+Tracks request flow across microservices.
+
+Gateway
+   ↓
+Order
+   ↓
+Payment
+   ↓
+Notification
+
+
+Tools:
+
+OpenTelemetry
+Jaeger
+Zipkin
+--------------------------------------------------------------------------------------
+9. Kubernetes Scaling
+
+Uses:
+
+HPA
+VPA
+Cluster Autoscaler
+
+
+Automatically scales workloads.
+--------------------------------------------------------------------------------------
+10. API Gateway
+
+Responsibilities:
+
+Authentication
+Authorization
+Routing
+Rate Limiting
+Logging
+
+Examples:
+
+AWS API Gateway
+Kong
+Spring Cloud Gateway
+--------------------------------------------------------------------------------------
+11. OAuth2 + JWT
+
+Industry standard security approach.
+
+User
+ ↓
+OAuth Server
+ ↓
+JWT Token
+ ↓
+Microservices
+--------------------------------------------------------------------------------------
+12. Transaction Consistency
+
+Achieved using:
+
+Saga
+Kafka
+Outbox Pattern
+CDC
+Eventual Consistency
+
+Avoid distributed ACID transactions.
+--------------------------------------------------------------------------------------
+13. High Availability & Disaster Recovery
+
+Important Terms:
+
+RTO
+
+Recovery Time Objective
+
+RPO
+
+Recovery Point Objective
+
+Deployment Models
+Active-Active
+Active-Passive
+Multi-AZ
+Multi-Region
+--------------------------------------------------------------------------------------
+14. Redis Caching
+
+Commonly used for:
+
+Customer profiles
+Session management
+Configuration data
+Frequently accessed reference data
+--------------------------------------------------------------------------------------
+15. Database Per Service
+
+Preferred microservice architecture pattern.
+
+Customer Service → Customer DB
+Order Service    → Order DB
+Payment Service  → Payment DB
+
+Benefits
+Loose coupling
+Independent deployment
+Independent scaling
+Better service ownership
+Improved fault isolation
+30-Second Architect Revision
+Kafka           → Async Communication
+Saga            → Distributed Transactions
+Outbox          → Reliable Event Publishing
+EOS             → Exactly Once Processing
+CQRS            → Separate Read & Write Models
+Event Sourcing  → Audit Trail
+Circuit Breaker → Prevent Cascading Failure
+Redis           → Fast Caching
+Kubernetes      → Auto Scaling
+API Gateway     → Entry Point
+OAuth2 + JWT    → Security
+OpenTelemetry   → Distributed Tracing
+Database/Service→ Loose Coupling
+Multi-Region    → Global Scale
+Blue-Green      → Zero Downtime Deployment
+
+
+For a 13+ year Senior Java Developer interview, focus heavily on Saga, Outbox,
+Kafka EOS, Idempotency, CQRS, Event Sourcing, Redis, Kubernetes Scaling, Distributed Tracing, 
+and High Availability/Disaster Recovery, as these topics frequently appear in banking-domain architecture rounds.
