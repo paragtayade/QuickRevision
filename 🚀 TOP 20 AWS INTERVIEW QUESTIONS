@@ -1,0 +1,593 @@
+🚀 TOP 20 AWS INTERVIEW QUESTIONS
+Java + Spring Boot + Banking Domain Quick Revision Sheet
+
+═══════════════════════════════════════════════════════════════
+1. WHAT IS AWS?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    AWS (Amazon Web Services) is a cloud computing platform
+    that provides compute, storage, networking, database,
+    security, analytics, and AI services on a pay-as-you-go
+    pricing model.
+
+Examples:
+
+    • EC2
+    • S3
+    • Lambda
+    • RDS
+    • ECS
+
+───────────────────────────────────────────────────────────────
+
+2. WHAT IS AMAZON EC2?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    EC2 (Elastic Compute Cloud) provides virtual servers
+    in the cloud.
+
+Use Case:
+
+    Run Spring Boot Microservices
+
+Benefits:
+
+    • Scalable
+    • Highly Available
+    • Flexible
+
+───────────────────────────────────────────────────────────────
+
+3. WHAT IS AMAZON S3?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    S3 (Simple Storage Service) is an object storage service.
+
+Used For:
+
+    • Files
+    • Images
+    • Backups
+    • Logs
+    • Videos
+
+Key Feature:
+
+    Durability = 99.999999999%
+    (11 Nines)
+
+───────────────────────────────────────────────────────────────
+
+4. DIFFERENCE BETWEEN EBS AND S3?
+═══════════════════════════════════════════════════════════════
+
+EBS
+
+    • Block Storage
+    • Attached To EC2
+    • Low Latency
+    • Database Storage
+
+S3
+
+    • Object Storage
+    • Independent Service
+    • Massive Scalability
+    • File Storage
+
+───────────────────────────────────────────────────────────────
+
+5. WHAT IS AWS LAMBDA?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    AWS Lambda is a serverless compute service that executes
+    code without managing servers.
+
+Benefits:
+
+    • No Server Management
+    • Auto Scaling
+    • Pay Per Use
+
+Banking Example:
+
+    Process Payment Events
+
+───────────────────────────────────────────────────────────────
+
+6. WHAT IS API GATEWAY?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    API Gateway is a managed service used to create,
+    publish, secure and monitor APIs.
+
+Flow:
+
+    Client
+      ↓
+    API Gateway
+      ↓
+    Lambda / ECS / EC2
+      ↓
+    Response
+
+Benefits:
+
+    • Security
+    • Rate Limiting
+    • Authentication
+    • Monitoring
+
+───────────────────────────────────────────────────────────────
+
+7. WHAT IS IAM?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    IAM (Identity and Access Management) manages AWS
+    authentication and authorization.
+
+Used For:
+
+    • Users
+    • Roles
+    • Policies
+    • Permissions
+
+Interview Point:
+
+    IAM is the core AWS security service.
+
+───────────────────────────────────────────────────────────────
+
+8. IAM USER VS IAM ROLE
+═══════════════════════════════════════════════════════════════
+
+IAM User
+
+    • Permanent Credentials
+    • Human User/Application
+    • Username & Password
+
+IAM Role
+
+    • Temporary Credentials
+    • AWS Services
+    • Assumed Dynamically
+
+Example:
+
+    ECS Task → Assume IAM Role
+
+───────────────────────────────────────────────────────────────
+
+9. WHAT IS A VPC?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    VPC (Virtual Private Cloud) allows creation of isolated
+    private networks inside AWS.
+
+Components:
+
+    • Subnets
+    • Route Tables
+    • Internet Gateway
+    • NAT Gateway
+    • Security Groups
+
+───────────────────────────────────────────────────────────────
+
+10. PUBLIC SUBNET VS PRIVATE SUBNET
+═══════════════════════════════════════════════════════════════
+
+Public Subnet
+
+    • Direct Internet Access
+    • Web Servers
+    • Load Balancers
+
+Private Subnet
+
+    • No Direct Internet Access
+    • Databases
+    • Internal Applications
+
+───────────────────────────────────────────────────────────────
+
+11. WHAT IS APPLICATION LOAD BALANCER (ALB)?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    ALB distributes incoming traffic across multiple
+    servers or containers.
+
+Features:
+
+    • Path Based Routing
+    • Host Based Routing
+    • SSL Termination
+    • High Availability
+
+Flow:
+
+    User
+      ↓
+     ALB
+      ↓
+    ECS / EC2
+      ↓
+    Spring Boot Service
+
+───────────────────────────────────────────────────────────────
+
+12. WHAT IS AUTO SCALING?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    Automatically adds or removes resources based
+    on workload.
+
+Benefits:
+
+    • High Availability
+    • Cost Optimization
+    • Improved Performance
+
+Example:
+
+    CPU > 70%
+
+        2 Servers
+            ↓
+        10 Servers
+
+───────────────────────────────────────────────────────────────
+
+13. WHAT IS CLOUDWATCH?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    AWS CloudWatch is a monitoring and observability service.
+
+Used For:
+
+    • Metrics
+    • Logs
+    • Alarms
+    • Dashboards
+
+Interview Favorite:
+
+    CloudWatch monitors applications and infrastructure.
+
+───────────────────────────────────────────────────────────────
+
+14. WHAT IS SNS?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    SNS (Simple Notification Service) provides
+    publish-subscribe messaging.
+
+Flow:
+
+         Application
+               ↓
+              SNS
+
+        ↙      ↓      ↘
+
+      Email   SMS   Lambda
+
+Use Cases:
+
+    • Alerts
+    • Notifications
+    • Broadcast Messages
+
+───────────────────────────────────────────────────────────────
+
+15. WHAT IS SQS?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    SQS (Simple Queue Service) decouples applications
+    through message queues.
+
+Flow:
+
+    Producer
+       ↓
+      SQS
+       ↓
+    Consumer
+
+Benefits:
+
+    • Reliable Processing
+    • Message Buffering
+    • Fault Tolerance
+
+───────────────────────────────────────────────────────────────
+
+16. SNS VS SQS
+═══════════════════════════════════════════════════════════════
+
+SNS
+
+    • Push Model
+    • Broadcast Message
+    • Multiple Subscribers
+
+SQS
+
+    • Pull Model
+    • Queue Processing
+    • One Consumer At A Time
+
+───────────────────────────────────────────────────────────────
+
+17. WHAT IS RDS?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    RDS (Relational Database Service) is a managed
+    relational database service.
+
+Supports:
+
+    • Oracle
+    • PostgreSQL
+    • MySQL
+    • SQL Server
+    • MariaDB
+
+Banking Use Case:
+
+    Transaction Databases
+
+───────────────────────────────────────────────────────────────
+
+18. WHAT IS DYNAMODB?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    DynamoDB is a fully managed NoSQL database.
+
+Features:
+
+    • Millisecond Latency
+    • Auto Scaling
+    • Serverless
+    • High Throughput
+
+Use Cases:
+
+    • User Sessions
+    • Shopping Carts
+    • Event Storage
+
+───────────────────────────────────────────────────────────────
+
+19. ECS VS EKS
+═══════════════════════════════════════════════════════════════
+
+ECS
+
+    • AWS Managed Container Service
+    • Simpler Setup
+    • AWS Native
+    • Easier Management
+
+EKS
+
+    • Managed Kubernetes
+    • Portable Across Clouds
+    • Industry Standard
+    • More Flexible
+
+Interview Answer:
+
+    ECS = Easier
+    EKS = More Flexible
+
+───────────────────────────────────────────────────────────────
+
+20. WHAT IS CLOUDFRONT?
+═══════════════════════════════════════════════════════════════
+
+Answer:
+
+    CloudFront is AWS Content Delivery Network (CDN).
+
+Benefits:
+
+    • Faster Content Delivery
+    • Global Edge Locations
+    • Reduced Latency
+    • Improved Performance
+
+═══════════════════════════════════════════════════════════════
+🎯 TOP 5 SCENARIO-BASED AWS QUESTIONS
+═══════════════════════════════════════════════════════════════
+
+Q1. Store files uploaded by customers?
+
+Answer:
+
+    ✅ Amazon S3
+
+────────────────────────────────────────
+
+Q2. Create thumbnail after image upload?
+
+Answer:
+
+    ✅ S3 + Lambda
+
+Flow:
+
+    Image Upload
+          ↓
+         S3
+          ↓
+      Lambda
+          ↓
+    Thumbnail Creation
+
+────────────────────────────────────────
+
+Q3. Decouple Payment Service and Notification Service?
+
+Answer:
+
+    ✅ Amazon SQS
+
+────────────────────────────────────────
+
+Q4. Broadcast transaction alerts to
+    Email + SMS + Mobile App?
+
+Answer:
+
+    ✅ Amazon SNS
+
+────────────────────────────────────────
+
+Q5. Expose Spring Boot APIs securely?
+
+Answer:
+
+    ✅ API Gateway + ALB + ECS/Lambda
+
+Flow:
+
+    Client
+      ↓
+    API Gateway
+      ↓
+       ALB
+      ↓
+    ECS Service
+      ↓
+    Spring Boot API
+
+═══════════════════════════════════════════════════════════════
+🧠 AWS MEMORY TRICK
+═══════════════════════════════════════════════════════════════
+
+Compute
+
+    • EC2
+    • Lambda
+    • ECS
+
+Storage
+
+    • S3
+    • EBS
+
+Database
+
+    • RDS
+    • DynamoDB
+
+Messaging
+
+    • SNS
+    • SQS
+
+Networking
+
+    • VPC
+    • Route53
+
+Monitoring
+
+    • CloudWatch
+
+Security
+
+    • IAM
+    • KMS
+
+API
+
+    • API Gateway
+
+═══════════════════════════════════════════════════════════════
+⭐ GOLDEN INTERVIEW LINE
+═══════════════════════════════════════════════════════════════
+
+"In most enterprise banking projects, the most frequently
+used AWS services are IAM, VPC, EC2/ECS, S3, RDS,
+API Gateway, Lambda, CloudWatch, SNS, and SQS."
+
+═══════════════════════════════════════════════════════════════
+🧠 30-SECOND AWS REVISION
+═══════════════════════════════════════════════════════════════
+
+COMPUTE
+
+    EC2
+    ECS
+    Lambda
+
+STORAGE
+
+    S3
+    EBS
+
+DATABASE
+
+    RDS
+    DynamoDB
+
+MESSAGING
+
+    SNS
+    SQS
+
+NETWORKING
+
+    VPC
+    Route53
+    ALB
+
+SECURITY
+
+    IAM
+    KMS
+
+MONITORING
+
+    CloudWatch
+
+API
+
+    API Gateway
+
+✅ These AWS services cover approximately 80-90% of AWS
+interview questions asked for Senior Java Spring Boot
+Microservices roles in banking projects (JPMC, RBC, MUFG,
+Cognizant, Infosys, TCS, Accenture, etc.).
