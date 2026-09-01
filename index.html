@@ -11,7 +11,7 @@
 
     <meta
         name="description"
-        content="QuickRevision interview preparation library covering Java, Spring Boot, Microservices, Kafka, AWS, SQL, Docker, Kubernetes, CI/CD and System Design."
+        content="QuickRevision interview preparation library for Java, Spring Boot, Microservices, Kafka, AWS, SQL, Docker, Kubernetes, CI/CD and System Design."
     >
 
     <title>
@@ -28,8 +28,9 @@
             --primary: #2457d6;
             --primary-dark: #173e9f;
             --border: #dfe6f1;
-            --danger: #dc2626;
-            --success: #15803d;
+            --error-background: #fff1f2;
+            --error-border: #fecaca;
+            --error-text: #b91c1c;
 
             --shadow:
                 0 12px 30px
@@ -187,9 +188,9 @@
 
         main {
             padding:
-                34px
+                36px
                 0
-                60px;
+                64px;
         }
 
         .section-heading {
@@ -210,13 +211,13 @@
             margin:
                 0
                 0
-                22px;
+                24px;
 
             color: var(--muted);
         }
 
         /*
-         * Search and filters
+         * Search and filter controls
          */
 
         .toolbar {
@@ -224,7 +225,7 @@
 
             grid-template-columns:
                 minmax(0, 1fr)
-                240px
+                235px
                 auto;
 
             gap: 12px;
@@ -273,7 +274,7 @@
             white-space: nowrap;
         }
 
-        .status {
+        .status-message {
             min-height: 24px;
 
             margin:
@@ -305,7 +306,7 @@
             display: flex;
             flex-direction: column;
 
-            min-height: 220px;
+            min-height: 222px;
             padding: 21px;
 
             border:
@@ -371,11 +372,12 @@
             font-size: 0.91rem;
         }
 
-        .read-button {
+        .view-button {
             width: 100%;
             min-height: 43px;
 
             margin-top: auto;
+
             padding:
                 10px
                 14px;
@@ -394,42 +396,19 @@
                 transform 0.15s ease;
         }
 
-        .read-button:hover {
+        .view-button:hover {
             background: var(--primary-dark);
             transform: translateY(-1px);
         }
 
         /*
-         * Empty result
+         * Loading cards
          */
 
-        .empty-state {
-            grid-column:
-                1
-                /
-                -1;
+        .loading-card {
+            min-height: 190px;
 
-            padding: 42px 20px;
-
-            border:
-                1px dashed
-                var(--border);
-
-            border-radius: 16px;
-
-            background: var(--surface);
-
-            text-align: center;
-            color: var(--muted);
-        }
-
-        /*
-         * Content viewer
-         */
-
-        .content-panel {
-            margin-top: 28px;
-            padding: 25px;
+            padding: 21px;
 
             border:
                 1px solid
@@ -441,140 +420,127 @@
             box-shadow: var(--shadow);
         }
 
-        .content-panel[hidden] {
-            display: none;
+        .loading-line {
+            height: 15px;
+            margin-bottom: 13px;
+
+            border-radius: 8px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #edf1f7 25%,
+                    #f8faff 50%,
+                    #edf1f7 75%
+                );
+
+            background-size: 200% 100%;
+
+            animation:
+                loading-animation
+                1.3s
+                infinite;
         }
 
-        .content-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 18px;
-
-            margin-bottom: 18px;
+        .loading-line.short {
+            width: 36%;
         }
 
-        .content-title-area {
-            min-width: 0;
+        .loading-line.medium {
+            width: 70%;
         }
 
-        .content-label {
-            display: block;
-
-            margin-bottom: 5px;
-
-            color: var(--primary);
-
-            font-size: 0.76rem;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
+        .loading-line.long {
+            width: 94%;
         }
 
-        .content-title {
-            margin: 0;
+        @keyframes loading-animation {
 
-            font-size: 1.35rem;
-            line-height: 1.4;
+            0% {
+                background-position: 200% 0;
+            }
 
-            overflow-wrap: anywhere;
+            100% {
+                background-position: -200% 0;
+            }
         }
 
-        .viewer-actions {
-            display: flex;
-            flex-shrink: 0;
-            gap: 9px;
-        }
+        /*
+         * Empty and error states
+         */
 
-        .copy-button,
-        .close-button {
+        .message-box {
+            grid-column:
+                1
+                /
+                -1;
+
             padding:
-                8px
-                14px;
+                42px
+                22px;
+
+            border-radius: 16px;
+
+            background: var(--surface);
+
+            text-align: center;
+        }
+
+        .empty-state {
+            border:
+                1px dashed
+                var(--border);
+
+            color: var(--muted);
+        }
+
+        .error-state {
+            border:
+                1px solid
+                var(--error-border);
+
+            background:
+                var(--error-background);
+
+            color:
+                var(--error-text);
+        }
+
+        .message-box h3 {
+            margin:
+                0
+                0
+                6px;
+        }
+
+        .message-box p {
+            margin: 0;
+        }
+
+        .retry-button {
+            margin-top: 16px;
+
+            padding:
+                9px
+                16px;
 
             border: none;
             border-radius: 8px;
 
+            background: var(--primary);
             color: #ffffff;
 
             font-weight: 750;
             cursor: pointer;
         }
 
-        .copy-button {
-            background: var(--success);
-        }
-
-        .copy-button:hover {
-            background: #166534;
-        }
-
-        .close-button {
-            background: var(--danger);
-        }
-
-        .close-button:hover {
-            background: #b91c1c;
-        }
-
-        .file-content {
-            max-height: 760px;
-            overflow: auto;
-
-            margin: 0;
-            padding: 23px;
-
-            border-radius: 12px;
-
-            background: #111827;
-            color: #e5e7eb;
-
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-
-            font-family:
-                Consolas,
-                Monaco,
-                "Courier New",
-                monospace;
-
-            font-size: 0.9rem;
-            line-height: 1.72;
-
-            tab-size: 4;
-        }
-
-        .loading-message {
-            margin: 0;
-            padding: 18px;
-
-            border-radius: 10px;
-
-            background: var(--surface-soft);
-            color: var(--primary-dark);
-
-            font-weight: 700;
-        }
-
-        .error-message {
-            padding: 18px;
-
-            border:
-                1px solid
-                #fecaca;
-
-            border-radius: 10px;
-
-            background: #fff1f2;
-            color: #b91c1c;
-        }
-
         /*
-         * Back to top button
+         * Back-to-top button
          */
 
         .top-button {
             position: fixed;
+
             right: 20px;
             bottom: 20px;
 
@@ -638,7 +604,7 @@
 
             .toolbar {
                 grid-template-columns:
-                    1fr
+                    minmax(0, 1fr)
                     190px;
             }
 
@@ -667,26 +633,8 @@
                 grid-column: auto;
             }
 
-            .content-panel {
-                padding: 17px;
-            }
-
-            .content-header {
-                flex-direction: column;
-            }
-
-            .viewer-actions {
-                width: 100%;
-            }
-
-            .copy-button,
-            .close-button {
-                flex: 1;
-            }
-
-            .file-content {
-                padding: 16px;
-                font-size: 0.83rem;
+            .resource-grid {
+                grid-template-columns: 1fr;
             }
 
             .top-button {
@@ -745,8 +693,8 @@
         </h2>
 
         <p class="section-description">
-            Search by technology or select a category.
-            Open any guide to read it on this page.
+            Search by topic or select a technology category.
+            Each guide opens on a separate reading page.
         </p>
 
 
@@ -763,11 +711,13 @@
                 autocomplete="off"
             >
 
+
             <select
                 id="categorySelect"
                 class="category-select"
                 aria-label="Filter by technology category"
             >
+
                 <option value="All">
                     All Categories
                 </option>
@@ -803,6 +753,7 @@
                 <option value="Quick Revision">
                     Other Resources
                 </option>
+
             </select>
 
 
@@ -819,14 +770,14 @@
 
         <p
             id="statusMessage"
-            class="status"
+            class="status-message"
             aria-live="polite"
         >
             Loading revision resources from the main branch.
         </p>
 
 
-        <!-- File cards are generated here -->
+        <!-- Cards are generated dynamically -->
 
         <section
             id="resourceGrid"
@@ -835,66 +786,10 @@
         >
         </section>
 
-
-        <!-- File viewer -->
-
-        <section
-            id="contentPanel"
-            class="content-panel"
-            aria-label="Revision guide content"
-            hidden
-        >
-
-            <div class="content-header">
-
-                <div class="content-title-area">
-
-                    <span class="content-label">
-                        Revision Guide
-                    </span>
-
-                    <h2
-                        id="contentTitle"
-                        class="content-title"
-                    >
-                        Selected Resource
-                    </h2>
-
-                </div>
-
-
-                <div class="viewer-actions">
-
-                    <button
-                        id="copyButton"
-                        class="copy-button"
-                        type="button"
-                    >
-                        Copy Text
-                    </button>
-
-                    <button
-                        id="closeButton"
-                        class="close-button"
-                        type="button"
-                    >
-                        Close
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div id="contentBody">
-            </div>
-
-        </section>
-
     </main>
 
 
-    <!-- Back to top -->
+    <!-- Back-to-top button -->
 
     <button
         id="topButton"
@@ -907,7 +802,7 @@
     </button>
 
 
-    <!-- Footer contains no external links -->
+    <!-- Footer has no repository links -->
 
     <footer>
 
@@ -922,10 +817,12 @@
     <script>
 
         /*
-         * Repository details
+         * Repository configuration
          *
-         * These values are used only to retrieve text files.
-         * No visible page element links to the repository.
+         * This API address is used only to retrieve
+         * the list of files from the main branch.
+         *
+         * No visible page element navigates to GitHub.
          */
 
         const repositoryOwner =
@@ -947,7 +844,7 @@
 
 
         /*
-         * HTML elements
+         * Page elements
          */
 
         const browseButton =
@@ -980,31 +877,6 @@
                 "resourceGrid"
             );
 
-        const contentPanel =
-            document.getElementById(
-                "contentPanel"
-            );
-
-        const contentTitle =
-            document.getElementById(
-                "contentTitle"
-            );
-
-        const contentBody =
-            document.getElementById(
-                "contentBody"
-            );
-
-        const copyButton =
-            document.getElementById(
-                "copyButton"
-            );
-
-        const closeButton =
-            document.getElementById(
-                "closeButton"
-            );
-
         const topButton =
             document.getElementById(
                 "topButton"
@@ -1012,16 +884,14 @@
 
 
         /*
-         * Application data
+         * Stores all root-level revision files.
          */
 
         let allResources = [];
 
-        let currentFileText = "";
-
 
         /*
-         * Scroll to revision guides.
+         * Scroll to resource list.
          */
 
         function scrollToResources() {
@@ -1036,8 +906,8 @@
 
 
         /*
-         * Remove rocket emoji and optional .txt
-         * extension from the visible title.
+         * Remove the rocket emoji and optional
+         * .txt extension from the visible title.
          */
 
         function cleanResourceName(name) {
@@ -1050,7 +920,9 @@
 
 
         /*
-         * Identify the resource category.
+         * Determine category from filename.
+         *
+         * More specific categories are checked first.
          */
 
         function getCategory(name) {
@@ -1058,11 +930,6 @@
             const value =
                 name.toLowerCase();
 
-
-            /*
-             * More specific checks are kept before
-             * general checks so categories remain accurate.
-             */
 
             if (
                 value.includes("docker")
@@ -1174,7 +1041,7 @@
 
 
         /*
-         * Description shown on each card.
+         * Description for each technology category.
          */
 
         function getDescription(name) {
@@ -1195,7 +1062,7 @@
                     "Microservices, Kafka and event-driven architecture interview preparation.",
 
                 "AWS & Cloud":
-                    "AWS cloud services and cloud-native interview revision material.",
+                    "AWS services and cloud-native interview revision material.",
 
                 "Database":
                     "SQL and PL/SQL interview questions, queries and database concepts.",
@@ -1216,7 +1083,7 @@
 
 
         /*
-         * Sort resources alphabetically without
+         * Sort guides alphabetically without
          * considering the rocket emoji.
          */
 
@@ -1233,10 +1100,49 @@
 
 
         /*
-         * Render revision-guide cards.
+         * Display loading cards while retrieving files.
+         */
+
+        function showLoadingCards() {
+
+            resourceGrid.innerHTML = "";
+
+
+            for (
+                let cardNumber = 0;
+                cardNumber < 6;
+                cardNumber++
+            ) {
+
+                const loadingCard =
+                    document.createElement(
+                        "div"
+                    );
+
+                loadingCard.className =
+                    "loading-card";
+
+
+                loadingCard.innerHTML = `
+                    <div class="loading-line short"></div>
+                    <div class="loading-line long"></div>
+                    <div class="loading-line medium"></div>
+                    <div class="loading-line long"></div>
+                `;
+
+
+                resourceGrid.appendChild(
+                    loadingCard
+                );
+            }
+        }
+
+
+        /*
+         * Render revision guide cards.
          *
-         * No anchor elements or external navigation
-         * are created.
+         * No anchor elements are created.
+         * The button opens viewer.html.
          */
 
         function renderResources(resources) {
@@ -1257,13 +1163,39 @@
             if (resources.length === 0) {
 
                 const emptyState =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
                 emptyState.className =
-                    "empty-state";
+                    "message-box empty-state";
 
-                emptyState.textContent =
-                    "No matching revision guide found.";
+
+                const emptyTitle =
+                    document.createElement(
+                        "h3"
+                    );
+
+                emptyTitle.textContent =
+                    "No matching guide found";
+
+
+                const emptyDescription =
+                    document.createElement(
+                        "p"
+                    );
+
+                emptyDescription.textContent =
+                    "Try a different search term or category.";
+
+
+                emptyState.appendChild(
+                    emptyTitle
+                );
+
+                emptyState.appendChild(
+                    emptyDescription
+                );
 
 
                 resourceGrid.appendChild(
@@ -1274,106 +1206,135 @@
             }
 
 
-            resources.forEach(resource => {
+            resources.forEach(
+                function (resource) {
 
-                const card =
-                    document.createElement(
-                        "article"
-                    );
-
-                card.className =
-                    "resource-card";
-
-
-                const category =
-                    document.createElement(
-                        "span"
-                    );
-
-                category.className =
-                    "category-tag";
-
-                category.textContent =
-                    getCategory(
-                        resource.name
-                    );
-
-
-                const title =
-                    document.createElement(
-                        "h3"
-                    );
-
-                title.textContent =
-                    cleanResourceName(
-                        resource.name
-                    );
-
-
-                const description =
-                    document.createElement(
-                        "p"
-                    );
-
-                description.textContent =
-                    getDescription(
-                        resource.name
-                    );
-
-
-                const readButton =
-                    document.createElement(
-                        "button"
-                    );
-
-                readButton.className =
-                    "read-button";
-
-                readButton.type =
-                    "button";
-
-                readButton.textContent =
-                    "Read Revision Guide";
-
-
-                readButton.addEventListener(
-                    "click",
-                    function () {
-
-                        displayTextFile(
-                            resource
+                    const card =
+                        document.createElement(
+                            "article"
                         );
-                    }
-                );
+
+                    card.className =
+                        "resource-card";
 
 
-                card.appendChild(
-                    category
-                );
+                    const categoryTag =
+                        document.createElement(
+                            "span"
+                        );
 
-                card.appendChild(
-                    title
-                );
+                    categoryTag.className =
+                        "category-tag";
 
-                card.appendChild(
-                    description
-                );
-
-                card.appendChild(
-                    readButton
-                );
+                    categoryTag.textContent =
+                        getCategory(
+                            resource.name
+                        );
 
 
-                resourceGrid.appendChild(
-                    card
-                );
+                    const title =
+                        document.createElement(
+                            "h3"
+                        );
 
-            });
+                    title.textContent =
+                        cleanResourceName(
+                            resource.name
+                        );
+
+
+                    const description =
+                        document.createElement(
+                            "p"
+                        );
+
+                    description.textContent =
+                        getDescription(
+                            resource.name
+                        );
+
+
+                    const viewButton =
+                        document.createElement(
+                            "button"
+                        );
+
+                    viewButton.className =
+                        "view-button";
+
+                    viewButton.type =
+                        "button";
+
+                    viewButton.textContent =
+                        "View Revision Guide";
+
+
+                    viewButton.addEventListener(
+                        "click",
+                        function () {
+
+                            openViewerPage(
+                                resource
+                            );
+                        }
+                    );
+
+
+                    card.appendChild(
+                        categoryTag
+                    );
+
+                    card.appendChild(
+                        title
+                    );
+
+                    card.appendChild(
+                        description
+                    );
+
+                    card.appendChild(
+                        viewButton
+                    );
+
+
+                    resourceGrid.appendChild(
+                        card
+                    );
+                }
+            );
         }
 
 
         /*
-         * Apply search text and category filter.
+         * Open the selected guide in viewer.html.
+         *
+         * Only the repository file path is passed.
+         * The GitHub repository page is not opened.
+         */
+
+        function openViewerPage(resource) {
+
+            const encodedPath =
+                encodeURIComponent(
+                    resource.path
+                );
+
+
+            const viewerAddress =
+                "viewer.html?file="
+                + encodedPath;
+
+
+            window.open(
+                viewerAddress,
+                "_blank",
+                "noopener,noreferrer"
+            );
+        }
+
+
+        /*
+         * Apply text search and category filtering.
          */
 
         function filterResources() {
@@ -1393,13 +1354,16 @@
                 allResources.filter(
                     function (resource) {
 
+                        const visibleName =
+                            cleanResourceName(
+                                resource.name
+                            ).toLowerCase();
+
+
                         const matchesSearch =
-                            resource
-                                .name
-                                .toLowerCase()
-                                .includes(
-                                    searchText
-                                );
+                            visibleName.includes(
+                                searchText
+                            );
 
 
                         const matchesCategory =
@@ -1426,232 +1390,101 @@
 
 
         /*
-         * Display a text file on this page.
+         * Display repository loading failure.
          */
 
-        async function displayTextFile(
-            resource
-        ) {
+        function showLoadingError() {
 
-            currentFileText =
-                "";
+            resourceGrid.innerHTML = "";
 
 
-            contentPanel.hidden =
-                false;
-
-
-            contentTitle.textContent =
-                cleanResourceName(
-                    resource.name
+            const errorState =
+                document.createElement(
+                    "div"
                 );
 
+            errorState.className =
+                "message-box error-state";
 
-            contentBody.innerHTML =
-                "";
+
+            const errorTitle =
+                document.createElement(
+                    "h3"
+                );
+
+            errorTitle.textContent =
+                "Unable to load revision guides";
 
 
-            const loadingMessage =
+            const errorDescription =
                 document.createElement(
                     "p"
                 );
 
-            loadingMessage.className =
-                "loading-message";
-
-            loadingMessage.textContent =
-                "Loading revision guide...";
+            errorDescription.textContent =
+                "Please check your internet connection and try again.";
 
 
-            contentBody.appendChild(
-                loadingMessage
+            const retryButton =
+                document.createElement(
+                    "button"
+                );
+
+            retryButton.className =
+                "retry-button";
+
+            retryButton.type =
+                "button";
+
+            retryButton.textContent =
+                "Retry";
+
+
+            retryButton.addEventListener(
+                "click",
+                loadRepositoryResources
             );
 
 
-            contentPanel.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
+            errorState.appendChild(
+                errorTitle
+            );
+
+            errorState.appendChild(
+                errorDescription
+            );
+
+            errorState.appendChild(
+                retryButton
+            );
 
 
-            try {
-
-                /*
-                 * resource.url is the API endpoint supplied
-                 * for this file by the repository contents API.
-                 */
-
-                const response =
-                    await fetch(
-                        resource.url,
-                        {
-                            headers: {
-                                "Accept":
-                                    "application/vnd.github.raw+json"
-                            }
-                        }
-                    );
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        "Unable to load the selected guide."
-                    );
-                }
-
-
-                currentFileText =
-                    await response.text();
-
-
-                const fileContent =
-                    document.createElement(
-                        "pre"
-                    );
-
-                fileContent.className =
-                    "file-content";
-
-
-                /*
-                 * textContent safely displays the text file.
-                 * HTML or scripts in a text file cannot execute.
-                 */
-
-                fileContent.textContent =
-                    currentFileText;
-
-
-                contentBody.innerHTML =
-                    "";
-
-
-                contentBody.appendChild(
-                    fileContent
-                );
-
-            } catch (error) {
-
-                currentFileText =
-                    "";
-
-
-                contentBody.innerHTML =
-                    "";
-
-
-                const errorMessage =
-                    document.createElement(
-                        "div"
-                    );
-
-                errorMessage.className =
-                    "error-message";
-
-                errorMessage.textContent =
-                    "This revision guide could not be displayed. Please refresh the page and try again.";
-
-
-                contentBody.appendChild(
-                    errorMessage
-                );
-            }
+            resourceGrid.appendChild(
+                errorState
+            );
         }
 
 
         /*
-         * Copy the currently opened guide.
-         */
-
-        async function copyCurrentText() {
-
-            if (!currentFileText) {
-
-                return;
-            }
-
-
-            try {
-
-                await navigator
-                    .clipboard
-                    .writeText(
-                        currentFileText
-                    );
-
-
-                const originalText =
-                    copyButton.textContent;
-
-
-                copyButton.textContent =
-                    "Copied";
-
-
-                setTimeout(
-                    function () {
-
-                        copyButton.textContent =
-                            originalText;
-
-                    },
-                    1500
-                );
-
-            } catch (error) {
-
-                copyButton.textContent =
-                    "Copy Failed";
-
-
-                setTimeout(
-                    function () {
-
-                        copyButton.textContent =
-                            "Copy Text";
-
-                    },
-                    1500
-                );
-            }
-        }
-
-
-        /*
-         * Close the file viewer.
-         */
-
-        function closeContentViewer() {
-
-            contentPanel.hidden =
-                true;
-
-            contentTitle.textContent =
-                "Selected Resource";
-
-            contentBody.innerHTML =
-                "";
-
-            currentFileText =
-                "";
-
-
-            document
-                .getElementById("resources")
-                .scrollIntoView({
-                    behavior: "smooth",
-                    block: "start"
-                });
-        }
-
-
-        /*
-         * Load every root-level text file from
-         * the main branch.
+         * Load every root-level file from main branch.
+         *
+         * Website-management files are hidden.
+         * Any new root-level revision file automatically
+         * appears when the page is refreshed.
          */
 
         async function loadRepositoryResources() {
+
+            showLoadingCards();
+
+
+            resourceCount.textContent =
+                "Loading...";
+
+
+            statusMessage.textContent =
+                "Loading revision resources from the main branch.";
+
 
             try {
 
@@ -1662,7 +1495,10 @@
                             headers: {
                                 "Accept":
                                     "application/vnd.github+json"
-                            }
+                            },
+
+                            cache:
+                                "no-store"
                         }
                     );
 
@@ -1679,39 +1515,29 @@
                     await response.json();
 
 
+                const excludedFiles = [
+                    "index.html",
+                    "viewer.html",
+                    ".gitignore",
+                    "README.md",
+                    "CNAME",
+                    "LICENSE"
+                ];
+
+
                 allResources =
                     repositoryItems
-
-                        /*
-                         * Include root-level files.
-                         *
-                         * Website-management files are excluded.
-                         * Your revision files remain visible even
-                         * if their names do not end with .txt.
-                         */
 
                         .filter(
                             function (item) {
 
-                                if (item.type !== "file") {
-
-                                    return false;
-                                }
-
-
-                                const hiddenFileNames = [
-                                    "index.html",
-                                    ".gitignore",
-                                    "README.md",
-                                    "CNAME",
-                                    "LICENSE"
-                                ];
-
-
-                                return !hiddenFileNames
-                                    .includes(
+                                return (
+                                    item.type === "file"
+                                    &&
+                                    !excludedFiles.includes(
                                         item.name
-                                    );
+                                    )
+                                );
                             }
                         )
 
@@ -1721,7 +1547,7 @@
 
 
                 statusMessage.textContent =
-                    "Select any guide to read its complete content on this page.";
+                    "Select View Revision Guide to open a guide on a separate reading page.";
 
 
                 renderResources(
@@ -1730,17 +1556,18 @@
 
             } catch (error) {
 
-                allResources =
-                    [];
+                allResources = [];
+
+
+                resourceCount.textContent =
+                    "0 guides";
 
 
                 statusMessage.textContent =
                     "The revision guides could not be loaded.";
 
 
-                renderResources(
-                    allResources
-                );
+                showLoadingError();
             }
         }
 
@@ -1788,18 +1615,6 @@
         );
 
 
-        copyButton.addEventListener(
-            "click",
-            copyCurrentText
-        );
-
-
-        closeButton.addEventListener(
-            "click",
-            closeContentViewer
-        );
-
-
         topButton.addEventListener(
             "click",
             function () {
@@ -1819,7 +1634,7 @@
 
 
         /*
-         * Initial loading
+         * Initial page load
          */
 
         loadRepositoryResources();
