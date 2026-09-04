@@ -1,0 +1,426 @@
+I found relevant enterprise discussions where WebFlux, Mono/Flux, streaming, WebClient, Netty, 
+throughput considerations, and reactive vs RestTemplate were discussed. These align closely 
+with senior-level WebFlux interview topics.
+
+Top 30 Scenario-Based WebFlux Interview Questions (Senior Developer)
+1. Why WebFlux Scenario
+Question
+
+Your REST API handles 500 TPS today but is expected to handle 20,000 TPS next year. Would you choose Spring MVC or WebFlux?
+
+Answer
+
+Choose WebFlux if:
+
+High concurrency
+I/O heavy workload
+Many external API calls
+Interview One-Liner
+WebFlux is designed for high concurrency using non-blocking I/O.
+
+
+2. RestTemplate vs WebClient Scenario
+Question
+
+You are developing a new microservice. Which client would you choose?
+
+Answer
+RestTemplate -> Blocking
+WebClient    -> Non-blocking
+
+Interview One-Liner
+Prefer WebClient for new development.
+
+
+3. Streaming API Scenario
+Question
+
+Client wants records streamed as soon as they are available instead of waiting for all data.
+
+Answer
+Flux<Customer>
+
+Interview One-Liner
+Flux supports streaming data efficiently.
+
+
+4. External API Latency Scenario
+Question
+
+An external API takes 5 seconds. Thousands of users call your API simultaneously.
+
+Answer
+WebFlux avoids blocking threads while waiting.
+Interview One-Liner
+Non-blocking threads improve scalability during I/O waits.
+
+
+5. Mono vs Flux Scenario
+Question
+
+Customer API returns single customer. Which type would you use?
+
+Answer
+Mono<Customer>
+
+
+Multiple customers:
+
+Flux<Customer>
+
+Interview One-Liner
+Mono = 0 or 1 item, Flux = 0 to N items.
+
+
+6. Database Call Scenario
+Question
+
+Can WebFlux improve performance if database calls are blocking?
+
+Answer
+
+Not much.
+
+Interview One-Liner
+Reactive benefits reduce when downstream systems are blocking.
+
+
+7. Blocking Code Scenario
+Question
+
+Developer uses:
+
+Thread.sleep(5000);
+
+
+inside WebFlux code.
+
+What is wrong?
+
+Answer
+
+Blocks event loop threads.
+
+Interview One-Liner
+Blocking code destroys WebFlux scalability.
+
+
+8. Reactive Controller Scenario
+Question
+
+Design a reactive endpoint.
+
+Answer
+@GetMapping("/{id}")
+public Mono<Customer> getCustomer(Long id)
+
+Interview One-Liner
+Reactive controllers return Mono or Flux.
+
+
+9. Multiple External APIs Scenario
+Question
+
+Need to call Customer API, Risk API and Audit API simultaneously.
+
+Answer
+Mono.zip(...)
+
+Interview One-Liner
+WebFlux enables parallel non-blocking execution.
+
+
+10. Timeout Scenario
+Question
+
+External API hangs forever.
+
+Answer
+.timeout(Duration.ofSeconds(5))
+
+Interview One-Liner
+Always configure reactive timeouts.
+
+
+11. Fallback Scenario
+Question
+
+External service fails.
+
+Answer
+.onErrorResume(...)
+
+Interview One-Liner
+onErrorResume provides graceful fallback.
+
+
+12. Error Handling Scenario
+Question
+
+How do you handle exceptions globally?
+
+Answer
+@RestControllerAdvice
+
+Interview One-Liner
+Use global exception handling for consistent responses.
+
+
+13. Backpressure Scenario
+Question
+
+Producer generates 1 million events/sec but consumer handles 10k/sec.
+
+Answer
+
+Use:
+
+Backpressure
+Buffering
+Throttling
+Interview One-Liner
+Backpressure prevents consumer overload.
+
+
+14. Server-Sent Events Scenario
+Question
+
+Need real-time stock prices.
+
+Answer
+Flux<StockPrice>
+
+Interview One-Liner
+Flux is ideal for continuous data streams.
+
+
+15. Netty vs Tomcat Scenario
+Question
+
+Which server is commonly used with WebFlux?
+
+Answer
+Netty
+
+Interview One-Liner
+Netty is optimized for reactive applications.
+
+
+16. High Memory Scenario
+Question
+
+Memory usage keeps increasing.
+
+Answer
+
+Investigate:
+
+Buffering
+Infinite streams
+Unreleased subscriptions
+Interview One-Liner
+Poor reactive design can cause memory pressure.
+
+
+17. Reactive + Kafka Scenario
+Question
+
+Kafka consumer receives events continuously.
+
+Answer
+Flux<PaymentEvent>
+
+Interview One-Liner
+Kafka and WebFlux work well together for event streaming.
+
+
+18. Reactive File Download Scenario
+Question
+
+Need to download a 5 GB file.
+
+Answer
+
+Use streaming.
+
+Interview One-Liner
+Flux streams data without loading entire content into memory.
+
+
+19. Scheduler Scenario
+Question
+
+Need CPU-intensive image processing.
+
+Answer
+.subscribeOn(Schedulers.boundedElastic())
+
+Interview One-Liner
+Offload blocking work to dedicated schedulers.
+
+
+20. Parallel Processing Scenario
+Question
+
+Need to process 1000 API calls concurrently.
+
+Answer
+flatMap()
+
+Interview One-Liner
+flatMap enables concurrent execution.
+
+
+21. Retry Scenario
+Question
+
+External API occasionally fails.
+
+Answer
+.retry(3)
+
+Interview One-Liner
+Retries should be combined with timeouts.
+
+
+22. Circuit Breaker Scenario
+Question
+
+Fraud service is down.
+
+Answer
+
+Use:
+
+Resilience4j
+Circuit Breaker
+Interview One-Liner
+Circuit breakers prevent cascading failures.
+
+
+23. Thread Model Scenario
+Question
+
+How many threads are used for 10,000 requests?
+
+Answer
+
+Far fewer than Spring MVC.
+
+Interview One-Liner
+WebFlux handles many requests with fewer threads.
+
+
+24. WebFlux + R2DBC Scenario
+Question
+
+How can database access become fully reactive?
+
+Answer
+
+Use:
+
+R2DBC
+
+Interview One-Liner
+R2DBC provides reactive database connectivity.
+
+
+25. Logging Scenario
+Question
+
+How would you trace requests across services?
+
+Answer
+Correlation ID
+Request ID
+Interview One-Liner
+Correlation IDs are critical in distributed systems.
+
+
+26. Reactive Transaction Scenario
+Question
+
+Can normal JPA transactions be reactive?
+
+Answer
+No
+
+
+Use reactive transaction support.
+
+Interview One-Liner
+JPA is blocking; R2DBC is reactive.
+
+
+27. WebFlux Adoption Scenario
+Question
+
+When should you NOT use WebFlux?
+
+Answer
+
+When:
+
+Application is mostly CPU bound
+Everything is blocking
+Low traffic system
+Interview One-Liner
+WebFlux is not a silver bullet.
+
+
+28. Throughput Scenario
+Question
+
+Throughput requirement is 25k TPS.
+
+Answer
+
+Consider:
+
+WebFlux
+Netty
+Reactive stack
+Interview One-Liner
+Reactive architecture targets high throughput use cases.
+
+
+29. Real-Time Banking Scenario
+Question
+
+Transactions must be streamed to fraud detection immediately.
+
+Answer
+REST API
+    |
+Kafka
+    |
+Reactive Consumer
+
+Interview One-Liner
+Reactive streaming is ideal for real-time processing.
+
+
+30. Most Important Senior-Level Question
+Question
+
+If external APIs and database are still blocking, does adopting WebFlux automatically make the application reactive?
+
+Answer
+No
+
+
+WebFlux helps only when the entire call chain is non-blocking.
+
+
+Ultimate One-Liners
+Mono = 0 or 1 item.
+Flux = 0 to N items.
+WebClient replaces RestTemplate.
+Netty is the default reactive server.
+Backpressure protects slow consumers.
+Blocking code kills WebFlux scalability.
+flatMap = parallel processing.
+zip = combine async calls.
+Reactive works best with R2DBC + WebClient.
+WebFlux shines for high-concurrency I/O-bound systems.
