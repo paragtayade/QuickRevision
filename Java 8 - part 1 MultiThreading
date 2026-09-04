@@ -1,0 +1,469 @@
+Below is the same content in interview-friendly text format using dashes (-) instead of tables, making it easy to copy into Word, Notepad, or revision guides.
+
+Top 30 Multithreading Interview Questions (Java 8–21)
+1. What is a Thread?
+
+Answer:
+
+A thread is the smallest unit of execution within a process.
+Multiple threads can run concurrently within the same process.
+
+Interview One-Liner:
+
+A thread is a lightweight sub-process that enables concurrent execution.
+2. What is Multithreading?
+
+Answer:
+
+Multithreading is the execution of multiple threads concurrently to improve application responsiveness and throughput.
+
+Interview One-Liner:
+
+Multithreading allows multiple tasks to execute simultaneously within the same application.
+3. Difference Between Process and Thread
+
+Process
+
+Independent execution unit
+Separate memory
+Heavyweight
+Higher creation cost
+
+Thread
+
+Part of a process
+Shared memory
+Lightweight
+Lower creation cost
+
+Interview One-Liner:
+
+Processes have separate memory, while threads share memory within the same process.
+4. How Do You Create a Thread in Java?
+
+Methods:
+
+Extend Thread
+Implement Runnable
+Use ExecutorService
+Use Virtual Threads (Java 21)
+Thread t = new Thread(() -> System.out.println("Running"));
+t.start();
+
+
+Interview One-Liner:
+
+Modern Java applications typically use ExecutorService or Virtual Threads.
+5. Difference Between start() and run()
+
+start()
+
+Creates a new thread
+Asynchronous
+Calls JVM scheduler
+
+run()
+
+Executes in current thread
+Synchronous
+Normal method call
+
+Interview One-Liner:
+
+start() creates a new thread, run() executes like a normal method.
+6. Explain Thread Lifecycle
+NEW
+ ↓
+RUNNABLE
+ ↓
+RUNNING
+ ↓
+WAITING / BLOCKED / TIMED_WAITING
+ ↓
+TERMINATED
+
+
+Interview One-Liner:
+
+NEW → RUNNABLE → RUNNING → WAITING/BLOCKED → TERMINATED
+7. What is Thread Scheduler?
+
+Answer:
+
+JVM component responsible for selecting runnable threads.
+
+Interview One-Liner:
+
+Thread scheduling behavior depends on the JVM and operating system.
+8. What is Context Switching?
+
+Answer:
+
+CPU switches execution from one thread to another.
+
+Interview One-Liner:
+
+Context switching improves concurrency but introduces overhead.
+9. What is a Daemon Thread?
+
+Answer:
+
+Background thread that terminates when all user threads finish.
+
+Examples:
+
+Garbage Collector
+Monitoring Threads
+
+Interview One-Liner:
+
+Daemon threads provide background services to user threads.
+10. What is Thread Priority?
+
+Answer:
+
+A hint to the scheduler regarding thread execution preference.
+
+Interview One-Liner:
+
+Thread priority does not guarantee execution order.
+Synchronization
+11. What is Synchronization?
+
+Answer:
+
+Synchronization ensures only one thread accesses shared resources at a time.
+
+Interview One-Liner:
+
+Synchronization prevents concurrent modification of shared data.
+12. Why Do We Need Synchronization?
+
+Answer:
+
+Prevent race conditions
+Prevent inconsistent data
+Maintain data integrity
+
+Interview One-Liner:
+
+Synchronization provides thread safety.
+13. What is Race Condition?
+
+Answer:
+
+Multiple threads modify shared data simultaneously causing unpredictable results.
+
+Example:
+
+count++;
+
+
+Interview One-Liner:
+
+Race condition occurs when program output depends on thread execution timing.
+14. Difference Between synchronized Method and Block
+
+synchronized Method
+
+Locks entire method
+Less flexible
+
+synchronized Block
+
+Locks specific section of code
+More flexible
+Better performance
+
+Interview One-Liner:
+
+Synchronized blocks provide finer-grained locking.
+15. What is Intrinsic Lock (Monitor)?
+
+Answer:
+
+Every Java object has an internal monitor lock used by synchronized code.
+
+Interview One-Liner:
+
+Every Java object contains its own monitor.
+16. What is Deadlock?
+
+Answer:
+
+Two or more threads wait forever for each other's locks.
+
+Example:
+
+Thread1 → LockA → LockB
+Thread2 → LockB → LockA
+
+
+Interview One-Liner:
+
+Deadlock is a circular lock dependency.
+17. How Do You Prevent Deadlock?
+
+Techniques:
+
+Consistent lock ordering
+Lock timeout
+tryLock()
+Avoid nested locks
+
+Interview One-Liner:
+
+Always acquire locks in the same order.
+18. What is Livelock?
+
+Answer:
+
+Threads keep responding to each other but make no actual progress.
+
+Interview One-Liner:
+
+In livelock, threads are active but stuck.
+19. What is Starvation?
+
+Answer:
+
+A thread never gets CPU time or resources.
+
+Interview One-Liner:
+
+Starvation occurs when one thread is continuously denied execution.
+20. Difference Between volatile and synchronized
+
+volatile
+
+Visibility only
+No locking
+Faster
+No atomicity
+
+synchronized
+
+Visibility + Atomicity
+Uses locking
+Slower
+Thread-safe
+
+Interview One-Liner:
+
+volatile provides visibility, synchronized provides visibility and mutual exclusion.
+Inter-Thread Communication
+21. Difference Between sleep(), wait(), and join()
+
+sleep()
+
+Pauses current thread
+Does NOT release lock
+
+wait()
+
+Releases lock
+Must be called inside synchronized block
+
+join()
+
+Waits for another thread to finish
+
+Interview One-Liner:
+
+wait() releases the lock, sleep() does not.
+22. Difference Between notify() and notifyAll()
+
+notify()
+
+Wakes one waiting thread
+
+notifyAll()
+
+Wakes all waiting threads
+
+Interview One-Liner:
+
+notifyAll() is generally safer when multiple threads may be waiting.
+23. What is Producer-Consumer Problem?
+
+Answer:
+
+One thread produces data.
+Another thread consumes data.
+Producer → Queue → Consumer
+
+
+Interview One-Liner:
+
+Classic synchronization problem solved using wait/notify or BlockingQueue.
+24. What is BlockingQueue?
+
+Answer:
+
+Thread-safe queue used in producer-consumer scenarios.
+
+Benefits:
+
+Built-in synchronization
+Blocks automatically when full or empty
+
+Interview One-Liner:
+
+BlockingQueue greatly simplifies producer-consumer implementation.
+Advanced Concurrency
+25. What is Executor Framework?
+
+Answer:
+
+Framework for managing thread creation and execution.
+
+Benefits:
+
+Thread pooling
+Better resource management
+Improved scalability
+
+Interview One-Liner:
+
+Separates task submission from thread management.
+26. What is Thread Pool?
+
+Answer:
+
+Collection of reusable worker threads.
+
+Benefits:
+
+Improved performance
+Reduced thread creation overhead
+Better memory utilization
+
+Interview One-Liner:
+
+Reuse threads instead of creating them repeatedly.
+27. Difference Between Runnable and Callable
+
+Runnable
+
+No return value
+Cannot throw checked exception
+run()
+
+Callable
+
+Returns value
+Can throw checked exception
+call()
+
+Interview One-Liner:
+
+Use Callable when a result is needed.
+28. What is Future?
+
+Answer:
+
+Represents result of an asynchronous computation.
+
+Important Methods:
+
+get()
+isDone()
+cancel()
+
+Interview One-Liner:
+
+Future.get() blocks until the result is available.
+29. What is CompletableFuture?
+
+Answer:
+
+Advanced Future introduced in Java 8.
+Supports asynchronous pipelines.
+Supports chaining and combining tasks.
+
+Interview One-Liner:
+
+CompletableFuture enables non-blocking async programming.
+30. What is ConcurrentHashMap?
+
+Answer:
+
+Thread-safe implementation of Map.
+Designed for high concurrency.
+
+Advantages:
+
+Better scalability than synchronized HashMap
+Concurrent reads
+Better performance
+
+Interview One-Liner:
+
+ConcurrentHashMap is the preferred thread-safe Map in Java.
+Java 21 Bonus Questions
+31. What are Virtual Threads?
+
+Answer:
+
+Lightweight threads introduced in Java 21.
+Allow millions of concurrent tasks.
+
+Interview One-Liner:
+
+Virtual Threads make thread-per-request architecture practical again.
+32. Platform Thread vs Virtual Thread
+
+Platform Thread
+
+OS thread
+Heavyweight
+Higher memory usage
+Thousands possible
+
+Virtual Thread
+
+JVM managed
+Lightweight
+Low memory
+Millions possible
+
+Interview One-Liner:
+
+Virtual Threads dramatically reduce thread management cost.
+33. Can Database Transactions Run in @Async?
+
+Answer:
+
+Yes.
+Transaction does not automatically propagate to async thread.
+
+Interview One-Liner:
+
+Transactions are thread-bound and do not automatically cross thread boundaries.
+34. What is ThreadLocal?
+
+Answer:
+
+Provides a separate copy of a variable for each thread.
+
+Use Cases:
+
+User Context
+Request Tracking
+Correlation ID
+Database Connection
+
+Interview One-Liner:
+
+ThreadLocal provides thread-specific storage without synchronization.
+35. What is AtomicInteger?
+
+Answer:
+
+Thread-safe counter using CAS (Compare-And-Swap).
+
+Benefits:
+
+No synchronization required
+High performance
+
