@@ -1,0 +1,437 @@
+I found Kubernetes interview material in your own preparation files covering Pods, Deployments, 
+Services, Ingress, ConfigMaps, Secrets, HPA, StatefulSets, probes, and production troubleshooting.
+
+☸️ Top 20 Kubernetes Scenario-Based Interview Questions
+Senior Java Developer (Spring Boot + AWS EKS)
+1. Spring Boot Pod Crashes Repeatedly
+Scenario
+Pod Status:
+
+CrashLoopBackOff
+
+What Will You Check?
+kubectl logs pod-name
+
+kubectl describe pod pod-name
+
+
+Check:
+
+Application Error
+
+Memory Issue
+
+Database Connectivity
+
+Environment Variables
+
+Interview One-Liner
+Always check logs first, then events.
+
+2. Pod Stuck In Pending
+Scenario
+Pod Never Starts.
+
+Checks
+kubectl describe pod pod-name
+
+
+Possible Reasons:
+
+No Available CPU
+
+No Available Memory
+
+Node Selector Mismatch
+
+Taints/Tolerations
+
+One-Liner
+Pending means Kubernetes cannot schedule the Pod.
+
+3. What Happens If Pod Crashes?
+Flow
+Pod Dies
+    ↓
+Deployment Detects
+    ↓
+ReplicaSet Creates New Pod
+
+One-Liner
+Deployments provide self-healing.
+
+4. Difference Between Pod and Deployment
+Pod
+Single Instance
+
+Deployment
+Manages Pods
+
+Scaling
+
+Rolling Updates
+
+Self Healing
+
+One-Liner
+Never deploy production applications using bare Pods.
+
+5. High Traffic Suddenly Comes
+Scenario
+
+Traffic increases from:
+
+500 TPS
+
+to
+
+5000 TPS
+
+Solution
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+
+minReplicas: 2
+maxReplicas: 10
+
+One-Liner
+Use HPA to scale Pods automatically.
+
+6. Health Endpoint Down
+Scenario
+
+Application Running
+
+But Traffic Should Stop
+
+Solution
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+
+One-Liner
+Readiness controls traffic.
+
+7. Application Hung
+Scenario
+
+App is alive but stuck forever.
+
+Solution
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+
+Flow
+Probe Fails
+   ↓
+Pod Restarted
+
+One-Liner
+Liveness restarts unhealthy Pods.
+
+8. Store Passwords?
+Wrong
+ConfigMap
+
+Correct
+Secret
+
+
+Example
+
+secretKeyRef:
+  name: db-secret
+
+One-Liner
+ConfigMap = Non Sensitive
+
+Secret = Sensitive
+
+9. Pod Can Start But Cannot Reach Database
+Checks
+kubectl exec -it pod-name -- sh
+
+
+Check
+
+DNS
+
+Network
+
+Security Groups
+
+Network Policies
+
+One-Liner
+Always verify pod-to-service connectivity.
+
+10. Difference Between Service and Ingress
+Service
+Expose Pods
+
+Ingress
+Expose URL
+
+
+Flow
+
+Internet
+   ↓
+Ingress
+   ↓
+Service
+   ↓
+Pods
+
+One-Liner
+Ingress routes traffic, Service connects Pods.
+
+11. User Gets 503 Error
+Check
+kubectl get endpoints
+
+kubectl get pods
+
+
+Possible Reasons
+
+Pods Not Ready
+
+No Endpoints
+
+Readiness Probe Failure
+
+One-Liner
+503 usually means Service has no healthy backend Pods.
+
+12. Rolling Deployment
+Scenario
+
+Deploy New Version Without Downtime
+
+kubectl apply -f deployment.yaml
+
+
+Flow
+
+Old Pod
+    ↓
+New Pod Created
+    ↓
+Traffic Shifted
+
+One-Liner
+Deployments support rolling updates automatically.
+
+13. Rollback Deployment
+Command
+kubectl rollout undo deployment payment-service
+
+One-Liner
+Deployment history allows quick rollback.
+
+14. Node Fails
+Scenario
+
+Worker Node Goes Down
+
+Flow
+Node Down
+     ↓
+Pods Lost
+     ↓
+Scheduler Creates Pods
+     ↓
+Healthy Nodes
+
+One-Liner
+Kubernetes reschedules workloads automatically.
+
+15. Stateful Application Deployment
+Scenario
+
+Deploy Kafka
+
+Deploy Oracle
+
+Deploy PostgreSQL
+
+Use?
+
+StatefulSet
+
+Why?
+Stable Hostname
+
+Persistent Storage
+
+Stable Identity
+
+One-Liner
+Stateful workloads require StatefulSets.
+
+16. Persistent Data Lost
+Cause
+
+Using
+
+emptyDir
+
+Solution
+PersistentVolumeClaim
+
+One-Liner
+Pod restart can destroy local storage.
+
+17. OOMKilled
+Scenario
+Pod Restarting
+
+Status = OOMKilled
+
+Fix
+resources:
+  requests:
+    memory: "512Mi"
+
+  limits:
+    memory: "1Gi"
+
+One-Liner
+OOMKilled means the container exceeded memory limits.
+
+18. Restrict One Pod From Accessing Others
+Use
+kind: NetworkPolicy
+
+Example
+podSelector:
+   matchLabels:
+      app: payment
+
+One-Liner
+Network Policies control pod-to-pod traffic.
+
+19. How To Debug Production Pod?
+Commands
+kubectl get pods
+
+kubectl describe pod pod-name
+
+kubectl logs pod-name
+
+kubectl top pod
+
+One-Liner
+Describe → Logs → Metrics is the usual troubleshooting order.
+
+20. Design Banking Payment Service On Kubernetes
+Architecture
+Internet
+    ↓
+Ingress
+    ↓
+Service
+    ↓
+Payment Pods (3 Replicas)
+    ↓
+Kafka
+    ↓
+Database
+
+Add
+HPA
+
+ConfigMap
+
+Secrets
+
+Liveness Probe
+
+Readiness Probe
+
+PVC
+
+Monitoring
+
+One-Liner
+Production Kubernetes design focuses on scalability, resiliency, security and observability.
+
+🎯 Most Asked Senior Kubernetes Questions
+1. Pod vs Deployment
+
+2. Service vs Ingress
+
+3. ConfigMap vs Secret
+
+4. Liveness vs Readiness
+
+5. Deployment vs StatefulSet
+
+6. HPA Working
+
+7. Pod Crash Troubleshooting
+
+8. OOMKilled
+
+9. Rolling Update vs Rollback
+
+10. Node Failure Handling
+
+11. 503 Error Troubleshooting
+
+12. Pending Pods
+
+13. PVC vs PV
+
+14. Network Policies
+
+15. EKS Architecture
+
+16. Kafka On Kubernetes
+
+17. Pod Scheduling
+
+18. Resource Limits
+
+19. How To Debug Production Issues
+
+20. Design Spring Boot Microservices On Kubernetes
+
+🎯 Golden 30-Second Kubernetes Answer
+Deployment
+   ↓
+Pods
+   ↓
+Service
+   ↓
+Ingress
+
+Configuration
+   ↓
+ConfigMap / Secret
+
+Health Checks
+   ↓
+Readiness / Liveness
+
+Scaling
+   ↓
+HPA
+
+Storage
+   ↓
+PVC
+
+Stateful Apps
+   ↓
+StatefulSet
+
+Troubleshooting
+   ↓
+describe + logs + metrics
+
+
+This single summary covers the majority of Kubernetes questions asked in Senior Java Developer, 
+Spring Boot Microservices, AWS EKS, JPMC, RBC, MUFG, and Cognizant banking interviews.
