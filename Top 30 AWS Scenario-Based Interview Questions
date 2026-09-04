@@ -1,0 +1,513 @@
+Top 30 AWS Scenario-Based Interview Questions (Senior Java Developer)
+
+Perfect for Spring Boot + Microservices + AWS ECS/EKS + Banking Domain interviews.
+
+1. EC2 vs ECS Scenario
+Question
+
+Your Spring Boot application is currently deployed on EC2 instances. Management wants easier deployment and scaling. What would you recommend?
+
+Answer
+Move to ECS (Elastic Container Service)
+Containerize application using Docker
+Use ECS Service Auto Scaling
+Interview One-Liner
+ECS reduces infrastructure management compared to EC2.
+
+
+2. ECS vs EKS Scenario
+Question
+
+When would you choose ECS over EKS?
+
+Answer
+
+Choose ECS:
+
+AWS-only environment
+Simpler setup
+Lower operational overhead
+
+Choose EKS:
+
+Kubernetes standardization
+Multi-cloud strategy
+Complex orchestration needs
+Interview One-Liner
+ECS is simpler, EKS provides Kubernetes flexibility.
+
+
+3. High Traffic Scenario
+Question
+
+Your API suddenly receives 10x traffic.
+
+How would you handle it?
+
+Answer
+Load Balancer
+Auto Scaling
+Multi-AZ deployment
+CloudWatch alarms
+Interview One-Liner
+Auto Scaling is the first line of defense against traffic spikes.
+
+
+4. Application Not Responding Scenario
+Question
+
+Production API is slow. Where will you investigate?
+
+Answer
+CloudWatch Metrics
+ECS Logs
+CPU Utilization
+Memory Usage
+Database Metrics
+Interview One-Liner
+Check metrics before changing infrastructure.
+
+
+5. Secure Database Scenario
+Question
+
+RDS should not be exposed publicly.
+
+How would you design the architecture?
+
+Answer
+Internet
+   |
+ALB
+   |
+ECS
+   |
+Private Subnet
+   |
+RDS
+
+Interview One-Liner
+RDS should normally reside in private subnets.
+
+
+6. Secret Management Scenario
+Question
+
+Where will you store database passwords?
+
+Answer
+
+Use:
+
+AWS Secrets Manager
+
+Avoid:
+
+application.properties
+Git repositories
+Interview One-Liner
+Secrets should never be hardcoded.
+
+
+7. Multiple Environment Scenario
+Question
+
+How would you manage Dev, QA, and Prod configuration?
+
+Answer
+Parameter Store
+Secrets Manager
+Environment Variables
+Interview One-Liner
+Externalize configuration from application code.
+
+
+8. File Upload Scenario
+Question
+
+Users upload 5 GB documents.
+
+How will you design it?
+
+Answer
+Upload directly to S3
+Use Pre-Signed URLs
+Avoid routing files through Spring Boot
+Interview One-Liner
+Large files should flow directly into S3.
+
+
+9. Static Content Scenario
+Question
+
+Website images must load globally with low latency.
+
+Answer
+S3
+CloudFront CDN
+Interview One-Liner
+CloudFront caches content closer to users.
+
+
+10. Disaster Recovery Scenario
+Question
+
+One AWS region goes down.
+
+How do you recover?
+
+Answer
+Multi-Region
+Cross-region replication
+Route53 Failover Routing
+Interview One-Liner
+DR planning starts before the disaster occurs.
+
+
+11. Database Scaling Scenario
+Question
+
+RDS CPU is continuously above 90%.
+
+Answer
+Read Replicas
+Better Indexing
+Query Optimization
+Vertical Scaling
+Interview One-Liner
+First optimize queries before increasing infrastructure.
+
+
+12. Microservices Communication Scenario
+Question
+
+Should two microservices communicate using REST or SQS?
+
+Answer
+
+REST
+
+Immediate response required
+
+SQS
+
+Async processing
+Decoupled systems
+Interview One-Liner
+REST is synchronous; SQS is asynchronous.
+
+
+13. Decoupling Scenario
+Question
+
+Order Service is slow because Notification Service is unavailable.
+
+Answer
+
+Use:
+
+Order Service
+      |
+     SQS
+      |
+Notification Service
+
+Interview One-Liner
+SQS prevents service-to-service dependency failures.
+
+
+14. Event Driven Architecture Scenario
+Question
+
+A fund transfer should trigger multiple services.
+
+Answer
+Transfer Service
+      |
+   EventBridge
+      |
+----------------
+|      |      |
+SMS   Email Audit
+
+Interview One-Liner
+EventBridge enables event-driven architectures.
+
+
+15. Queue Growing Scenario
+Question
+
+SQS queue size keeps increasing.
+
+Answer
+Scale consumers
+Check failures
+Investigate downstream APIs
+Interview One-Liner
+Growing queue generally means consumers can't keep up.
+
+
+16. Duplicate Message Scenario
+Question
+
+Message gets processed twice.
+
+Answer
+
+Use:
+
+FIFO Queue
+Deduplication ID
+Idempotent processing
+Interview One-Liner
+Consumers should always be idempotent.
+
+
+17. API Security Scenario
+Question
+
+How would you secure REST APIs in AWS?
+
+Answer
+API Gateway
+JWT
+OAuth2
+WAF
+HTTPS
+Interview One-Liner
+Security should be layered.
+
+
+18. Public API Scenario
+Question
+
+How do you protect APIs from DDoS attacks?
+
+Answer
+AWS Shield
+WAF
+Rate Limiting
+Interview One-Liner
+WAF and Shield provide first-level protection.
+
+
+19. Logging Scenario
+Question
+
+How would you trace a request across 20 microservices?
+
+Answer
+Correlation ID
+CloudWatch Logs
+X-Ray
+Interview One-Liner
+Distributed tracing is essential in microservices.
+
+
+20. Monitoring Scenario
+Question
+
+What metrics do you monitor?
+
+Answer
+CPU
+Memory
+Latency
+Error Rate
+Throughput
+Interview One-Liner
+Monitor business metrics along with infrastructure metrics.
+
+
+21. Cost Optimization Scenario
+Question
+
+AWS bill suddenly doubles.
+
+Answer
+Cost Explorer
+Trusted Advisor
+Rightsizing
+Reserved Instances
+Interview One-Liner
+Cost optimization is an ongoing activity.
+
+
+22. ECS Task Failure Scenario
+Question
+
+ECS tasks continuously restart.
+
+Answer
+
+Check:
+
+Container logs
+Memory limits
+Health checks
+Configuration errors
+Interview One-Liner
+Always look at logs before scaling.
+
+
+23. Deployment Scenario
+Question
+
+How would you deploy with zero downtime?
+
+Answer
+Blue-Green Deployment
+Rolling Deployment
+Interview One-Liner
+Blue-Green minimizes production risk.
+
+
+24. Blue-Green Scenario
+Question
+
+New release contains bugs.
+
+How would you rollback?
+
+Answer
+Blue --> Current Version
+Green --> New Version
+
+Switch traffic back to Blue
+
+Interview One-Liner
+Blue-Green enables instant rollback.
+
+
+25. CI/CD Scenario
+Question
+
+How would you automate deployments?
+
+Answer
+Git
+  |
+CodePipeline
+  |
+CodeBuild
+  |
+ECS
+
+Interview One-Liner
+CI/CD eliminates manual deployment effort.
+
+
+26. Lambda Scenario
+Question
+
+When would you use Lambda instead of ECS?
+
+Answer
+
+Use Lambda:
+
+Short execution
+Event-driven
+No server management
+
+Use ECS:
+
+Long running APIs
+Microservices
+Interview One-Liner
+Lambda excels at event-driven workloads.
+
+
+27. Cold Start Scenario
+Question
+
+Lambda execution is slow initially.
+
+Why?
+
+Answer
+Cold Start
+Function initialization
+Interview One-Liner
+Cold starts are common in infrequently used Lambda functions.
+
+
+28. Banking Audit Scenario
+
+Question
+
+Every transaction must be retained for seven years.
+
+Answer
+S3 Versioning
+S3 Glacier
+Lifecycle Policies
+Interview One-Liner
+Glacier provides low-cost long-term retention.
+
+
+29. Multi-AZ Scenario
+Question
+
+One Availability Zone goes down.
+
+Will application survive?
+
+Answer
+
+Use:
+
+Multi-AZ ECS
+Multi-AZ RDS
+Load Balancer
+Interview One-Liner
+High availability requires multi-AZ deployment.
+30. Design a Banking Fund Transfer System on AWS
+Question
+
+Design a highly available fund transfer application.
+
+Answer
+Users
+  |
+Route53
+  |
+ALB
+  |
+ECS / EKS
+  |
+RDS Multi-AZ
+  |
+EventBridge
+  |
+SQS
+  |
+Notification Services
+
+CloudWatch
+X-Ray
+Secrets Manager
+WAF
+
+
+Senior-Developer Interview One-Liners
+EC2 = Virtual Machine.
+ECS = Managed Containers.
+EKS = Managed Kubernetes.
+S3 = Object Storage.
+RDS = Managed Database.
+SQS = Message Queue.
+SNS = Pub/Sub Messaging.
+EventBridge = Event Bus.
+CloudFront = CDN.
+API Gateway = API Entry Point.
+Secrets Manager = Credentials Storage.
+CloudWatch = Monitoring.
+X-Ray = Distributed Tracing.
+WAF = Application Firewall.
+Shield = DDoS Protection.
+Auto Scaling = Dynamic Capacity Management.
+Blue-Green = Zero Downtime Deployment.
+Multi-AZ = High Availability.
+Multi-Region = Disaster Recovery.
+SQS + Idempotency = Reliable Event Processing.
