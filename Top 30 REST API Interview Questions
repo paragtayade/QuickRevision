@@ -1,0 +1,492 @@
+Top 30 REST API Interview Questions (Java Spring Boot / Microservices)
+
+1. What is REST?
+
+Answer:
+
+REST (Representational State Transfer) is an architectural style for designing web services.
+REST APIs use HTTP protocol for communication between client and server.
+
+Interview One-Liner:
+
+REST is an architectural style that uses HTTP methods to perform CRUD operations on resources.
+2. What is a Resource in REST?
+
+Answer:
+
+Any object, data, or service exposed through an API.
+Identified using a URI.
+
+Example:
+
+/api/customers/101
+
+
+Interview One-Liner:
+
+A resource is anything that can be uniquely identified by a URI.
+3. What are REST Constraints?
+
+Answer:
+
+Client-Server
+Stateless
+Cacheable
+Uniform Interface
+Layered System
+Code on Demand (Optional)
+
+Interview One-Liner:
+
+REST follows six architectural constraints that ensure scalability and simplicity.
+4. What is Statelessness in REST?
+
+Answer:
+
+Server does not store client session information.
+Every request contains all required data.
+
+Interview One-Liner:
+
+Each request must be self-contained because REST is stateless.
+5. Difference Between REST and SOAP?
+
+REST
+
+Lightweight
+Uses JSON/XML
+Faster
+Uses HTTP
+
+SOAP
+
+Heavyweight
+XML only
+Slower
+Protocol based
+
+Interview One-Liner:
+
+REST is lightweight and flexible, whereas SOAP is a strict protocol.
+6. What is URI?
+
+Answer:
+
+Uniform Resource Identifier.
+Used to identify resources uniquely.
+
+Example:
+
+/api/accounts/1001
+
+
+Interview One-Liner:
+
+URI uniquely identifies a REST resource.
+7. Difference Between URI and URL?
+
+URI
+
+Identifies resource
+
+URL
+
+Identifies resource + location
+
+Example:
+
+https://bank.com/accounts/1001
+
+
+Interview One-Liner:
+
+Every URL is a URI, but not every URI is a URL.
+8. What are HTTP Methods?
+GET
+POST
+PUT
+PATCH
+DELETE
+
+Interview One-Liner:
+
+HTTP methods represent different operations on resources.
+9. Difference Between GET and POST?
+
+GET
+
+Retrieve data
+Idempotent
+Parameters in URL
+
+POST
+
+Create resource
+Not idempotent
+Data in request body
+
+Interview One-Liner:
+
+GET reads data, POST creates data.
+10. Difference Between PUT and PATCH?
+
+PUT
+
+Replaces entire resource
+
+PATCH
+
+Updates only specific fields
+
+Example:
+
+PATCH /customers/1
+{
+  "city":"Mumbai"
+}
+
+
+Interview One-Liner:
+
+PUT performs full update, PATCH performs partial update.
+HTTP Status Codes
+11. Common HTTP Status Codes
+
+Success
+
+200 OK
+201 Created
+204 No Content
+
+Client Error
+
+400 Bad Request
+401 Unauthorized
+403 Forbidden
+404 Not Found
+
+Server Error
+
+500 Internal Server Error
+
+Interview One-Liner:
+
+Status codes indicate the outcome of an HTTP request.
+12. Difference Between 401 and 403?
+
+401 Unauthorized
+
+Authentication missing or invalid
+
+403 Forbidden
+
+Authentication succeeded
+Access denied
+
+Interview One-Liner:
+
+401 means "Who are you?", 403 means "I know you, but you cannot access."
+13. When Should You Use 201 Created?
+
+Answer:
+
+After successful resource creation.
+
+Example:
+
+POST /customers
+
+
+Interview One-Liner:
+
+Use 201 when a new resource is successfully created.
+14. When Should You Use 204 No Content?
+
+Answer:
+
+Successful operation with no response body.
+
+Example:
+
+DELETE /accounts/1001
+
+
+Interview One-Liner:
+
+Use 204 when operation succeeds but nothing needs to be returned.
+Request and Response
+15. What is Request Body?
+
+Answer:
+
+Data sent by client to server.
+
+Example:
+
+{
+  "name":"Parag",
+  "city":"Mumbai"
+}
+
+
+Interview One-Liner:
+
+Request body contains data sent from client to server.
+16. What is Response Body?
+
+Answer:
+
+Data sent by server to client.
+
+Example:
+
+{
+  "id":101,
+  "name":"Parag"
+}
+
+
+Interview One-Liner:
+
+Response body contains resource representation returned to client.
+17. What are Request Headers?
+
+Examples:
+
+Content-Type
+Authorization
+Accept
+
+Interview One-Liner:
+
+Headers carry metadata about requests and responses.
+18. Difference Between Content-Type and Accept?
+
+Content-Type
+
+Format of request body
+
+Accept
+
+Format expected in response
+
+Example:
+
+Content-Type: application/json
+Accept: application/json
+
+
+Interview One-Liner:
+
+Content-Type defines what is sent, Accept defines what is expected.
+19. What is JSON?
+
+Answer:
+
+JavaScript Object Notation.
+Most commonly used REST payload format.
+
+Interview One-Liner:
+
+JSON is lightweight, readable, and language-independent.
+20. Why is JSON Preferred Over XML?
+
+JSON
+
+Lightweight
+Faster parsing
+Less verbose
+
+XML
+
+Verbose
+Heavier
+
+Interview One-Liner:
+
+JSON reduces payload size and improves performance.
+Security
+21. What is Authentication?
+
+Answer:
+
+Verification of user identity.
+
+Examples:
+
+Username/Password
+JWT Token
+OAuth2
+
+Interview One-Liner:
+
+Authentication answers "Who are you?"
+22. What is Authorization?
+
+Answer:
+
+Determines what actions a user can perform.
+
+Interview One-Liner:
+
+Authorization answers "What can you do?"
+23. What is JWT?
+
+Answer:
+
+JSON Web Token.
+Token-based authentication mechanism.
+
+Structure:
+
+Header.Payload.Signature
+
+
+Interview One-Liner:
+
+JWT carries user claims and avoids server-side session storage.
+24. Why Use HTTPS?
+
+Answer:
+
+Encrypts communication between client and server.
+
+Benefits:
+
+Confidentiality
+Integrity
+Security
+
+Interview One-Liner:
+
+HTTPS prevents data interception and tampering.
+Advanced REST API Concepts
+25. What is Idempotency?
+
+Answer:
+
+Multiple identical requests produce the same result.
+
+Idempotent Methods
+
+GET
+PUT
+DELETE
+
+Non-Idempotent
+
+POST
+
+Interview One-Liner:
+
+Idempotent operations can be safely retried.
+26. What is API Versioning?
+
+Examples:
+
+/v1/customers
+/v2/customers
+
+
+Interview One-Liner:
+
+API versioning enables backward compatibility.
+27. What is Pagination?
+
+Answer:
+
+Fetch data in chunks instead of all at once.
+
+Example:
+
+/customers?page=0&size=20
+
+
+Interview One-Liner:
+
+Pagination improves performance for large datasets.
+28. What is Rate Limiting?
+
+Answer:
+
+Restricts API request frequency.
+
+Example:
+
+100 requests/minute
+
+Interview One-Liner:
+
+Rate limiting prevents abuse and protects system resources.
+29. What is HATEOAS?
+
+Answer:
+
+Hypermedia As The Engine Of Application State.
+Response contains related links.
+
+Example:
+
+{
+  "id":1,
+  "name":"Parag",
+  "links":[
+      "/customers/1/accounts"
+  ]
+}
+
+
+Interview One-Liner:
+
+HATEOAS allows API navigation through hypermedia links.
+30. How Do You Handle Exceptions in Spring Boot REST APIs?
+
+Using:
+
+@RestControllerAdvice
+@ExceptionHandler
+
+
+Example:
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handle(Exception ex) {
+        return ResponseEntity.internalServerError()
+                .body(ex.getMessage());
+    }
+}
+
+
+Interview One-Liner:
+
+Global exception handling provides consistent error responses across APIs.
+Must-Remember REST API One-Liners
+REST is stateless.
+Resource = URI.
+GET = Read.
+POST = Create.
+PUT = Full Update.
+PATCH = Partial Update.
+DELETE = Remove.
+200 = Success.
+201 = Created.
+204 = No Content.
+400 = Bad Request.
+401 = Unauthorized.
+403 = Forbidden.
+404 = Not Found.
+500 = Internal Server Error.
+Authentication = Who are you?
+Authorization = What can you do?
+JWT = Stateless authentication.
+HTTPS = Secure communication.
+API Versioning = Backward compatibility.
+Pagination = Better performance.
+Rate Limiting = Prevent abuse.
+HATEOAS = Hypermedia navigation.
+Idempotent APIs can be safely retried.
+JSON is preferred over XML for REST APIs.
+@RestControllerAdvice is used for global exception handling.
