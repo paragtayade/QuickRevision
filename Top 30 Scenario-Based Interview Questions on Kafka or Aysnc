@@ -1,0 +1,509 @@
+I found several Kafka and async-related resources in your files and Teams discussions. Your notes specifically emphasize Kafka for real-time processing, consumer groups, retries, error handling, idempotency, dead-letter topics (DLT), partitions, throughput, and asynchronous consumers.
+
+Top 30 Scenario-Based Interview Questions on Async & Kafka
+
+Perfect for Senior Java Developer | Spring Boot | Microservices | Banking Domain Interviews.
+
+1. REST vs Kafka Scenario
+Question
+
+A fund transfer request must immediately return success/failure to the user. Would you use REST or Kafka?
+
+Answer
+
+Use REST for the immediate response.
+
+After successful transaction:
+
+Fund Transfer API
+        |
+     Kafka
+        |
+Audit | Notification | Reporting
+
+Interview One-Liner
+REST for command execution, Kafka for event propagation.
+
+
+2. Async vs Sync Scenario
+Question
+
+PDF generation takes 2 minutes. Should the API wait?
+
+Answer
+
+Bad:
+
+Client --> Wait 2 minutes
+
+
+Good:
+
+Client
+  |
+Submit Request
+  |
+Returns Job ID
+  |
+Async Processing
+
+Interview One-Liner
+Long-running tasks should be processed asynchronously.
+
+
+3. Notification Scenario
+Question
+
+After payment completion, Email, SMS and Audit services must execute.
+
+Answer
+Payment Service
+      |
+   Kafka Topic
+      |
+----------------
+|      |      |
+SMS   Email  Audit
+
+Interview One-Liner
+Kafka enables loose coupling between services.
+
+
+4. Consumer Down Scenario
+Question
+
+Email service is down for 3 hours. What happens?
+
+Answer
+
+Kafka retains messages.
+
+When service recovers:
+
+Consumer resumes from offset
+
+Interview One-Liner
+Kafka consumers can replay messages from stored offsets.
+
+
+5. High Volume Scenario
+Question
+
+System receives 1 million events per hour.
+
+Answer
+
+Use:
+
+Kafka Partitions
+Consumer Groups
+Horizontal Scaling
+Interview One-Liner
+More partitions enable more parallel consumption.
+
+
+6. Duplicate Message Scenario
+Question
+
+Consumer processes the same message twice.
+
+Answer
+
+Implement:
+
+Idempotency
+Transaction IDs
+Business Keys
+Interview One-Liner
+Kafka consumers must be idempotent.
+
+
+7. Ordering Scenario
+Question
+
+Account transactions must be processed in exact order.
+
+Answer
+
+Use:
+
+AccountId as partition key
+
+Interview One-Liner
+Ordering is guaranteed within a partition.
+
+
+8. One Consumer Slower Than Others
+Question
+
+One partition is processing significantly slower.
+
+Answer
+
+Possible causes:
+
+Hot partition
+Skewed key distribution
+Interview One-Liner
+Good partition key selection is critical.
+
+
+9. Failed Message Scenario
+Question
+
+Consumer cannot process a message.
+
+Answer
+Retry
+  |
+DLT (Dead Letter Topic)
+
+Interview One-Liner
+Never lose failed events; send them to DLT.
+
+
+10. Retry Loop Scenario
+Question
+
+Consumer keeps failing forever.
+
+Answer
+
+Use:
+
+Retry count
+Backoff strategy
+DLT
+Interview One-Liner
+Infinite retries can bring down the system.
+
+
+11. Exactly Once Scenario
+Question
+
+Bank transaction event must never be processed twice.
+
+Answer
+
+Use:
+
+Kafka Transactions
+Idempotent Producer
+Interview One-Liner
+Exactly-once requires both Kafka and application support.
+
+
+12. Producer Failure Scenario
+Question
+
+Broker is temporarily unavailable.
+
+Answer
+
+Producer configuration:
+
+retries=2147483647
+acks=all
+
+Interview One-Liner
+Use retries and acknowledgments for reliability.
+
+
+13. Consumer Lag Scenario
+Question
+
+Consumer lag continuously grows.
+
+Answer
+
+Check:
+
+Processing speed
+Partition count
+Hardware resources
+Interview One-Liner
+Growing lag indicates consumers cannot keep up.
+
+
+14. Database Update Scenario
+Question
+
+Kafka event updates database and application crashes afterward.
+
+Answer
+
+Use:
+
+Outbox Pattern
+Inbox Pattern
+Interview One-Liner
+Outbox Pattern solves dual-write problems.
+
+
+15. Multiple Microservices Scenario
+Question
+
+Five services need same event.
+
+Answer
+Consumer Group A
+Consumer Group B
+Consumer Group C
+
+Interview One-Liner
+Different consumer groups can read the same message independently.
+
+
+16. Large Message Scenario
+Question
+
+Need to send 100 MB document via Kafka.
+
+Answer
+
+Avoid it.
+
+Store document in:
+
+S3
+
+
+Send:
+
+Document URL in Kafka
+
+Interview One-Liner
+Kafka is not designed for very large payloads.
+
+
+17. Async API Scenario
+Question
+
+How would you implement async processing in Spring Boot?
+
+Answer
+@Async
+public CompletableFuture<String> process() {
+    return CompletableFuture.completedFuture("Done");
+}
+
+Interview One-Liner
+@Async shifts execution to another thread.
+
+
+18. @Async Failure Scenario
+Question
+
+Exception occurs in @Async method.
+
+Answer
+
+Use:
+
+CompletableFuture
+AsyncExceptionHandler
+Interview One-Liner
+Async exceptions do not automatically propagate to caller.
+
+
+19. Transaction + Async Scenario
+Question
+
+@Transactional and @Async on same method.
+
+Will transaction propagate?
+
+Answer
+
+No.
+
+Interview One-Liner
+Transactions are thread-bound.
+
+
+20. Async Thread Pool Scenario
+Question
+
+10000 async requests arrive.
+
+Answer
+
+Configure:
+
+ThreadPoolTaskExecutor
+
+Interview One-Liner
+Never depend on the default executor in production.
+
+
+21. Kafka Topic Design Scenario
+Question
+
+One topic or many topics?
+
+Answer
+
+Use topic-by-domain.
+
+payments
+accounts
+customers
+
+Interview One-Liner
+Organize topics based on business domains.
+
+
+22. Payment Processing Scenario
+Question
+
+How would you design payment processing?
+
+Answer
+Payment API
+    |
+Payment Topic
+    |
+Risk Service
+    |
+Settlement Service
+    |
+Notification Service
+
+Interview One-Liner
+Event-driven architecture improves scalability.
+
+
+23. Reprocessing Scenario
+Question
+
+Need to reprocess yesterday's events.
+
+Answer
+Reset Consumer Offset
+
+Interview One-Liner
+Kafka replay capability is a major advantage.
+
+
+24. Throughput Scenario
+Question
+
+REST handles 2000 TPS but expected load is 50,000 TPS.
+
+Answer
+
+Use:
+
+Kafka
+Asynchronous Processing
+Consumer Groups
+Interview One-Liner
+Kafka is optimized for high throughput.
+
+
+25. Replay Scenario
+Question
+
+Audit system added after six months.
+
+How will it consume historical events?
+
+Answer
+Consume from earliest offset
+
+Interview One-Liner
+Kafka provides event replay capabilities.
+
+
+26. Multi-Broker Failure Scenario
+Question
+
+One broker crashes.
+
+Answer
+
+Replication takes over.
+
+Interview One-Liner
+Replication provides fault tolerance.
+
+
+27. Kafka vs RabbitMQ Scenario
+Question
+
+Which would you choose for event-driven microservices?
+
+Answer
+
+Kafka:
+
+High throughput
+Replay
+Event streaming
+
+RabbitMQ:
+
+Traditional queueing
+Interview One-Liner
+Kafka is preferred for large-scale event streaming.
+
+
+28. Batch vs Stream Processing Scenario
+Question
+
+Fraud detection requires real-time processing.
+
+Answer
+
+Use:
+
+Kafka Streams
+Flink
+Spark Streaming
+Interview One-Liner
+Streaming processes events immediately instead of waiting for batches.
+
+
+29. Consumer Scaling Scenario
+Question
+
+Can 20 consumers process a topic with 10 partitions?
+
+Answer
+
+No.
+
+Only 10 consumers can actively process.
+
+Interview One-Liner
+Consumer parallelism is limited by partition count.
+
+
+30. Design a Banking Fund Transfer Event System
+Question
+
+Design a highly scalable banking event platform.
+
+Answer
+Client
+  |
+Spring Boot REST API
+  |
+Kafka Producer
+  |
+Payment Topic
+  |
+--------------------------------
+|             |              |
+Risk       Audit        Notification
+Service    Service       Service
+  |
+DLT
+  |
+Monitoring
+
+Interview One-Liner
+Banking systems use Kafka for reliability, scalability, auditability, and asynchronous processing.
+
+
+These are among the most common senior-level banking-domain questions around Spring Boot, Kafka, event-driven microservices, and high-throughput systems.
