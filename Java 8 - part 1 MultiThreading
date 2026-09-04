@@ -467,3 +467,20 @@ Benefits:
 No synchronization required
 High performance
 
+Interview One-Liner:
+
+AtomicInteger provides lock-free atomic operations.
+Must Remember Interview One-Liners
+start() creates a new thread; run() does not.
+Thread is lightweight, Process is heavyweight.
+wait() releases lock; sleep() does not.
+volatile provides visibility only.
+synchronized provides visibility + atomicity.
+Callable returns value; Runnable does not.
+Future.get() is blocking.
+CompletableFuture supports non-blocking pipelines.
+ConcurrentHashMap is preferred over synchronized HashMap.
+Deadlock = circular lock dependency.
+ThreadLocal = one copy per thread.
+AtomicInteger = lock-free counter.
+Virtual Threads are the biggest multithreading enhancement introduced in Java 21.
