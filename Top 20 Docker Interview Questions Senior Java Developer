@@ -1,0 +1,417 @@
+🐳 Top 20 Docker Interview Questions
+Senior Java Developer (Spring Boot + AWS + Kubernetes)
+
+These are the questions most commonly asked in banking and enterprise interviews and are heavily covered in your Docker preparation materials.
+
+1. What is Docker?
+Answer
+
+Docker is a containerization platform used to package:
+
+Application
++
+Dependencies
++
+Configuration
+
+
+into a container.
+
+One-Liner
+Docker = Build Once, Run Anywhere.
+
+2. Docker vs Virtual Machine
+Docker	VMShares Host OS	Own Guest OS
+Lightweight	Heavy
+Starts in Seconds	Starts in Minutes
+Less Memory	More Memory
+One-Liner
+Containers virtualize applications, VMs virtualize operating systems.
+
+3. Image vs Container
+Docker Image
+Blueprint
+Template
+Read Only
+
+Container
+Running Instance
+Of Image
+
+
+Example
+
+docker run nginx
+
+One-Liner
+Image = Class
+
+Container = Object
+
+4. Explain Docker Architecture
+Docker Client
+      ↓
+Docker Daemon
+      ↓
+Images
+      ↓
+Containers
+      ↓
+Registry
+
+One-Liner
+Client sends commands, Daemon executes them.
+
+5. What is Dockerfile?
+Example
+FROM eclipse-temurin:21
+
+COPY app.jar app.jar
+
+ENTRYPOINT
+["java","-jar","app.jar"]
+
+One-Liner
+Dockerfile contains instructions to build Docker images.
+
+6. How Do You Build An Image?
+Command
+docker build -t payment-app .
+
+Explanation
+-t = Tag
+.  = Current Folder
+
+One-Liner
+docker build converts Dockerfile into image.
+
+7. How Do You Run A Container?
+Command
+docker run payment-app
+
+
+Port Mapping
+
+docker run -p 8080:8080 payment-app
+
+One-Liner
+docker run creates container from image.
+
+8. COPY vs ADD
+COPY
+COPY app.jar app.jar
+
+
+Copies files only.
+
+ADD
+ADD my.zip /
+
+
+Can:
+
+Extract Archives
+
+Download URLs
+
+One-Liner
+Use COPY whenever possible.
+
+9. CMD vs ENTRYPOINT
+CMD
+CMD
+["java","-jar","app.jar"]
+
+
+Can be overridden.
+
+ENTRYPOINT
+ENTRYPOINT
+["java","-jar","app.jar"]
+
+
+Harder to override.
+
+One-Liner
+CMD = Default Command
+
+ENTRYPOINT = Main Command
+
+10. What Are Docker Volumes?
+Problem
+Container Deleted
+
+Data Lost
+
+Solution
+docker volume create app-data
+
+One-Liner
+Volumes provide persistent storage.
+
+11. Why Are Volumes Needed?
+
+Without Volume
+
+Container Deleted
+     ↓
+Data Deleted
+
+
+With Volume
+
+Container Deleted
+     ↓
+Data Safe
+
+One-Liner
+Volumes survive container restarts and deletion.
+
+12. Docker Networking
+Common Networks
+Bridge
+
+Host
+
+Overlay
+
+None
+
+Example
+docker network ls
+
+One-Liner
+Networking allows containers to communicate.
+
+13. What Is Docker Compose?
+Scenario
+
+Need
+
+Spring Boot
+
+MySQL
+
+Redis
+
+
+Together.
+
+docker-compose.yml
+services:
+
+  app:
+    image: app
+
+  mysql:
+    image: mysql
+
+
+Run
+
+docker-compose up
+
+One-Liner
+Docker Compose manages multiple containers together.
+
+14. What Is Multi-Stage Build?
+Traditional
+Build Tools
++
+Application
+
+
+Huge Image
+
+Multi Stage
+FROM maven:3.9 AS build
+
+RUN mvn package
+
+FROM eclipse-temurin:21
+
+COPY --from=build app.jar app.jar
+
+One-Liner
+Multi-stage build reduces image size dramatically.
+
+15. How To Reduce Docker Image Size?
+Best Practices
+Use Multi Stage Build
+
+Use Slim Images
+
+Use Alpine Images
+
+Remove Temporary Files
+
+
+Example
+
+FROM eclipse-temurin:21-jre-alpine
+
+One-Liner
+Smaller image = Faster deployment.
+
+16. How To Pass Environment Variables?
+Dockerfile
+ENV PROFILE=prod
+
+Runtime
+docker run -e DB_URL=mysql app
+
+Spring Boot
+docker run
+-e SPRING_PROFILES_ACTIVE=prod
+
+One-Liner
+Environment variables externalize configuration.
+
+17. How To Debug Running Container?
+Commands
+docker ps
+
+docker logs container-id
+
+docker exec -it
+container-id bash
+
+Interview Answer
+First Logs
+
+Then Enter Container
+
+Then Check Configuration
+
+One-Liner
+docker logs is usually the first troubleshooting command.
+
+18. Push Image To Docker Hub / ECR
+Docker Hub
+docker push myrepo/app
+
+AWS ECR
+docker tag app:1.0 repo/app:1.0
+
+docker push repo/app:1.0
+
+One-Liner
+Build → Tag → Push
+
+19. Docker vs Kubernetes
+Docker
+Container Runtime
+
+Kubernetes
+Container Orchestration
+
+Example
+Docker
+   ↓
+Creates Container
+
+Kubernetes
+   ↓
+Manages Containers
+
+One-Liner
+Docker runs containers, Kubernetes manages containers.
+
+20. Explain Docker In Your Banking Project
+Answer
+Spring Boot App
+       ↓
+Docker Image
+       ↓
+AWS ECR
+       ↓
+Kubernetes / ECS
+       ↓
+Container Instances
+
+
+Build
+
+docker build -t payment-service .
+
+
+Push
+
+docker push ecr/payment-service
+
+
+Deploy
+
+ECS / Kubernetes
+
+One-Liner
+Docker gives consistent deployment across Dev, QA and Production.
+
+🎯 Top 5 Advanced Docker Questions
+Q1. What is Layer Caching?
+Docker reuses unchanged layers.
+
+Faster Build
+
+Q2. Why Multi-Stage Build?
+Smaller
+
+More Secure
+
+Faster
+
+Q3. How Do You Handle Secrets?
+Do NOT hardcode.
+
+Use Environment Variables
+
+AWS Secrets Manager
+
+Kubernetes Secrets
+
+Q4. How Do You Scan Vulnerabilities?
+trivy image app
+
+Q5. Why Container Starts But App Fails?
+
+Check:
+
+Environment Variables
+
+Database Connectivity
+
+Port Mapping
+
+Logs
+
+🚀 Docker Memory Trick
+Dockerfile
+    ↓
+Image
+    ↓
+Container
+    ↓
+Registry (Hub/ECR)
+    ↓
+Kubernetes / ECS
+
+Data?
+    ↓
+Volume
+
+Multiple Containers?
+    ↓
+Docker Compose
+
+Smaller Image?
+    ↓
+Multi-Stage Build
+
+Production Troubleshooting?
+    ↓
+docker ps
+docker logs
+docker exec
+
+
+This covers roughly 90% of Docker questions asked for Senior Java Developer, Spring Boot Microservices, AWS ECS/EKS, JPMC, RBC, MUFG, and Cognizant interviews.
