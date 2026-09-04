@@ -1,0 +1,398 @@
+I found several REST API interview preparation resources in your Microsoft 365 files and prior interview notes,
+including material on REST API design, error handling, versioning, rate limiting, Swagger, JWT, and 
+Spring Boot implementation. There are also examples from your own interview experiences discussing API testing,
+API Gateway, reactive APIs, and microservices.
+
+Top 30 Scenario-Based REST API Interview Questions (Senior Developer)
+
+These are the kinds of questions typically asked for 13+ years Java/Spring Boot/Microservices profiles.
+
+1. API Design Scenario
+Question
+
+You need to design APIs for a banking system to manage customers and accounts. How would you design the endpoints?
+
+Expected Answer
+Use resource-oriented URLs
+GET    /customers/{id}
+POST   /customers
+PUT    /customers/{id}
+
+GET    /customers/{id}/accounts
+POST   /customers/{id}/accounts
+
+Interview One-Liner
+REST APIs should model business resources, not actions.
+2. Duplicate Request Scenario
+Question
+
+Client accidentally calls fund transfer API twice. How will you prevent duplicate transfers?
+
+Expected Answer
+Use Idempotency Key
+Store request reference
+Return same response for duplicate request
+Idempotency-Key: TXN12345
+
+Interview One-Liner
+Financial APIs should support idempotency to prevent duplicate transactions.
+3. Large Data Scenario
+Question
+
+Customer API returns 10 lakh records and causes performance issues. How will you fix it?
+
+Expected Answer
+Pagination
+Sorting
+Filtering
+GET /customers?page=0&size=50
+
+Interview One-Liner
+Never return unbounded data from REST APIs.
+4. Versioning Scenario
+Question
+
+Mobile clients use v1 APIs. New changes are not backward compatible. What will you do?
+
+Expected Answer
+/api/v1/customers
+/api/v2/customers
+
+Interview One-Liner
+API versioning is essential for backward compatibility.
+5. Security Scenario
+Question
+
+How would you secure a payment REST API?
+
+Expected Answer
+HTTPS
+JWT
+OAuth2
+Input Validation
+Rate Limiting
+Interview One-Liner
+Authentication + Authorization + Encryption.
+6. Concurrent Update Scenario
+Question
+
+Two users update the same customer profile simultaneously. How will you handle it?
+
+Expected Answer
+Optimistic Locking
+ETag
+Version Column
+@Version
+private Long version;
+
+Interview One-Liner
+Use optimistic locking to prevent lost updates.
+7. Error Handling Scenario
+Question
+
+How would you standardize error responses across 100 APIs?
+
+Expected Answer
+{
+  "timestamp":"2026-09-04",
+  "status":404,
+  "message":"Customer not found"
+}
+
+
+Use:
+
+@RestControllerAdvice
+
+Interview One-Liner
+Centralized exception handling ensures consistency.
+8. Slow API Scenario
+Question
+
+Response time increased from 100 ms to 5 seconds. What would you check?
+
+Expected Answer
+Database queries
+External calls
+Thread pool
+Logs
+APM tools
+Interview One-Liner
+Measure first, optimize later.
+9. Cache Scenario
+Question
+
+Product catalog rarely changes but gets heavy traffic.
+
+Expected Answer
+Redis Cache
+HTTP Cache Headers
+Cache-Control: max-age=3600
+
+Interview One-Liner
+Cache frequently read data.
+10. REST vs Kafka Scenario
+Question
+
+When would you choose Kafka instead of REST?
+
+Expected Answer
+
+REST
+
+Immediate response needed
+
+Kafka
+
+Async processing
+Event driven architecture
+Interview One-Liner
+REST for request-response, Kafka for events.
+11. Third-Party API Failure Scenario
+Question
+
+External fraud API is down. How will your system behave?
+
+Expected Answer
+Retry
+Circuit Breaker
+Fallback
+Interview One-Liner
+Never let downstream failures crash your service.
+12. Partial Update Scenario
+Question
+
+Customer wants to update only mobile number.
+
+Expected Answer
+PATCH /customers/100
+
+Interview One-Liner
+PATCH for partial update, PUT for full update.
+13. API Gateway Scenario
+Question
+
+Why place API Gateway before microservices?
+
+Expected Answer
+Authentication
+Routing
+Rate Limiting
+Logging
+Interview One-Liner
+API Gateway acts as the single entry point.
+14. Rate Limiting Scenario
+Question
+
+A consumer calls API 10,000 times per minute.
+
+Expected Answer
+Token Bucket
+Leaky Bucket
+
+Example:
+
+100 requests per minute
+
+Interview One-Liner
+Rate limiting protects APIs from abuse.
+15. File Upload Scenario
+Question
+
+How would you upload a 2 GB file?
+
+Expected Answer
+Multipart Upload
+Chunk Upload
+Stream Processing
+Interview One-Liner
+Never load huge files fully into memory.
+16. Authentication Scenario
+Question
+
+JWT token expires every 15 minutes.
+
+How will user continue working?
+
+Expected Answer
+Access Token
+Refresh Token
+Interview One-Liner
+Short-lived JWT + Refresh Token is standard practice.
+17. Logging Scenario
+Question
+
+Production issue occurred yesterday. What should logs contain?
+
+Expected Answer
+Correlation Id
+Request Id
+API Name
+Timestamp
+Interview One-Liner
+Correlation IDs help trace requests across microservices.
+18. API Documentation Scenario
+Question
+
+How would other teams consume your APIs easily?
+
+Expected Answer
+Swagger/OpenAPI
+
+Interview One-Liner
+APIs without documentation are difficult to maintain.
+19. CORS Scenario
+Question
+
+Frontend hosted on another domain gets CORS error.
+
+Expected Answer
+@CrossOrigin
+
+
+or global CORS configuration.
+
+Interview One-Liner
+CORS controls cross-domain browser requests.
+20. High Throughput Scenario
+Question
+
+API receives 20k requests/sec.
+
+Expected Answer
+Horizontal scaling
+Load Balancer
+Redis
+Async processing
+Interview One-Liner
+Scale horizontally before vertically.
+21. Reactive API Scenario
+Question
+
+You need to handle streaming responses and high concurrency. What will you choose?
+
+Expected Answer
+Spring WebFlux
+Mono
+Flux
+Netty
+Interview One-Liner
+Reactive APIs are suitable for high concurrency and streaming workloads.
+22. REST Template vs WebClient Scenario
+Question
+
+New external API integration. Which client would you choose?
+
+Expected Answer
+RestTemplate -> Blocking
+WebClient -> Non-blocking
+
+Interview One-Liner
+For new development, prefer WebClient.
+23. PII Data Scenario
+Question
+
+API request contains PAN/Aadhar/SSN. How would you log it?
+
+Expected Answer
+Mask sensitive data
+Log only required fields
+Interview One-Liner
+Never log personally identifiable information (PII).
+24. Timeout Scenario
+Question
+
+External service sometimes takes 60 seconds.
+
+Expected Answer
+Timeout configuration
+Retry policy
+Circuit breaker
+Interview One-Liner
+Every external call must have a timeout.
+25. API Testing Scenario
+Question
+
+How do you test REST APIs?
+
+Expected Answer
+Postman
+MockMvc
+REST Assured
+Integration tests
+Interview One-Liner
+Test both happy path and failure scenarios.
+26. Multi-Region Scenario
+Question
+
+Users are in US and India. API latency is high.
+
+Expected Answer
+CDN
+Global Load Balancer
+Regional deployment
+Interview One-Liner
+Deploy services closer to users.
+27. API Monitoring Scenario
+Question
+
+What metrics would you monitor?
+
+Expected Answer
+Response Time
+Error Rate
+Throughput
+CPU
+Memory
+Interview One-Liner
+If you cannot measure it, you cannot improve it.
+28. Distributed Transaction Scenario
+Question
+
+Fund Transfer API updates two microservices. One succeeds and one fails.
+
+Expected Answer
+Saga Pattern
+Event Driven Design
+Compensation Transactions
+Interview One-Liner
+Avoid distributed transactions in microservices.
+29. HTTP Status Code Scenario
+Question
+
+Customer not found. Which status code?
+
+Expected Answer
+404 Not Found
+
+
+Validation failure:
+
+400 Bad Request
+
+
+Unauthorized:
+
+401 Unauthorized
+
+Interview One-Liner
+Always return appropriate HTTP status codes.
+30. Design a Fund Transfer API
+Question
+
+Design a production-grade Fund Transfer API.
+
+Expected Answer
+JWT Security
+Validation
+Idempotency Key
+Audit Logging
+Transaction Management
+Exception Handling
+API Monitoring
+Rate Limiting
+Swagger Documentation
+Kafka Events
+Interview One-Liner
+A production API is much more than a controller and database call.
+
