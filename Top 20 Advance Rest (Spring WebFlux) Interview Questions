@@ -1,0 +1,1159 @@
+I found multiple WebFlux references in your interview-preparation files covering Mono, Flux, WebClient,
+R2DBC, backpressure, schedulers, reactive repositories, error handling, and reactive streaming.
+
+------------------------------------------------------------
+Top 20 Spring WebFlux Interview Questions (Senior Developer)
+------------------------------------------------------------
+These cover almost all commonly asked WebFlux topics for senior Java/Spring Boot interviews.
+
+1. What is Spring WebFlux?
+Answer
+Spring WebFlux is a reactive, non-blocking web framework.
+Built on Project Reactor.
+Designed for high concurrency and scalability.
+Interview One-Liner
+WebFlux is Spring's reactive framework built for non-blocking I/O.
+
+2. Why WebFlux Instead of Spring MVC?
+Answer
+
+Spring MVC
+
+Blocking
+Thread per request
+
+WebFlux
+
+Non-blocking
+Event-loop model
+Interview One-Liner
+WebFlux handles more concurrent users with fewer threads.
+
+3. What is Reactive Programming?
+Answer
+
+Reactive programming treats data as streams.
+
+Key concepts:
+
+Asynchronous
+Non-blocking
+Event-driven
+Interview One-Liner
+Reactive programming processes data streams asynchronously.
+
+4. What is Mono?
+Answer
+
+Represents:
+
+0 or 1 result
+
+
+Example:
+
+Mono<User>
+
+Interview One-Liner
+Mono represents a single asynchronous value.
+
+5. What is Flux?
+Answer
+
+Represents:
+
+0 to N results
+
+
+Example:
+
+Flux<User>
+
+Interview One-Liner
+Flux represents a stream of multiple values.
+
+6. Difference Between Mono and Flux?
+
+Mono
+
+Zero or one value
+
+Flux
+
+Multiple values
+Interview One-Liner
+Mono = Single result
+Flux = Multiple results
+
+7. How Does WebFlux Handle Concurrency?
+Answer
+
+Uses:
+
+Event Loop Model
+
+
+instead of
+
+Thread Per Request
+
+Interview One-Liner
+WebFlux uses fewer threads through event-driven processing.
+
+8. What is Backpressure?
+Answer
+
+Backpressure prevents consumers from being overwhelmed by producers.
+
+Example
+.onBackpressureBuffer()
+
+Interview One-Liner
+Backpressure lets consumers control data flow.
+
+9. WebClient vs RestTemplate?
+
+RestTemplate
+
+Blocking
+
+WebClient
+
+Non-blocking
+Reactive
+Interview One-Liner
+WebClient is the reactive replacement for RestTemplate.
+
+10. Why is RestTemplate Not Recommended?
+Answer
+Blocking
+
+
+while waiting for response.
+
+Interview One-Liner
+RestTemplate wastes request threads during I/O wait time.
+
+11. What Database Should Be Used With WebFlux?
+Answer
+
+Use:
+
+Spring Data R2DBC
+
+
+Avoid:
+
+JPA/Hibernate
+
+Interview One-Liner
+Reactive applications should use R2DBC instead of JDBC/JPA.
+
+12. Can We Use JPA With WebFlux?
+Answer
+
+Technically Yes.
+
+But:
+
+Not truly reactive.
+
+
+JPA uses JDBC.
+
+JDBC is blocking.
+
+Interview One-Liner
+WebFlux + JPA works but breaks end-to-end reactivity.
+
+13. What Repository Is Used In WebFlux?
+Answer
+ReactiveCrudRepository
+
+
+or
+
+R2dbcRepository
+
+Interview One-Liner
+Reactive repositories return Mono and Flux.
+
+14. How Do You Handle Errors?
+Answer
+.onErrorResume()
+
+.onErrorReturn()
+
+Example
+Mono.just(10)
+    .map(i -> i / 0)
+    .onErrorResume(ex -> Mono.just(0));
+
+Interview One-Liner
+onErrorResume provides graceful fallback.
+
+15. How Do You Handle Timeouts?
+Example
+.timeout(Duration.ofSeconds(3))
+
+Interview One-Liner
+Always configure timeouts for external calls.
+
+16. How Do You Call Multiple APIs Concurrently?
+Example
+Mono.zip(
+    customerMono,
+    accountMono,
+    riskMono
+)
+
+Interview One-Liner
+Mono.zip executes multiple non-blocking calls concurrently.
+
+17. What Are Schedulers?
+Answer
+
+Schedulers control execution threads.
+
+Common:
+
+boundedElastic()
+parallel()
+immediate()
+
+Example
+.publishOn(Schedulers.boundedElastic())
+
+Interview One-Liner
+Schedulers control where reactive pipelines execute.
+
+18. What is Server-Sent Events (SSE)?
+Example
+@GetMapping(
+ produces =
+ MediaType.TEXT_EVENT_STREAM_VALUE)
+
+Use Cases
+Live stock market feed
+Notifications
+Chat updates
+Interview One-Liner
+SSE streams data continuously from server to client.
+
+19. How Do You Implement Reactive CRUD?
+Answer
+save()      -> Mono<User>
+
+findById()  -> Mono<User>
+
+findAll()   -> Flux<User>
+
+deleteById()-> Mono<Void>
+
+Interview One-Liner
+Reactive CRUD returns Mono and Flux instead of actual objects.
+
+20. What is the Most Important Limitation of WebFlux?
+Answer
+
+Reactive gains are achieved only when:
+
+Entire chain is reactive
+
+
+Example:
+
+WebClient
++
+R2DBC
++
+Reactive Services
+
+
+If database is blocking:
+
+Benefits reduce significantly.
+
+Interview One-Liner
+A reactive controller does not make a reactive application; the whole stack must be non-blocking.
+
+Top 10 Senior-Level WebFlux One-Liners
+1. WebFlux = Non-blocking + Reactive.
+
+2. Mono = 0 or 1 element.
+
+3. Flux = 0 to N elements.
+
+4. WebClient replaces RestTemplate.
+
+5. Backpressure protects consumers.
+
+6. Netty is the default reactive server.
+
+7. Reactive DB access requires R2DBC.
+
+8. JPA is blocking and not truly reactive.
+
+9. Mono.zip() executes API calls concurrently.
+
+10. Entire stack must be reactive to gain full WebFlux benefits.
+
+Most Asked Scenario Question
+Question
+
+You converted controllers to WebFlux but still use:
+
+JPA
+RestTemplate
+Blocking DB calls
+
+Will the application become reactive?
+
+Answer
+No.
+
+
+Because:
+
+Reactive Controller ✅
+JPA ❌
+RestTemplate ❌
+
+Result:
+Partially Reactive
+
+Interview One-Liner
+WebFlux shines only when WebClient + R2DBC + Reactive Services are used end-to-end.
+
+-------------------------------------------------------------------------
+
+
+Excellent for interviews. Senior interviewers usually reject answers like:
+
+-------------------------------------------------------------------------
+
+Mono<User> findUser(Long id)
+
+
+because they want to know:
+
+Why Mono?
+What thread executes it?
+What happens when DB is slow?
+How do we handle timeout?
+How do we handle fallback?
+How do we combine multiple APIs?
+How do we avoid blocking?
+
+Below are the enhanced practical answers with enough code to explain for 3-5 minutes in interviews.
+------------------------------------------------------------------------------------------------------
+
+1. Mono Example (Single Record)
+Interview Question
+
+What is Mono?
+
+Practical Example
+
+Traditional MVC
+
+User user = repository.findById(id);
+return user;
+
+
+WebFlux
+
+public Mono<User> getUser(Long id) {
+
+    return userRepository
+            .findById(id)
+            .doOnNext(user ->
+                    System.out.println("User Found : "
+                    + user.getName()))
+            .switchIfEmpty(
+                    Mono.error(
+                     new RuntimeException(
+                            "User Not Found")));
+}
+
+Explanation
+findById()
+    |
+returns Mono<User>
+
+No DB call is executed yet
+
+Only when subscribe() occurs
+DB call executes
+
+
+Interview One-Liner
+
+Mono is a lazy asynchronous pipeline that produces zero or one element.
+
+2. Flux Example (Multiple Records)
+Interview Question
+
+What is Flux?
+
+public Flux<User> getAllUsers() {
+
+    return userRepository
+            .findAll()
+            .filter(user ->
+                    user.getEmail().contains("@gmail"))
+            .doOnNext(System.out::println);
+}
+
+
+Output
+
+User1
+User2
+User3
+User4
+
+
+Interview One-Liner
+
+Flux is a stream of multiple items processed asynchronously.
+
+3. WebClient Example
+Interview Question
+
+How do you call another microservice?
+
+public Mono<User> getUser(Long id) {
+
+    return webClient
+            .get()
+            .uri("/users/{id}", id)
+            .retrieve()
+            .bodyToMono(User.class);
+}
+
+
+Better Production Version
+
+public Mono<User> getUser(Long id) {
+
+    return webClient
+            .get()
+            .uri("/users/{id}", id)
+            .retrieve()
+            .bodyToMono(User.class)
+
+            .timeout(Duration.ofSeconds(3))
+
+            .retry(2)
+
+            .onErrorResume(ex -> {
+
+                User fallbackUser =
+                        new User();
+
+                fallbackUser.setName(
+                        "DEFAULT USER");
+
+                return Mono.just(fallbackUser);
+            });
+}
+
+
+Interview One-Liner
+
+WebClient supports non-blocking calls with timeout, retry and fallback.
+
+4. Mono.zip Example
+Most Important Senior Question
+
+Requirement:
+
+Need User
+Need Department
+Need Account
+
+All APIs should execute together
+
+Mono<User> userMono =
+        userService.getUser(id);
+
+Mono<Department> deptMono =
+        departmentService.getDepartment(id);
+
+Mono<Account> accountMono =
+        accountService
+                .getAccount(id);
+
+
+Combine
+
+return Mono.zip(
+        userMono,
+        deptMono,
+        accountMono)
+        .map(tuple -> {
+
+            User user =
+                    tuple.getT1();
+
+            Department dept =
+                    tuple.getT2();
+
+            Account account =
+                    tuple.getT3();
+
+            return new UserResponse(
+                    user,
+                    dept,
+                    account);
+        });
+
+
+Interview One-Liner
+
+Mono.zip executes multiple non-blocking API calls concurrently and combines results.
+
+5. Timeout Example
+
+External API hangs.
+
+return webClient
+        .get()
+        .uri("/risk")
+        .retrieve()
+        .bodyToMono(String.class)
+
+        .timeout(
+          Duration.ofSeconds(2));
+
+
+Without timeout
+
+Request waits forever
+
+
+With timeout
+
+Fail Fast
+
+
+Interview One-Liner
+
+Reactive applications should always define timeouts for external calls.
+
+6. Retry Example
+return webClient
+        .get()
+        .uri("/customer")
+
+        .retrieve()
+        .bodyToMono(Customer.class)
+
+        .retry(3);
+
+
+Execution
+
+Attempt 1 -> Fail
+
+Attempt 2 -> Fail
+
+Attempt 3 -> Success
+
+
+Better
+
+.retryWhen(
+    Retry.fixedDelay(
+        3,
+        Duration.ofSeconds(1)
+    )
+)
+
+
+Interview One-Liner
+
+Retry is useful for temporary network failures.
+
+7. Fallback Example
+return customerApi()
+       .onErrorResume(ex -> {
+
+           Customer customer =
+                   new Customer();
+
+           customer.setName(
+                   "Unknown Customer");
+
+           return Mono.just(customer);
+       });
+
+
+Output
+
+Actual Customer OR
+Fallback Customer
+
+
+Interview One-Liner
+
+onErrorResume provides graceful degradation when services fail.
+
+8. Scheduler Example
+Most Asked Question
+
+Blocking DB call:
+
+Thread.sleep(5000);
+
+
+Bad
+
+Mono.just("Hello")
+    .map(value -> {
+
+        Thread.sleep(5000);
+
+        return value;
+    });
+
+
+Good
+
+Mono.fromCallable(() -> {
+
+    Thread.sleep(5000);
+
+    return "Hello";
+})
+.subscribeOn(
+        Schedulers
+        .boundedElastic()
+);
+
+
+Interview One-Liner
+
+Legacy blocking operations should run on boundedElastic scheduler.
+
+9. SSE Streaming Example
+
+Real-time Stock Price API
+
+@GetMapping(
+produces =
+MediaType
+.TEXT_EVENT_STREAM_VALUE)
+public Flux<Long> streamPrices() {
+
+    return Flux.interval(
+            Duration.ofSeconds(1));
+}
+
+
+Output
+
+1
+2
+3
+4
+5
+...
+
+
+Interview One-Liner
+
+Flux can continuously stream data without closing the connection.
+
+10. Backpressure Example
+
+Producer
+
+Flux.range(
+        1,
+        1000000);
+
+
+Consumer
+
+Flux.range(1, 1000000)
+
+    .onBackpressureDrop()
+
+    .subscribe(
+       System.out::println);
+
+
+Without Backpressure
+
+OutOfMemory Risk
+
+
+Interview One-Liner
+
+Backpressure prevents fast producers from overwhelming slow consumers.
+
+11. Reactive CRUD Example
+
+Create
+
+@PostMapping
+public Mono<User> save(
+        @RequestBody User user){
+
+    return repository.save(user);
+}
+
+
+Read
+
+@GetMapping("/{id}")
+public Mono<User> getUser(
+        @PathVariable Long id){
+
+    return repository.findById(id);
+}
+
+
+Update
+
+public Mono<User> update(
+        Long id,
+        User request){
+
+    return repository
+            .findById(id)
+
+            .flatMap(user -> {
+
+                user.setName(
+                    request.getName());
+
+                return repository
+                        .save(user);
+            });
+}
+
+
+Delete
+
+public Mono<Void> delete(
+        Long id){
+
+    return repository
+            .deleteById(id);
+}
+
+
+Interview One-Liner
+
+Reactive CRUD operations return Mono or Flux instead of actual objects.
+
+12. Most Important Senior Question
+Why WebFlux + JPA is Wrong?
+
+Bad Design
+
+Controller
+    |
+WebFlux
+    |
+JPA
+    |
+JDBC
+
+
+Problem
+
+JPA = Blocking
+
+JDBC = Blocking
+
+
+Good Design
+
+Controller
+    |
+WebFlux
+    |
+R2DBC
+    |
+Reactive DB Driver
+
+
+Interview One-Liner
+
+Using JPA with WebFlux creates a partially reactive application because JDBC is blocking.
+
+Top 5 Practical Questions Asked in Banking Interviews
+1. Difference between WebClient and RestTemplate?
+
+2. Why WebFlux + JPA is not fully reactive?
+
+3. Explain Mono.zip() with User + Account + Department example.
+
+4. How do you implement timeout, retry and fallback?
+
+5. What happens if Thread.sleep() is called inside WebFlux?
+
+Golden Interview Answer
+WebFlux is beneficial only when the entire chain is non-blocking:
+
+Controller
+   ↓
+WebClient
+   ↓
+Reactive Service
+   ↓
+R2DBC
+   ↓
+Reactive Database Driver
+
+If JPA, JDBC, RestTemplate or Thread.sleep() is used anywhere in the flow, the reactive benefits are significantly reduced.
+
+
+This answer alone often impresses senior interviewers because it shows you understand end-to-end reactivity, not just Mono and Flux syntax.
+
+
+-------------------------------------------------------------------------
+
+Important Interview Point First for Spring WebFLux Reactive Programming
+
+-------------------------------------------------------------------------
+
+✅ There is NO Reactive JPA.
+
+Spring WebFlux + JPA/Hibernate is not fully reactive because JPA uses JDBC (blocking).
+For a true reactive application use:
+Spring WebFlux
+Spring Data R2DBC
+R2DBC H2 Driver
+
+Your own WebFlux notes also indicate that reactive SQL access should use R2DBC repositories, not JPA repositories.
+
+Interview One-Liner:
+
+Spring WebFlux + JPA = NOT truly reactive
+Spring WebFlux + R2DBC = Fully reactive
+
+
+Also, Reactive repositories are not supported by JPA and require R2DBC-style repositories.
+
+Project Structure
+src/main/java
+|
++-- controller
+|     UserController
+|
++-- service
+|     UserService
+|
++-- repository
+|     UserRepository
+|     DepartmentRepository
+|
++-- entity
+|     User
+|     Department
+|
++-- dto
+|     UserResponse
+|
++-- DemoApplication
+
+1. pom.xml
+<dependencies>
+
+    <!-- WebFlux -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+
+    <!-- R2DBC -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+    </dependency>
+
+    <!-- H2 Reactive Driver -->
+    <dependency>
+        <groupId>io.r2dbc</groupId>
+        <artifactId>r2dbc-h2</artifactId>
+    </dependency>
+
+    <!-- H2 Console -->
+    <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+    </dependency>
+
+</dependencies>
+
+2. application.properties
+spring.r2dbc.url=r2dbc:h2:mem:///testdb
+spring.r2dbc.username=sa
+spring.r2dbc.password=
+
+spring.h2.console.enabled=true
+
+spring.sql.init.mode=always
+
+3. schema.sql
+CREATE TABLE department(
+   id BIGINT AUTO_INCREMENT PRIMARY KEY,
+   dept_name VARCHAR(100)
+);
+
+CREATE TABLE users(
+   id BIGINT AUTO_INCREMENT PRIMARY KEY,
+   name VARCHAR(100),
+   email VARCHAR(100),
+   department_id BIGINT
+);
+
+4. Department Entity
+package com.example.entity;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Table("department")
+public class Department {
+
+    @Id
+    private Long id;
+
+    private String deptName;
+}
+
+5. User Entity
+package com.example.entity;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Table("users")
+public class User {
+
+    @Id
+    private Long id;
+
+    private String name;
+
+    private String email;
+
+    private Long departmentId;
+}
+
+6. DTO
+package com.example.dto;
+
+import lombok.*;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserResponse {
+
+    private Long userId;
+
+    private String userName;
+
+    private String email;
+
+    private String departmentName;
+}
+
+7. User Repository
+package com.example.repository;
+
+import com.example.entity.User;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+
+public interface UserRepository
+        extends ReactiveCrudRepository<User, Long> {
+}
+
+
+Your interview prep notes also show reactive repositories using ReactiveCrudRepository.
+
+8. Department Repository
+package com.example.repository;
+
+import com.example.entity.Department;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+
+public interface DepartmentRepository
+        extends ReactiveCrudRepository<Department, Long> {
+}
+
+9. Service Layer
+@Service
+@RequiredArgsConstructor
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final DepartmentRepository departmentRepository;
+
+    public Mono<User> saveUser(User user) {
+        return userRepository.save(user);
+    }
+
+    public Flux<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public Mono<User> getUser(Long id) {
+        return userRepository.findById(id);
+    }
+
+    public Mono<Void> deleteUser(Long id) {
+        return userRepository.deleteById(id);
+    }
+
+    public Mono<UserResponse> getUserWithDepartment(Long userId) {
+
+        return userRepository.findById(userId)
+                .flatMap(user ->
+                        departmentRepository
+                          .findById(user.getDepartmentId())
+                          .map(dept ->
+                            new UserResponse(
+                                    user.getId(),
+                                    user.getName(),
+                                    user.getEmail(),
+                                    dept.getDeptName())));
+    }
+}
+
+10. Controller
+@RestController
+@RequestMapping("/users")
+@RequiredArgsConstructor
+public class UserController {
+
+    private final UserService service;
+
+    @PostMapping
+    public Mono<User> saveUser(@RequestBody User user){
+        return service.saveUser(user);
+    }
+
+    @GetMapping
+    public Flux<User> getAllUsers(){
+        return service.getAllUsers();
+    }
+
+    @GetMapping("/{id}")
+    public Mono<User> getUser(@PathVariable Long id){
+        return service.getUser(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public Mono<Void> deleteUser(@PathVariable Long id){
+        return service.deleteUser(id);
+    }
+
+    @GetMapping("/{id}/department")
+    public Mono<UserResponse> getUserDepartment(
+                              @PathVariable Long id){
+        return service.getUserWithDepartment(id);
+    }
+}
+
+API Testing
+Create Department
+INSERT INTO department(dept_name)
+VALUES('IT');
+
+Create User
+POST /users
+
+{
+  "name":"Parag",
+  "email":"parag@gmail.com",
+  "departmentId":1
+}
+
+Get User
+GET /users/1
+
+
+Output
+
+{
+  "id":1,
+  "name":"Parag",
+  "email":"parag@gmail.com",
+  "departmentId":1
+}
+
+Get User + Department
+GET /users/1/department
+
+
+Output
+
+{
+   "userId":1,
+   "userName":"Parag",
+   "email":"parag@gmail.com",
+   "departmentName":"IT"
+}
+
+Senior Interview Questions From This Example
+Why not use JPA with WebFlux?
+JPA uses JDBC
+JDBC is blocking
+WebFlux is non-blocking
+Therefore JPA breaks the reactive chain
+
+Which Repository is used?
+ReactiveCrudRepository
+
+Why Mono?
+Single result
+0 or 1 value
+
+Why Flux?
+Multiple results
+0..N values
+
+What database library is used?
+R2DBC
+
+What replaces JPA Repository?
+ReactiveCrudRepository
+R2dbcRepository
+
+How are joins handled?
+No lazy loading like JPA.
+
+Combine data manually using:
+
+flatMap()
+zip()
+
+How to fetch User and Department together?
+Mono.zip(userMono, departmentMono)
+
+
+Senior Interview One-Liner
+
+In WebFlux, there is no Reactive JPA. Use Spring Data R2DBC with ReactiveCrudRepository and H2/Postgres/Oracle R2DBC drivers to maintain an end-to-end non-blocking reactive pipeline.
