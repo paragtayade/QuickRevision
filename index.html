@@ -170,8 +170,6 @@
             color: var(--primary-dark);
 
             font-weight: 800;
-            text-align: center;
-            text-decoration: none;
             cursor: pointer;
 
             transition:
@@ -392,13 +390,13 @@
             color: #ffffff;
 
             font-weight: 800;
+            text-align: center;
+            text-decoration: none;
             cursor: pointer;
 
             transition:
                 background-color 0.15s ease,
                 transform 0.15s ease;
-            text-align: center;
-            text-decoration: none;
         }
 
         .view-button:hover {
@@ -725,7 +723,7 @@
 
         <p class="section-description">
             Search by topic or select a technology category.
-            Each TXT or PDF revision guide opens in a separate browser tab.
+            TXT and PDF revision guides open in a separate browser tab.
         </p>
 
 
@@ -1194,60 +1192,36 @@
 
 
         /*
-         * Build a GitHub Pages URL for TXT and PDF files.
-         * Each path segment is encoded separately so spaces,
-         * brackets, ampersands and folder names work correctly.
+         * Build the URL used by View Revision Guide.
+         * TXT uses GitHub's raw text URL.
+         * PDF uses the published GitHub Pages URL.
          */
-
-        function createResourceUrl(resource) {
+        function getResourceViewUrl(resource) {
             if (!resource || !resource.name) {
                 return "";
             }
 
-            const lowerName =
-                resource.name.toLowerCase();
+            const lowerName = resource.name.toLowerCase();
 
-            /*
-             * TXT files use GitHub's raw download_url.
-             * Browsers display text/plain content directly.
-             */
-            if (
-                lowerName.endsWith(".txt")
-                &&
-                resource.download_url
-            ) {
-                return resource.download_url;
+            if (lowerName.endsWith(".txt")) {
+                return resource.download_url || "";
             }
 
-            /*
-             * PDF files use the published GitHub Pages URL.
-             * This allows the browser's built-in PDF viewer.
-             */
-            const resourcePath =
-                resource.path || resource.name;
+            const resourcePath = resource.path || resource.name;
+            const encodedPath = resourcePath
+                .split("/")
+                .map(function (part) {
+                    return encodeURIComponent(part);
+                })
+                .join("/");
 
-            const encodedPath =
-                resourcePath
-                    .split("/")
-                    .map(
-                        function (pathPart) {
-                            return encodeURIComponent(
-                                pathPart
-                            );
-                        }
-                    )
-                    .join("/");
-
-            return (
-                window.location.origin
-                + window.location.pathname.replace(
-                    /\/[^/]*$/,
-                    "/"
-                )
-                + encodedPath
-            );
+            return "https://"
+                + repositoryOwner
+                + ".github.io/"
+                + repositoryName
+                + "/"
+                + encodedPath;
         }
-
 
         /*
          * Render revision-guide cards.
@@ -1368,21 +1342,16 @@
                         document.createElement(
                             "a"
                         );
-
                     viewButton.className =
                         "view-button";
-
                     viewButton.href =
-                        createResourceUrl(
+                        getResourceViewUrl(
                             resource
                         );
-
                     viewButton.target =
                         "_blank";
-
                     viewButton.rel =
                         "noopener noreferrer";
-
                     viewButton.textContent =
                         "View Revision Guide";
 
@@ -1408,6 +1377,62 @@
                         card
                     );
                 }
+            );
+        }
+
+
+        /*
+         * Apply search and category filters.
+         */
+
+        function filterResources() {
+
+            const searchText =
+                searchInput
+                    .value
+                    .trim()
+                    .toLowerCase();
+
+
+            const selectedCategory =
+                categorySelect.value;
+
+
+            const filteredResources =
+                allResources.filter(
+                    function (resource) {
+
+                        const visibleName =
+                            cleanResourceName(
+                                resource.name
+                            ).toLowerCase();
+
+
+                        const matchesSearch =
+                            visibleName.includes(
+                                searchText
+                            );
+
+
+                        const matchesCategory =
+                            selectedCategory === "All"
+                            ||
+                            getCategory(
+                                resource.name
+                            ) === selectedCategory;
+
+
+                        return (
+                            matchesSearch
+                            &&
+                            matchesCategory
+                        );
+                    }
+                );
+
+
+            renderResources(
+                filteredResources
             );
         }
 
@@ -1556,31 +1581,20 @@
                 ];
 
 
-                const supportedExtensions = [
-                    ".txt",
-                    ".pdf"
-                ];
-
                 allResources =
                     repositoryItems
                         .filter(
                             function (item) {
                                 const lowerName =
                                     item.name.toLowerCase();
-
-                                const isSupported =
-                                    supportedExtensions.some(
-                                        function (extension) {
-                                            return lowerName.endsWith(
-                                                extension
-                                            );
-                                        }
-                                    );
-
+                                const supportedFile =
+                                    lowerName.endsWith(".txt")
+                                    ||
+                                    lowerName.endsWith(".pdf");
                                 return (
                                     item.type === "file"
                                     &&
-                                    isSupported
+                                    supportedFile
                                     &&
                                     !excludedFiles.includes(
                                         item.name
@@ -1598,7 +1612,7 @@
 
 
                 statusMessage.textContent =
-                    "Select View Revision Guide to open the complete TXT or PDF guide in a new browser tab.";
+                    "Select View Revision Guide to open a TXT or PDF guide in a new browser tab.";
 
 
                 renderResources(
