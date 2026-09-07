@@ -1,85 +1,140 @@
 ==============================================================================
-SPLITERATOR & STREAM INTERNALS - SUPER QUICK REVISION
+TOP 15 INTERVIEW QUESTIONS - SPLITERATOR & STREAM INTERNALS
 ==============================================================================
 
 1. What is Spliterator?
 
 Answer:
+Spliterator stands for:
+
 Split + Iterator
 
-Used internally by Streams to traverse and split data.
+It is used internally by Streams to traverse and split data for parallel processing.
 
-Memory:
-Spliterator = Traverse + Split
+Flow:
+
+Collection
+    ↓
+Spliterator
+    ↓
+Stream Pipeline
+
+Interview One-Liner:
+Spliterator is an iterator that can split data for parallel processing. 【1-1c4ebb】
 
 ------------------------------------------------------------------------------
 
-2. Iterator vs Spliterator?
+2. Why was Spliterator introduced?
+
+Answer:
 
 Iterator
 ---------
-Can Traverse
+Can traverse
+
+Cannot split
 
 Spliterator
------------
-Can Traverse + Split
+------------
+Can traverse
+Can split
 
-Benefit:
-Parallel Processing
+Benefits:
+
+✓ Parallel Processing
+✓ Better Performance
+✓ Work Stealing Support
 
 ------------------------------------------------------------------------------
 
-3. What is tryAdvance()?
+3. What does tryAdvance() do?
 
 Answer:
-Processes ONE element at a time.
+Processes one element at a time.
 
-Example:
+Input:
+[10,20,30]
 
+Code:
+
+spliterator.tryAdvance(
+    System.out::println);
+
+Output:
+10
+
+Call Again:
+
+Output:
+20
+
+Call Again:
+
+Output:
+30
+
+Interview Tip:
+tryAdvance() moves one element forward.
+
+------------------------------------------------------------------------------
+
+4. What does forEachRemaining() do?
+
+Answer:
+Processes all remaining elements.
+
+Input:
+[10,20,30]
+
+Code:
+
+spliterator.forEachRemaining(
+    System.out::println);
+
+Output:
 10
 20
 30
 
-One call → One element
-
-Memory:
-tryAdvance() = NEXT()
-
-------------------------------------------------------------------------------
-
-4. What is forEachRemaining()?
-
-Answer:
-Processes ALL remaining elements.
-
 Difference:
 
 tryAdvance()
-→ One Element
+-------------
+One at a time
 
 forEachRemaining()
-→ All Elements
+------------------
+All remaining elements
 
 ------------------------------------------------------------------------------
 
-5. What is trySplit()?
+5. What does trySplit() do?
 
 Answer:
-Splits data into smaller chunks.
+Divides data into smaller chunks.
 
-Example:
-
+Input:
 [1,2,3,4,5,6]
 
-↓
+Code:
 
-[1,2,3]
-[4,5,6]
+Spliterator<Integer> sp1 =
+list.spliterator();
 
-Used by Parallel Streams.
+Spliterator<Integer> sp2 =
+sp1.trySplit();
 
-Memory:
-trySplit() = Divide Work
+Possible Split:
+
+sp1 → [4,5,6]
+
+sp2 → [1,2,3]
+
+Use:
+Parallel Streams
+
+Interview One-Liner:
+trySplit() enables task splitting in parallel processing.
 
 ------------------------------------------------------------------------------
 
@@ -88,32 +143,40 @@ trySplit() = Divide Work
 Answer:
 
 ORDERED
-→ Has Order
+--------
+Elements have order
 
 DISTINCT
-→ No Duplicates
+---------
+No duplicates
 
 SORTED
-→ Sorted Data
+-------
+Sorted data
 
 SIZED
-→ Known Size
+------
+Known size
 
 NONNULL
-→ No Nulls
+--------
+No null values
 
 IMMUTABLE
-→ Cannot Change
+----------
+Cannot change
 
 CONCURRENT
-→ Safe Concurrent Updates
+-----------
+Safe concurrent modifications
 
 ------------------------------------------------------------------------------
 
-7. What is Source?
+7. How does a Stream start internally?
 
 Answer:
-Data source for Stream.
+
+Source
 
 Examples:
 
@@ -122,17 +185,28 @@ Set
 Array
 File
 
+Example:
+
+List<Integer> list =
+List.of(1,2,3);
+
+list.stream();
+
 Flow:
 
 Source
  ↓
-Stream
+Spliterator
+ ↓
+Pipeline
 
 ------------------------------------------------------------------------------
 
-8. What is Stream Pipeline?
+8. What is a Stream Pipeline?
 
 Answer:
+
+A Stream Pipeline consists of:
 
 Source
  ↓
@@ -142,17 +216,18 @@ Terminal Operation
 
 Example:
 
-filter()
-map()
-collect()
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
 
 ------------------------------------------------------------------------------
 
-9. What are Intermediate Operations?
+9. What are Intermediate Operations internally?
 
 Answer:
 
-Create a new Stream.
+Operations that create a new Stream.
 
 Examples:
 
@@ -162,18 +237,18 @@ flatMap()
 sorted()
 distinct()
 
-Properties:
+Characteristics:
 
 ✓ Lazy
 ✓ Return Stream
 
 ------------------------------------------------------------------------------
 
-10. What are Terminal Operations?
+10. What are Terminal Operations internally?
 
 Answer:
 
-Produce final result.
+Operations that produce final result.
 
 Examples:
 
@@ -182,27 +257,32 @@ reduce()
 count()
 forEach()
 
-Properties:
+Characteristics:
 
-✓ Trigger Execution
-✓ End Pipeline
+✓ Trigger execution
+✓ End pipeline
 
 ------------------------------------------------------------------------------
 
-11. What is Sink?
+11. What is Sink in Stream Internals?
 
 Answer:
 
-Final receiver of data.
+Sink is the final consumer of data.
 
 Example:
 
-collect()
-reduce()
-count()
+list.stream()
+    .filter(...)
+    .map(...)
+    .collect(Collectors.toList());
 
-Memory:
-Sink = Final Consumer
+Sink
+----
+collect()
+
+Interview One-Liner:
+Sink receives processed elements from pipeline stages. 【1-1c4ebb】
 
 ------------------------------------------------------------------------------
 
@@ -210,17 +290,20 @@ Sink = Final Consumer
 
 Answer:
 
-Nothing executes until a
-Terminal Operation is called.
+Intermediate operations execute only when a
+terminal operation is called.
 
-Example:
+Code:
 
-stream.filter(...);
+stream.filter(n -> n > 10);
 
 Output:
-Nothing
+No Output
 
-Memory:
+Reason:
+No Terminal Operation
+
+Memory Trick:
 Lazy = Execute Later
 
 ------------------------------------------------------------------------------
@@ -229,16 +312,33 @@ Lazy = Execute Later
 
 Answer:
 
-filter() + map() run together
-in a single traversal.
+Multiple operations are merged into one traversal.
+
+Example:
+
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
+
+Internal Execution:
+
+1 → filter → map
+
+2 → filter → map
+
+3 → filter → map
+
+Instead of:
+
+filter all
+then map all
 
 Benefit:
+Less memory usage
 
-✓ Less Memory
-✓ Better Performance
-
-Memory:
-Fusion = One Pass
+Interview One-Liner:
+Stream Fusion processes each element through all stages before moving to the next.
 
 ------------------------------------------------------------------------------
 
@@ -257,14 +357,110 @@ allMatch()
 noneMatch()
 limit()
 
-Memory:
-Short Circuit = Stop Early
+Example:
+
+list.stream()
+    .filter(n -> n > 10)
+    .findFirst();
+
+Processing stops after first match.
 
 ------------------------------------------------------------------------------
 
 15. Explain Stream Internal Working.
 
 Answer:
+
+Collection
+    ↓
+Source
+    ↓
+Spliterator
+    ↓
+Pipeline Creation
+    ↓
+Intermediate Operations
+        filter()
+        map()
+        sorted()
+    ↓
+Terminal Operation
+        collect()
+    ↓
+Sink
+    ↓
+Result
+
+Interview One-Liner:
+A Stream internally uses Spliterator to traverse data, builds a lazy pipeline, and executes it only when a terminal operation is invoked. 【1-1c4ebb】
+
+==============================================================================
+
+MOST ASKED DIFFERENCE QUESTIONS
+==============================================================================
+
+1. Iterator vs Spliterator
+
+2. tryAdvance() vs forEachRemaining()
+
+3. stream() vs Spliterator()
+
+4. Lazy Evaluation vs Eager Evaluation
+
+5. Intermediate vs Terminal Operations
+
+6. Stream Pipeline vs Collection Processing
+
+7. Spliterator vs ForkJoinPool
+
+8. Stream Fusion vs Multiple Loops
+
+9. findFirst() vs findAny()
+
+10. Short Circuiting vs Full Traversal
+
+==============================================================================
+
+30-SECOND REVISION
+==============================================================================
+
+Spliterator
+→ Split + Traverse
+
+tryAdvance()
+→ One Element
+
+forEachRemaining()
+→ All Remaining
+
+trySplit()
+→ Divide Data
+
+Characteristics
+→ ORDERED, SIZED, SORTED
+
+Source
+→ List, Set, Array, File
+
+Pipeline
+→ Source → Intermediate → Terminal
+
+Sink
+→ Final Consumer
+
+Lazy Evaluation
+→ Execute Later
+
+Stream Fusion
+→ Single Traversal
+
+Short Circuiting
+→ Stop Early
+
+==============================================================================
+
+MEMORY TRICK
+==============================================================================
 
 Collection
     ↓
@@ -282,39 +478,20 @@ Sink
     ↓
 Result
 
-==============================================================================
+Remember:
 
-15-SECOND INTERVIEW ANSWER
-==============================================================================
-
-Streams get data from a Source using a Spliterator.
-Intermediate operations build a lazy pipeline.
-Terminal operation triggers execution.
-Spliterator helps in traversal and parallel processing.
-
-==============================================================================
-
-MEMORY TRICK
-==============================================================================
-
-Source
-  ↓
 Spliterator
-  ↓
-Pipeline
-  ↓
-Intermediate Ops
-  ↓
-Terminal Ops
-  ↓
-Sink
-  ↓
-Result
+    = Split + Traverse
 
-Spliterator       → Split + Traverse
-tryAdvance()      → One Element
-forEachRemaining()→ All Elements
-trySplit()        → Divide Work
-Lazy              → Execute Later
-Fusion            → One Pass
-Short Circuit     → Stop Early
+Fusion
+    = One Pass
+
+Lazy
+    = Execute Later
+
+Short Circuit
+    = Stop Early
+
+
+Key stream internal concepts such as Spliterator, Source, Pipeline, Intermediate Operations, Terminal Operations, 
+Lazy Processing, Short Circuiting, and Stream Fusion are explicitly listed in your Java Streams notes.
