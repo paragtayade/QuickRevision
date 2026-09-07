@@ -723,7 +723,7 @@
 
         <p class="section-description">
             Search by topic or select a technology category.
-            TXT and PDF revision guides open in a separate browser tab.
+            Each revision guide opens in a separate browser tab.
         </p>
 
 
@@ -1192,9 +1192,10 @@
 
 
         /*
-         * Build the URL used by View Revision Guide.
-         * TXT uses GitHub's raw text URL.
-         * PDF uses the published GitHub Pages URL.
+         * Build the URL for a revision guide.
+         * Most guides in this repository have no .txt extension,
+         * so every non-PDF file uses GitHub's download_url.
+         * PDF files use the published GitHub Pages URL.
          */
         function getResourceViewUrl(resource) {
             if (!resource || !resource.name) {
@@ -1203,7 +1204,7 @@
 
             const lowerName = resource.name.toLowerCase();
 
-            if (lowerName.endsWith(".txt")) {
+            if (!lowerName.endsWith(".pdf")) {
                 return resource.download_url || "";
             }
 
@@ -1514,7 +1515,7 @@
 
 
         /*
-         * Load all root-level text resources.
+         * Load all root-level revision resources.
          *
          * Any future file added directly to the main
          * branch root appears after the page refreshes.
@@ -1583,18 +1584,12 @@
 
                 allResources =
                     repositoryItems
+
                         .filter(
                             function (item) {
-                                const lowerName =
-                                    item.name.toLowerCase();
-                                const supportedFile =
-                                    lowerName.endsWith(".txt")
-                                    ||
-                                    lowerName.endsWith(".pdf");
+
                                 return (
                                     item.type === "file"
-                                    &&
-                                    supportedFile
                                     &&
                                     !excludedFiles.includes(
                                         item.name
@@ -1602,6 +1597,7 @@
                                 );
                             }
                         )
+
                         .sort(
                             sortResources
                         );
@@ -1612,7 +1608,7 @@
 
 
                 statusMessage.textContent =
-                    "Select View Revision Guide to open a TXT or PDF guide in a new browser tab.";
+                    "Select View Revision Guide to open the complete guide in a new browser tab.";
 
 
                 renderResources(
