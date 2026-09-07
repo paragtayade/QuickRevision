@@ -1,0 +1,294 @@
+----------------------------------------------------
+Why Streams? - Top 10 Interview Questions
+----------------------------------------------------
+
+1. Why were Streams introduced in Java 8?
+
+Answer: Streams were introduced to simplify collection processing, reduce boilerplate code, and support functional programming.
+
+2. What problems do Streams solve?
+
+Answer:
+
+Too many loops
+Temporary variables
+Complex nested logic
+Difficult parallel processing
+
+3. What are the advantages of Streams over loops?
+
+Answer:
+
+Less Code
+Better Readability
+Easy Data Transformation
+Supports Parallel Processing
+Lazy Evaluation
+
+4. Why are Streams considered declarative?
+
+Answer:
+
+With loops we specify HOW to iterate.
+
+for(Employee e : employees){
+   ...
+}
+
+
+With Streams we specify WHAT we want.
+
+employees.stream()
+         .filter(emp -> emp.getSalary() > 50000);
+
+5. How do Streams improve readability?
+
+Answer:
+
+Instead of multiple loops and conditions:
+
+list.stream()
+    .filter(...)
+    .map(...)
+    .sorted(...)
+    .toList();
+
+
+Everything appears as a readable pipeline.
+
+6. How do Streams support functional programming?
+
+Answer:
+
+Streams use:
+
+Lambda Expressions
+Method References
+Functional Interfaces
+
+
+Example:
+
+list.stream()
+    .map(String::toUpperCase);
+
+7. Why are Streams better for data transformation?
+
+Answer:
+
+Operations can be chained.
+
+list.stream()
+    .filter(x -> x > 10)
+    .map(x -> x * 2)
+    .sorted();
+
+8. Why are Streams useful for large datasets?
+
+Answer:
+
+Because of Lazy Evaluation.
+
+list.stream()
+    .filter(x -> x > 100)
+    .findFirst();
+
+
+Processing stops once a match is found.
+
+9. Why do Streams support Parallel Processing easily?
+
+Answer:
+
+Just replace:
+
+stream()
+
+
+with
+
+parallelStream()
+
+
+No thread management required.
+
+10. When should Streams NOT be used?
+
+Answer:
+
+Very simple loops
+Complex debugging requirements
+Performance-critical small datasets
+When side effects are required
+
+Interview One-Liner
+Streams are introduced to make collection processing concise, readable, functional, and parallelizable.
+
+Collections vs Streams - Top 10 Interview Questions
+1. What is the difference between Collection and Stream?
+Collection
+----------
+Stores Data
+
+Stream
+-------
+Processes Data
+
+2. Which one stores elements?
+
+Answer:
+
+Collection stores elements.
+Stream does not store elements.
+
+
+Example:
+
+List<String> names;
+
+
+stores data.
+
+names.stream();
+
+
+processes data.
+
+3. Which one is reusable?
+
+Answer:
+
+Collection → Reusable
+Stream → Single-use
+
+
+Example:
+
+list.size();
+list.size();
+
+
+Works.
+
+stream.count();
+stream.count();
+
+
+Throws exception.
+
+4. Can Collection be modified?
+
+Answer:
+
+Yes.
+
+list.add("Java");
+list.remove("Java");
+
+5. Can Stream modify data?
+
+Answer:
+
+No.
+
+list.stream()
+    .filter(x -> x > 10);
+
+
+Original collection remains unchanged.
+
+6. Which supports CRUD operations?
+
+Answer:
+
+Collection → Yes
+Stream → No
+
+
+Collections support:
+
+Add
+Update
+Delete
+Search
+
+
+Streams only process data.
+
+7. Which supports Lazy Evaluation?
+
+Answer:
+
+Collection → No
+Stream → Yes
+
+
+Streams execute only after terminal operation.
+
+8. Which supports Functional Programming?
+
+Answer:
+
+Collection → No
+Stream → Yes
+
+
+Streams use:
+
+Lambda Expressions
+Method References
+Functional Interfaces
+
+9. Which supports Parallel Processing?
+
+Answer:
+
+Collection → No direct support
+Stream → Yes
+
+
+Example:
+
+list.parallelStream()
+
+10. When would you choose Collection over Stream?
+
+Answer:
+
+Use Collection when:
+
+Need to store data
+Need CRUD operations
+Need repeated access
+Need indexing
+
+
+-------------
+Quick Revision
+-------------
+Why Streams?
+-------------
+Less Code
+Better Readability
+Functional Programming
+Lazy Evaluation
+Parallel Processing
+
+--------------------------
+Collection vs Stream
+--------------------------
+Collection = Stores Data
+Stream = Processes Data
+
+Collection = Reusable
+Stream = Single-use
+
+Collection = CRUD
+Stream = No CRUD
+
+Collection = Eager
+Stream = Lazy
+
+Collection = Storage
+Stream = Computation
+---------------------------------------
