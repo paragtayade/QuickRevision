@@ -28,6 +28,7 @@
             --primary: #2457d6;
             --primary-dark: #173e9f;
             --border: #dfe6f1;
+
             --error-background: #fff1f2;
             --error-border: #fecaca;
             --error-text: #b91c1c;
@@ -151,8 +152,8 @@
         .hero-actions {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
 
+            gap: 12px;
             margin-top: 26px;
         }
 
@@ -230,7 +231,6 @@
 
             gap: 12px;
             align-items: center;
-
             margin-bottom: 14px;
         }
 
@@ -358,7 +358,6 @@
 
             font-size: 1.08rem;
             line-height: 1.4;
-
             overflow-wrap: anywhere;
         }
 
@@ -421,8 +420,8 @@
 
         .loading-line {
             height: 15px;
-            margin-bottom: 13px;
 
+            margin-bottom: 13px;
             border-radius: 8px;
 
             background:
@@ -454,7 +453,6 @@
         }
 
         @keyframes loading-animation {
-
             0% {
                 background-position: 200% 0;
             }
@@ -465,7 +463,7 @@
         }
 
         /*
-         * Empty and error messages
+         * Empty and error states
          */
 
         .message-box {
@@ -476,7 +474,6 @@
                 22px;
 
             border-radius: 16px;
-
             text-align: center;
         }
 
@@ -494,11 +491,8 @@
                 1px solid
                 var(--error-border);
 
-            background:
-                var(--error-background);
-
-            color:
-                var(--error-text);
+            background: var(--error-background);
+            color: var(--error-text);
         }
 
         .message-box h3 {
@@ -534,16 +528,31 @@
         }
 
         /*
-         * Footer statistics
+         * Footer
          */
+
+        footer {
+            padding:
+                24px
+                20px;
+
+            background: #111827;
+            color: #cbd5e1;
+
+            text-align: center;
+        }
+
+        footer p {
+            margin: 0;
+        }
 
         .footer-stats {
             display: flex;
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 24px;
 
+            gap: 24px;
             margin-bottom: 10px;
         }
 
@@ -602,30 +611,10 @@
         }
 
         /*
-         * Footer
-         */
-
-        footer {
-            padding:
-                24px
-                20px;
-
-            background: #111827;
-            color: #cbd5e1;
-
-            text-align: center;
-        }
-
-        footer p {
-            margin: 0;
-        }
-
-        /*
          * Responsive design
          */
 
         @media (max-width: 800px) {
-
             .toolbar {
                 grid-template-columns:
                     minmax(0, 1fr)
@@ -638,7 +627,6 @@
         }
 
         @media (max-width: 600px) {
-
             .hero {
                 padding:
                     44px
@@ -676,7 +664,6 @@
     <!-- Header -->
 
     <header class="hero">
-
         <div class="hero-inner">
 
             <span class="eyebrow">
@@ -694,7 +681,6 @@
             </p>
 
             <div class="hero-actions">
-
                 <button
                     id="browseButton"
                     class="browse-button"
@@ -702,13 +688,10 @@
                 >
                     Browse Revision Guides
                 </button>
-
             </div>
 
         </div>
-
     </header>
-
 
     <!-- Main content -->
 
@@ -720,9 +703,9 @@
 
         <p class="section-description">
             Search by topic or select a technology category.
-            Each text guide opens in a separate browser tab.
+            Each revision guide opens in a separate browser tab.
+            PDF guides open in the browser without downloading.
         </p>
-
 
         <!-- Search and filtering -->
 
@@ -737,13 +720,11 @@
                 autocomplete="off"
             >
 
-
             <select
                 id="categorySelect"
                 class="category-select"
                 aria-label="Filter by technology category"
             >
-
                 <option value="All">
                     All Categories
                 </option>
@@ -779,9 +760,7 @@
                 <option value="Quick Revision">
                     Other Resources
                 </option>
-
             </select>
-
 
             <div
                 id="resourceCount"
@@ -793,7 +772,6 @@
 
         </div>
 
-
         <p
             id="statusMessage"
             class="status-message"
@@ -801,7 +779,6 @@
         >
             Loading revision resources from the main branch.
         </p>
-
 
         <!-- Resource cards are created here -->
 
@@ -813,7 +790,6 @@
         </section>
 
     </main>
-
 
     <!-- Back-to-top button -->
 
@@ -827,7 +803,6 @@
         ↑
     </button>
 
-
     <!-- Footer -->
 
     <footer>
@@ -836,6 +811,7 @@
 
             <span class="footer-stat">
                 📚 Available Guides:
+
                 <strong id="footerGuideCount">
                     0
                 </strong>
@@ -843,6 +819,7 @@
 
             <span class="footer-stat">
                 🔄 Resources:
+
                 <strong>
                     Automatically Updated
                 </strong>
@@ -857,17 +834,9 @@
 
     </footer>
 
-
     <script>
-
         /*
          * Repository configuration
-         *
-         * The repository API is used to retrieve the
-         * current list of files from the main branch.
-         *
-         * No visible element navigates to the
-         * repository page.
          */
 
         const repositoryOwner =
@@ -886,7 +855,6 @@
             + repositoryName
             + "/contents?ref="
             + repositoryBranch;
-
 
         /*
          * Page elements
@@ -932,20 +900,17 @@
                 "topButton"
             );
 
-
         /*
-         * Stores all revision files.
+         * Stores all revision files
          */
 
         let allResources = [];
 
-
         /*
-         * Scroll to revision resources.
+         * Scroll to revision resources
          */
 
         function scrollToResources() {
-
             document
                 .getElementById("resources")
                 .scrollIntoView({
@@ -954,33 +919,25 @@
                 });
         }
 
-
         /*
-         * Remove the rocket emoji and optional
-         * text-file extension from the displayed title.
+         * Remove the rocket emoji and file extension
+         * from the displayed guide title
          */
 
         function cleanResourceName(name) {
-
             return name
                 .replace(/🚀/g, "")
-                .replace(/\.txt$/i, "")
+                .replace(/\.(txt|pdf)$/i, "")
                 .trim();
         }
 
-
         /*
-         * Determine a category from the filename.
-         *
-         * Specific categories are checked before
-         * broader categories.
+         * Determine a category from the filename
          */
 
         function getCategory(name) {
-
             const value =
                 name.toLowerCase();
-
 
             if (
                 value.includes("docker")
@@ -996,7 +953,6 @@
                 return "DevOps";
             }
 
-
             if (
                 value.includes("system design")
                 ||
@@ -1009,7 +965,6 @@
                 return "System Design";
             }
 
-
             if (
                 value.includes("sql")
                 ||
@@ -1021,7 +976,6 @@
             ) {
                 return "Database";
             }
-
 
             if (
                 value.includes("kafka")
@@ -1039,7 +993,6 @@
                 return "Microservices";
             }
 
-
             if (
                 value.includes("aws")
                 ||
@@ -1054,7 +1007,6 @@
                 return "AWS & Cloud";
             }
 
-
             if (
                 value.includes("spring")
                 ||
@@ -1066,7 +1018,6 @@
             ) {
                 return "Spring";
             }
-
 
             if (
                 value.includes("java")
@@ -1086,23 +1037,18 @@
                 return "Java";
             }
 
-
             return "Quick Revision";
         }
 
-
         /*
-         * Create a short description for each card.
+         * Create the card description
          */
 
         function getDescription(name) {
-
             const category =
                 getCategory(name);
 
-
             const descriptions = {
-
                 "Java":
                     "Java interview questions, examples and quick-revision concepts.",
 
@@ -1128,17 +1074,14 @@
                     "Senior Java developer interview preparation material."
             };
 
-
             return descriptions[category];
         }
 
-
         /*
-         * Sort revision guides alphabetically.
+         * Sort revision guides alphabetically
          */
 
         function sortResources(first, second) {
-
             return cleanResourceName(
                 first.name
             ).localeCompare(
@@ -1148,22 +1091,18 @@
             );
         }
 
-
         /*
-         * Show loading placeholders.
+         * Show loading placeholders
          */
 
         function showLoadingCards() {
-
             resourceGrid.innerHTML = "";
-
 
             for (
                 let cardNumber = 0;
                 cardNumber < 6;
                 cardNumber++
             ) {
-
                 const loadingCard =
                     document.createElement(
                         "div"
@@ -1172,7 +1111,6 @@
                 loadingCard.className =
                     "loading-card";
 
-
                 loadingCard.innerHTML = `
                     <div class="loading-line short"></div>
                     <div class="loading-line long"></div>
@@ -1180,24 +1118,18 @@
                     <div class="loading-line long"></div>
                 `;
 
-
                 resourceGrid.appendChild(
                     loadingCard
                 );
             }
         }
 
-
         /*
-         * Render revision-guide cards.
-         *
-         * The cards contain buttons rather than links.
+         * Render revision-guide cards
          */
 
         function renderResources(resources) {
-
             resourceGrid.innerHTML = "";
-
 
             resourceCount.textContent =
                 resources.length
@@ -1208,9 +1140,7 @@
                         : "s"
                 );
 
-
             if (resources.length === 0) {
-
                 const emptyState =
                     document.createElement(
                         "div"
@@ -1218,7 +1148,6 @@
 
                 emptyState.className =
                     "message-box empty-state";
-
 
                 const emptyTitle =
                     document.createElement(
@@ -1228,7 +1157,6 @@
                 emptyTitle.textContent =
                     "No matching guide found";
 
-
                 const emptyDescription =
                     document.createElement(
                         "p"
@@ -1236,7 +1164,6 @@
 
                 emptyDescription.textContent =
                     "Try a different search term or category.";
-
 
                 emptyState.appendChild(
                     emptyTitle
@@ -1246,7 +1173,6 @@
                     emptyDescription
                 );
 
-
                 resourceGrid.appendChild(
                     emptyState
                 );
@@ -1254,10 +1180,8 @@
                 return;
             }
 
-
             resources.forEach(
                 function (resource) {
-
                     const card =
                         document.createElement(
                             "article"
@@ -1265,7 +1189,6 @@
 
                     card.className =
                         "resource-card";
-
 
                     const categoryTag =
                         document.createElement(
@@ -1280,7 +1203,6 @@
                             resource.name
                         );
 
-
                     const title =
                         document.createElement(
                             "h3"
@@ -1291,7 +1213,6 @@
                             resource.name
                         );
 
-
                     const description =
                         document.createElement(
                             "p"
@@ -1301,7 +1222,6 @@
                         getDescription(
                             resource.name
                         );
-
 
                     const viewButton =
                         document.createElement(
@@ -1317,17 +1237,14 @@
                     viewButton.textContent =
                         "View Revision Guide";
 
-
                     viewButton.addEventListener(
                         "click",
                         function () {
-
-                            openTextFile(
+                            openRevisionGuide(
                                 resource
                             );
                         }
                     );
-
 
                     card.appendChild(
                         categoryTag
@@ -1345,7 +1262,6 @@
                         viewButton
                     );
 
-
                     resourceGrid.appendChild(
                         card
                     );
@@ -1353,20 +1269,25 @@
             );
         }
 
-
         /*
-         * Open the selected text file directly.
+         * Open the selected revision guide
          *
-         * This fixes the earlier 404 error because
-         * viewer.html is no longer required.
+         * PDF:
+         * Opens through the GitHub Pages URL.
+         * It does not use GitHub download_url.
          *
-         * download_url is supplied by the repository API.
+         * TXT:
+         * Opens through the raw GitHub URL.
+         *
+         * Both file types open in a new browser tab.
          */
 
-        function openTextFile(resource) {
-
-            if (!resource.download_url) {
-
+        function openRevisionGuide(resource) {
+            if (
+                !resource
+                ||
+                !resource.name
+            ) {
                 alert(
                     "The selected revision guide cannot be opened."
                 );
@@ -1374,60 +1295,120 @@
                 return;
             }
 
+            const fileExtension =
+                resource.name
+                    .split(".")
+                    .pop()
+                    .toLowerCase();
+
+            let viewUrl;
+
+            if (fileExtension === "pdf") {
+                /*
+                 * Use resource.path so this also works
+                 * if a PDF is inside a repository folder.
+                 */
+
+                const resourcePath =
+                    resource.path
+                    ||
+                    resource.name;
+
+                /*
+                 * Safely encode spaces and special characters
+                 * in every folder and filename section.
+                 */
+
+                const encodedPath =
+                    resourcePath
+                        .split("/")
+                        .map(
+                            function (pathPart) {
+                                return encodeURIComponent(
+                                    pathPart
+                                );
+                            }
+                        )
+                        .join("/");
+
+                /*
+                 * Example result:
+                 *
+                 * https://paragtayade.github.io/
+                 * QuickRevision/Guide%20Name.pdf
+                 */
+
+                viewUrl =
+                    "https://"
+                    + repositoryOwner
+                    + ".github.io/"
+                    + repositoryName
+                    + "/"
+                    + encodedPath;
+
+            } else {
+                /*
+                 * Text guides continue to use
+                 * the raw GitHub file URL.
+                 */
+
+                viewUrl =
+                    resource.download_url;
+            }
+
+            if (!viewUrl) {
+                alert(
+                    "The selected revision guide cannot be opened."
+                );
+
+                return;
+            }
+
+            /*
+             * Open the guide in a separate browser tab.
+             */
 
             const newWindow =
                 window.open(
-                    resource.download_url,
-                    "_blank"
+                    viewUrl,
+                    "_blank",
+                    "noopener,noreferrer"
                 );
 
-
-            if (newWindow) {
-
-                newWindow.opener =
-                    null;
-
-            } else {
-
+            if (!newWindow) {
                 alert(
-                    "Your browser blocked the new tab. Please allow pop-ups for this website."
+                    "Your browser blocked the new tab. "
+                    + "Please allow pop-ups for this website."
                 );
             }
         }
 
-
         /*
-         * Apply search and category filters.
+         * Apply search and category filters
          */
 
         function filterResources() {
-
             const searchText =
                 searchInput
                     .value
                     .trim()
                     .toLowerCase();
 
-
             const selectedCategory =
                 categorySelect.value;
-
 
             const filteredResources =
                 allResources.filter(
                     function (resource) {
-
                         const visibleName =
                             cleanResourceName(
                                 resource.name
                             ).toLowerCase();
 
-
                         const matchesSearch =
                             visibleName.includes(
                                 searchText
                             );
-
 
                         const matchesCategory =
                             selectedCategory === "All"
@@ -1435,7 +1416,6 @@
                             getCategory(
                                 resource.name
                             ) === selectedCategory;
-
 
                         return (
                             matchesSearch
@@ -1445,21 +1425,17 @@
                     }
                 );
 
-
             renderResources(
                 filteredResources
             );
         }
 
-
         /*
-         * Show resource loading failure.
+         * Show resource-loading failure
          */
 
         function showLoadingError() {
-
             resourceGrid.innerHTML = "";
-
 
             const errorState =
                 document.createElement(
@@ -1469,7 +1445,6 @@
             errorState.className =
                 "message-box error-state";
 
-
             const errorTitle =
                 document.createElement(
                     "h3"
@@ -1478,7 +1453,6 @@
             errorTitle.textContent =
                 "Unable to load revision guides";
 
-
             const errorDescription =
                 document.createElement(
                     "p"
@@ -1486,7 +1460,6 @@
 
             errorDescription.textContent =
                 "Please check your internet connection and try again.";
-
 
             const retryButton =
                 document.createElement(
@@ -1502,12 +1475,10 @@
             retryButton.textContent =
                 "Retry";
 
-
             retryButton.addEventListener(
                 "click",
                 loadRepositoryResources
             );
-
 
             errorState.appendChild(
                 errorTitle
@@ -1521,39 +1492,29 @@
                 retryButton
             );
 
-
             resourceGrid.appendChild(
                 errorState
             );
         }
 
-
         /*
-         * Load all root-level text resources.
-         *
-         * Any future file added directly to the main
-         * branch root appears after the page refreshes.
+         * Load revision resources from
+         * the root of the main branch
          */
 
         async function loadRepositoryResources() {
-
             showLoadingCards();
-
 
             resourceCount.textContent =
                 "Loading...";
 
-
             footerGuideCount.textContent =
                 "0";
-
 
             statusMessage.textContent =
                 "Loading revision resources from the main branch.";
 
-
             try {
-
                 const response =
                     await fetch(
                         repositoryApiUrl,
@@ -1568,22 +1529,18 @@
                         }
                     );
 
-
                 if (!response.ok) {
-
                     throw new Error(
                         "Unable to retrieve revision guides."
                     );
                 }
 
-
                 const repositoryItems =
                     await response.json();
 
-
                 /*
-                 * These site-management files are not
-                 * displayed as revision guides.
+                 * Files that must not be displayed
+                 * as revision guides
                  */
 
                 const excludedFiles = [
@@ -1595,15 +1552,36 @@
                     "LICENSE"
                 ];
 
+                /*
+                 * Only TXT and PDF resources
+                 * are displayed on the website
+                 */
+
+                const supportedExtensions = [
+                    ".txt",
+                    ".pdf"
+                ];
 
                 allResources =
                     repositoryItems
-
                         .filter(
                             function (item) {
+                                const lowerName =
+                                    item.name.toLowerCase();
+
+                                const isSupported =
+                                    supportedExtensions.some(
+                                        function (extension) {
+                                            return lowerName.endsWith(
+                                                extension
+                                            );
+                                        }
+                                    );
 
                                 return (
                                     item.type === "file"
+                                    &&
+                                    isSupported
                                     &&
                                     !excludedFiles.includes(
                                         item.name
@@ -1611,67 +1589,56 @@
                                 );
                             }
                         )
-
                         .sort(
                             sortResources
                         );
 
-
                 footerGuideCount.textContent =
                     allResources.length;
 
-
                 statusMessage.textContent =
-                    "Select View Revision Guide to open the complete text guide in a new browser tab.";
-
+                    "Select View Revision Guide to open the complete guide in a new browser tab.";
 
                 renderResources(
                     allResources
                 );
 
             } catch (error) {
+                console.error(
+                    "Unable to load revision resources:",
+                    error
+                );
 
-                allResources =
-                    [];
-
+                allResources = [];
 
                 resourceCount.textContent =
                     "0 guides";
 
-
                 footerGuideCount.textContent =
                     "0";
 
-
                 statusMessage.textContent =
                     "The revision guides could not be loaded.";
-
 
                 showLoadingError();
             }
         }
 
-
         /*
-         * Show or hide the back-to-top button.
+         * Show or hide the back-to-top button
          */
 
         function updateTopButton() {
-
             if (window.scrollY > 500) {
-
                 topButton.classList.add(
                     "visible"
                 );
-
             } else {
-
                 topButton.classList.remove(
                     "visible"
                 );
             }
         }
-
 
         /*
          * Event listeners
@@ -1682,23 +1649,19 @@
             scrollToResources
         );
 
-
         searchInput.addEventListener(
             "input",
             filterResources
         );
-
 
         categorySelect.addEventListener(
             "change",
             filterResources
         );
 
-
         topButton.addEventListener(
             "click",
             function () {
-
                 window.scrollTo({
                     top: 0,
                     behavior: "smooth"
@@ -1706,19 +1669,16 @@
             }
         );
 
-
         window.addEventListener(
             "scroll",
             updateTopButton
         );
-
 
         /*
          * Initial page load
          */
 
         loadRepositoryResources();
-
     </script>
 
 </body>
