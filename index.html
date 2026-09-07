@@ -170,6 +170,8 @@
             color: var(--primary-dark);
 
             font-weight: 800;
+            text-align: center;
+            text-decoration: none;
             cursor: pointer;
 
             transition:
@@ -373,6 +375,7 @@
         }
 
         .view-button {
+            display: block;
             width: 100%;
             min-height: 43px;
 
@@ -1189,6 +1192,43 @@
 
 
         /*
+         * Build a GitHub Pages URL for TXT and PDF files.
+         * Each path segment is encoded separately so spaces,
+         * brackets, ampersands and folder names work correctly.
+         */
+
+        function createResourceUrl(resource) {
+            if (!resource || !resource.name) {
+                return "";
+            }
+
+            const resourcePath =
+                resource.path || resource.name;
+
+            const encodedPath =
+                resourcePath
+                    .split("/")
+                    .map(
+                        function (pathPart) {
+                            return encodeURIComponent(
+                                pathPart
+                            );
+                        }
+                    )
+                    .join("/");
+
+            return (
+                "https://"
+                + repositoryOwner
+                + ".github.io/"
+                + repositoryName
+                + "/"
+                + encodedPath
+            );
+        }
+
+
+        /*
          * Render revision-guide cards.
          *
          * The cards contain buttons rather than links.
@@ -1305,28 +1345,25 @@
 
                     const viewButton =
                         document.createElement(
-                            "button"
+                            "a"
                         );
 
                     viewButton.className =
                         "view-button";
 
-                    viewButton.type =
-                        "button";
+                    viewButton.href =
+                        createResourceUrl(
+                            resource
+                        );
+
+                    viewButton.target =
+                        "_blank";
+
+                    viewButton.rel =
+                        "noopener noreferrer";
 
                     viewButton.textContent =
                         "View Revision Guide";
-
-
-                    viewButton.addEventListener(
-                        "click",
-                        function () {
-
-                            openTextFile(
-                                resource
-                            );
-                        }
-                    );
 
 
                     card.appendChild(
@@ -1350,117 +1387,6 @@
                         card
                     );
                 }
-            );
-        }
-
-
-        /*
-         * Open the selected text file directly.
-         *
-         * This fixes the earlier 404 error because
-         * viewer.html is no longer required.
-         *
-         * download_url is supplied by the repository API.
-         */
-
-        function openTextFile(resource) {
-            if (!resource || !resource.name) {
-                alert(
-                    "The selected revision guide cannot be opened."
-                );
-                return;
-            }
-
-            const resourcePath =
-                resource.path || resource.name;
-
-            const encodedPath =
-                resourcePath
-                    .split("/")
-                    .map(
-                        function (pathPart) {
-                            return encodeURIComponent(
-                                pathPart
-                            );
-                        }
-                    )
-                    .join("/");
-
-            const viewUrl =
-                "https://"
-                + repositoryOwner
-                + ".github.io/"
-                + repositoryName
-                + "/"
-                + encodedPath;
-
-            const newWindow =
-                window.open(
-                    viewUrl,
-                    "_blank",
-                    "noopener,noreferrer"
-                );
-
-            if (!newWindow) {
-                alert(
-                    "Your browser blocked the new tab. "
-                    + "Please allow pop-ups for this website."
-                );
-            }
-        }
-
-        /*
-         * Apply search and category filters.
-         */
-
-        function filterResources() {
-
-            const searchText =
-                searchInput
-                    .value
-                    .trim()
-                    .toLowerCase();
-
-
-            const selectedCategory =
-                categorySelect.value;
-
-
-            const filteredResources =
-                allResources.filter(
-                    function (resource) {
-
-                        const visibleName =
-                            cleanResourceName(
-                                resource.name
-                            ).toLowerCase();
-
-
-                        const matchesSearch =
-                            visibleName.includes(
-                                searchText
-                            );
-
-
-                        const matchesCategory =
-                            selectedCategory === "All"
-                            ||
-                            getCategory(
-                                resource.name
-                            ) === selectedCategory;
-
-
-                        return (
-                            matchesSearch
-                            &&
-                            matchesCategory
-                        );
-                    }
-                );
-
-
-            renderResources(
-                filteredResources
             );
         }
 
