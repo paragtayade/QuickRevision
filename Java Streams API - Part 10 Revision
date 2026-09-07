@@ -1,0 +1,336 @@
+==============================================================================
+TOP 10 INTERVIEW QUESTIONS - ADVANCED COLLECTORS
+==============================================================================
+
+1. How do you Group Employees by Department?
+
+Answer:
+
+Input:
+
+IT
+IT
+HR
+HR
+
+Code:
+
+Map<String, List<Employee>> result =
+employees.stream()
+         .collect(
+             Collectors.groupingBy(
+                 Employee::getDepartment));
+
+Output:
+
+{
+ IT=[John, David],
+ HR=[Mary, Bob]
+}
+
+Frequently Asked:
+Group employees by Department.
+
+------------------------------------------------------------------------------
+
+2. How do you Group Employees by Gender?
+
+Answer:
+
+Code:
+
+Map<String, List<Employee>> result =
+employees.stream()
+         .collect(
+             Collectors.groupingBy(
+                 Employee::getGender));
+
+Output:
+
+{
+ M=[John, David],
+ F=[Mary, Lisa]
+}
+
+------------------------------------------------------------------------------
+
+3. What is Multi-level Grouping?
+
+Answer:
+
+Grouping inside another grouping.
+
+Code:
+
+Map<String,
+    Map<String, List<Employee>>> result =
+employees.stream()
+         .collect(
+            Collectors.groupingBy(
+               Employee::getDepartment,
+               Collectors.groupingBy(
+                  Employee::getGender)));
+
+Output:
+
+{
+ IT={
+      M=[John],
+      F=[Mary]
+    },
+ HR={
+      M=[David]
+    }
+}
+
+Senior Question:
+Department → Gender → Employees
+
+------------------------------------------------------------------------------
+
+4. How do you perform Frequency Counting?
+
+Answer:
+
+Input:
+
+[a,b,a,c,a]
+
+Code:
+
+Map<String, Long> result =
+list.stream()
+    .collect(
+       Collectors.groupingBy(
+           s -> s,
+           Collectors.counting()));
+
+Output:
+
+{
+ a=3,
+ b=1,
+ c=1
+}
+
+Frequently Asked Program.
+
+------------------------------------------------------------------------------
+
+5. How do you count Employees per Department?
+
+Answer:
+
+Code:
+
+Map<String, Long> result =
+employees.stream()
+         .collect(
+             Collectors.groupingBy(
+                 Employee::getDepartment,
+                 Collectors.counting()));
+
+Output:
+
+{
+ IT=10,
+ HR=5
+}
+
+------------------------------------------------------------------------------
+
+6. How do you calculate Total Salary by Department?
+
+Answer:
+
+Code:
+
+Map<String, Integer> result =
+employees.stream()
+         .collect(
+             Collectors.groupingBy(
+                 Employee::getDepartment,
+                 Collectors.summingInt(
+                     Employee::getSalary)));
+
+Output:
+
+{
+ IT=500000,
+ HR=250000
+}
+
+Frequently Asked:
+Salary Aggregation.
+
+------------------------------------------------------------------------------
+
+7. How do you find Top N Records using Streams?
+
+Answer:
+
+Example:
+Top 3 Highest Salaries
+
+Code:
+
+employees.stream()
+         .sorted(
+            Comparator.comparing(
+               Employee::getSalary)
+               .reversed())
+         .limit(3)
+         .toList();
+
+Output:
+
+Top 3 employees by salary.
+
+Senior Question:
+Top 5 Customers
+Top 10 Products
+Top 3 Employees
+
+------------------------------------------------------------------------------
+
+8. How do you find the Second Highest Salary?
+
+Answer:
+
+Code:
+
+Integer salary =
+employees.stream()
+         .map(Employee::getSalary)
+         .distinct()
+         .sorted(
+             Comparator.reverseOrder())
+         .skip(1)
+         .findFirst()
+         .get();
+
+Output:
+
+70000
+
+Most Frequently Asked Stream Problem.
+
+------------------------------------------------------------------------------
+
+9. How do you find Highest Salary by Department?
+
+Answer:
+
+Code:
+
+Map<String, Optional<Employee>> result =
+employees.stream()
+         .collect(
+             Collectors.groupingBy(
+                 Employee::getDepartment,
+                 Collectors.maxBy(
+                    Comparator.comparing(
+                       Employee::getSalary))));
+
+Output:
+
+{
+ IT=John(120000),
+ HR=Mary(95000)
+}
+
+Senior Developer Question.
+
+------------------------------------------------------------------------------
+
+10. What is a Custom Collector?
+
+Answer:
+
+Custom Collector allows creating your own collection logic.
+
+Example:
+
+Collector<Employee,
+          List<String>,
+          List<String>>
+
+Use Cases:
+
+✓ Custom Statistics
+✓ Custom Report Generation
+✓ Special Aggregations
+✓ Complex Business Rules
+
+Interview One-Liner:
+
+Use Custom Collector when built-in Collectors
+cannot satisfy business requirements.
+
+==============================================================================
+
+30-SECOND REVISION
+==============================================================================
+
+Group by Department
+→ groupingBy(Employee::getDepartment)
+
+Group by Gender
+→ groupingBy(Employee::getGender)
+
+Multi-level Grouping
+→ groupingBy(...groupingBy(...))
+
+Frequency Count
+→ groupingBy(x->x,counting())
+
+Employee Count
+→ groupingBy(..., counting())
+
+Salary Sum
+→ groupingBy(..., summingInt())
+
+Top N Records
+→ sorted().limit(N)
+
+Second Highest
+→ distinct().sorted().skip(1)
+
+Highest Salary by Department
+→ groupingBy(..., maxBy())
+
+Custom Collector
+→ Custom aggregation logic
+
+==============================================================================
+
+MEMORY TRICK
+==============================================================================
+
+Group
+  → groupingBy()
+
+Count
+  → counting()
+
+Sum
+  → summingInt()
+
+Max
+  → maxBy()
+
+Top N
+  → limit()
+
+Second Highest
+  → skip(1)
+
+Multi Group
+  → groupingBy(groupingBy())
+
+Custom Logic
+  → Custom Collector
+
+
+Examples align with advanced collector patterns such as groupingBy, counting, summingInt,
+maxBy, nested grouping, and custom collector usage found in your Java interview handbooks.
