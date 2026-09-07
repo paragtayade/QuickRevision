@@ -1,0 +1,320 @@
+==============================================================================
+SPLITERATOR & STREAM INTERNALS - SUPER QUICK REVISION
+==============================================================================
+
+1. What is Spliterator?
+
+Answer:
+Split + Iterator
+
+Used internally by Streams to traverse and split data.
+
+Memory:
+Spliterator = Traverse + Split
+
+------------------------------------------------------------------------------
+
+2. Iterator vs Spliterator?
+
+Iterator
+---------
+Can Traverse
+
+Spliterator
+-----------
+Can Traverse + Split
+
+Benefit:
+Parallel Processing
+
+------------------------------------------------------------------------------
+
+3. What is tryAdvance()?
+
+Answer:
+Processes ONE element at a time.
+
+Example:
+
+10
+20
+30
+
+One call → One element
+
+Memory:
+tryAdvance() = NEXT()
+
+------------------------------------------------------------------------------
+
+4. What is forEachRemaining()?
+
+Answer:
+Processes ALL remaining elements.
+
+Difference:
+
+tryAdvance()
+→ One Element
+
+forEachRemaining()
+→ All Elements
+
+------------------------------------------------------------------------------
+
+5. What is trySplit()?
+
+Answer:
+Splits data into smaller chunks.
+
+Example:
+
+[1,2,3,4,5,6]
+
+↓
+
+[1,2,3]
+[4,5,6]
+
+Used by Parallel Streams.
+
+Memory:
+trySplit() = Divide Work
+
+------------------------------------------------------------------------------
+
+6. What are Spliterator Characteristics?
+
+Answer:
+
+ORDERED
+→ Has Order
+
+DISTINCT
+→ No Duplicates
+
+SORTED
+→ Sorted Data
+
+SIZED
+→ Known Size
+
+NONNULL
+→ No Nulls
+
+IMMUTABLE
+→ Cannot Change
+
+CONCURRENT
+→ Safe Concurrent Updates
+
+------------------------------------------------------------------------------
+
+7. What is Source?
+
+Answer:
+Data source for Stream.
+
+Examples:
+
+List
+Set
+Array
+File
+
+Flow:
+
+Source
+ ↓
+Stream
+
+------------------------------------------------------------------------------
+
+8. What is Stream Pipeline?
+
+Answer:
+
+Source
+ ↓
+Intermediate Operations
+ ↓
+Terminal Operation
+
+Example:
+
+filter()
+map()
+collect()
+
+------------------------------------------------------------------------------
+
+9. What are Intermediate Operations?
+
+Answer:
+
+Create a new Stream.
+
+Examples:
+
+filter()
+map()
+flatMap()
+sorted()
+distinct()
+
+Properties:
+
+✓ Lazy
+✓ Return Stream
+
+------------------------------------------------------------------------------
+
+10. What are Terminal Operations?
+
+Answer:
+
+Produce final result.
+
+Examples:
+
+collect()
+reduce()
+count()
+forEach()
+
+Properties:
+
+✓ Trigger Execution
+✓ End Pipeline
+
+------------------------------------------------------------------------------
+
+11. What is Sink?
+
+Answer:
+
+Final receiver of data.
+
+Example:
+
+collect()
+reduce()
+count()
+
+Memory:
+Sink = Final Consumer
+
+------------------------------------------------------------------------------
+
+12. What is Lazy Evaluation?
+
+Answer:
+
+Nothing executes until a
+Terminal Operation is called.
+
+Example:
+
+stream.filter(...);
+
+Output:
+Nothing
+
+Memory:
+Lazy = Execute Later
+
+------------------------------------------------------------------------------
+
+13. What is Stream Fusion?
+
+Answer:
+
+filter() + map() run together
+in a single traversal.
+
+Benefit:
+
+✓ Less Memory
+✓ Better Performance
+
+Memory:
+Fusion = One Pass
+
+------------------------------------------------------------------------------
+
+14. What is Short Circuiting?
+
+Answer:
+
+Stops processing early when result is found.
+
+Examples:
+
+findFirst()
+findAny()
+anyMatch()
+allMatch()
+noneMatch()
+limit()
+
+Memory:
+Short Circuit = Stop Early
+
+------------------------------------------------------------------------------
+
+15. Explain Stream Internal Working.
+
+Answer:
+
+Collection
+    ↓
+Source
+    ↓
+Spliterator
+    ↓
+Pipeline
+    ↓
+Intermediate Operations
+    ↓
+Terminal Operation
+    ↓
+Sink
+    ↓
+Result
+
+==============================================================================
+
+15-SECOND INTERVIEW ANSWER
+==============================================================================
+
+Streams get data from a Source using a Spliterator.
+Intermediate operations build a lazy pipeline.
+Terminal operation triggers execution.
+Spliterator helps in traversal and parallel processing.
+
+==============================================================================
+
+MEMORY TRICK
+==============================================================================
+
+Source
+  ↓
+Spliterator
+  ↓
+Pipeline
+  ↓
+Intermediate Ops
+  ↓
+Terminal Ops
+  ↓
+Sink
+  ↓
+Result
+
+Spliterator       → Split + Traverse
+tryAdvance()      → One Element
+forEachRemaining()→ All Elements
+trySplit()        → Divide Work
+Lazy              → Execute Later
+Fusion            → One Pass
+Short Circuit     → Stop Early
