@@ -397,6 +397,8 @@
             transition:
                 background-color 0.15s ease,
                 transform 0.15s ease;
+            text-align: center;
+            text-decoration: none;
         }
 
         .view-button:hover {
@@ -1202,6 +1204,25 @@
                 return "";
             }
 
+            const lowerName =
+                resource.name.toLowerCase();
+
+            /*
+             * TXT files use GitHub's raw download_url.
+             * Browsers display text/plain content directly.
+             */
+            if (
+                lowerName.endsWith(".txt")
+                &&
+                resource.download_url
+            ) {
+                return resource.download_url;
+            }
+
+            /*
+             * PDF files use the published GitHub Pages URL.
+             * This allows the browser's built-in PDF viewer.
+             */
             const resourcePath =
                 resource.path || resource.name;
 
@@ -1218,11 +1239,11 @@
                     .join("/");
 
             return (
-                "https://"
-                + repositoryOwner
-                + ".github.io/"
-                + repositoryName
-                + "/"
+                window.location.origin
+                + window.location.pathname.replace(
+                    /\/[^/]*$/,
+                    "/"
+                )
                 + encodedPath
             );
         }
