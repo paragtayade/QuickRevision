@@ -1,0 +1,460 @@
+==============================================================================
+TOP 20 INTERVIEW QUESTIONS - TERMINAL OPERATIONS
+(forEach, forEachOrdered, collect, reduce, count, min, max,
+findFirst, findAny, anyMatch, allMatch, noneMatch, toArray)
+==============================================================================
+
+1. What are Terminal Operations?
+
+Answer:
+Terminal Operations trigger execution of the Stream pipeline and
+produce the final result.
+
+Examples:
+forEach()
+collect()
+reduce()
+count()
+findFirst()
+
+Important:
+After a terminal operation, Stream cannot be reused.
+
+------------------------------------------------------------------------------
+
+2. What is the difference between Intermediate and Terminal Operations?
+
+Answer:
+
+Intermediate Operations
+-----------------------
+Return Stream
+Lazy Execution
+
+Examples:
+filter()
+map()
+sorted()
+
+Terminal Operations
+-------------------
+Return Result
+Trigger Execution
+
+Examples:
+collect()
+count()
+reduce()
+
+------------------------------------------------------------------------------
+
+3. What does forEach() do?
+
+Answer:
+Performs an action on every element.
+
+Input:
+[1,2,3]
+
+Code:
+list.stream()
+    .forEach(System.out::println);
+
+Output:
+1
+2
+3
+
+Use:
+Printing, logging, processing elements.
+
+------------------------------------------------------------------------------
+
+4. What does forEachOrdered() do?
+
+Answer:
+Processes elements in encounter order.
+
+Input:
+[1,2,3,4]
+
+Code:
+list.parallelStream()
+    .forEachOrdered(System.out::println);
+
+Output:
+1
+2
+3
+4
+
+Use:
+When order matters in Parallel Streams.
+
+------------------------------------------------------------------------------
+
+5. forEach() vs forEachOrdered()
+
+Answer:
+
+forEach()
+----------
+Order may not be guaranteed
+Better performance
+
+forEachOrdered()
+----------------
+Order guaranteed
+Slightly slower
+
+Interview Tip:
+Use forEachOrdered() only when order is important.
+
+------------------------------------------------------------------------------
+
+6. What does collect() do?
+
+Answer:
+Collects Stream elements into List, Set, Map etc.
+
+Input:
+[1,2,3]
+
+Code:
+list.stream()
+    .collect(Collectors.toList());
+
+Output:
+[1,2,3]
+
+Most Common:
+toList()
+toSet()
+toMap()
+
+------------------------------------------------------------------------------
+
+7. What does reduce() do?
+
+Answer:
+Combines multiple values into a single value.
+
+Input:
+[1,2,3,4]
+
+Code:
+list.stream()
+    .reduce(0, Integer::sum);
+
+Output:
+10
+
+Use:
+Sum, Product, Maximum, Minimum
+
+Memory Trick:
+Many → One
+
+------------------------------------------------------------------------------
+
+8. reduce() vs collect()
+
+Answer:
+
+reduce()
+---------
+Single Result
+
+Examples:
+Sum
+Product
+Max
+
+collect()
+----------
+Container Result
+
+Examples:
+List
+Set
+Map
+
+Interview Tip:
+reduce() = aggregation
+collect() = collection
+
+------------------------------------------------------------------------------
+
+9. What does count() do?
+
+Answer:
+Returns number of elements in stream.
+
+Input:
+[10,20,30]
+
+Code:
+list.stream().count();
+
+Output:
+3
+
+Return Type:
+long
+
+------------------------------------------------------------------------------
+
+10. What does min() do?
+
+Answer:
+Finds smallest element.
+
+Input:
+[30,10,20]
+
+Code:
+list.stream()
+    .min(Integer::compareTo);
+
+Output:
+Optional[10]
+
+------------------------------------------------------------------------------
+
+11. What does max() do?
+
+Answer:
+Finds largest element.
+
+Input:
+[30,10,20]
+
+Code:
+list.stream()
+    .max(Integer::compareTo);
+
+Output:
+Optional[30]
+
+------------------------------------------------------------------------------
+
+12. Why do min() and max() return Optional?
+
+Answer:
+Stream may be empty.
+
+Example:
+
+Stream.empty()
+      .max(Integer::compareTo);
+
+Output:
+Optional.empty
+
+Interview Tip:
+Avoid NoSuchElementException.
+
+------------------------------------------------------------------------------
+
+13. What does findFirst() do?
+
+Answer:
+Returns the first element.
+
+Input:
+[10,20,30]
+
+Code:
+list.stream().findFirst();
+
+Output:
+Optional[10]
+
+Use:
+Ordered Streams
+
+------------------------------------------------------------------------------
+
+14. What does findAny() do?
+
+Answer:
+Returns any element.
+
+Input:
+[10,20,30]
+
+Code:
+list.parallelStream()
+    .findAny();
+
+Output:
+Optional[10]
+(or Optional[20], Optional[30])
+
+Use:
+Parallel Streams
+
+------------------------------------------------------------------------------
+
+15. findFirst() vs findAny()
+
+Answer:
+
+findFirst()
+------------
+Always first element
+
+Output:
+Optional[10]
+
+findAny()
+----------
+Any available element
+
+Output:
+Optional[20]
+
+Interview Tip:
+findAny() may perform better in Parallel Streams.
+
+------------------------------------------------------------------------------
+
+16. What does anyMatch() do?
+
+Answer:
+Returns true if at least one element matches.
+
+Input:
+[1,2,3]
+
+Code:
+list.stream()
+    .anyMatch(n -> n % 2 == 0);
+
+Output:
+true
+
+Memory Trick:
+Any One
+
+------------------------------------------------------------------------------
+
+17. What does allMatch() do?
+
+Answer:
+Returns true if all elements match.
+
+Input:
+[2,4,6]
+
+Code:
+list.stream()
+    .allMatch(n -> n % 2 == 0);
+
+Output:
+true
+
+Memory Trick:
+Everyone
+
+------------------------------------------------------------------------------
+
+18. What does noneMatch() do?
+
+Answer:
+Returns true if no element matches.
+
+Input:
+[1,3,5]
+
+Code:
+list.stream()
+    .noneMatch(n -> n % 2 == 0);
+
+Output:
+true
+
+Memory Trick:
+Nobody
+
+------------------------------------------------------------------------------
+
+19. anyMatch() vs allMatch() vs noneMatch()
+
+Answer:
+
+anyMatch()
+-----------
+At least one satisfies condition
+
+allMatch()
+-----------
+Every element satisfies condition
+
+noneMatch()
+------------
+No element satisfies condition
+
+Example:
+
+[1,2,3]
+
+anyMatch(even)  → true
+
+allMatch(even)  → false
+
+noneMatch(even) → false
+
+------------------------------------------------------------------------------
+
+20. What does toArray() do?
+
+Answer:
+Converts Stream to Array.
+
+Input:
+["Java","Spring"]
+
+Code:
+Object[] arr =
+    list.stream().toArray();
+
+Output:
+[Java, Spring]
+
+Typed Version:
+
+String[] arr =
+    list.stream()
+        .toArray(String[]::new);
+
+==============================================================================
+MEMORY TRICK
+==============================================================================
+
+forEach      → Process
+
+collect      → Store
+
+reduce       → Aggregate
+
+count        → Count
+
+min          → Smallest
+
+max          → Largest
+
+findFirst    → First
+
+findAny      → Any
+
+anyMatch     → One
+
+allMatch     → All
+
+noneMatch    → None
+
+toArray      → Array
+
+
+Based on your Java Streams notes and handbook references covering terminal operations.
