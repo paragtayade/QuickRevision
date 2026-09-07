@@ -1,0 +1,324 @@
+==============================================================================
+TOP 10 INTERVIEW QUESTIONS - PRIMITIVE STREAMS
+(IntStream, LongStream, DoubleStream, mapToInt, mapToLong,
+mapToDouble, boxed, asLongStream, asDoubleStream)
+==============================================================================
+
+1. What are Primitive Streams?
+
+Answer:
+Primitive Streams are specialized streams for primitive data types.
+
+Types:
+IntStream
+LongStream
+DoubleStream
+
+Benefits:
+✓ Better Performance
+✓ Less Memory
+✓ No Boxing/Unboxing Overhead
+
+Interview One-Liner:
+Primitive Streams avoid wrapper objects and improve performance. 【1-1ac88f】【2-e2d925】
+
+------------------------------------------------------------------------------
+
+2. Why use IntStream instead of Stream<Integer>?
+
+Answer:
+
+Stream<Integer>
+---------------
+Uses Integer objects
+Requires boxing/unboxing
+
+IntStream
+----------
+Works directly with int values
+
+Example:
+
+IntStream.of(1,2,3)
+         .sum();
+
+Output:
+6
+
+Interview Tip:
+Prefer IntStream for numeric calculations. 【1-1ac88f】
+
+------------------------------------------------------------------------------
+
+3. What is IntStream?
+
+Answer:
+A Stream specialized for int values.
+
+Example:
+
+IntStream.of(1,2,3,4)
+         .forEach(System.out::println);
+
+Output:
+1
+2
+3
+4
+
+Common Methods:
+sum()
+average()
+max()
+min()
+
+------------------------------------------------------------------------------
+
+4. What is LongStream?
+
+Answer:
+A Stream specialized for long values.
+
+Example:
+
+LongStream.of(10L,20L,30L)
+          .sum();
+
+Output:
+60
+
+Use:
+Large numeric values.
+
+------------------------------------------------------------------------------
+
+5. What is DoubleStream?
+
+Answer:
+A Stream specialized for double values.
+
+Example:
+
+DoubleStream.of(1.5,2.5,3.5)
+            .sum();
+
+Output:
+7.5
+
+Use:
+Decimal calculations.
+
+------------------------------------------------------------------------------
+
+6. What are mapToInt(), mapToLong(), and mapToDouble()?
+
+Answer:
+Convert Stream<T> into a primitive stream. 【3-211e3e】【4-79bb19】
+
+mapToInt()
+
+Input:
+["Java","Spring","Kafka"]
+
+Code:
+list.stream()
+    .mapToInt(String::length)
+    .toArray();
+
+Output:
+[4,6,5]
+
+mapToLong()
+
+Input:
+[1,2,3]
+
+Code:
+list.stream()
+    .mapToLong(Integer::longValue)
+    .toArray();
+
+Output:
+[1,2,3]
+
+mapToDouble()
+
+Input:
+[1,2,3]
+
+Code:
+list.stream()
+    .mapToDouble(n -> n * 1.5)
+    .toArray();
+
+Output:
+[1.5,3.0,4.5]
+
+------------------------------------------------------------------------------
+
+7. What does boxed() do?
+
+Answer:
+Converts primitive stream to wrapper stream.
+
+Input:
+[1,2,3]
+
+Code:
+IntStream.of(1,2,3)
+         .boxed();
+
+Output:
+Stream<Integer>
+
+Use:
+When Collectors require wrapper objects.
+
+Example:
+
+IntStream.of(1,2,3)
+         .boxed()
+         .toList();
+
+Output:
+[1,2,3]
+
+------------------------------------------------------------------------------
+
+8. What does asLongStream() do?
+
+Answer:
+Converts IntStream to LongStream.
+
+Input:
+[1,2,3]
+
+Code:
+IntStream.of(1,2,3)
+         .asLongStream();
+
+Output:
+LongStream
+
+Use:
+Prevent overflow in calculations.
+
+------------------------------------------------------------------------------
+
+9. What does asDoubleStream() do?
+
+Answer:
+Converts IntStream to DoubleStream.
+
+Input:
+[1,2,3]
+
+Code:
+IntStream.of(1,2,3)
+         .asDoubleStream();
+
+Output:
+DoubleStream
+
+Use:
+Decimal calculations.
+
+------------------------------------------------------------------------------
+
+10. boxed() vs mapToInt() vs asLongStream()
+
+Answer:
+
+mapToInt()
+-----------
+Object Stream → IntStream
+
+Example:
+Stream<String>
+        → IntStream
+
+boxed()
+--------
+Primitive Stream → Wrapper Stream
+
+Example:
+IntStream
+      → Stream<Integer>
+
+asLongStream()
+--------------
+IntStream
+      → LongStream
+
+Example:
+IntStream.of(1,2,3)
+         .asLongStream()
+
+==============================================================================
+30-SECOND REVISION
+==============================================================================
+
+IntStream
+→ int data
+
+LongStream
+→ long data
+
+DoubleStream
+→ double data
+
+mapToInt()
+→ Convert to IntStream
+
+mapToLong()
+→ Convert to LongStream
+
+mapToDouble()
+→ Convert to DoubleStream
+
+boxed()
+→ Primitive → Wrapper
+
+asLongStream()
+→ IntStream → LongStream
+
+asDoubleStream()
+→ IntStream → DoubleStream
+
+==============================================================================
+
+MEMORY TRICK
+==============================================================================
+
+Stream<String>
+      ↓
+mapToInt()
+      ↓
+IntStream
+      ↓
+boxed()
+      ↓
+Stream<Integer>
+
+IntStream
+      ↓
+asLongStream()
+      ↓
+LongStream
+
+IntStream
+      ↓
+asDoubleStream()
+      ↓
+DoubleStream
+
+Remember:
+
+mapToX()  → Create Primitive Stream
+
+boxed()   → Primitive → Object
+
+asX()     → Primitive → Primitive
+
+
+Examples for mapToInt(), mapToLong(), and mapToDouble() are consistent with examples found in your enterprise Java interview handbooks.
