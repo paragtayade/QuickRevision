@@ -20,7 +20,7 @@ Benefits:
 ✓ No Boxing/Unboxing Overhead
 
 Interview One-Liner:
-Primitive Streams avoid wrapper objects and improve performance. 【1-1ac88f】【2-e2d925】
+Primitive Streams avoid wrapper objects and improve performance.
 
 ------------------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ Output:
 6
 
 Interview Tip:
-Prefer IntStream for numeric calculations. 【1-1ac88f】
+Prefer IntStream for numeric calculations.
 
 ------------------------------------------------------------------------------
 
@@ -113,7 +113,7 @@ Decimal calculations.
 6. What are mapToInt(), mapToLong(), and mapToDouble()?
 
 Answer:
-Convert Stream<T> into a primitive stream. 【3-211e3e】【4-79bb19】
+Convert Stream<T> into a primitive stream.
 
 mapToInt()
 
