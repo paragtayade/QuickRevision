@@ -1,0 +1,260 @@
+==============================================================================
+TOP 10 INTERVIEW QUESTIONS
+Stream Pipeline, Lazy Evaluation, Eager Evaluation,
+Single-use Stream, Stateless & Stateful Operations
+==============================================================================
+
+1. What is a Stream Pipeline?
+
+Answer:
+A Stream Pipeline consists of:
+
+Source
+  ↓
+Intermediate Operations
+  ↓
+Terminal Operation
+
+Example:
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
+
+------------------------------------------------------------------------------
+
+2. What are the components of a Stream Pipeline?
+
+Answer:
+
+1. Source
+   List, Set, Array, File
+
+2. Intermediate Operations
+   filter(), map(), sorted()
+
+3. Terminal Operations
+   collect(), count(), forEach()
+
+------------------------------------------------------------------------------
+
+3. What is Lazy Evaluation?
+
+Answer:
+Intermediate operations are NOT executed immediately.
+Execution starts only when a terminal operation is called.
+
+Example:
+
+list.stream()
+    .filter(n -> n > 10);
+
+Output:
+No Output
+
+Reason:
+No terminal operation present.
+
+------------------------------------------------------------------------------
+
+4. What triggers execution of a Stream Pipeline?
+
+Answer:
+A Terminal Operation triggers execution.
+
+Examples:
+
+collect()
+count()
+reduce()
+forEach()
+findFirst()
+
+Example:
+
+list.stream()
+    .filter(n -> n > 10)
+    .count();
+
+------------------------------------------------------------------------------
+
+5. What is Eager Evaluation?
+
+Answer:
+Execution happens immediately.
+
+Example:
+
+for(Integer n : numbers){
+    System.out.println(n);
+}
+
+Output:
+1
+2
+3
+
+Traditional loops use Eager Evaluation.
+
+------------------------------------------------------------------------------
+
+6. What is the difference between Lazy and Eager Evaluation?
+
+Answer:
+
+Lazy Evaluation
+---------------
+Executes later
+Used by Streams
+Better performance
+Processes only when needed
+
+Eager Evaluation
+----------------
+Executes immediately
+Used by loops
+May process unnecessary data
+
+------------------------------------------------------------------------------
+
+7. Why is Stream called a Single-use Object?
+
+Answer:
+Once a terminal operation executes, the stream is consumed and closed.
+
+Example:
+
+Stream<String> stream =
+        Stream.of("A","B","C");
+
+stream.count();
+
+stream.count();
+
+Output:
+
+IllegalStateException
+
+------------------------------------------------------------------------------
+
+8. What are Stateless Operations?
+
+Answer:
+Operations that process each element independently.
+
+Examples:
+
+filter()
+map()
+flatMap()
+peek()
+
+Example:
+
+numbers.stream()
+       .filter(n -> n > 10);
+
+Each element is processed independently.
+
+------------------------------------------------------------------------------
+
+9. What are Stateful Operations?
+
+Answer:
+Operations that need information about other elements.
+
+Examples:
+
+sorted()
+distinct()
+limit()
+skip()
+
+Example:
+
+numbers.stream()
+       .sorted();
+
+To sort data, Java needs all elements first.
+
+------------------------------------------------------------------------------
+
+10. Difference between Stateless and Stateful Operations?
+
+Answer:
+
+Stateless
+----------
+filter()
+map()
+flatMap()
+
+No dependency on other elements
+Less memory usage
+Faster
+
+Stateful
+---------
+sorted()
+distinct()
+limit()
+skip()
+
+Needs information from other elements
+More memory usage
+Slightly slower
+
+==============================================================================
+
+INTERVIEW DAY REVISION
+==============================================================================
+
+Stream Pipeline
+---------------
+Source
+  ↓
+Intermediate Operations
+  ↓
+Terminal Operation
+
+Lazy Evaluation
+---------------
+Executes only when terminal operation runs.
+
+Eager Evaluation
+----------------
+Executes immediately.
+
+Single-use Stream
+-----------------
+Can be used only once.
+
+Stateless Operations
+--------------------
+filter()
+map()
+flatMap()
+
+Stateful Operations
+-------------------
+sorted()
+distinct()
+limit()
+skip()
+
+Memory Trick
+------------
+
+filter()   → Stateless
+map()      → Stateless
+flatMap()  → Stateless
+
+sorted()   → Stateful
+distinct() → Stateful
+limit()    → Stateful
+skip()     → Stateful
+
+Lazy  = Execute Later
+Eager = Execute Now
+
+Stream = Single Use
