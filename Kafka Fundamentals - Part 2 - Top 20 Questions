@@ -1,0 +1,453 @@
+#Kafka Fundamentals - Part 2 - Top 20 Questions#
+Kafka Architecture Components - Top 20 Interview Questions
+
+1. What is a Kafka Broker?
+
+Answer:
+
+A Broker is a Kafka server that stores data and serves producer/consumer requests.
+
+Producer → Broker → Consumer
+
+
+Key Points
+
+Stores partitions
+Handles reads/writes
+Part of Kafka cluster
+
+Interview Discussion A Kafka cluster may contain hundreds of brokers.
+
+2. What is a Kafka Cluster?
+
+Answer:
+
+A Cluster is a group of Kafka brokers working together.
+
+Cluster
+
+Broker1
+Broker2
+Broker3
+Broker4
+
+
+Benefits
+
+High Availability
+Scalability
+Fault Tolerance
+3. What is a Topic?
+
+Answer:
+
+A Topic is a logical category where messages are stored.
+
+Transaction-Topic
+Payment-Topic
+Customer-Topic
+
+
+Example
+
+transaction-events
+
+
+All transaction events are stored inside this topic.
+
+4. What is a Partition?
+
+Answer:
+
+A Topic is divided into multiple Partitions.
+
+Transaction Topic
+
+P0
+P1
+P2
+P3
+
+
+Why?
+
+Parallel Processing
+Load Distribution
+Scalability
+
+Interview Discussion Partitions are the unit of scalability in Kafka.
+
+5. What is a Kafka Record?
+
+Answer:
+
+A Record is an individual message stored inside a partition.
+
+Key
+Value
+Timestamp
+Offset
+
+
+Example:
+
+{
+ "accountId":"123",
+ "amount":5000
+}
+
+6. What is Offset?
+
+Answer:
+
+Offset is the unique sequence number of a record within a partition.
+
+Partition-0
+
+Offset 0
+Offset 1
+Offset 2
+Offset 3
+
+
+Important
+
+Offset is unique only within a partition.
+
+7. What is a Producer?
+
+Answer:
+
+A Producer publishes messages to Kafka topics.
+
+Payment Service
+      |
+   Producer
+      |
+    Kafka
+
+
+Example:
+
+kafkaTemplate.send("payments", payment);
+
+8. What is a Consumer?
+
+Answer:
+
+Consumer reads data from Kafka Topics.
+
+Kafka
+  |
+Consumer
+
+
+Examples:
+
+Audit Service
+Fraud Service
+Reporting Service
+9. What is a Consumer Group?
+
+Answer:
+
+A Consumer Group is a collection of consumers working together.
+
+Consumer Group
+
+Consumer1
+Consumer2
+Consumer3
+
+
+Kafka distributes partitions among consumers.
+
+10. Why are Consumer Groups Needed?
+
+Answer:
+
+They provide:
+
+✅ Scalability
+
+✅ Load Balancing
+
+✅ Fault Tolerance
+
+Example:
+
+4 Partitions
+
+C1 -> P0,P1
+C2 -> P2,P3
+
+11. What is a Leader Partition?
+
+Answer:
+
+Each partition has one Leader.
+
+P0 Leader -> Broker1
+
+
+All Reads/Writes happen through the Leader.
+
+Producer
+   |
+ Leader
+
+
+Interview Question
+
+Can producer write to follower?
+
+Answer: No.
+
+12. What is a Follower Partition?
+
+Answer:
+
+Followers are replicated copies of Leader.
+
+Leader
+  |
+  +-- Follower1
+  |
+  +-- Follower2
+
+
+Purpose:
+
+High Availability
+Disaster Recovery
+13. What happens if the Leader Broker crashes?
+
+Answer:
+
+Kafka elects a new Leader from ISR replicas.
+
+Old Leader Down
+
+Follower1 -> New Leader
+
+
+No data loss if replication is configured properly.
+
+14. What is Controller in Kafka?
+
+Answer:
+
+Controller manages the cluster.
+
+Responsibilities:
+
+Broker monitoring
+Leader election
+Partition reassignment
+Cluster metadata updates
+
+Think of Controller as:
+
+Cluster Manager
+
+15. What is ISR (In Sync Replica)?
+
+Answer:
+
+ISR contains all replicas fully synchronized with the leader.
+
+Leader
+Follower1 ✅
+Follower2 ✅
+
+ISR = [Leader,F1,F2]
+
+
+Only ISR replicas can become future leaders.
+
+16. What happens if a Replica falls behind?
+
+Answer:
+
+Kafka removes it from ISR.
+
+Leader ✅
+Follower1 ✅
+Follower2 ❌
+
+ISR=[Leader,F1]
+
+
+Once synced again, it rejoins ISR.
+
+17. What is Kafka Metadata?
+
+Answer:
+
+Metadata contains cluster information.
+
+Includes:
+
+Brokers
+Topics
+Partitions
+Leaders
+ISRs
+
+Example:
+
+Topic=Payments
+Partition=0
+Leader=Broker2
+
+
+Clients fetch metadata before sending requests.
+
+18. What is ZooKeeper in Kafka?
+
+Answer:
+
+ZooKeeper was traditionally used for:
+
+Broker registration
+Leader election
+Metadata management
+Configuration management
+Kafka <--> ZooKeeper
+
+
+Used before Kafka 3.x KRaft mode became mainstream.
+
+19. What is KRaft?
+
+Answer:
+
+KRaft (Kafka Raft Metadata Mode) removes ZooKeeper dependency.
+
+Kafka Cluster
+      |
+    KRaft
+
+
+Benefits:
+
+✅ Simpler Architecture
+
+✅ Easier Operations
+
+✅ Faster Startup
+
+✅ Better Scalability
+
+✅ No ZooKeeper
+
+20. KRaft vs ZooKeeper?
+
+Answer:
+
+KRaft	ZooKeeperBuilt into Kafka	Separate System
+Simpler	More Complex
+Better Scalability	Limited
+Less Maintenance	Extra Maintenance
+Future of Kafka	Legacy Approach
+
+Interview Discussion
+
+Modern Kafka deployments prefer KRaft mode.
+
+Most Asked Scenario-Based Questions
+Q1. If Topic has 3 Partitions and Consumer Group has 5 Consumers, what happens?
+
+Answer
+
+P0 -> C1
+P1 -> C2
+P2 -> C3
+C4 -> Idle
+C5 -> Idle
+
+
+Extra consumers remain idle.
+
+Q2. If Topic has 10 Partitions and only 2 Consumers?
+
+Answer
+
+Partitions are shared.
+
+C1 -> P0-P4
+C2 -> P5-P9
+
+Q3. Can multiple Consumer Groups read the same Topic?
+
+Answer
+
+Yes.
+
+Transaction Topic
+
+Group-A → Fraud
+Group-B → Audit
+Group-C → Analytics
+
+
+All receive same data independently.
+
+Q4. Why can only ISR replicas become Leaders?
+
+Answer
+
+To avoid data loss.
+
+Out-of-sync replicas may miss messages.
+
+Q5. Why is Partition count important?
+
+Answer
+
+Partition count determines maximum consumer parallelism.
+
+Maximum Consumers
+=
+Number of Partitions
+
+Memory Trick (Kafka Components)
+BCTPROCCLFM KZ
+
+B → Broker
+C → Cluster
+T → Topic
+P → Partition
+R → Record
+O → Offset
+P → Producer
+C → Consumer
+C → Consumer Group
+L → Leader
+F → Follower
+M → Metadata
+
+K → KRaft
+Z → ZooKeeper
+
+Architect Cheat Code
+Broker = Server
+Cluster = Group of Brokers
+Topic = Category
+Partition = Scalability Unit
+Record = Message
+Offset = Message ID
+Producer = Sender
+Consumer = Reader
+Consumer Group = Parallel Readers
+Leader = Read/Write Owner
+Follower = Backup Copy
+ISR = Healthy Replicas
+Controller = Cluster Manager
+Metadata = Cluster Information
+KRaft = ZooKeeper Replacement
+ZooKeeper = Legacy Metadata Manager
+
+
+These 20 questions are among the most frequently asked Kafka Architecture interview questions
+for Senior Java Developers, Lead Engineers, Solution Architects, and Banking Domain Kafka implementations.
