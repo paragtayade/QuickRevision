@@ -1,0 +1,435 @@
+Kafka Fundamentals - Part 3 - Top 20 Questions
+Kafka Topic & Partitioning  - Top 20 Interview Questions (Senior Developer / Lead / Architect)
+
+1. How do you design Kafka Topics in a large-scale microservices architecture?
+Answer
+
+Topic design should be based on business events, not services.
+
+✅ Good
+
+customer-created
+payment-completed
+account-opened
+transaction-posted
+
+
+❌ Bad
+
+customer-service-topic
+payment-service-topic
+
+Banking Example
+transaction-events
+customer-events
+loan-events
+
+
+Interview Tip
+
+Topic should represent business domain events.
+
+2. How do you decide the number of Partitions for a Topic?
+Answer
+
+Consider:
+
+Expected TPS
+Consumer Parallelism
+Future Growth
+Broker Count
+
+
+Formula:
+
+Partitions >= Maximum Consumers
+
+
+Example:
+
+100K TPS
+10 Consumers
+
+Partition Count = 12-15
+
+3. What is a Partition Key?
+Answer
+
+Partition Key determines which partition receives a message.
+
+ProducerRecord<>("payments", accountId, payment);
+
+accountId = 101
+
+
+Same key always goes to same partition.
+
+4. Why is Partition Key important?
+Answer
+
+It ensures:
+
+✅ Message Ordering
+
+✅ Consistent Routing
+
+✅ Related Events Together
+
+Banking Example
+Account-101
+Deposit
+Withdraw
+Transfer
+
+
+All events must go to same partition.
+
+5. Explain Key-Based Routing.
+Answer
+
+Kafka uses:
+
+hash(key) % partitions
+
+
+Example:
+
+Account-101 → Partition 2
+Account-101 → Partition 2
+Account-101 → Partition 2
+
+
+Guarantees ordering.
+
+6. What happens when no Key is provided?
+Answer
+
+Kafka uses Round Robin partitioning.
+
+Example:
+
+Msg1 → P0
+Msg2 → P1
+Msg3 → P2
+Msg4 → P0
+
+
+Load gets distributed evenly.
+
+7. What is Round Robin Partitioning?
+Answer
+
+Messages are distributed sequentially.
+
+P0
+P1
+P2
+P0
+P1
+P2
+
+
+Useful when:
+
+Ordering not needed
+Maximum throughput required
+
+8. What are the drawbacks of Round Robin Partitioning?
+Answer
+
+No ordering guarantee.
+
+Example:
+
+Deposit
+Withdraw
+Balance Check
+
+
+May land on different partitions.
+
+Not suitable for banking transactions.
+
+9. What is a Custom Partitioner?
+Answer
+
+Developer decides partition logic.
+
+public class BankingPartitioner
+implements Partitioner
+{
+}
+
+
+Used when default partition strategy isn't enough.
+
+10. Give a real-world use case of Custom Partitioner.
+Answer
+
+Route VIP customers separately.
+
+Premium Customers → Partition 0
+Normal Customers → Other Partitions
+
+
+Or
+
+Country-Based Routing
+
+India → P0
+USA   → P1
+UK    → P2
+
+11. How does Kafka provide Ordering Guarantee?
+Answer
+
+Ordering is guaranteed only within a partition.
+
+Partition 0
+
+Event1
+Event2
+Event3
+
+
+Kafka preserves order.
+
+12. Is Ordering Guaranteed Across Partitions?
+Answer
+
+No.
+
+Example:
+
+P0 → Event A
+P1 → Event B
+
+
+Execution order cannot be guaranteed.
+
+Very Common Interview Question
+
+13. How do you maintain ordering for financial transactions?
+Answer
+
+Use same business key.
+
+AccountId
+CustomerId
+OrderId
+
+
+Example:
+
+send(topic, accountId, txn);
+
+
+All account events go to same partition.
+
+14. What is Repartitioning?
+Answer
+
+Moving records into new partitions using a different key.
+
+Example:
+
+Before
+CustomerId
+
+After
+BranchId
+
+
+Kafka Streams often performs repartitioning.
+
+15. Why is Repartitioning expensive?
+Answer
+
+Because Kafka needs:
+
+Read
+Network Transfer
+Write Again
+
+
+Causes:
+
+More I/O
+More Disk Usage
+More Network Traffic
+16. Can we increase partitions later?
+Answer
+
+Yes.
+
+Old = 5 Partitions
+New = 10 Partitions
+
+
+Kafka allows partition expansion.
+
+17. What is the effect of increasing partitions?
+Answer
+
+Ordering may break for future messages.
+
+Example:
+
+Before
+
+hash(key)%5
+
+After
+
+hash(key)%10
+
+
+Keys may move to different partitions.
+
+Architect Level Question
+
+18. What is Partition Skew?
+Answer
+
+Uneven distribution of messages across partitions.
+
+Example:
+
+P0 = 50 Million
+P1 = 10 Million
+P2 = 5 Million
+
+
+Cluster becomes unbalanced.
+
+19. What is Hot Partition Problem?
+Answer
+
+One partition receives most traffic.
+
+Example:
+
+90% traffic
+    |
+    V
+   P0
+
+
+Causes:
+
+Consumer lag
+High CPU
+Slow throughput
+20. How does Partitioning enable Parallel Processing?
+Answer
+
+Each partition can be consumed independently.
+
+Example:
+
+Topic
+
+P0 -> Consumer1
+P1 -> Consumer2
+P2 -> Consumer3
+P3 -> Consumer4
+
+
+Result:
+
+✅ Higher Throughput
+
+✅ Better Scalability
+
+✅ Faster Processing
+
+Top Scenario-Based Questions (Most Asked)
+Scenario 1
+Topic has 10 Partitions and Consumer Group has 15 Consumers. What happens?
+
+Answer
+
+10 Consumers Active
+5 Consumers Idle
+
+
+Maximum parallelism = Partitions.
+
+Scenario 2
+All transactions of a customer must remain ordered. How will you design it?
+
+Answer
+
+Use:
+
+CustomerId as Key
+
+
+All events go to same partition.
+
+Scenario 3
+One partition receives 90% traffic. What is the issue?
+
+Answer
+
+Hot Partition Problem
+
+
+Causes skew and consumer lag.
+
+Scenario 4
+Can increasing partitions improve throughput?
+
+Answer
+
+Yes.
+
+More partitions enable:
+
+More Consumers
+More Parallelism
+Higher TPS
+
+Scenario 5
+Why not create 10,000 partitions for every topic?
+
+Answer
+
+Too many partitions cause:
+
+Memory Usage ↑
+Metadata Size ↑
+Leader Elections ↑
+Rebalance Time ↑
+
+Architect Cheat Sheet
+Topic         = Business Event Category
+Partition     = Unit of Scalability
+Partition Key = Routing Decision
+Same Key      = Same Partition
+Ordering      = Within Partition Only
+Round Robin   = No Key Distribution
+Custom Partitioner = Custom Routing Logic
+Repartitioning = Change Partition Strategy
+Partition Skew = Uneven Data Distribution
+Hot Partition = One Partition Gets Most Traffic
+Parallelism   = Number of Partitions
+
+Memory Trick
+TPKROSPHPR
+
+T = Topic Design
+P = Partition Design
+K = Partition Key
+R = Routing
+O = Ordering
+S = Skew
+P = Parallelism
+H = Hot Partition
+P = Partition Expansion
+R = Repartitioning
+
+
+These are among the most frequently asked Kafka Topic & Partitioning interview questions for Senior 
+Java Developers (10+ years), Kafka Leads, Staff Engineers, and Solution Architects, especially in 
+banking and high-volume transaction systems.
