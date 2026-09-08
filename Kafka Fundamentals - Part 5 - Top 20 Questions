@@ -1,0 +1,1001 @@
+#Kafka Fundamentals - Part 5 - Top 20 Questions
+Kafka Consumers - Top 20 Interview Questions (Senior Developer / Solution Architect)
+
+1. Explain Kafka Consumer Architecture.
+Answer
+
+Consumer Architecture Flow:
+
+Kafka Broker
+     |
+Fetch Request
+     |
+Consumer
+     |
+Poll()
+     |
+Process Records
+     |
+Commit Offset
+
+
+Consumer continuously polls Kafka for new records.
+
+2. How does Kafka Consumer work internally?
+Answer
+Subscribe Topic
+      |
+Join Consumer Group
+      |
+Partition Assignment
+      |
+Poll Messages
+      |
+Process Messages
+      |
+Commit Offset
+      |
+Poll Again
+
+
+Consumer is pull-based, not push-based.
+
+3. What is the Poll Mechanism?
+Answer
+
+Kafka consumers pull records using:
+
+consumer.poll(Duration.ofMillis(1000));
+
+Consumer
+    |
+ Poll Request
+    |
+ Broker
+    |
+ Records Returned
+
+
+Kafka never pushes messages.
+
+4. Why did Kafka choose Pull instead of Push?
+Answer
+
+Benefits:
+
+✅ Consumer controls speed
+
+✅ Better backpressure handling
+
+✅ No consumer overload
+
+✅ Better scalability
+
+Interview One-Liner
+
+Kafka is Pull Based.
+Consumers decide when and how much to consume.
+
+5. What is an Offset?
+Answer
+
+Offset is the unique position of a message within a partition.
+
+Example:
+
+Partition-0
+
+Offset 0
+Offset 1
+Offset 2
+Offset 3
+
+
+Consumer tracks offsets to know where to resume.
+
+6. What is Offset Commit?
+Answer
+
+Offset commit means saving consumer progress.
+
+Example:
+
+Processed up to Offset 100
+
+
+Commit:
+
+Offset = 101
+
+
+If consumer restarts:
+
+Starts from 101
+
+7. What is Auto Commit?
+Answer
+
+Kafka automatically commits offsets.
+
+enable.auto.commit=true
+
+
+Default:
+
+auto.commit.interval.ms=5000
+
+
+Every 5 seconds Kafka commits offsets.
+
+8. What are the disadvantages of Auto Commit?
+Answer
+
+Possible message loss.
+
+Scenario:
+
+Read Message
+Auto Commit Happens
+Application Crashes
+
+
+Message committed but not processed.
+
+Result:
+
+Data Loss
+
+9. What is Manual Commit?
+Answer
+
+Developer controls offset commit.
+
+enable.auto.commit=false
+
+
+Example:
+
+consumer.commitSync();
+
+
+Commit only after successful processing.
+
+10. What is commitSync()?
+Answer
+
+Synchronous offset commit.
+
+consumer.commitSync();
+
+
+Consumer waits for broker acknowledgment.
+
+Advantages
+
+✅ Reliable
+
+✅ Guaranteed Commit
+
+Disadvantages
+
+❌ Slightly slower
+
+11. What is commitAsync()?
+Answer
+
+Asynchronous offset commit.
+
+consumer.commitAsync();
+
+
+Consumer doesn't wait for broker.
+
+Advantages
+
+✅ Fast
+
+✅ High Throughput
+
+Disadvantages
+
+❌ Commit failure may go unnoticed
+
+12. When should commitSync vs commitAsync be used?
+Answer
+commitSync()
+Banking
+Payments
+Financial Transactions
+
+commitAsync()
+Analytics
+Logging
+Metrics
+Reporting
+
+13. What is Consumer Lag?
+Answer
+
+Difference between:
+
+Latest Offset
+AND
+Consumer Offset
+
+
+Formula:
+
+Lag = Latest Offset - Consumed Offset
+
+
+Example:
+
+Latest Offset = 1000
+Consumer Offset = 700
+
+Lag = 300
+
+14. Why does Consumer Lag happen?
+Answer
+
+Common reasons:
+
+Slow Consumer
+Large Messages
+CPU Issue
+Network Issue
+Broker Issue
+Too Few Consumers
+
+15. What is Rebalancing?
+Answer
+
+Redistribution of partitions within a consumer group.
+
+Example:
+
+Before:
+
+C1 -> P0,P1
+
+
+New Consumer Joins
+
+After:
+
+C1 -> P0
+C2 -> P1
+
+
+Kafka redistributes work.
+
+16. When does Rebalancing occur?
+Answer
+
+Common triggers:
+
+✅ Consumer joins
+
+✅ Consumer leaves
+
+✅ Consumer crashes
+
+✅ Topic partition changes
+
+17. What are Rebalance Listeners?
+Answer
+
+Special callback methods.
+
+ConsumerRebalanceListener
+
+
+Methods:
+
+onPartitionsRevoked()
+
+onPartitionsAssigned()
+
+
+Useful for:
+
+Offset saving
+Cleanup
+Recovery
+18. Explain Kafka Fetch Process.
+Answer
+
+Consumer sends Fetch Request.
+
+Consumer
+   |
+Fetch Request
+   |
+Broker
+   |
+Records Returned
+
+
+Fetch parameters:
+
+fetch.min.bytes
+fetch.max.bytes
+fetch.max.wait.ms
+
+
+Control batch retrieval.
+
+19. Important Consumer Configurations?
+Answer
+
+Most Asked Interview Question
+
+group.id
+enable.auto.commit
+auto.offset.reset
+max.poll.records
+max.poll.interval.ms
+session.timeout.ms
+heartbeat.interval.ms
+fetch.min.bytes
+fetch.max.bytes
+
+20. Explain Heartbeats, Session Timeout and Max Poll Interval.
+Answer
+Heartbeat
+
+Consumer periodically tells broker:
+
+I am Alive
+
+session.timeout.ms
+
+Maximum time broker waits for heartbeat.
+
+Example:
+
+session.timeout.ms=45000
+
+
+If no heartbeat for 45 sec:
+
+Consumer Dead
+Rebalance Triggered
+
+max.poll.interval.ms
+
+Maximum processing time between poll calls.
+
+Example:
+
+max.poll.interval.ms=300000
+
+
+(5 minutes)
+
+If exceeded:
+
+Consumer Removed From Group
+Rebalance Starts
+
+Bonus Questions (Extremely Asked)
+What is max.poll.records?
+Answer
+
+Maximum records returned per poll.
+
+Example:
+
+max.poll.records=500
+
+poll()
+
+
+returns maximum 500 records.
+
+Useful for controlling memory usage.
+
+Difference Between Session Timeout and Max Poll Interval?
+session.timeout.ms
+Checks Consumer Health
+
+
+Based on Heartbeats.
+
+max.poll.interval.ms
+Checks Processing Time
+
+
+Based on Poll Frequency.
+
+Scenario-Based Questions (Banking Domain)
+Scenario 1
+
+Consumer reads record but crashes before commit.
+
+What happens?
+
+Answer
+Message Reprocessed
+
+
+At-Least-Once Delivery.
+
+Scenario 2
+
+Consumer lag continuously increasing.
+
+How would you troubleshoot?
+
+Answer
+
+Check:
+
+Consumer CPU
+Broker CPU
+Partition Count
+Consumer Count
+Network
+Large Messages
+Poll Configuration
+
+Scenario 3
+
+Processing one message takes 10 minutes.
+
+Which configuration becomes critical?
+
+Answer
+max.poll.interval.ms
+
+
+Must be increased.
+
+Scenario 4
+
+Consumer stopped sending heartbeats.
+
+What happens?
+
+Answer
+Session Timeout
+      ↓
+Consumer Removed
+      ↓
+Rebalance Triggered
+
+Scenario 5
+
+Why can repeated rebalances hurt performance?
+
+Answer
+
+During rebalance:
+
+Consumption Stops
+Partitions Reassigned
+Consumers Restart
+
+
+Frequent rebalances reduce throughput.
+
+Senior Developer Cheat Sheet
+Consumer Workflow
+
+Poll()
+   ↓
+Fetch Records
+   ↓
+Process Records
+   ↓
+Commit Offset
+   ↓
+Poll Again
+
+Offset
+   ↓
+Message Position
+
+Auto Commit
+   ↓
+Easy but Risky
+
+Manual Commit
+   ↓
+Reliable
+
+commitSync()
+   ↓
+Reliable
+
+commitAsync()
+   ↓
+Fast
+
+Consumer Lag
+   ↓
+Latest Offset - Current Offset
+
+Heartbeat
+   ↓
+Consumer Alive Signal
+
+session.timeout.ms
+   ↓
+Health Check
+
+max.poll.interval.ms
+   ↓
+Processing Time Check
+
+Rebalancing
+   ↓
+Partition Redistribution
+
+Memory Trick
+POCARLFMHSR
+
+P = Poll
+O = Offset
+C = Commit
+A = Auto Commit
+R = Rebalancing
+L = Lag
+F = Fetch
+M = Max Poll
+H = Heartbeat
+S = Session Timeout
+R = Rebalance Listener
+
+One-Line Interview Revision
+Consumer = Poll → Process → Commit → Heartbeat → Rebalance → Continue
+
+
+These are the most frequently asked Kafka Consumer questions for Senior Java Developers
+(10-15+ years), Kafka Leads, Staff Engineers,Principal Engineers, and Solution Architects, 
+especially around offset management, lag troubleshooting, rebalancing, and consumer tuning.
+
+=============================================================================================
+# EXTRA KNOWELDGE
+=============================================================================================
+Explain Kafka Consumer Architecture (Senior Developer Interview)
+High-Level Flow
+Kafka Broker
+     |
+Fetch Request
+     |
+Consumer
+     |
+Poll()
+     |
+Process Records
+     |
+Commit Offset
+
+
+Consumer continuously pulls (fetches) messages from Kafka, processes them, and then saves its progress using offset commits.
+=============================================================================================
+Real Banking Example
+=============================================================================================
+Imagine a banking transaction topic:
+
+transaction-topic
+
+P0
+--------------------------------
+Offset 0 -> Deposit 1000
+Offset 1 -> Withdraw 200
+Offset 2 -> Transfer 500
+Offset 3 -> Deposit 3000
+
+
+A Fraud Detection Service is consuming these events.
+=============================================================================================
+Step 1: Consumer Starts
+=============================================================================================
+consumer.subscribe(
+    Arrays.asList("transaction-topic")
+);
+
+
+Consumer joins a consumer group.
+
+group.id=fraud-group
+
+Fraud Service
+      |
+Consumer
+      |
+transaction-topic
+=============================================================================================
+Step 2: Poll() Request
+=============================================================================================
+
+Consumer continuously executes:
+
+while(true) {
+
+ ConsumerRecords<String,Txn> records
+      = consumer.poll(
+          Duration.ofMillis(1000)
+        );
+
+}
+=============================================================================================
+What happens?
+
+Consumer asks broker:
+
+Do you have new records for me?
+=============================================================================================
+
+Broker responds:
+
+Yes.
+
+Offset 0
+Offset 1
+Offset 2
+=============================================================================================
+Why Poll()?
+=============================================================================================
+Kafka is a Pull-Based System.
+
+Consumer controls:
+
+When to Read
+
+How Fast to Read
+
+How Many Records to Read
+
+
+Unlike RabbitMQ:
+
+Broker Pushes Messages
+
+
+Kafka:
+
+Consumer Pulls Messages
+=============================================================================================
+Step 3: Fetch Request
+=============================================================================================
+
+Internally Poll() sends:
+
+Fetch Request
+
+
+to Kafka Broker.
+
+Consumer
+     |
+Fetch Request
+     |
+Broker
+
+
+Request contains:
+
+Topic Name
+
+Partition
+
+Offset Position
+
+Max Records
+
+
+Example:
+
+Give me records
+from Offset 100 onward
+=============================================================================================
+Step 4: Broker Returns Records
+=============================================================================================
+
+Broker looks inside partition.
+
+P0
+
+Offset 100
+Offset 101
+Offset 102
+Offset 103
+
+
+Returns data.
+
+Consumer Receives
+
+100
+101
+102
+103
+=============================================================================================
+Step 5: Record Processing
+=============================================================================================
+Now application processes records.
+
+for(var record : records){
+
+ processTransaction(record);
+
+}
+
+
+Example:
+
+Txn-100
+Txn-101
+Txn-102
+Txn-103
+
+=============================================================================================
+Fraud Service checks:
+=============================================================================================
+High Amount?
+Suspicious Activity?
+Duplicate Transaction?
+=============================================================================================
+Step 6: Commit Offset
+=============================================================================================
+
+After successful processing:
+
+consumer.commitSync();
+
+
+Kafka stores:
+
+Last Processed Offset = 103
+
+
+Actually Kafka saves:
+
+Offset = 104
+
+
+Meaning:
+
+Start from 104 next time
+
+Why Commit Offset?
+
+Without commit:
+
+Consumer Restart
+
+
+Kafka wouldn't know where to resume.
+
+Example:
+
+Processed upto Offset 103
+
+Commit 104
+
+
+Restart:
+
+Starts From 104
+=============================================================================================
+Internal Consumer Architecture
+=============================================================================================
+                Kafka Cluster
+
+ Broker1          Broker2          Broker3
+    |                |                |
+    -----------------------------------
+                     |
+               Consumer Group
+                     |
+                Consumer
+                     |
+                  poll()
+                     |
+              Fetch Request
+                     |
+            Consumer Buffer
+                     |
+           Process Records
+                     |
+             Commit Offset
+
+=============================================================================================
+Detailed Lifecycle
+=============================================================================================
+Application Starts
+        |
+Subscribe Topic
+        |
+Join Group
+        |
+Partition Assignment
+        |
+Poll()
+        |
+Fetch Records
+        |
+Process Records
+        |
+Commit Offset
+        |
+Poll Again
+
+
+This loop continues forever.
+
+=============================================================================================
+Example With Offsets
+=============================================================================================
+Suppose Topic:
+
+Partition 0
+
+Offset 0
+Offset 1
+Offset 2
+Offset 3
+Offset 4
+
+
+Consumer reads:
+
+0
+1
+2
+
+
+Processes successfully.
+
+Commit:
+
+Offset 3
+
+
+Now application crashes.
+
+After restart:
+
+Consumer Starts
+
+Reads From:
+
+Offset 3
+
+
+Not from beginning.
+=============================================================================================
+What Happens If Consumer Crashes Before Commit?
+=============================================================================================
+Example:
+
+Read Offset 100
+Read Offset 101
+Read Offset 102
+
+Crash
+
+
+No commit done.
+
+After restart:
+
+Kafka Gives
+
+100
+101
+102 Again
+
+
+This causes:
+
+Duplicate Processing
+
+
+Known as:
+
+At-Least-Once Delivery
+=============================================================================================
+Most Asked Interview Question
+Does Consumer Receive Messages Automatically?
+=============================================================================================
+
+No
+
+Kafka never pushes.
+
+Consumer must call:
+
+poll()
+
+
+continuously.
+
+=============================================================================================
+Another Most Asked Question
+Why Consumer Polls Continuously?
+=============================================================================================
+
+Because:
+
+New records may arrive anytime
+
+
+Consumer keeps checking.
+
+while(true)
+{
+   poll()
+}
+=============================================================================================
+Components and Responsibilities
+=============================================================================================
+Component	ResponsibilityBroker	Stores Messages
+Consumer	Reads Messages
+Poll()	Requests Records
+Fetch Request	Sent To Broker
+Record Processing	Business Logic
+Offset	Message Position
+Commit Offset	Save Progress
+
+=============================================================================================
+Senior Developer Interview Diagram
+=============================================================================================
+Kafka Broker
+     |
+Store Records
+     |
+Offset 100
+Offset 101
+Offset 102
+     |
+-------------------------
+     |
+Fetch Request
+     |
+Consumer Poll()
+     |
+Receive Records
+     |
+Business Processing
+     |
+Commit Offset
+     |
+Offset=103 Saved
+     |
+Poll Again
+
+=============================================================================================
+One-Line Revision
+=============================================================================================
+Kafka Consumer = Poll → Fetch → Process → Commit Offset → Poll Again
+
+Memory Trick
+PFPC
+
+P = Poll
+F = Fetch
+P = Process
+C = Commit
+
+=============================================================================================
+Remember:
+=============================================================================================
+Consumer Life Cycle
+
+Poll
+  ↓
+Fetch
+  ↓
+Process
+  ↓
+Commit
+  ↓
+Repeat
+
+
+This is the core answer expected in senior Kafka interviews before they move into advanced topics like 
+Consumer Lag, Rebalancing, Offset Management, Exactly Once Processing, and Consumer Tuning.
