@@ -1,0 +1,400 @@
+Kafka Fundamentals - Top 20 Interview Questions (Senior Java Developer / Solution Architect)
+1. What is Apache Kafka?
+
+Answer: Apache Kafka is a distributed event streaming platform used for building real-time data pipelines and event-driven applications. It stores data as an immutable log and allows producers to publish events while consumers read them independently.
+
+Interview Discussion:
+
+Distributed system
+Event streaming platform
+Persistent storage
+Horizontal scalability
+2. Why Kafka became so popular?
+
+Answer: Kafka provides:
+
+High Throughput
+Low Latency
+Scalability
+Fault Tolerance
+Message Replay
+Event Streaming
+
+Real-world Example: Banking transaction events flowing between multiple microservices.
+
+3. Explain Kafka vs RabbitMQ.
+
+Answer:
+
+Kafka	RabbitMQDistributed Log	Traditional Message Broker
+Very High Throughput	Moderate Throughput
+Message Replay Supported	Limited Replay
+Event Streaming	Queue-Based Messaging
+Better for Big Data	Better for Task Processing
+
+When to Choose Kafka?
+
+Event streaming
+Analytics
+Audit logs
+Data pipelines
+
+When to Choose RabbitMQ?
+
+Order processing
+Task queues
+Email notifications
+4. Kafka vs JMS?
+
+Answer:
+
+Kafka	JMSPlatform	API Specification
+Distributed	Usually Broker-Based
+Stores Data Long-Term	Transient Messaging
+Replay Supported	Limited
+
+Important Interview Point:
+
+JMS is a standard.
+
+Kafka is a product/platform.
+
+5. Kafka vs ActiveMQ?
+
+Answer:
+
+Kafka	ActiveMQDistributed Platform	Traditional Broker
+Millions of Messages	Lower Throughput
+Event Streaming	Queue Messaging
+Partition Based	Queue Based
+Replay Supported	Limited
+6. What is Event Streaming?
+
+Answer:
+
+Event Streaming means continuously capturing, storing, and processing events as they happen.
+
+Examples:
+
+Credit card transaction
+ATM withdrawal
+User login
+Stock trade
+7. What is an Event?
+
+Answer:
+
+An event is a fact that something happened.
+
+Examples:
+
+Plain Text
+1
+OrderCreated
+2
+PaymentReceived
+3
+CustomerRegistered
+Show more lines
+
+Events are immutable.
+
+8. Explain Messaging Patterns.
+
+Answer:
+
+Two common patterns:
+
+Queue
+
+One producer → One consumer
+
+Plain Text
+1
+Producer
+2
+|
+3
+Queue
+4
+|
+5
+Consumer
+Show more lines
+Publish-Subscribe
+
+One producer → Many consumers
+
+Plain Text
+1
+Producer
+2
+|
+3
+Topic
+4
+/ | \
+5
+C1 C2 C3
+6
+ 
+Show more lines
+9. What is Publish-Subscribe Model?
+
+Answer:
+
+A producer publishes messages to a topic.
+
+Multiple consumers receive the same message.
+
+Example:
+
+Plain Text
+1
+Transaction Event
+2
+ 
+3
+→ Fraud Service
+4
+→ Audit Service
+5
+→ Analytics Service
+6
+→ Notification Service
+Show more lines
+10. What is Queue Model?
+
+Answer:
+
+A message is consumed by only one consumer.
+
+Useful for:
+
+Order processing
+Email sending
+Background jobs
+11. Explain Event-Driven Architecture.
+
+Answer:
+
+Applications communicate through events instead of direct API calls.
+
+Traditional:
+
+Plain Text
+1
+Service A → REST → Service B
+Show more lines
+
+Event Driven:
+
+Plain Text
+1
+Service A → Kafka → Service B
+2
+→ Service C
+3
+→ Service D
+Show more lines
+
+Benefits
+
+Loose coupling
+Scalability
+Flexibility
+12. What is Log-Based Architecture?
+
+Answer:
+
+Kafka stores messages in append-only logs.
+
+Plain Text
+1
+Offset 0
+2
+Offset 1
+3
+Offset 2
+4
+Offset 3
+Show more lines
+
+Messages are never updated.
+
+Only appended.
+
+13. What is Message Durability?
+
+Answer:
+
+Durability means messages survive crashes and restarts.
+
+Kafka achieves durability through:
+
+Disk persistence
+Replication
+Acknowledgements
+14. How does Kafka provide High Throughput?
+
+Answer:
+
+Throughput is increased using:
+
+Partitions
+Plain Text
+1
+Topic
+2
+├─ P1
+3
+├─ P2
+4
+├─ P3
+5
+``
+Show more lines
+Sequential Disk Writes
+
+Very fast compared to random writes.
+
+Batch Processing
+
+Multiple messages sent together.
+
+15. How does Kafka achieve Low Latency?
+
+Answer:
+
+Kafka reduces latency using:
+
+Sequential writes
+Zero-copy transfer
+OS page cache
+Batching
+
+Typical latency:
+
+Few milliseconds
+16. Explain Kafka Scalability.
+
+Answer:
+
+Kafka scales horizontally.
+
+Add more:
+
+Plain Text
+1
+Broker1
+2
+Broker2
+3
+Broker3
+4
+Broker4
+Show more lines
+
+Benefits:
+
+More storage
+More throughput
+More consumers
+17. What is Fault Tolerance in Kafka?
+
+Answer:
+
+Fault tolerance means system continues working even when broker fails.
+
+Implemented using:
+
+Plain Text
+1
+Leader
+2
+Follower1
+3
+Follower2
+4
+ 
+Show more lines
+
+Copies of data exist on multiple brokers.
+
+18. What is Replayability?
+
+Answer:
+
+Consumers can re-read old messages using offsets.
+
+Example:
+
+Plain Text
+1
+Offset 0
+2
+Offset 1
+3
+Offset 2
+4
+Offset 3
+Show more lines
+
+Consumer can start again from Offset 0.
+
+This is extremely important for:
+
+Audits
+Problem recovery
+Reprocessing
+19. Why is Kafka ideal for Microservices?
+
+Answer:
+
+Because it provides:
+
+Asynchronous communication
+Loose coupling
+Independent deployment
+Event streaming
+Scalability
+
+Banking Example:
+
+Plain Text
+1
+Account Service
+2
+|
+3
+Kafka
+4
+┌─────┼─────┐
+5
+Fraud Audit Notification
+Show more lines
+20. What are the biggest advantages of Kafka over traditional MQ systems?
+
+Answer:
+
+Traditional MQ
+Message deleted after consumption
+Limited scalability
+Limited replay
+Kafka
+
+✅ Persistent Storage
+
+✅ Message Replay
+
+✅ High Throughput
+
+✅ Event Streaming
+
+✅ Horizontal Scaling
+
+✅ Fault Tolerance
+
+✅ Real-Time Analytics
+
+✅ Event-Driven Architecture
