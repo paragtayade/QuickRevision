@@ -1,0 +1,554 @@
+Kafka Fundamentals - Part 4 - Top 20 Questions
+
+Kafka Producers - Top 20 Interview Questions (Senior Developer / Solution Architect)
+1. Explain Kafka Producer Internals.
+Answer
+
+Kafka Producer workflow:
+
+Application
+    |
+Producer API
+    |
+Serializer
+    |
+Partitioner
+    |
+Record Accumulator
+    |
+Batch Creation
+    |
+Sender Thread
+    |
+Kafka Broker
+
+Interview Discussion
+
+Producer does NOT send every record immediately.
+
+It:
+
+Serializes
+Partitions
+Batches
+Compresses
+Sends asynchronously
+2. What is Producer Lifecycle?
+Answer
+Create Producer
+      |
+Send Records
+      |
+Batch Messages
+      |
+Broker Acknowledgement
+      |
+Flush
+      |
+Close
+
+
+Example:
+
+KafkaProducer<String,String> producer
+      = new KafkaProducer<>(props);
+
+producer.send(record);
+
+producer.flush();
+
+producer.close();
+
+3. What are the most important Producer Configurations?
+Answer
+bootstrap.servers
+acks
+retries
+linger.ms
+batch.size
+compression.type
+enable.idempotence
+delivery.timeout.ms
+request.timeout.ms
+
+
+These are asked in almost every Kafka interview.
+
+4. What does acks=0 mean?
+Answer
+
+Producer does NOT wait for broker acknowledgement.
+
+Producer
+   |
+Send
+   |
+Continue
+
+Advantages
+
+✅ Extremely Fast
+
+Disadvantages
+
+❌ Message Loss Possible
+
+Usage
+Rarely used
+Non-Critical Logging
+Metrics
+
+5. What does acks=1 mean?
+Answer
+
+Leader partition acknowledges.
+
+Producer
+    |
+ Leader ACK
+
+Advantages
+
+✅ Better Reliability
+
+✅ Good Performance
+
+Risk
+
+Leader crash before replication.
+
+Potential Data Loss.
+
+6. What does acks=all mean?
+Answer
+
+All ISR replicas must acknowledge.
+
+Producer
+   |
+Leader
+   |
+Followers
+
+
+Only then success is returned.
+
+Benefits
+
+✅ Maximum Durability
+
+✅ No Data Loss
+
+Banking Recommendation
+acks=all
+
+7. Which ACK mode should be used in Banking Systems?
+Answer
+acks=all
+enable.idempotence=true
+
+
+Reason:
+
+Transaction Lost = Business Impact
+
+
+Most asked architect question.
+
+8. What is Batching?
+Answer
+
+Producer combines multiple records together.
+
+Instead of:
+
+Send 1
+Send 2
+Send 3
+
+
+Kafka sends:
+
+Batch[1,2,3]
+
+Benefit
+
+✅ Fewer Network Calls
+
+✅ Higher Throughput
+
+9. How does batch.size work?
+Answer
+
+Defines maximum batch size.
+
+Example:
+
+batch.size=16384
+
+
+Meaning:
+
+16KB batch buffer
+
+
+Larger batches:
+
+✅ Better Throughput
+
+❌ Higher Memory Usage
+
+10. What is linger.ms?
+Answer
+
+Producer waits before sending batch.
+
+Example:
+
+linger.ms=10
+
+Wait 10ms
+Collect More Records
+Send Batch
+
+Benefit
+
+More batching
+
+Better throughput.
+
+11. Difference Between batch.size and linger.ms?
+Answer
+batch.size
+Size Based Trigger
+
+linger.ms
+Time Based Trigger
+
+
+Batch sent when either condition is met.
+
+12. What is Compression in Kafka Producer?
+Answer
+
+Producer compresses messages before transmission.
+
+Supported:
+
+gzip
+snappy
+lz4
+zstd
+
+Benefits
+
+✅ Lower Network Traffic
+
+✅ Lower Storage
+
+✅ Better Throughput
+
+13. Best Compression Algorithm in Kafka?
+Answer
+
+Modern recommendation:
+
+compression.type=zstd
+
+
+Benefits:
+
+✅ High Compression
+
+✅ Excellent Throughput
+
+✅ Lower Storage
+
+14. What is Idempotent Producer?
+Answer
+
+Prevents duplicate message writes.
+
+Enable:
+
+enable.idempotence=true
+
+
+Example:
+
+Retry happens
+Message sent again
+
+
+Without idempotence:
+
+Duplicate Created
+
+
+With idempotence:
+
+Kafka Detects Duplicate
+
+15. How does Kafka achieve Idempotency?
+Answer
+
+Kafka assigns:
+
+Producer ID (PID)
+Sequence Number
+
+
+Broker tracks sequence.
+
+Duplicate requests are discarded.
+
+16. What are Kafka Transactions?
+Answer
+
+Transactions provide:
+
+Atomic Writes
+
+
+Example:
+
+Write Topic-A
+Write Topic-B
+
+Either Both Succeed
+Or Both Fail
+
+17. What is the difference between Idempotence and Transactions?
+Answer
+Idempotence
+Prevents Duplicate Writes
+Single Partition Protection
+
+Transactions
+Multiple Topic/Partition Atomicity
+
+
+Very common senior-level question.
+
+18. How do Retries work in Kafka Producer?
+Answer
+
+If broker temporarily fails:
+
+Send Failed
+     |
+ Retry
+     |
+ Retry
+     |
+ Success
+
+
+Configuration:
+
+retries=3
+
+
+Modern Kafka retries automatically.
+
+19. What is request.timeout.ms?
+Answer
+
+Maximum wait time for broker response.
+
+Example:
+
+request.timeout.ms=30000
+
+
+Meaning:
+
+Wait 30 Seconds
+
+
+If no response:
+
+Request Failed
+
+20. What is delivery.timeout.ms?
+Answer
+
+Maximum total time allowed for successful delivery.
+
+Includes:
+
+Retries
+Network Delay
+Broker Delay
+Request Timeout
+
+
+Example:
+
+delivery.timeout.ms=120000
+
+2 Minutes Maximum
+
+
+After that, message fails permanently.
+
+Bonus Questions (Frequently Asked)
+What is Sticky Partitioner?
+Answer
+
+Kafka 2.4+ default optimization.
+
+Instead of:
+
+P0
+P1
+P2
+P0
+P1
+
+
+Producer keeps sending to same partition temporarily.
+
+P0
+P0
+P0
+P0
+
+
+Creates larger batches.
+
+Benefits
+
+✅ Better Compression
+
+✅ Better Throughput
+
+✅ Fewer Network Calls
+
+What are Producer Interceptors?
+Answer
+
+Intercept messages before sending.
+
+Example Uses:
+
+Logging
+Auditing
+Metrics
+Tracing
+Encryption
+Headers
+
+
+Example:
+
+ProducerInterceptor
+
+
+Runs before record reaches broker.
+
+Most Asked Scenario-Based Questions
+Scenario 1
+Banking transaction must never be lost. Producer settings?
+Answer
+acks=all
+enable.idempotence=true
+retries=Integer.MAX_VALUE
+compression.type=zstd
+
+Scenario 2
+Producer sending 1 Million Messages/sec. How improve performance?
+Answer
+Increase batch.size
+Increase linger.ms
+Use Compression
+Use Async Send
+More Partitions
+
+Scenario 3
+Why duplicate messages still appear?
+Answer
+
+Possible reasons:
+
+Idempotence Disabled
+Application Retry
+Consumer Retry
+Multiple Producers
+
+Scenario 4
+Transactions suddenly timeout. Why?
+Answer
+
+Possible causes:
+
+Slow Broker
+Network Delay
+Large Batch
+Transaction Timeout
+
+Scenario 5
+High Throughput OR Maximum Reliability?
+Answer
+Requirement	SettingHigh Speed	acks=0
+Balanced	acks=1
+Banking/Critical	acks=all
+Senior Developer Cheat Sheet
+Producer Internals
+    ↓
+Serializer
+    ↓
+Partitioner
+    ↓
+Batching
+    ↓
+Compression
+    ↓
+Sender Thread
+    ↓
+Broker
+
+acks=0   → Fastest
+acks=1   → Balanced
+acks=all → Safest
+
+linger.ms = Time Trigger
+batch.size = Size Trigger
+
+Idempotence = No Duplicates
+Transactions = Atomic Writes
+
+request.timeout.ms
+    ↓
+Single Request Timeout
+
+delivery.timeout.ms
+    ↓
+Overall Delivery Timeout
+
+Sticky Partitioner
+    ↓
+Better Batching
+
+Producer Interceptor
+    ↓
+Logging / Audit / Metrics
+
+Memory Trick
+ABICRTLDSPI
+
+A → Acks
+B → Batching
+I → Idempotence
+C → Compression
+R → Retries
+T → Transactions
+L → Linger.ms
+D → Delivery Timeout
+S → Sticky Partitioner
+P → Producer Interceptor
+I → Internals
+
+
+These are among the top Kafka Producer interview questions asked for Senior Java Developer (10-15+ years), Kafka Lead, 
+Staff Engineer, Principal Engineer, and Solution Architect roles.
