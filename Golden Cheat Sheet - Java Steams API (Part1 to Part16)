@@ -1,0 +1,7110 @@
+==============================================================================
+JAVA STREAMS API PART 1-16: INTERVIEW REVISION
+STANDARD FORMAT: QUESTION -> INPUT -> CODE -> OUTPUT -> EXPLANATION
+==============================================================================
+Total structured question blocks: 288
+Note: Concept-only questions use "Not applicable" for executable code. Original examples are preserved where present.
+
+QUESTION 1: What is Stream API?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Stream API, introduced in Java 8, is used to process collections in a functional and declarative way. It allows filtering, transforming, sorting, grouping, and aggregating data without writing explicit loops.
+
+==============================================================================
+
+QUESTION 2: Why was Stream API introduced?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+employees.stream()
+         .filter(e -> e.getSalary() > 50000)
+         .toList();
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+To reduce boilerplate code, improve readability, support functional programming, and simplify collection processing.
+Before Stream
+for(Employee e : employees){
+    if(e.getSalary() > 50000){
+        result.add(e);
+    }
+}
+Using Stream
+employees.stream()
+         .filter(e -> e.getSalary() > 50000)
+         .toList();
+
+==============================================================================
+
+QUESTION 3: What are the advantages of Stream API?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Less Code
+Better Readability
+Functional Programming
+Lazy Evaluation
+Parallel Processing
+Easy Data Transformation
+Easy Aggregation
+
+==============================================================================
+
+QUESTION 4: What is the difference between Collection and Stream?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Collection
+Stores Data
+Reusable
+Supports CRUD Operations
+Stream
+Processes Data
+Single-use
+No CRUD Operations
+One-Liner
+Collection stores data, Stream processes data.
+
+==============================================================================
+
+QUESTION 5: What is a Stream Pipeline?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+A Stream Pipeline consists of:
+Source
+ v
+Intermediate Operations
+ v
+Terminal Operation
+Example
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
+
+==============================================================================
+
+QUESTION 6: What are Intermediate Operations?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Operations that transform the stream and return another Stream.
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2);
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Operations that transform the stream and return another Stream.
+Examples
+filter()
+map()
+flatMap()
+sorted()
+distinct()
+limit()
+skip()
+Example
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2);
+Important
+Intermediate operations are lazy.
+
+==============================================================================
+
+QUESTION 7: What are Terminal Operations?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream().count();
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Terminal operations trigger the execution of the pipeline and produce the final result.
+Examples
+collect()
+count()
+reduce()
+forEach()
+findFirst()
+findAny()
+Example
+long count =
+    list.stream().count();
+
+==============================================================================
+
+QUESTION 8: What is Lazy Evaluation?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(n -> {
+
+OUTPUT:
+No Output
+Because no terminal operation exists.
+One-Liner
+Execution starts only when a terminal operation is encountered.
+
+EXPLANATION:
+Stream operations do not execute until a terminal operation is called.
+Example
+list.stream()
+    .filter(n -> {
+        System.out.println(n);
+        return n > 10;
+    });
+
+==============================================================================
+
+QUESTION 9: Can a Stream be reused?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.of("A","B","C");
+
+OUTPUT:
+IllegalStateException
+One-Liner
+A Stream can be consumed only once.
+
+EXPLANATION:
+No.
+Example
+Stream<String> stream =
+        Stream.of("A","B","C");
+stream.count();
+stream.count();
+
+==============================================================================
+
+QUESTION 10: Explain the Internal Working of Stream API.
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+employees.stream()
+         .filter(e -> e.getSalary() > 50000)
+         .map(Employee::getName)
+         .toList();
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Flow
+Collection
+      v
+Stream Source
+      v
+Spliterator
+      v
+Intermediate Operations
+      v
+Terminal Operation
+      v
+Result
+Example
+employees.stream()
+         .filter(e -> e.getSalary() > 50000)
+         .map(Employee::getName)
+         .toList();
+One-Liner
+Stream internally uses Spliterator to traverse data and execute a processing pipeline.
+Interview Quick Revision
+What is Stream API?
+-> Data Processing Pipeline
+Why Streams?
+-> Less Code, Better Readability
+Collection vs Stream?
+-> Store vs Process
+Pipeline?
+-> Source -> Intermediate -> Terminal
+Intermediate Operations?
+-> filter, map, flatMap, sorted
+Terminal Operations?
+-> collect, count, reduce
+Lazy Evaluation?
+-> Executes only on Terminal Operation
+Single Use?
+-> Stream cannot be reused
+Internal Iteration?
+-> Stream controls traversal
+Internal Working?
+-> Collection -> Spliterator -> Pipeline -> Result
+Why Streams? - Top 10 Interview Questions
+
+==============================================================================
+
+QUESTION 1: Why were Streams introduced in Java 8?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Answer: Streams were introduced to simplify collection processing, reduce boilerplate code, and support functional programming.
+
+==============================================================================
+
+QUESTION 2: What problems do Streams solve?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Too many loops
+Temporary variables
+Complex nested logic
+Difficult parallel processing
+
+==============================================================================
+
+QUESTION 3: What are the advantages of Streams over loops?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Less Code
+Better Readability
+Easy Data Transformation
+Supports Parallel Processing
+Lazy Evaluation
+
+==============================================================================
+
+QUESTION 4: Why are Streams considered declarative?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+employees.stream()
+         .filter(emp -> emp.getSalary() > 50000);
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+With loops we specify HOW to iterate.
+for(Employee e : employees){
+   ...
+}
+With Streams we specify WHAT we want.
+employees.stream()
+         .filter(emp -> emp.getSalary() > 50000);
+
+==============================================================================
+
+QUESTION 5: How do Streams improve readability?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(...)
+    .map(...)
+    .sorted(...)
+    .toList();
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Instead of multiple loops and conditions:
+list.stream()
+    .filter(...)
+    .map(...)
+    .sorted(...)
+    .toList();
+Everything appears as a readable pipeline.
+
+==============================================================================
+
+QUESTION 6: How do Streams support functional programming?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .map(String::toUpperCase);
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Streams use:
+Lambda Expressions
+Method References
+Functional Interfaces
+Example:
+list.stream()
+    .map(String::toUpperCase);
+
+==============================================================================
+
+QUESTION 7: Why are Streams better for data transformation?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(x -> x > 10)
+    .map(x -> x * 2)
+    .sorted();
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Operations can be chained.
+list.stream()
+    .filter(x -> x > 10)
+    .map(x -> x * 2)
+    .sorted();
+
+==============================================================================
+
+QUESTION 8: Why are Streams useful for large datasets?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(x -> x > 100)
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Because of Lazy Evaluation.
+list.stream()
+    .filter(x -> x > 100)
+    .findFirst();
+Processing stops once a match is found.
+
+==============================================================================
+
+QUESTION 9: Why do Streams support Parallel Processing easily?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+stream()
+parallelStream()
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Just replace:
+stream()
+with
+parallelStream()
+No thread management required.
+
+==============================================================================
+
+QUESTION 10: When should Streams NOT be used?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Very simple loops
+Complex debugging requirements
+Performance-critical small datasets
+When side effects are required
+Interview One-Liner
+Streams are introduced to make collection processing concise, readable, functional, and parallelizable.
+Collections vs Streams - Top 10 Interview Questions
+
+==============================================================================
+
+QUESTION 1: What is the difference between Collection and Stream?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Collection
+Stores Data
+Stream
+Processes Data
+
+==============================================================================
+
+QUESTION 2: Which one stores elements?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+names.stream();
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Collection stores elements.
+Stream does not store elements.
+Example:
+List<String> names;
+stores data.
+names.stream();
+processes data.
+
+==============================================================================
+
+QUESTION 3: Which one is reusable?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Collection -> Reusable
+Stream -> Single-use
+Example:
+list.size();
+list.size();
+Works.
+stream.count();
+stream.count();
+Throws exception.
+
+==============================================================================
+
+QUESTION 4: Can Collection be modified?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Yes.
+list.add("Java");
+list.remove("Java");
+
+==============================================================================
+
+QUESTION 5: Can Stream modify data?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(x -> x > 10);
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+No.
+list.stream()
+    .filter(x -> x > 10);
+Original collection remains unchanged.
+
+==============================================================================
+
+QUESTION 6: Which supports CRUD operations?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Collection -> Yes
+Stream -> No
+Collections support:
+Add
+Update
+Delete
+Search
+Streams only process data.
+
+==============================================================================
+
+QUESTION 7: Which supports Lazy Evaluation?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Collection -> No
+Stream -> Yes
+Streams execute only after terminal operation.
+
+==============================================================================
+
+QUESTION 8: Which supports Functional Programming?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Collection -> No
+Stream -> Yes
+Streams use:
+Lambda Expressions
+Method References
+Functional Interfaces
+
+==============================================================================
+
+QUESTION 9: Which supports Parallel Processing?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.parallelStream()
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Collection -> No direct support
+Stream -> Yes
+Example:
+list.parallelStream()
+
+==============================================================================
+
+QUESTION 10: When would you choose Collection over Stream?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Use Collection when:
+Need to store data
+Need CRUD operations
+Need repeated access
+Need indexing
+Quick Revision
+Why Streams?
+Less Code
+Better Readability
+Functional Programming
+Lazy Evaluation
+Parallel Processing
+Collection vs Stream
+Collection = Stores Data
+Stream = Processes Data
+Collection = Reusable
+Stream = Single-use
+Collection = CRUD
+Stream = No CRUD
+Collection = Eager
+Stream = Lazy
+Collection = Storage
+Stream = Computation
+TOP 10 INTERVIEW QUESTIONS - FUNCTIONAL PROGRAMMING
+
+==============================================================================
+
+QUESTION 1: What is Functional Programming?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Functional Programming focuses on WHAT to do rather than HOW to do it.
+
+==============================================================================
+
+QUESTION 2: Why was Functional Programming introduced in Java?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+To reduce boilerplate code, improve readability, and support Stream API.
+
+==============================================================================
+
+QUESTION 3: What is the difference between Imperative Programming and Functional Programming?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Imperative
+Focus on HOW
+Uses loops
+More code
+Functional
+Focus on WHAT
+Uses Streams
+Less code
+
+==============================================================================
+
+QUESTION 4: What are the three main concepts used in Functional Programming?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 1: Functional Interfaces
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 2: Lambda Expressions
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 3: Method References
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 5: What is a Functional Interface?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+An interface that contains exactly one abstract method.
+Examples:
+Runnable
+Predicate
+Function
+Consumer
+Supplier
+
+==============================================================================
+
+QUESTION 6: What is a Lambda Expression?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+n -> n % 2 == 0
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+An anonymous function used to implement Functional Interfaces.
+Example:
+n -> n % 2 == 0
+
+==============================================================================
+
+QUESTION 7: What is a Method Reference?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+name -> System.out.println(name)
+System.out::println
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+A short form of Lambda Expression.
+Lambda:
+name -> System.out.println(name)
+Method Reference:
+System.out::println
+
+==============================================================================
+
+QUESTION 8: What are the most commonly used Functional Interfaces?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Predicate  -> filter()
+Function   -> map()
+Consumer   -> forEach()
+Supplier   -> get()
+
+==============================================================================
+
+QUESTION 9: How does Stream API use Functional Programming?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+names.stream()
+     .filter(name -> name.startsWith("J"))
+     .map(String::toUpperCase)
+     .forEach(System.out::println);
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+filter()   -> Predicate + Lambda
+map()      -> Function + Method Reference
+forEach()  -> Consumer
+Example:
+names.stream()
+     .filter(name -> name.startsWith("J"))
+     .map(String::toUpperCase)
+     .forEach(System.out::println);
+
+==============================================================================
+
+QUESTION 10: What are the benefits of Functional Programming?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+[OK] Less Code
+[OK] Better Readability
+[OK] Easy Testing
+[OK] Fewer Bugs
+[OK] Supports Streams
+[OK] Supports Parallel Processing
+[OK] Encourages Immutability
+30-SECOND INTERVIEW ANSWER
+Functional Programming is a programming style that
+focuses on WHAT to do instead of HOW to do it.
+Java supports Functional Programming using:
+    Functional Interfaces
+           v
+    Lambda Expressions
+           v
+    Method References
+           v
+        Streams
+Examples:
+Predicate -> filter()
+Function  -> map()
+Consumer  -> forEach()
+Supplier  -> get()
+Benefits:
+Less Code
+Better Readability
+Parallel Processing
+Easy Testing
+Cleaner Stream Pipelines
+TOP 10 INTERVIEW QUESTIONS
+Stream Pipeline, Lazy Evaluation, Eager Evaluation,
+Single-use Stream, Stateless & Stateful Operations
+
+==============================================================================
+
+QUESTION 1: What is a Stream Pipeline?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+A Stream Pipeline consists of:
+Source
+  v
+Intermediate Operations
+  v
+Terminal Operation
+Example:
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
+
+==============================================================================
+
+QUESTION 2: What are the components of a Stream Pipeline?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 1: Source
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+List, Set, Array, File
+
+==============================================================================
+
+QUESTION 2: Intermediate Operations
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+filter(), map(), sorted()
+
+==============================================================================
+
+QUESTION 3: Terminal Operations
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+collect(), count(), forEach()
+
+==============================================================================
+
+QUESTION 3: What is Lazy Evaluation?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(n -> n > 10);
+
+OUTPUT:
+No Output
+Reason:
+No terminal operation present.
+
+EXPLANATION:
+Intermediate operations are NOT executed immediately.
+Execution starts only when a terminal operation is called.
+Example:
+list.stream()
+    .filter(n -> n > 10);
+
+==============================================================================
+
+QUESTION 4: What triggers execution of a Stream Pipeline?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(n -> n > 10)
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+A Terminal Operation triggers execution.
+Examples:
+collect()
+count()
+reduce()
+forEach()
+findFirst()
+Example:
+list.stream()
+    .filter(n -> n > 10)
+    .count();
+
+==============================================================================
+
+QUESTION 5: What is Eager Evaluation?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+1
+2
+3
+Traditional loops use Eager Evaluation.
+
+EXPLANATION:
+Execution happens immediately.
+Example:
+for(Integer n : numbers){
+    System.out.println(n);
+}
+
+==============================================================================
+
+QUESTION 6: What is the difference between Lazy and Eager Evaluation?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Lazy Evaluation
+Executes later
+Used by Streams
+Better performance
+Processes only when needed
+Eager Evaluation
+Executes immediately
+Used by loops
+May process unnecessary data
+
+==============================================================================
+
+QUESTION 7: Why is Stream called a Single-use Object?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.of("A","B","C");
+
+OUTPUT:
+IllegalStateException
+
+EXPLANATION:
+Once a terminal operation executes, the stream is consumed and closed.
+Example:
+Stream<String> stream =
+        Stream.of("A","B","C");
+stream.count();
+stream.count();
+
+==============================================================================
+
+QUESTION 8: What are Stateless Operations?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+numbers.stream()
+       .filter(n -> n > 10);
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Operations that process each element independently.
+Examples:
+filter()
+map()
+flatMap()
+peek()
+Example:
+numbers.stream()
+       .filter(n -> n > 10);
+Each element is processed independently.
+
+==============================================================================
+
+QUESTION 9: What are Stateful Operations?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+numbers.stream()
+       .sorted();
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Operations that need information about other elements.
+Examples:
+sorted()
+distinct()
+limit()
+skip()
+Example:
+numbers.stream()
+       .sorted();
+To sort data, Java needs all elements first.
+
+==============================================================================
+
+QUESTION 10: Difference between Stateless and Stateful Operations?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Stateless
+filter()
+map()
+flatMap()
+No dependency on other elements
+Less memory usage
+Faster
+Stateful
+sorted()
+distinct()
+limit()
+skip()
+Needs information from other elements
+More memory usage
+Slightly slower
+INTERVIEW DAY REVISION
+Stream Pipeline
+Source
+  v
+Intermediate Operations
+  v
+Terminal Operation
+Lazy Evaluation
+Executes only when terminal operation runs.
+Eager Evaluation
+Executes immediately.
+Single-use Stream
+Can be used only once.
+Stateless Operations
+filter()
+map()
+flatMap()
+Stateful Operations
+sorted()
+distinct()
+limit()
+skip()
+Memory Trick
+filter()   -> Stateless
+map()      -> Stateless
+flatMap()  -> Stateless
+sorted()   -> Stateful
+distinct() -> Stateful
+limit()    -> Stateful
+skip()     -> Stateful
+Lazy  = Execute Later
+Eager = Execute Now
+Stream = Single Use
+TOP 20 INTERVIEW QUESTIONS - STREAM CREATION
+
+==============================================================================
+
+QUESTION 1: What are the different ways to create a Stream in Java?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+stream()
+parallelStream()
+Arrays.stream()
+Stream.of()
+Stream.empty()
+Stream.builder()
+Stream.generate()
+Stream.iterate()
+Stream.ofNullable()
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+stream()
+parallelStream()
+Arrays.stream()
+Stream.of()
+Stream.empty()
+Stream.builder()
+Stream.generate()
+Stream.iterate()
+Stream.ofNullable()
+Files.lines()
+BufferedReader.lines()
+
+==============================================================================
+
+QUESTION 2: How do you create a Stream from a Collection?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+names.stream();
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+List<String> names =
+        List.of("John","Jane");
+names.stream();
+
+==============================================================================
+
+QUESTION 3: What is the difference between stream() and parallelStream()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+stream()
+parallelStream()
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+stream()
+Sequential Processing
+Single Thread
+parallelStream()
+Parallel Processing
+Multiple Threads
+Uses ForkJoinPool
+
+==============================================================================
+
+QUESTION 4: When should you use parallelStream()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+[OK] CPU-intensive operations
+[OK] Large datasets
+Avoid:
+[X] Database Calls
+[X] REST Calls
+[X] File I/O
+[X] Kafka Calls
+
+==============================================================================
+
+QUESTION 5: How do you create a Stream from an Array?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+String[] arr =
+        {"Java","Spring","Kafka"};
+Arrays.stream(arr);
+
+==============================================================================
+
+QUESTION 6: What is the difference between Arrays.stream() and Stream.of()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Arrays.stream()
+Stream.of()
+Stream.of("A","B","C");
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Arrays.stream()
+Mainly for arrays
+Stream.of()
+For individual values or arrays
+Example:
+Arrays.stream(arr);
+Stream.of("A","B","C");
+
+==============================================================================
+
+QUESTION 7: What is Stream.of()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.of(1,2,3,4);
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Creates a Stream from values.
+Example:
+Stream.of(1,2,3,4);
+
+==============================================================================
+
+QUESTION 8: What is Stream.empty()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.empty();
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Creates an empty Stream containing no elements.
+Example:
+Stream<String> stream =
+        Stream.empty();
+
+==============================================================================
+
+QUESTION 9: Why use Stream.empty() instead of null?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+return Stream.empty();
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Avoids NullPointerException.
+Bad:
+return null;
+Good:
+return Stream.empty();
+
+==============================================================================
+
+QUESTION 10: What is Stream.builder()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.<String>builder()
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Used to build Streams dynamically.
+Example:
+Stream<String> stream =
+    Stream.<String>builder()
+          .add("Java")
+          .add("Spring")
+          .build();
+
+==============================================================================
+
+QUESTION 11: When would you use Stream.builder()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+When elements are added dynamically at runtime.
+
+==============================================================================
+
+QUESTION 12: What is Stream.generate()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.generate(() -> "Java");
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Creates an infinite Stream using Supplier.
+Example:
+Stream.generate(() -> "Java");
+
+==============================================================================
+
+QUESTION 13: Why is Stream.generate() considered dangerous?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.generate(() -> "Java")
+
+OUTPUT:
+Java
+Java
+Java
+
+EXPLANATION:
+It generates infinite data.
+Use:
+.limit()
+Example:
+Stream.generate(() -> "Java")
+      .limit(3);
+
+==============================================================================
+
+QUESTION 14: What is Stream.iterate()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.iterate(1,n -> n+1)
+
+OUTPUT:
+1
+2
+3
+4
+5
+
+EXPLANATION:
+Creates an infinite sequence.
+Example:
+Stream.iterate(1,n -> n+1)
+      .limit(5);
+
+==============================================================================
+
+QUESTION 15: Difference between Stream.generate() and Stream.iterate()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.generate()
+Stream.iterate()
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Stream.generate()
+Independent values
+Uses Supplier
+Stream.iterate()
+Next value depends on previous value
+Uses UnaryOperator
+
+==============================================================================
+
+QUESTION 16: What is Stream.ofNullable()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.ofNullable(null);
+
+OUTPUT:
+Empty Stream
+
+EXPLANATION:
+Introduced in Java 9.
+Handles null safely.
+Example:
+Stream.ofNullable(null);
+
+==============================================================================
+
+QUESTION 17: Why use Stream.ofNullable()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Avoids NullPointerException while creating Streams.
+
+==============================================================================
+
+QUESTION 18: How do you create a Stream from a File?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Files.lines()
+Example:
+Files.lines(Path.of("employees.txt"));
+Each line becomes one Stream element.
+
+==============================================================================
+
+QUESTION 19: What is BufferedReader.lines()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Converts file lines into Stream<String>.
+Example:
+BufferedReader br =
+        new BufferedReader(reader);
+br.lines();
+
+==============================================================================
+
+QUESTION 20: Difference between Files.lines() and BufferedReader.lines()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Collection      -> stream()
+Collection      -> parallelStream()
+Array           -> Arrays.stream()
+Values          -> Stream.of()
+Empty Stream    -> Stream.empty()
+Dynamic Stream  -> Stream.builder()
+Infinite Data   -> Stream.generate()
+Sequence Data   -> Stream.iterate()
+Null Safe       -> Stream.ofNullable()
+Collection  -> stream()
+Array       -> Arrays.stream()
+Values      -> Stream.of()
+Nothing     -> Stream.empty()
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Files.lines()
+Simple file reading
+Creates BufferedReader internally
+BufferedReader.lines()
+Works on existing BufferedReader
+INTERVIEW DAY REVISION
+Collection      -> stream()
+Collection      -> parallelStream()
+Array           -> Arrays.stream()
+Values          -> Stream.of()
+Empty Stream    -> Stream.empty()
+Dynamic Stream  -> Stream.builder()
+Infinite Data   -> Stream.generate()
+Sequence Data   -> Stream.iterate()
+Null Safe       -> Stream.ofNullable()
+Read File       -> Files.lines()
+BufferedReader  -> lines()
+Memory Trick
+Collection  -> stream()
+Array       -> Arrays.stream()
+Values      -> Stream.of()
+Nothing     -> Stream.empty()
+Dynamic     -> builder()
+Infinite    -> generate()
+Sequence    -> iterate()
+Null Safe   -> ofNullable()
+File        -> Files.lines()
+###### EXTRA QUICK RAPIDFIRE QUESTIONS:
+
+==============================================================================
+
+QUESTION 1: How do you create a Stream from a Collection?
+------------------------------------------------------------------------------
+INPUT:
+["Java", "Spring"]
+
+CODE:
+List.of("Java","Spring")
+    .stream()
+    .forEach(System.out::println);
+
+OUTPUT:
+Java
+Spring
+Use:
+Create Stream from Collection.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 2: How do you create a Parallel Stream from a Collection?
+------------------------------------------------------------------------------
+INPUT:
+["Java", "Spring"]
+
+CODE:
+List.of("Java","Spring")
+    .parallelStream()
+    .forEach(System.out::println);
+
+OUTPUT:
+Java
+Spring
+Note:
+Order is NOT guaranteed.
+Use:
+Parallel processing of collection data.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 3: How do you create a Stream from an Array?
+------------------------------------------------------------------------------
+INPUT:
+[1, 2, 3]
+
+CODE:
+Arrays.stream(new int[]{1,2,3})
+      .forEach(System.out::println);
+
+OUTPUT:
+1
+2
+3
+Use:
+Create Stream from Array.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 4: How do you create a Stream from individual values?
+------------------------------------------------------------------------------
+INPUT:
+Java, Spring, Kafka
+
+CODE:
+Stream.of("Java","Spring","Kafka")
+      .forEach(System.out::println);
+
+OUTPUT:
+Java
+Spring
+Kafka
+Use:
+Create Stream from individual values.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 5: How do you create an Empty Stream?
+------------------------------------------------------------------------------
+INPUT:
+No Elements
+
+CODE:
+Stream.empty()
+      .forEach(System.out::println);
+
+OUTPUT:
+No Output
+Use:
+Return empty Stream instead of null.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 6: How do you create a Stream dynamically at runtime?
+------------------------------------------------------------------------------
+INPUT:
+Java, Spring
+
+CODE:
+Stream.<String>builder()
+      .add("Java")
+      .add("Spring")
+      .build()
+      .forEach(System.out::println);
+
+OUTPUT:
+Java
+Spring
+Use:
+Create Stream dynamically.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 7: How do you create an Infinite Stream using Stream.generate()?
+------------------------------------------------------------------------------
+INPUT:
+"Java"
+
+CODE:
+Stream.generate(() -> "Java")
+      .limit(3)
+      .forEach(System.out::println);
+
+OUTPUT:
+Java
+Java
+Java
+Use:
+Generate infinite Stream using Supplier.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 8: How do you generate a sequence using Stream.iterate()?
+------------------------------------------------------------------------------
+INPUT:
+Start = 1
+
+CODE:
+Stream.iterate(1, n -> n + 1)
+      .limit(5)
+      .forEach(System.out::println);
+
+OUTPUT:
+1
+2
+3
+4
+5
+Use:
+Generate sequential data.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 9: How do you safely create a Stream from a nullable value?
+------------------------------------------------------------------------------
+INPUT:
+null
+
+CODE:
+Stream.ofNullable(null)
+      .forEach(System.out::println);
+
+OUTPUT:
+No Output
+Use:
+Null-safe Stream creation.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 10: How do you read a File as a Stream?
+------------------------------------------------------------------------------
+INPUT:
+employee.txt
+John
+Jane
+Mike
+
+CODE:
+Files.lines(Path.of("employee.txt"))
+     .forEach(System.out::println);
+
+OUTPUT:
+John
+Jane
+Mike
+Use:
+Read file as Stream.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 11: How do you convert BufferedReader content into a Stream?
+------------------------------------------------------------------------------
+INPUT:
+employee.txt
+John
+Jane
+Mike
+
+CODE:
+new BufferedReader(
+        new FileReader("employee.txt"))
+    .lines()
+    .forEach(System.out::println);
+
+OUTPUT:
+John
+Jane
+Mike
+Use:
+Convert BufferedReader content into Stream.
+TOP 20 INTERVIEW QUESTIONS - INTERMEDIATE OPERATIONS
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 1: What are Intermediate Operations?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Intermediate Operations transform one Stream into another Stream.
+They are lazy and return a Stream.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Intermediate Operations transform one Stream into another Stream.
+They are lazy and return a Stream.
+Examples:
+filter()
+map()
+flatMap()
+distinct()
+sorted()
+peek()
+limit()
+skip()
+takeWhile()
+dropWhile()
+
+==============================================================================
+
+QUESTION 2: Why are Intermediate Operations called Lazy?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+stream.filter(n -> n > 10);
+
+OUTPUT:
+No Output
+Reason:
+No terminal operation is present.
+
+EXPLANATION:
+They do not execute immediately.
+Example:
+stream.filter(n -> n > 10);
+
+==============================================================================
+
+QUESTION 3: What does filter() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,4,5]
+
+CODE:
+stream.filter(n -> n % 2 == 0)
+
+OUTPUT:
+[2,4]
+Memory Trick:
+filter = SQL WHERE clause
+
+EXPLANATION:
+Filters elements based on a condition.
+
+==============================================================================
+
+QUESTION 4: What does map() do?
+------------------------------------------------------------------------------
+INPUT:
+["java","spring"]
+
+CODE:
+stream.map(String::toUpperCase)
+
+OUTPUT:
+[JAVA, SPRING]
+Memory Trick:
+map = Transform
+
+EXPLANATION:
+Transforms each element into another value.
+
+==============================================================================
+
+QUESTION 5: What does flatMap() do?
+------------------------------------------------------------------------------
+INPUT:
+[[A,B],[C,D]]
+
+CODE:
+stream.flatMap(List::stream)
+
+OUTPUT:
+[A,B,C,D]
+Memory Trick:
+flatMap = Flatten + Map
+
+EXPLANATION:
+Converts nested structures into a single flattened stream.
+
+==============================================================================
+
+QUESTION 6: Difference between map() and flatMap()?
+------------------------------------------------------------------------------
+INPUT:
+[[A,B],[C,D]]
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+[A,B,C,D]
+Interview One-Liner:
+map() transforms data, flatMap() flattens data.
+
+EXPLANATION:
+map()
+One Input -> One Output
+
+==============================================================================
+
+QUESTION 7: What does distinct() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,2,3,3,4]
+
+CODE:
+stream.distinct()
+
+OUTPUT:
+[1,2,3,4]
+
+EXPLANATION:
+Removes duplicate elements.
+
+==============================================================================
+
+QUESTION 8: How does distinct() work internally?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Uses equals() and hashCode().
+Interview Point:
+Custom objects should override both methods.
+
+==============================================================================
+
+QUESTION 9: What does sorted() do?
+------------------------------------------------------------------------------
+INPUT:
+[30,10,20]
+
+CODE:
+stream.sorted()
+
+OUTPUT:
+[10,20,30]
+
+EXPLANATION:
+Sorts elements using natural ordering.
+
+==============================================================================
+
+QUESTION 10: What does sorted(Comparator) do?
+------------------------------------------------------------------------------
+INPUT:
+[30,10,20]
+
+CODE:
+stream.sorted(Comparator.reverseOrder())
+
+OUTPUT:
+[30,20,10]
+
+EXPLANATION:
+Sorts elements using custom logic.
+
+==============================================================================
+
+QUESTION 11: Difference between sorted() and sorted(Comparator)?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+sorted()
+Natural Order
+Example:
+A,B,C
+sorted(Comparator)
+Custom Order
+Example:
+C,B,A
+
+==============================================================================
+
+QUESTION 12: What does peek() do?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+stream.peek(System.out::println)
+
+OUTPUT:
+Prints every element flowing through pipeline.
+
+EXPLANATION:
+Observes data during stream processing.
+Main Use:
+Debugging
+Example:
+stream.peek(System.out::println)
+
+==============================================================================
+
+QUESTION 13: Difference between peek() and map()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+peek()
+For Debugging
+Does not modify data
+map()
+Transforms data
+Returns modified values
+Interview One-Liner:
+peek() observes, map() transforms.
+
+==============================================================================
+
+QUESTION 14: What does limit() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,4,5]
+
+CODE:
+stream.limit(3)
+
+OUTPUT:
+[1,2,3]
+
+EXPLANATION:
+Returns first N elements.
+
+==============================================================================
+
+QUESTION 15: What does skip() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,4,5]
+
+CODE:
+stream.skip(2)
+
+OUTPUT:
+[3,4,5]
+
+EXPLANATION:
+Skips first N elements.
+
+==============================================================================
+
+QUESTION 16: Difference between limit() and skip()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+[4,5]
+Memory Trick:
+limit = Take
+skip = Ignore
+
+EXPLANATION:
+limit(3)
+Take first 3 elements
+
+==============================================================================
+
+QUESTION 17: What is takeWhile() ?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,10,4,5]
+
+CODE:
+stream.takeWhile(n -> n < 5)
+
+OUTPUT:
+[1,2,3]
+Stops immediately after finding 10.
+
+EXPLANATION:
+(Java 9)
+Keeps elements while condition is true.
+
+==============================================================================
+
+QUESTION 18: What is dropWhile() ?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,10,4,5]
+
+CODE:
+stream.dropWhile(n -> n < 5)
+
+OUTPUT:
+[10,4,5]
+
+EXPLANATION:
+(Java 9)
+Drops elements while condition is true.
+
+==============================================================================
+
+QUESTION 19: Difference between filter() and takeWhile()?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,10,4]
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+[1,2,3]
+Interview One-Liner:
+filter() scans all elements,
+takeWhile() stops at first failure.
+
+EXPLANATION:
+filter(n < 5)
+Checks ALL elements
+
+==============================================================================
+
+QUESTION 20: Which Intermediate Operations are Stateless and Stateful?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Stateless Operations
+filter()
+map()
+flatMap()
+peek()
+Reason:
+Each element processed independently.
+Stateful Operations
+distinct()
+sorted()
+limit()
+skip()
+Reason:
+Need information about other elements.
+Interview One-Liner:
+Stateless = Independent processing
+Stateful  = Requires element history
+TOP 20 INTERVIEW QUESTIONS - TERMINAL OPERATIONS
+(forEach, forEachOrdered, collect, reduce, count, min, max,
+findFirst, findAny, anyMatch, allMatch, noneMatch, toArray)
+
+==============================================================================
+
+QUESTION 1: What are Terminal Operations?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Terminal Operations trigger execution of the Stream pipeline and
+produce the final result.
+Examples:
+forEach()
+collect()
+reduce()
+count()
+findFirst()
+Important:
+After a terminal operation, Stream cannot be reused.
+
+==============================================================================
+
+QUESTION 2: What is the difference between Intermediate and Terminal Operations?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Intermediate Operations
+Return Stream
+Lazy Execution
+Examples:
+filter()
+map()
+sorted()
+Terminal Operations
+Return Result
+Trigger Execution
+Examples:
+collect()
+count()
+reduce()
+
+==============================================================================
+
+QUESTION 3: What does forEach() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3]
+
+CODE:
+list.stream()
+    .forEach(System.out::println);
+
+OUTPUT:
+1
+2
+3
+Use:
+Printing, logging, processing elements.
+
+EXPLANATION:
+Performs an action on every element.
+
+==============================================================================
+
+QUESTION 4: What does forEachOrdered() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,4]
+
+CODE:
+list.parallelStream()
+    .forEachOrdered(System.out::println);
+
+OUTPUT:
+1
+2
+3
+4
+Use:
+When order matters in Parallel Streams.
+
+EXPLANATION:
+Processes elements in encounter order.
+
+==============================================================================
+
+QUESTION 5: forEach() vs forEachOrdered()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+forEach()
+Order may not be guaranteed
+Better performance
+forEachOrdered()
+Order guaranteed
+Slightly slower
+Interview Tip:
+Use forEachOrdered() only when order is important.
+
+==============================================================================
+
+QUESTION 6: What does collect() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3]
+
+CODE:
+list.stream()
+    .collect(Collectors.toList());
+
+OUTPUT:
+[1,2,3]
+Most Common:
+toList()
+toSet()
+toMap()
+
+EXPLANATION:
+Collects Stream elements into List, Set, Map etc.
+
+==============================================================================
+
+QUESTION 7: What does reduce() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,4]
+
+CODE:
+list.stream()
+    .reduce(0, Integer::sum);
+
+OUTPUT:
+10
+Use:
+Sum, Product, Maximum, Minimum
+Memory Trick:
+Many -> One
+
+EXPLANATION:
+Combines multiple values into a single value.
+
+==============================================================================
+
+QUESTION 8: reduce() vs collect()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+reduce()
+Single Result
+Examples:
+Sum
+Product
+Max
+collect()
+Container Result
+Examples:
+List
+Set
+Map
+Interview Tip:
+reduce() = aggregation
+collect() = collection
+
+==============================================================================
+
+QUESTION 9: What does count() do?
+------------------------------------------------------------------------------
+INPUT:
+[10,20,30]
+
+CODE:
+list.stream().count();
+
+OUTPUT:
+3
+Return Type:
+long
+
+EXPLANATION:
+Returns number of elements in stream.
+
+==============================================================================
+
+QUESTION 10: What does min() do?
+------------------------------------------------------------------------------
+INPUT:
+[30,10,20]
+
+CODE:
+list.stream()
+    .min(Integer::compareTo);
+
+OUTPUT:
+Optional[10]
+
+EXPLANATION:
+Finds smallest element.
+
+==============================================================================
+
+QUESTION 11: What does max() do?
+------------------------------------------------------------------------------
+INPUT:
+[30,10,20]
+
+CODE:
+list.stream()
+    .max(Integer::compareTo);
+
+OUTPUT:
+Optional[30]
+
+EXPLANATION:
+Finds largest element.
+
+==============================================================================
+
+QUESTION 12: Why do min() and max() return Optional?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.empty()
+      .max(Integer::compareTo);
+Optional.empty
+
+OUTPUT:
+Optional.empty
+Interview Tip:
+Avoid NoSuchElementException.
+
+EXPLANATION:
+Stream may be empty.
+Example:
+Stream.empty()
+      .max(Integer::compareTo);
+
+==============================================================================
+
+QUESTION 13: What does findFirst() do?
+------------------------------------------------------------------------------
+INPUT:
+[10,20,30]
+
+CODE:
+list.stream().findFirst();
+
+OUTPUT:
+Optional[10]
+Use:
+Ordered Streams
+
+EXPLANATION:
+Returns the first element.
+
+==============================================================================
+
+QUESTION 14: What does findAny() do?
+------------------------------------------------------------------------------
+INPUT:
+[10,20,30]
+
+CODE:
+list.parallelStream()
+    .findAny();
+
+OUTPUT:
+Optional[10]
+(or Optional[20], Optional[30])
+Use:
+Parallel Streams
+
+EXPLANATION:
+Returns any element.
+
+==============================================================================
+
+QUESTION 15: findFirst() vs findAny()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Optional[20]
+Interview Tip:
+findAny() may perform better in Parallel Streams.
+
+EXPLANATION:
+findFirst()
+Always first element
+
+==============================================================================
+
+QUESTION 16: What does anyMatch() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3]
+
+CODE:
+list.stream()
+    .anyMatch(n -> n % 2 == 0);
+
+OUTPUT:
+true
+Memory Trick:
+Any One
+
+EXPLANATION:
+Returns true if at least one element matches.
+
+==============================================================================
+
+QUESTION 17: What does allMatch() do?
+------------------------------------------------------------------------------
+INPUT:
+[2,4,6]
+
+CODE:
+list.stream()
+    .allMatch(n -> n % 2 == 0);
+
+OUTPUT:
+true
+Memory Trick:
+Everyone
+
+EXPLANATION:
+Returns true if all elements match.
+
+==============================================================================
+
+QUESTION 18: What does noneMatch() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,3,5]
+
+CODE:
+list.stream()
+    .noneMatch(n -> n % 2 == 0);
+
+OUTPUT:
+true
+Memory Trick:
+Nobody
+
+EXPLANATION:
+Returns true if no element matches.
+
+==============================================================================
+
+QUESTION 19: anyMatch() vs allMatch() vs noneMatch()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+anyMatch()
+At least one satisfies condition
+allMatch()
+Every element satisfies condition
+noneMatch()
+No element satisfies condition
+Example:
+[1,2,3]
+anyMatch(even)  -> true
+allMatch(even)  -> false
+noneMatch(even) -> false
+
+==============================================================================
+
+QUESTION 20: What does toArray() do?
+------------------------------------------------------------------------------
+INPUT:
+["Java","Spring"]
+
+CODE:
+Object[] arr =
+    list.stream().toArray();
+
+OUTPUT:
+[Java, Spring]
+Typed Version:
+String[] arr =
+    list.stream()
+        .toArray(String[]::new);
+MEMORY TRICK
+forEach      -> Process
+collect      -> Store
+reduce       -> Aggregate
+count        -> Count
+min          -> Smallest
+max          -> Largest
+findFirst    -> First
+findAny      -> Any
+anyMatch     -> One
+allMatch     -> All
+noneMatch    -> None
+toArray      -> Array
+Based on your Java Streams notes and handbook references covering terminal operations.
+TOP 10 INTERVIEW QUESTIONS - PRIMITIVE STREAMS
+(IntStream, LongStream, DoubleStream, mapToInt, mapToLong,
+mapToDouble, boxed, asLongStream, asDoubleStream)
+
+EXPLANATION:
+Converts Stream to Array.
+
+==============================================================================
+
+QUESTION 1: What are Primitive Streams?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+IntStream
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Primitive Streams are specialized streams for primitive data types.
+Types:
+IntStream
+LongStream
+DoubleStream
+Benefits:
+[OK] Better Performance
+[OK] Less Memory
+[OK] No Boxing/Unboxing Overhead
+Interview One-Liner:
+Primitive Streams avoid wrapper objects and improve performance.
+
+==============================================================================
+
+QUESTION 2: Why use IntStream instead of Stream<Integer>?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+IntStream
+IntStream.of(1,2,3)
+Prefer IntStream for numeric calculations.
+
+OUTPUT:
+6
+Interview Tip:
+Prefer IntStream for numeric calculations.
+
+EXPLANATION:
+Stream<Integer>
+Uses Integer objects
+Requires boxing/unboxing
+IntStream
+Works directly with int values
+Example:
+IntStream.of(1,2,3)
+         .sum();
+
+==============================================================================
+
+QUESTION 3: What is IntStream?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+IntStream.of(1,2,3,4)
+         .forEach(System.out::println);
+
+OUTPUT:
+1
+2
+3
+4
+Common Methods:
+sum()
+average()
+max()
+min()
+
+EXPLANATION:
+A Stream specialized for int values.
+Example:
+IntStream.of(1,2,3,4)
+         .forEach(System.out::println);
+
+==============================================================================
+
+QUESTION 4: What is LongStream?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+LongStream.of(10L,20L,30L)
+
+OUTPUT:
+60
+Use:
+Large numeric values.
+
+EXPLANATION:
+A Stream specialized for long values.
+Example:
+LongStream.of(10L,20L,30L)
+          .sum();
+
+==============================================================================
+
+QUESTION 5: What is DoubleStream?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+DoubleStream.of(1.5,2.5,3.5)
+
+OUTPUT:
+7.5
+Use:
+Decimal calculations.
+
+EXPLANATION:
+A Stream specialized for double values.
+Example:
+DoubleStream.of(1.5,2.5,3.5)
+            .sum();
+
+==============================================================================
+
+QUESTION 6: What are mapToInt(), mapToLong(), and mapToDouble()?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3]
+
+CODE:
+list.stream()
+    .mapToDouble(n -> n * 1.5)
+    .toArray();
+
+OUTPUT:
+[1.5,3.0,4.5]
+
+EXPLANATION:
+Convert Stream<T> into a primitive stream.
+mapToInt()
+
+==============================================================================
+
+QUESTION 7: What does boxed() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3]
+
+CODE:
+IntStream.of(1,2,3)
+         .boxed();
+
+OUTPUT:
+[1,2,3]
+
+EXPLANATION:
+Converts primitive stream to wrapper stream.
+
+==============================================================================
+
+QUESTION 8: What does asLongStream() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3]
+
+CODE:
+IntStream.of(1,2,3)
+         .asLongStream();
+
+OUTPUT:
+LongStream
+Use:
+Prevent overflow in calculations.
+
+EXPLANATION:
+Converts IntStream to LongStream.
+
+==============================================================================
+
+QUESTION 9: What does asDoubleStream() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3]
+
+CODE:
+IntStream.of(1,2,3)
+         .asDoubleStream();
+
+OUTPUT:
+DoubleStream
+Use:
+Decimal calculations.
+
+EXPLANATION:
+Converts IntStream to DoubleStream.
+
+==============================================================================
+
+QUESTION 10: boxed() vs mapToInt() vs asLongStream()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Object Stream -> IntStream
+        -> IntStream
+IntStream
+IntStream
+IntStream.of(1,2,3)
+IntStream
+-> Convert to IntStream
+-> IntStream -> LongStream
+-> IntStream -> DoubleStream
+IntStream
+IntStream
+IntStream
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+mapToInt()
+Object Stream -> IntStream
+Example:
+Stream<String>
+        -> IntStream
+boxed()
+Primitive Stream -> Wrapper Stream
+Example:
+IntStream
+      -> Stream<Integer>
+asLongStream()
+IntStream
+      -> LongStream
+Example:
+IntStream.of(1,2,3)
+         .asLongStream()
+30-SECOND REVISION
+IntStream
+-> int data
+LongStream
+-> long data
+DoubleStream
+-> double data
+mapToInt()
+-> Convert to IntStream
+mapToLong()
+-> Convert to LongStream
+mapToDouble()
+-> Convert to DoubleStream
+boxed()
+-> Primitive -> Wrapper
+asLongStream()
+-> IntStream -> LongStream
+asDoubleStream()
+-> IntStream -> DoubleStream
+MEMORY TRICK
+Stream<String>
+      v
+mapToInt()
+      v
+IntStream
+      v
+boxed()
+      v
+Stream<Integer>
+IntStream
+      v
+asLongStream()
+      v
+LongStream
+IntStream
+      v
+asDoubleStream()
+      v
+DoubleStream
+Remember:
+mapToX()  -> Create Primitive Stream
+boxed()   -> Primitive -> Object
+asX()     -> Primitive -> Primitive
+Examples for mapToInt(), mapToLong(), and mapToDouble() are consistent with examples found in your enterprise Java interview handbooks.
+TOP 20 INTERVIEW QUESTIONS - COLLECTORS
+
+==============================================================================
+
+QUESTION 1: What are Collectors in Java Streams?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .collect(Collectors.toList());
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Collectors are utility methods used with collect() to transform
+Stream results into List, Set, Map, String, Statistics, etc.
+Example:
+list.stream()
+    .collect(Collectors.toList());
+Interview One-Liner:
+Collectors gather Stream results into a final container.
+
+==============================================================================
+
+QUESTION 2: What is Collectors.toList()?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3]
+
+CODE:
+stream.collect(Collectors.toList());
+
+OUTPUT:
+[1,2,3]
+
+EXPLANATION:
+Collects elements into a List.
+
+==============================================================================
+
+QUESTION 3: What is Collectors.toSet()?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,2,3]
+
+CODE:
+stream.collect(Collectors.toSet());
+
+OUTPUT:
+[1,2,3]
+
+EXPLANATION:
+Collects elements into a Set and removes duplicates.
+
+==============================================================================
+
+QUESTION 4: What is Collectors.toMap()?
+------------------------------------------------------------------------------
+INPUT:
+["Java","Spring"]
+
+CODE:
+stream.collect(
+    Collectors.toMap(
+        String::length,
+        s -> s));
+
+OUTPUT:
+{4=Java, 6=Spring}
+Important:
+Duplicate keys cause IllegalStateException.
+
+EXPLANATION:
+Converts Stream into Map.
+
+==============================================================================
+
+QUESTION 5: What is Collectors.joining()?
+------------------------------------------------------------------------------
+INPUT:
+["Java","Spring","Kafka"]
+
+CODE:
+stream.collect(
+    Collectors.joining(","));
+
+OUTPUT:
+Java,Spring,Kafka
+
+EXPLANATION:
+Combines String elements into a single String.
+
+==============================================================================
+
+QUESTION 6: What is Collectors.counting()?
+------------------------------------------------------------------------------
+INPUT:
+["A","B","C"]
+
+CODE:
+stream.collect(Collectors.counting());
+
+OUTPUT:
+3
+
+EXPLANATION:
+Counts number of elements.
+
+==============================================================================
+
+QUESTION 7: What are summingInt(), summingLong(), summingDouble()?
+------------------------------------------------------------------------------
+INPUT:
+[10,20,30]
+
+CODE:
+stream.collect(
+    Collectors.summingInt(Integer::intValue));
+
+OUTPUT:
+60
+Memory Trick:
+summingX() = Total
+
+EXPLANATION:
+Calculate total sum.
+
+==============================================================================
+
+QUESTION 8: What are averagingInt(), averagingLong(), averagingDouble()?
+------------------------------------------------------------------------------
+INPUT:
+[10,20,30]
+
+CODE:
+stream.collect(
+    Collectors.averagingInt(Integer::intValue));
+
+OUTPUT:
+20.0
+Memory Trick:
+averagingX() = Mean
+
+EXPLANATION:
+Calculate average value.
+
+==============================================================================
+
+QUESTION 9: What is summarizingInt()?
+------------------------------------------------------------------------------
+INPUT:
+[10,20,30]
+
+CODE:
+stream.collect(
+    Collectors.summarizingInt(Integer::intValue));
+
+OUTPUT:
+count = 3
+sum = 60
+min = 10
+max = 30
+avg = 20
+
+EXPLANATION:
+Returns statistics object containing:
+Count
+Sum
+Min
+Max
+Average
+
+==============================================================================
+
+QUESTION 10: Difference between summingInt() and summarizingInt()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Statistics Object
+
+EXPLANATION:
+summingInt()
+Only Sum
+
+==============================================================================
+
+QUESTION 11: What is groupingBy()?
+------------------------------------------------------------------------------
+INPUT:
+["one","two","three"]
+
+CODE:
+stream.collect(
+    Collectors.groupingBy(String::length));
+
+OUTPUT:
+{
+ 3=[one,two],
+ 5=[three]
+}
+Interview One-Liner:
+groupingBy() works like SQL GROUP BY.
+
+EXPLANATION:
+Groups elements by a key.
+
+==============================================================================
+
+QUESTION 12: What is partitioningBy()?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,4]
+
+CODE:
+stream.collect(
+    Collectors.partitioningBy(
+        n -> n % 2 == 0));
+
+OUTPUT:
+{
+ false=[1,3],
+ true=[2,4]
+}
+
+EXPLANATION:
+Splits data into TWO groups only.
+
+==============================================================================
+
+QUESTION 13: groupingBy() vs partitioningBy()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+true / false
+Interview Tip:
+partitioningBy() = special case of groupingBy().
+
+EXPLANATION:
+groupingBy()
+Multiple groups possible
+
+==============================================================================
+
+QUESTION 14: What is Collectors.mapping()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Employee::getDept,
+    Employee::getName,
+
+OUTPUT:
+{
+ IT=[John,David],
+ HR=[Mary]
+}
+
+EXPLANATION:
+Transforms values before collection.
+Example:
+groupingBy(
+ Employee::getDept,
+ mapping(
+    Employee::getName,
+    toList()))
+
+==============================================================================
+
+QUESTION 15: What is collectingAndThen()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+stream.collect(
+ Collectors.collectingAndThen(
+     Collectors.toList(),
+     Collections::unmodifiableList));
+
+OUTPUT:
+Immutable List
+
+EXPLANATION:
+Performs final operation after collection.
+Example:
+stream.collect(
+ Collectors.collectingAndThen(
+     Collectors.toList(),
+     Collections::unmodifiableList));
+
+==============================================================================
+
+QUESTION 16: What is reducing() Collector?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3]
+
+CODE:
+stream.collect(
+   Collectors.reducing(
+      Integer::sum));
+
+OUTPUT:
+Optional[6]
+
+EXPLANATION:
+Performs reduction operation inside collect().
+
+==============================================================================
+
+QUESTION 17: When should you use reducing() instead of reduce()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+reduce()
+Standalone aggregation
+reducing()
+Inside groupingBy()
+Example:
+groupingBy(
+ dept,
+ reducing(...))
+
+==============================================================================
+
+QUESTION 18: What is teeing()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Collectors.teeing(
+    summingInt(Integer::intValue),
+    (count,sum) -> sum/count
+
+OUTPUT:
+Average
+
+EXPLANATION:
+(Java 12)
+Runs two collectors simultaneously and merges results.
+Example:
+Collectors.teeing(
+    counting(),
+    summingInt(Integer::intValue),
+    (count,sum) -> sum/count
+)
+
+==============================================================================
+
+QUESTION 19: How do you count frequency using Collectors?
+------------------------------------------------------------------------------
+INPUT:
+[a,b,a,c,a]
+
+CODE:
+stream.collect(
+  Collectors.groupingBy(
+      s -> s,
+      Collectors.counting()));
+
+OUTPUT:
+{
+ a=3,
+ b=1,
+ c=1
+}
+Frequently Asked Interview Program.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 20: How do you perform multi-level grouping?
+------------------------------------------------------------------------------
+INPUT:
+Employees
+
+CODE:
+groupingBy(
+ Employee::getDepartment,
+ groupingBy(
+ Employee::getGender))
+
+OUTPUT:
+{
+ IT={
+      M=[...],
+      F=[...]
+    }
+}
+Frequently Asked Senior Developer Question.
+30-SECOND REVISION
+toList()
+-> List
+toSet()
+-> Unique Values
+toMap()
+-> Map
+joining()
+-> String
+counting()
+-> Count
+summingInt()
+-> Sum
+averagingInt()
+-> Average
+summarizingInt()
+-> Complete Statistics
+groupingBy()
+-> SQL GROUP BY
+partitioningBy()
+-> TRUE/FALSE Groups
+mapping()
+-> Transform Before Collect
+collectingAndThen()
+-> Post Processing
+reducing()
+-> Aggregation Collector
+teeing()
+-> Two Collectors Together
+Based on your enterprise Java handbooks and stream revision guides, which include examples
+for groupingBy, partitioningBy, counting, summingInt, mapping, collectingAndThen, and reducing.
+TOP 10 INTERVIEW QUESTIONS - ADVANCED COLLECTORS
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 1: How do you Group Employees by Department?
+------------------------------------------------------------------------------
+INPUT:
+IT
+IT
+HR
+HR
+
+CODE:
+Map<String, List<Employee>> result =
+employees.stream()
+         .collect(
+             Collectors.groupingBy(
+                 Employee::getDepartment));
+
+OUTPUT:
+{
+ IT=[John, David],
+ HR=[Mary, Bob]
+}
+Frequently Asked:
+Group employees by Department.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 2: How do you Group Employees by Gender?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Map<String, List<Employee>> result =
+employees.stream()
+         .collect(
+             Collectors.groupingBy(
+                 Employee::getGender));
+
+OUTPUT:
+{
+ M=[John, David],
+ F=[Mary, Lisa]
+}
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 3: What is Multi-level Grouping?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Map<String,
+    Map<String, List<Employee>>> result =
+employees.stream()
+         .collect(
+            Collectors.groupingBy(
+               Employee::getDepartment,
+               Collectors.groupingBy(
+                  Employee::getGender)));
+
+OUTPUT:
+{
+ IT={
+      M=[John],
+      F=[Mary]
+    },
+ HR={
+      M=[David]
+    }
+}
+Senior Question:
+Department -> Gender -> Employees
+
+EXPLANATION:
+Grouping inside another grouping.
+
+==============================================================================
+
+QUESTION 4: How do you perform Frequency Counting?
+------------------------------------------------------------------------------
+INPUT:
+[a,b,a,c,a]
+
+CODE:
+Map<String, Long> result =
+list.stream()
+    .collect(
+       Collectors.groupingBy(
+           s -> s,
+           Collectors.counting()));
+
+OUTPUT:
+{
+ a=3,
+ b=1,
+ c=1
+}
+Frequently Asked Program.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 5: How do you count Employees per Department?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Map<String, Long> result =
+employees.stream()
+         .collect(
+             Collectors.groupingBy(
+                 Employee::getDepartment,
+                 Collectors.counting()));
+
+OUTPUT:
+{
+ IT=10,
+ HR=5
+}
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 6: How do you calculate Total Salary by Department?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Map<String, Integer> result =
+employees.stream()
+         .collect(
+             Collectors.groupingBy(
+                 Employee::getDepartment,
+                 Collectors.summingInt(
+                     Employee::getSalary)));
+
+OUTPUT:
+{
+ IT=500000,
+ HR=250000
+}
+Frequently Asked:
+Salary Aggregation.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 7: How do you find Top N Records using Streams?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+employees.stream()
+         .sorted(
+            Comparator.comparing(
+               Employee::getSalary)
+               .reversed())
+         .limit(3)
+         .toList();
+
+OUTPUT:
+Top 3 employees by salary.
+Senior Question:
+Top 5 Customers
+Top 10 Products
+Top 3 Employees
+
+EXPLANATION:
+Example:
+Top 3 Highest Salaries
+
+==============================================================================
+
+QUESTION 8: How do you find the Second Highest Salary?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Integer salary =
+employees.stream()
+         .map(Employee::getSalary)
+         .distinct()
+         .sorted(
+             Comparator.reverseOrder())
+         .skip(1)
+         .findFirst()
+         .get();
+
+OUTPUT:
+70000
+Most Frequently Asked Stream Problem.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 9: How do you find Highest Salary by Department?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Map<String, Optional<Employee>> result =
+employees.stream()
+         .collect(
+             Collectors.groupingBy(
+                 Employee::getDepartment,
+                 Collectors.maxBy(
+                    Comparator.comparing(
+                       Employee::getSalary))));
+
+OUTPUT:
+{
+ IT=John(120000),
+ HR=Mary(95000)
+}
+Senior Developer Question.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 10: What is a Custom Collector?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+-> groupingBy(Employee::getDepartment)
+-> groupingBy(Employee::getGender)
+-> groupingBy(x->x,counting())
+-> distinct().sorted().skip(1)
+(Optional.stream, map, flatMap, filter, ifPresent,
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Custom Collector allows creating your own collection logic.
+Example:
+Collector<Employee,
+          List<String>,
+          List<String>>
+Use Cases:
+[OK] Custom Statistics
+[OK] Custom Report Generation
+[OK] Special Aggregations
+[OK] Complex Business Rules
+Interview One-Liner:
+Use Custom Collector when built-in Collectors
+cannot satisfy business requirements.
+30-SECOND REVISION
+Group by Department
+-> groupingBy(Employee::getDepartment)
+Group by Gender
+-> groupingBy(Employee::getGender)
+Multi-level Grouping
+-> groupingBy(...groupingBy(...))
+Frequency Count
+-> groupingBy(x->x,counting())
+Employee Count
+-> groupingBy(..., counting())
+Salary Sum
+-> groupingBy(..., summingInt())
+Top N Records
+-> sorted().limit(N)
+Second Highest
+-> distinct().sorted().skip(1)
+Highest Salary by Department
+-> groupingBy(..., maxBy())
+Custom Collector
+-> Custom aggregation logic
+MEMORY TRICK
+Group
+  -> groupingBy()
+Count
+  -> counting()
+Sum
+  -> summingInt()
+Max
+  -> maxBy()
+Top N
+  -> limit()
+Second Highest
+  -> skip(1)
+Multi Group
+  -> groupingBy(groupingBy())
+Custom Logic
+  -> Custom Collector
+Examples align with advanced collector patterns such as groupingBy, counting, summingInt,
+maxBy, nested grouping, and custom collector usage found in your Java interview handbooks.
+TOP 10 INTERVIEW QUESTIONS - OPTIONAL WITH STREAMS
+(Optional.stream, map, flatMap, filter, ifPresent,
+orElse, orElseGet, orElseThrow)
+
+==============================================================================
+
+QUESTION 1: What is Optional and why is it used?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Optional.of("Java");
+
+OUTPUT:
+Optional[Java]
+Interview One-Liner:
+Optional represents presence or absence of a value.
+
+EXPLANATION:
+Optional is a container object that may or may not contain a value.
+Benefits:
+[OK] Avoids NullPointerException
+[OK] Reduces null checks
+[OK] Improves readability
+Example:
+Optional<String> name =
+        Optional.of("Java");
+
+==============================================================================
+
+QUESTION 2: What is Optional.stream()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Converts Optional into a Stream.
+Optional.of("Java")
+        .stream()
+        .forEach(System.out::println);
+Optional.empty()
+        .stream()
+        .forEach(System.out::println);
+Optional.stream() returns one element if present,
+otherwise an empty Stream.
+
+OUTPUT:
+No Output
+Interview One-Liner:
+Optional.stream() returns one element if present,
+otherwise an empty Stream.
+
+EXPLANATION:
+(Java 9)
+Converts Optional into a Stream.
+Example:
+Optional.of("Java")
+        .stream()
+        .forEach(System.out::println);
+
+==============================================================================
+
+QUESTION 3: Why is Optional.stream() useful with Streams?
+------------------------------------------------------------------------------
+INPUT:
+[
+ Optional.of("A"),
+ Optional.empty(),
+ Optional.of("B")
+]
+
+CODE:
+list.stream()
+    .flatMap(Optional::stream)
+    .toList();
+
+OUTPUT:
+[A,B]
+Frequently Asked.
+
+EXPLANATION:
+Helps remove empty Optional values.
+
+==============================================================================
+
+QUESTION 4: What is map() in Optional?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Optional<String> opt =
+        Optional.of("Java");
+Optional<Integer> length =
+        opt.map(String::length);
+
+OUTPUT:
+Optional[4]
+Interview One-Liner:
+map() transforms the value and wraps the result inside Optional.
+
+EXPLANATION:
+Transforms a value if present.
+
+==============================================================================
+
+QUESTION 5: What is flatMap() in Optional?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Optional<String> opt =
+        Optional.of("Java");
+Optional<Integer> result =
+        opt.flatMap(
+            s -> Optional.of(s.length()));
+
+OUTPUT:
+Optional[4]
+
+EXPLANATION:
+Transforms the value without creating nested Optionals.
+
+==============================================================================
+
+QUESTION 6: map() vs flatMap()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+when mapper returns Optional.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+map()
+Returns Optional<Optional<T>>
+when mapper returns Optional.
+flatMap()
+Returns Optional<T>
+Example:
+map()
+Optional<Optional<Integer>>
+flatMap()
+Optional<Integer>
+Interview One-Liner:
+flatMap() prevents nested Optionals.
+
+==============================================================================
+
+QUESTION 7: What does filter() do in Optional?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Optional.of("Java")
+        .filter(
+            s -> s.startsWith("J"))
+        .ifPresent(System.out::println);
+
+OUTPUT:
+No Output
+
+EXPLANATION:
+Keeps value only if condition is true.
+
+==============================================================================
+
+QUESTION 8: What does ifPresent() do?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Optional.of("Java")
+        .ifPresent(System.out::println);
+
+OUTPUT:
+Java
+Use:
+Avoid explicit null checking.
+
+EXPLANATION:
+Executes code only if value exists.
+
+==============================================================================
+
+QUESTION 9: What is the difference between orElse() and orElseGet()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+() -> getDefault());
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+orElse()
+Always evaluates default value.
+orElseGet()
+Evaluates default value only if Optional is empty.
+Example:
+opt.orElse(getDefault());
+getDefault()
+is always executed.
+Example:
+opt.orElseGet(
+    () -> getDefault());
+getDefault()
+executes only when empty.
+Interview Tip:
+Prefer orElseGet() when default creation is expensive.
+
+==============================================================================
+
+QUESTION 10: What does orElseThrow() do?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Optional.empty()
+        .orElseThrow(
+            () -> new RuntimeException(
+                "No value found"));
+
+OUTPUT:
+RuntimeException:
+No value found
+Use:
+Mandatory values.
+30-SECOND REVISION
+Optional.stream()
+-> Optional -> Stream
+map()
+-> Transform Value
+flatMap()
+-> Avoid Nested Optional
+filter()
+-> Apply Condition
+ifPresent()
+-> Execute If Available
+orElse()
+-> Default Value (Always Computed)
+orElseGet()
+-> Lazy Default Value
+orElseThrow()
+-> Throw Exception If Empty
+MEMORY TRICK
+Optional
+    v
+filter()
+    v
+map()
+    v
+flatMap()
+    v
+ifPresent()
+Fallback Options
+orElse()
+    -> Fixed Default
+orElseGet()
+    -> Lazy Default
+orElseThrow()
+    -> Exception
+Remember:
+map()      -> Transform
+flatMap()  -> Flatten
+filter()   -> Validate
+ifPresent()-> Execute
+orElse()   -> Default
+Throw?     -> orElseThrow()
+Examples and distinctions for Optional.stream(), map, flatMap, filter, ifPresent, orElse, orElseGet,
+and orElseThrow are supported by your enterprise Java interview notes and handbooks.
+TOP 15 INTERVIEW QUESTIONS - SPLITERATOR & STREAM INTERNALS
+
+EXPLANATION:
+Returns value if present,
+otherwise throws exception.
+
+==============================================================================
+
+QUESTION 1: What is Spliterator?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Spliterator stands for:
+Split + Iterator
+It is used internally by Streams to traverse and split data for parallel processing.
+Flow:
+Collection
+    v
+Spliterator
+    v
+Stream Pipeline
+Interview One-Liner:
+Spliterator is an iterator that can split data for parallel processing. 1-1c4ebb
+
+==============================================================================
+
+QUESTION 2: Why was Spliterator introduced?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Iterator
+Can traverse
+Cannot split
+Spliterator
+Can traverse
+Can split
+Benefits:
+[OK] Parallel Processing
+[OK] Better Performance
+[OK] Work Stealing Support
+
+==============================================================================
+
+QUESTION 3: What does tryAdvance() do?
+------------------------------------------------------------------------------
+INPUT:
+[10,20,30]
+
+CODE:
+spliterator.tryAdvance(
+    System.out::println);
+
+OUTPUT:
+30
+Interview Tip:
+tryAdvance() moves one element forward.
+
+EXPLANATION:
+Processes one element at a time.
+
+==============================================================================
+
+QUESTION 4: What does forEachRemaining() do?
+------------------------------------------------------------------------------
+INPUT:
+[10,20,30]
+
+CODE:
+spliterator.forEachRemaining(
+    System.out::println);
+
+OUTPUT:
+10
+20
+30
+Difference:
+tryAdvance()
+One at a time
+forEachRemaining()
+All remaining elements
+
+EXPLANATION:
+Processes all remaining elements.
+
+==============================================================================
+
+QUESTION 5: What does trySplit() do?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,4,5,6]
+
+CODE:
+Spliterator<Integer> sp1 =
+list.spliterator();
+Spliterator<Integer> sp2 =
+sp1.trySplit();
+Possible Split:
+sp1 -> [4,5,6]
+sp2 -> [1,2,3]
+Use:
+Parallel Streams
+Interview One-Liner:
+trySplit() enables task splitting in parallel processing.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Divides data into smaller chunks.
+
+==============================================================================
+
+QUESTION 6: What are Spliterator Characteristics?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+ORDERED
+Elements have order
+DISTINCT
+No duplicates
+SORTED
+Sorted data
+SIZED
+Known size
+NONNULL
+No null values
+IMMUTABLE
+Cannot change
+CONCURRENT
+Safe concurrent modifications
+
+==============================================================================
+
+QUESTION 7: How does a Stream start internally?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream();
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Source
+Examples:
+List
+Set
+Array
+File
+Example:
+List<Integer> list =
+List.of(1,2,3);
+list.stream();
+Flow:
+Source
+ v
+Spliterator
+ v
+Pipeline
+
+==============================================================================
+
+QUESTION 8: What is a Stream Pipeline?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+A Stream Pipeline consists of:
+Source
+ v
+Intermediate Operations
+ v
+Terminal Operation
+Example:
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
+
+==============================================================================
+
+QUESTION 9: What are Intermediate Operations internally?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Operations that create a new Stream.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Operations that create a new Stream.
+Examples:
+filter()
+map()
+flatMap()
+sorted()
+distinct()
+Characteristics:
+[OK] Lazy
+[OK] Return Stream
+
+==============================================================================
+
+QUESTION 10: What are Terminal Operations internally?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Operations that produce final result.
+Examples:
+collect()
+reduce()
+count()
+forEach()
+Characteristics:
+[OK] Trigger execution
+[OK] End pipeline
+
+==============================================================================
+
+QUESTION 11: What is Sink in Stream Internals?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(...)
+    .map(...)
+    .collect(Collectors.toList());
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Sink is the final consumer of data.
+Example:
+list.stream()
+    .filter(...)
+    .map(...)
+    .collect(Collectors.toList());
+Sink
+collect()
+Interview One-Liner:
+Sink receives processed elements from pipeline stages. 1-1c4ebb
+
+==============================================================================
+
+QUESTION 12: What is Lazy Evaluation?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+stream.filter(n -> n > 10);
+
+OUTPUT:
+No Output
+Reason:
+No Terminal Operation
+Memory Trick:
+Lazy = Execute Later
+
+EXPLANATION:
+Intermediate operations execute only when a
+terminal operation is called.
+
+==============================================================================
+
+QUESTION 13: What is Stream Fusion?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Multiple operations are merged into one traversal.
+Example:
+list.stream()
+    .filter(n -> n > 10)
+    .map(n -> n * 2)
+    .collect(Collectors.toList());
+Internal Execution:
+1 -> filter -> map
+2 -> filter -> map
+3 -> filter -> map
+Instead of:
+filter all
+then map all
+Benefit:
+Less memory usage
+Interview One-Liner:
+Stream Fusion processes each element through all stages before moving to the next.
+
+==============================================================================
+
+QUESTION 14: What is Short Circuiting?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+list.stream()
+    .filter(n -> n > 10)
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Stops processing early when result is found.
+Examples:
+findFirst()
+findAny()
+anyMatch()
+allMatch()
+noneMatch()
+limit()
+Example:
+list.stream()
+    .filter(n -> n > 10)
+    .findFirst();
+Processing stops after first match.
+
+==============================================================================
+
+QUESTION 15: Explain Stream Internal Working.
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Collection
+    v
+Source
+    v
+Spliterator
+    v
+Pipeline Creation
+    v
+Intermediate Operations
+        filter()
+        map()
+        sorted()
+    v
+Terminal Operation
+        collect()
+    v
+Sink
+    v
+Result
+Interview One-Liner:
+A Stream internally uses Spliterator to traverse data, builds a lazy pipeline, and executes it only when a terminal operation is invoked. 1-1c4ebb
+MOST ASKED DIFFERENCE QUESTIONS
+
+==============================================================================
+
+QUESTION 1: Iterator vs Spliterator
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 2: tryAdvance() vs forEachRemaining()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 3: stream() vs Spliterator()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 4: Lazy Evaluation vs Eager Evaluation
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 5: Intermediate vs Terminal Operations
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 6: Stream Pipeline vs Collection Processing
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 7: Spliterator vs ForkJoinPool
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 8: Stream Fusion vs Multiple Loops
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 9: findFirst() vs findAny()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 10: Short Circuiting vs Full Traversal
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+30-SECOND REVISION
+Spliterator
+-> Split + Traverse
+tryAdvance()
+-> One Element
+forEachRemaining()
+-> All Remaining
+trySplit()
+-> Divide Data
+Characteristics
+-> ORDERED, SIZED, SORTED
+Source
+-> List, Set, Array, File
+Pipeline
+-> Source -> Intermediate -> Terminal
+Sink
+-> Final Consumer
+Lazy Evaluation
+-> Execute Later
+Stream Fusion
+-> Single Traversal
+Short Circuiting
+-> Stop Early
+MEMORY TRICK
+Collection
+    v
+Source
+    v
+Spliterator
+    v
+Pipeline
+    v
+Intermediate Operations
+    v
+Terminal Operation
+    v
+Sink
+    v
+Result
+Remember:
+Spliterator
+    = Split + Traverse
+Fusion
+    = One Pass
+Lazy
+    = Execute Later
+Short Circuit
+    = Stop Early
+Key stream internal concepts such as Spliterator, Source, Pipeline, Intermediate Operations, Terminal Operations,
+Lazy Processing, Short Circuiting, and Stream Fusion are explicitly listed in your Java Streams notes.
+TOP 10 SENIOR DEVELOPER INTERVIEW QUESTIONS
+(Infinite Streams, Short Circuiting, Java 9 & Java 16 Features)
+
+==============================================================================
+
+QUESTION 1: Why should Infinite Streams always be used with limit()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.iterate(1,n->n+1)
+      .forEach(System.out::println);
+Stream.iterate(1,n->n+1)
+
+OUTPUT:
+1,2,3,4,5
+Senior Point:
+Infinite Streams without limit() can cause CPU and memory issues.
+
+EXPLANATION:
+Without limit()
+Stream.iterate(1,n->n+1)
+      .forEach(System.out::println);
+Problem:
+Runs forever.
+With limit()
+Stream.iterate(1,n->n+1)
+      .limit(5);
+
+==============================================================================
+
+QUESTION 2: Stream.generate() vs Stream.iterate()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.generate(() -> 10)
+Stream.iterate(1,n->n+1)
+
+OUTPUT:
+1,2,3,4...
+Interview One-Liner:
+generate() creates values independently,
+iterate() creates values from previous values.
+
+EXPLANATION:
+generate()
+Independent values
+Supplier<T>
+Example:
+Stream.generate(() -> 10)
+
+==============================================================================
+
+QUESTION 3: How do Infinite Streams behave with Parallel Streams?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.iterate(1,n->n+1)
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Example:
+Stream.iterate(1,n->n+1)
+      .parallel()
+      .limit(100);
+Challenge:
+[OK] Splitting is difficult
+[OK] Ordering overhead
+[OK] Can reduce performance
+Senior Point:
+Infinite ordered streams often perform poorly in parallel mode.
+
+==============================================================================
+
+QUESTION 4: What are Short Circuit Operations?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Operations that stop processing early.
+Examples:
+limit()
+findFirst()
+findAny()
+anyMatch()
+allMatch()
+noneMatch()
+Benefit:
+Less Work
+Better Performance
+
+==============================================================================
+
+QUESTION 5: Why is findAny() faster than findFirst() in Parallel Streams?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+parallelStream()
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+findFirst()
+Must preserve order
+findAny()
+Can return any available result
+Example:
+parallelStream()
+      .findAny();
+Senior Point:
+findAny() enables better parallel optimization.
+
+==============================================================================
+
+QUESTION 6: Difference between filter() and takeWhile()?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,10,4]
+filter(n<5)
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+[1,2,3]
+Stops at first failure.
+Senior Point:
+takeWhile() can process fewer elements.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 7: What problem does dropWhile() solve?
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,10,4]
+
+CODE:
+dropWhile(n<5)
+
+OUTPUT:
+[10,4]
+Use:
+Skip header records
+Skip initial noise
+Skip startup events
+
+EXPLANATION:
+Skips matching elements until condition fails.
+
+==============================================================================
+
+QUESTION 8: Why was iterate(predicate) introduced in Java 9?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.iterate(1,n->n+1)
+Stream.iterate(
+       n -> n <= 5,
+       n -> n+1);
+
+OUTPUT:
+1,2,3,4,5
+Benefit:
+Finite stream without explicit limit().
+
+EXPLANATION:
+Old Style:
+Stream.iterate(1,n->n+1)
+      .limit(5);
+New Style:
+Stream.iterate(
+       1,
+       n -> n <= 5,
+       n -> n+1);
+
+==============================================================================
+
+QUESTION 9: What is Stream.ofNullable() and when should it be used?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Stream.ofNullable(null);
+
+OUTPUT:
+Empty Stream
+Use Cases:
+[OK] Database Results
+[OK] Optional Data
+[OK] API Responses
+
+EXPLANATION:
+Null-safe stream creation.
+
+==============================================================================
+
+QUESTION 10: Stream.toList() vs Collectors.toList()?
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Collectors.toList()
+Stream.toList()
+Stream.of(1,2,3)
+      .toList();
+Java 9 features (takeWhile, dropWhile, iterate(predicate), ofNullable) and Java 16 Stream.toList().
+
+OUTPUT:
+UnsupportedOperationException
+Senior Point:
+Prefer toList() in Java 16+ when immutability is desired.
+30-SECOND REVISION
+generate()
+-> Infinite Independent Values
+iterate()
+-> Infinite Sequence
+limit()
+-> Stop After N
+findFirst()
+-> First Element
+findAny()
+-> Any Element (Parallel Friendly)
+takeWhile()
+-> Keep Until False
+dropWhile()
+-> Skip Until False
+iterate(predicate)
+-> Finite Iterate
+ofNullable()
+-> Null Safe Stream
+toList()
+-> Immutable List
+MEMORY TRICK
+Infinite Stream
+      v
+generate() / iterate()
+      v
+limit()
+      v
+Short Circuit
+      v
+findAny()
+      v
+Performance Gain
+Java 9
+takeWhile()
+dropWhile()
+iterate(predicate)
+ofNullable()
+Java 16
+toList()
+These topics are covered in your Java Streams notes under Infinite Streams, Short-Circuit Operations,
+Java 9 features (takeWhile, dropWhile, iterate(predicate), ofNullable) and Java 16 Stream.toList().
+Java Streams API Providing all 37 programs mostly asked interview questions with explanation
+
+EXPLANATION:
+Collectors.toList()
+Mutable List (implementation unspecified)
+Stream.toList()
+Unmodifiable List
+(Java 16)
+Example:
+List<Integer> list =
+Stream.of(1,2,3)
+      .toList();
+list.add(4);
+
+==============================================================================
+
+QUESTION 1: Find Even Numbers
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,4,5,6]
+
+CODE:
+List<Integer> result =
+    nums.stream()
+        .filter(n -> n % 2 == 0)
+        .toList();
+
+OUTPUT:
+[2,4,6]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 2: Find Odd Numbers
+------------------------------------------------------------------------------
+INPUT:
+[1,2,3,4,5,6]
+
+CODE:
+List<Integer> result =
+    nums.stream()
+        .filter(n -> n % 2 != 0)
+        .toList();
+
+OUTPUT:
+[1,3,5]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 3: Remove Duplicates
+------------------------------------------------------------------------------
+INPUT:
+[1,2,2,3,3,4]
+
+CODE:
+List<Integer> result =
+    nums.stream()
+        .distinct()
+        .toList();
+
+OUTPUT:
+[1,2,3,4]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 4: Find Duplicates
+------------------------------------------------------------------------------
+INPUT:
+[1,2,2,3,3,4]
+
+CODE:
+Set<Integer> seen = new HashSet<>();
+List<Integer> result =
+    nums.stream()
+        .filter(n -> !seen.add(n))
+        .distinct()
+        .toList();
+
+OUTPUT:
+[2,3]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 5: Unique Elements
+------------------------------------------------------------------------------
+INPUT:
+[1,2,2,3,3,4]
+
+CODE:
+List<Integer> result =
+    nums.stream()
+        .collect(Collectors.groupingBy(
+            n -> n,
+            Collectors.counting()))
+        .entrySet()
+        .stream()
+        .filter(e -> e.getValue()==1)
+        .map(Map.Entry::getKey)
+        .toList();
+
+OUTPUT:
+[1,4]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 6: Count Elements
+------------------------------------------------------------------------------
+INPUT:
+[10,20,30,40]
+
+CODE:
+long count =
+    nums.stream().count();
+
+OUTPUT:
+4
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 7: Sum Elements
+------------------------------------------------------------------------------
+INPUT:
+[10,20,30]
+
+CODE:
+int sum =
+    nums.stream()
+        .mapToInt(Integer::intValue)
+        .sum();
+
+OUTPUT:
+60
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 8: Average Elements
+------------------------------------------------------------------------------
+INPUT:
+[10,20,30]
+
+CODE:
+double avg =
+    nums.stream()
+        .mapToInt(Integer::intValue)
+        .average()
+        .orElse(0);
+
+OUTPUT:
+20.0
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 9: Maximum Element
+------------------------------------------------------------------------------
+INPUT:
+[10,20,40,30]
+
+CODE:
+Integer max =
+    nums.stream()
+        .max(Integer::compareTo)
+        .orElse(null);
+
+OUTPUT:
+40
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 10: Minimum Element
+------------------------------------------------------------------------------
+INPUT:
+[10,20,40,30]
+
+CODE:
+Integer min =
+    nums.stream()
+        .min(Integer::compareTo)
+        .orElse(null);
+
+OUTPUT:
+10
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 11: Second Highest Number
+------------------------------------------------------------------------------
+INPUT:
+[10,20,40,30]
+
+CODE:
+Integer result =
+    nums.stream()
+        .distinct()
+        .sorted(Comparator.reverseOrder())
+        .skip(1)
+        .findFirst()
+        .orElse(null);
+
+OUTPUT:
+30
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 12: Second Lowest Number
+------------------------------------------------------------------------------
+INPUT:
+[10,20,40,30]
+
+CODE:
+Integer result =
+    nums.stream()
+        .distinct()
+        .sorted()
+        .skip(1)
+        .findFirst()
+        .orElse(null);
+
+OUTPUT:
+20
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 13: Nth Highest Number
+------------------------------------------------------------------------------
+INPUT:
+[10,20,50,40,30]
+N = 3
+
+CODE:
+int n = 3;
+Integer result =
+    nums.stream()
+        .distinct()
+        .sorted(Comparator.reverseOrder())
+        .skip(n-1)
+        .findFirst()
+        .orElse(null);
+
+OUTPUT:
+30
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 14: Nth Lowest Number
+------------------------------------------------------------------------------
+INPUT:
+[10,20,50,40,30]
+N = 3
+
+CODE:
+int n = 3;
+Integer result =
+    nums.stream()
+        .distinct()
+        .sorted()
+        .skip(n-1)
+        .findFirst()
+        .orElse(null);
+
+OUTPUT:
+30
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 15: Sort Ascending
+------------------------------------------------------------------------------
+INPUT:
+[30,10,20]
+
+CODE:
+List<Integer> result =
+    nums.stream()
+        .sorted()
+        .toList();
+
+OUTPUT:
+[10,20,30]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 16: Sort Descending
+------------------------------------------------------------------------------
+INPUT:
+[30,10,20]
+
+CODE:
+List<Integer> result =
+    nums.stream()
+        .sorted(Comparator.reverseOrder())
+        .toList();
+
+OUTPUT:
+[30,20,10]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 17: Reverse Sort
+------------------------------------------------------------------------------
+INPUT:
+[30,10,20]
+
+CODE:
+List<Integer> result =
+    nums.stream()
+        .sorted(Collections.reverseOrder())
+        .toList();
+
+OUTPUT:
+[30,20,10]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 18: Frequency Count
+------------------------------------------------------------------------------
+INPUT:
+[a,b,a,c,a]
+
+CODE:
+Map<String,Long> result =
+    list.stream()
+        .collect(Collectors.groupingBy(
+            s -> s,
+            Collectors.counting()));
+
+OUTPUT:
+{a=3,b=1,c=1}
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 19: Most Repeated Number
+------------------------------------------------------------------------------
+INPUT:
+[1,2,2,3,3,3]
+
+CODE:
+Integer result =
+    nums.stream()
+        .collect(Collectors.groupingBy(
+            n -> n,
+            Collectors.counting()))
+        .entrySet()
+        .stream()
+        .max(Map.Entry.comparingByValue())
+        .get()
+        .getKey();
+
+OUTPUT:
+3
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 20: Least Repeated Number
+------------------------------------------------------------------------------
+INPUT:
+[1,1,2,2,2,3]
+
+CODE:
+Integer result =
+    nums.stream()
+        .collect(Collectors.groupingBy(
+            n -> n,
+            Collectors.counting()))
+        .entrySet()
+        .stream()
+        .min(Map.Entry.comparingByValue())
+        .get()
+        .getKey();
+
+OUTPUT:
+3
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 21: First Non-Repeated Number
+------------------------------------------------------------------------------
+INPUT:
+[1,2,2,3,3,4]
+
+CODE:
+nums.stream()
+    .filter(n -> Collections.frequency(nums,n) == 1)
+    .findFirst()
+    .get();
+
+OUTPUT:
+1
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 22: Longest String
+------------------------------------------------------------------------------
+INPUT:
+[Java,SpringBoot,Kafka]
+
+CODE:
+list.stream()
+    .max(Comparator.comparingInt(String::length))
+    .get();
+
+OUTPUT:
+SpringBoot
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 23: Shortest String
+------------------------------------------------------------------------------
+INPUT:
+[Java,SpringBoot,Kafka]
+
+CODE:
+list.stream()
+    .min(Comparator.comparingInt(String::length))
+    .get();
+
+OUTPUT:
+Java
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 24: Palindrome Strings
+------------------------------------------------------------------------------
+INPUT:
+[level,java,madam,spring]
+
+CODE:
+list.stream()
+    .filter(s -> s.equals(
+        new StringBuilder(s)
+            .reverse()
+            .toString()))
+    .toList();
+
+OUTPUT:
+[level,madam]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 25: Anagram Check
+------------------------------------------------------------------------------
+INPUT:
+listen
+silent
+
+CODE:
+Arrays.equals(
+    listen.chars().sorted().toArray(),
+    silent.chars().sorted().toArray()
+);
+
+OUTPUT:
+true
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 26: String Reverse
+------------------------------------------------------------------------------
+INPUT:
+Java
+
+CODE:
+new StringBuilder("Java")
+    .reverse()
+    .toString();
+
+OUTPUT:
+avaJ
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 27: Character Count
+------------------------------------------------------------------------------
+INPUT:
+Java
+
+CODE:
+"Java".chars()
+      .mapToObj(c -> (char)c)
+      .collect(Collectors.groupingBy(
+          c -> c,
+          Collectors.counting()));
+
+OUTPUT:
+{
+ J=1,
+ a=2,
+ v=1
+}
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 28: Word Count
+------------------------------------------------------------------------------
+INPUT:
+Java Java Spring Kafka Spring
+
+CODE:
+Arrays.stream(str.split(" "))
+      .collect(Collectors.groupingBy(
+          w -> w,
+          Collectors.counting()));
+
+OUTPUT:
+{
+ Java=2,
+ Spring=2,
+ Kafka=1
+}
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 29: Group By Length
+------------------------------------------------------------------------------
+INPUT:
+[one,two,java,spring]
+
+CODE:
+list.stream()
+    .collect(Collectors.groupingBy(
+        String::length));
+
+OUTPUT:
+{
+ 3=[one,two],
+ 4=[java],
+ 6=[spring]
+}
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 30: Group By First Character
+------------------------------------------------------------------------------
+INPUT:
+[Apple,Ant,Bat,Ball]
+
+CODE:
+list.stream()
+    .collect(Collectors.groupingBy(
+        s -> s.charAt(0)));
+
+OUTPUT:
+{
+ A=[Apple,Ant],
+ B=[Bat,Ball]
+}
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 31: Flatten Nested List
+------------------------------------------------------------------------------
+INPUT:
+[[1,2],[3,4]]
+
+CODE:
+nested.stream()
+      .flatMap(List::stream)
+      .toList();
+
+OUTPUT:
+[1,2,3,4]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 32: Merge Lists
+------------------------------------------------------------------------------
+INPUT:
+[1,2]
+[3,4]
+
+CODE:
+Stream.of(list1,list2)
+      .flatMap(List::stream)
+      .toList();
+
+OUTPUT:
+[1,2,3,4]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 33: Merge Streams
+------------------------------------------------------------------------------
+INPUT:
+[1,2]
+[3,4]
+
+CODE:
+Stream.concat(
+    stream1,
+    stream2)
+    .toList();
+
+OUTPUT:
+[1,2,3,4]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 34: Convert List To Map
+------------------------------------------------------------------------------
+INPUT:
+101-John
+102-David
+
+CODE:
+employees.stream()
+         .collect(Collectors.toMap(
+             Employee::getId,
+             Employee::getName));
+
+OUTPUT:
+{
+ 101=John,
+ 102=David
+}
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 35: Convert Map To List
+------------------------------------------------------------------------------
+INPUT:
+{
+ 101=John,
+ 102=David
+}
+
+CODE:
+map.entrySet()
+   .stream()
+   .toList();
+
+OUTPUT:
+[
+ 101=John,
+ 102=David
+]
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 36: Employee Department Grouping
+------------------------------------------------------------------------------
+INPUT:
+John-IT
+David-IT
+Mary-HR
+
+CODE:
+employees.stream()
+         .collect(Collectors.groupingBy(
+             Employee::getDepartment));
+
+OUTPUT:
+{
+ IT=[John,David],
+ HR=[Mary]
+}
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 37: Employee Salary Problems
+------------------------------------------------------------------------------
+INPUT:
+John-100000
+David-150000
+Mary-120000
+
+CODE:
+employees.stream()
+         .collect(Collectors.averagingDouble(
+             Employee::getSalary));
+
+OUTPUT:
+123333.33
+MEMORY TRICK
+filter()
+   -> Even/Odd
+distinct()
+   -> Remove Duplicates
+sorted()+skip()
+   -> Ranking Problems
+groupingBy()
+   -> Grouping Problems
+counting()
+   -> Frequency Problems
+flatMap()
+   -> Flatten / Merge
+toMap()
+   -> List -> Map
+max()
+   -> Highest Salary
+groupingBy()+maxBy()
+   -> Highest Salary By Department
+Below is the corrected senior developer interview cheatsheet with a simple code example, input, output, key difference, and interview one-liner for each topic.
+TOP 13 SENIOR DEVELOPER STREAM DIFFERENCE QUESTIONS WITH CODE
+
+EXPLANATION:
+A. Highest Salary
+
+==============================================================================
+
+QUESTION 1: map() vs flatMap()
+------------------------------------------------------------------------------
+INPUT:
+[[1,2], [3,4]]
+
+CODE:
+List<Integer> result =
+    List.of(List.of(1,2), List.of(3,4))
+        .stream()
+        .flatMap(List::stream)
+        .toList();
+
+OUTPUT:
+[1, 2, 3, 4]
+Difference:
+map()     = Transform
+flatMap() = Transform + Flatten
+Interview One-Liner:
+Use map() for one-to-one transformation and flatMap() for
+one-to-many transformation or nested collections.
+
+EXPLANATION:
+map()
+Transforms each element into one new element.
+
+==============================================================================
+
+QUESTION 2: reduce() vs collect()
+------------------------------------------------------------------------------
+INPUT:
+[10, 20, 30]
+
+CODE:
+List<Integer> result =
+    List.of(10,20,30)
+        .stream()
+        .collect(Collectors.toList());
+
+OUTPUT:
+[10, 20, 30]
+Difference:
+reduce()  = Many elements to one immutable value
+collect() = Many elements to a collection or mutable result
+Interview One-Liner:
+Use reduce() for aggregation and collect() for List, Set, Map,
+grouping, partitioning, or mutable reduction.
+
+EXPLANATION:
+reduce()
+Combines all elements into one value.
+
+==============================================================================
+
+QUESTION 3: findFirst() vs findAny()
+------------------------------------------------------------------------------
+INPUT:
+[10, 20, 30]
+
+CODE:
+Integer any =
+    List.of(10,20,30)
+        .parallelStream()
+        .findAny()
+        .orElse(null);
+Possible Output:
+10
+or 20
+or 30
+Difference:
+findFirst() = Preserves encounter order
+findAny()   = Any available element
+Interview One-Liner:
+Prefer findAny() when encounter order is unimportant, especially
+in a parallel Stream.
+
+OUTPUT:
+10
+findAny()
+Returns any available element.
+
+EXPLANATION:
+findFirst()
+Returns the first element according to encounter order.
+
+==============================================================================
+
+QUESTION 4: stream() vs parallelStream()
+------------------------------------------------------------------------------
+INPUT:
+[1, 2, 3, 4]
+
+CODE:
+List<Integer> result =
+    List.of(1,2,3,4)
+        .parallelStream()
+        .map(n -> n * 2)
+        .toList();
+
+OUTPUT:
+[2, 4, 6, 8]
+Difference:
+stream()         = Sequential execution
+parallelStream() = Parallel execution using ForkJoinPool
+Important:
+toList() preserves encounter order for this ordered source, but
+forEach() execution order is not guaranteed in a parallel Stream.
+Interview One-Liner:
+Use parallelStream() only after measuring performance for a large,
+CPU-intensive, stateless workload.
+
+EXPLANATION:
+stream()
+Processes elements sequentially.
+
+==============================================================================
+
+QUESTION 5: Collection vs Stream
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+List<String> result =
+    names.stream()
+         .map(String::toUpperCase)
+         .toList();
+
+OUTPUT:
+[JAVA, SPRING]
+Difference:
+Collection = Data storage
+Stream     = Data processing pipeline
+Collection = Reusable
+Stream     = Single-use
+Collection = Supports add/remove
+Stream     = Does not modify its source directly
+Interview One-Liner:
+A Collection stores data, while a Stream performs declarative
+processing over data.
+
+EXPLANATION:
+Collection
+Stores and manages data.
+
+==============================================================================
+
+QUESTION 6: peek() vs map()
+------------------------------------------------------------------------------
+INPUT:
+["java", "spring"]
+
+CODE:
+List<String> result =
+    List.of("java", "spring")
+        .stream()
+        .map(String::toUpperCase)
+        .toList();
+
+OUTPUT:
+[JAVA, SPRING]
+Difference:
+peek() = Observe or debug
+map()  = Transform
+Interview One-Liner:
+Use map() for transformation and use peek() sparingly for debugging,
+not for critical business side effects.
+
+EXPLANATION:
+peek()
+Observes elements without transforming them.
+
+==============================================================================
+
+QUESTION 7: forEach() vs forEachOrdered()
+------------------------------------------------------------------------------
+INPUT:
+[1, 2, 3, 4]
+
+CODE:
+List.of(1,2,3,4)
+    .parallelStream()
+    .forEachOrdered(System.out::println);
+
+OUTPUT:
+1
+2
+3
+4
+Difference:
+forEach()        = Order not guaranteed in parallel execution
+forEachOrdered() = Encounter order maintained
+Interview One-Liner:
+Use forEachOrdered() when order is mandatory, but remember that
+preserving order can reduce parallel performance.
+
+EXPLANATION:
+forEach()
+Processes every element, but parallel execution may not preserve order.
+
+==============================================================================
+
+QUESTION 8: groupingBy() vs partitioningBy()
+------------------------------------------------------------------------------
+INPUT:
+[1, 2, 3, 4]
+
+CODE:
+Map<Boolean, List<Integer>> result =
+    List.of(1,2,3,4)
+        .stream()
+        .collect(
+            Collectors.partitioningBy(
+                n -> n % 2 == 0));
+
+OUTPUT:
+{
+ false=[1, 3],
+ true=[2, 4]
+}
+Difference:
+groupingBy()     = Multiple keys or groups
+partitioningBy() = true and false groups
+Interview One-Liner:
+Use groupingBy() for multi-category classification and
+partitioningBy() for Boolean conditions.
+
+EXPLANATION:
+groupingBy()
+Creates any number of groups based on a classifier.
+
+==============================================================================
+
+QUESTION 9: limit() vs skip()
+------------------------------------------------------------------------------
+INPUT:
+[1, 2, 3, 4, 5]
+
+CODE:
+List<Integer> result =
+    List.of(1,2,3,4,5)
+        .stream()
+        .skip(3)
+        .toList();
+
+OUTPUT:
+[30, 40]
+Interview One-Liner:
+Use skip() and limit() together for in-memory pagination, but not as
+a replacement for database-level pagination on large datasets.
+
+EXPLANATION:
+limit()
+Keeps the first N elements.
+
+==============================================================================
+
+QUESTION 10: sorted() vs sorted(Comparator)
+------------------------------------------------------------------------------
+INPUT:
+[30, 10, 20]
+
+CODE:
+List<Integer> result =
+    List.of(30,10,20)
+        .stream()
+        .sorted(Comparator.reverseOrder())
+        .toList();
+
+OUTPUT:
+[30, 20, 10]
+Employee Example:
+List<Employee> result =
+    employees.stream()
+             .sorted(
+                 Comparator.comparing(Employee::getSalary)
+                           .reversed()
+                           .thenComparing(Employee::getName))
+             .toList();
+Difference:
+sorted()           = Natural order
+sorted(Comparator) = Custom or multi-field order
+Interview One-Liner:
+Use sorted() for natural ordering and provide a Comparator for
+reverse, property-based, or multi-level sorting.
+
+EXPLANATION:
+sorted()
+Uses natural ordering.
+
+==============================================================================
+
+QUESTION 11: Optional vs Null
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+String result =
+    Optional.ofNullable(null)
+            .map(String::toUpperCase)
+            .orElse("UNKNOWN");
+
+OUTPUT:
+UNKNOWN
+Difference:
+null     = Absence is implicit
+Optional = Absence is explicit
+Interview One-Liner:
+Optional makes absence explicit and supports fluent transformations,
+but it is mainly intended for return types rather than every field
+or method parameter.
+
+EXPLANATION:
+Null
+Requires explicit checking.
+
+==============================================================================
+
+QUESTION 12: Lazy Evaluation vs Eager Evaluation
+------------------------------------------------------------------------------
+INPUT:
+[1, 2, 3]
+
+CODE:
+List<Integer> result =
+    new ArrayList<>();
+for(Integer n : List.of(1,2,3)) {
+    if(n > 1) {
+        result.add(n);
+    }
+}
+
+OUTPUT:
+[2, 3]
+Difference:
+Lazy  = Execute only when required
+Eager = Execute immediately
+Interview One-Liner:
+Lazy evaluation allows operation fusion and short-circuiting because
+the Stream delays processing until a terminal operation runs.
+
+EXPLANATION:
+Lazy Evaluation
+Intermediate Stream operations execute only when a terminal operation runs.
+
+==============================================================================
+
+QUESTION 13: Stateful vs Stateless Operations
+------------------------------------------------------------------------------
+INPUT:
+[3, 1, 2, 2]
+
+CODE:
+List<Integer> result =
+    List.of(3,1,2,2)
+        .stream()
+        .distinct()
+        .sorted()
+        .toList();
+
+OUTPUT:
+[1, 2, 3]
+Difference:
+Stateless = Each element is independent
+Stateful  = Maintains information across elements
+Important Correction:
+limit() and skip() are stateful short-circuiting intermediate operations.
+Their performance cost is especially noticeable on ordered parallel Streams.
+Interview One-Liner:
+Stateless operations are easier to parallelize, while stateful operations
+may require buffering, coordination, or knowledge of previously seen elements.
+TOP 5 SENIOR DEVELOPER MUST-PREPARE DIFFERENCES
+
+EXPLANATION:
+Stateless Operation
+Processes each element independently.
+Examples:
+filter()
+map()
+flatMap()
+peek()
+
+==============================================================================
+
+QUESTION 1: map() vs flatMap()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+map transforms; flatMap transforms and flattens.
+
+==============================================================================
+
+QUESTION 2: reduce() vs collect()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+reduce aggregates to one value; collect gathers into a container.
+
+==============================================================================
+
+QUESTION 3: stream() vs parallelStream()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Sequential vs parallel, but parallel must be benchmarked.
+
+==============================================================================
+
+QUESTION 4: groupingBy() vs partitioningBy()
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Multiple categories vs two Boolean groups.
+
+==============================================================================
+
+QUESTION 5: Stateful vs Stateless
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+stream()             = Sequential
+parallelStream()     = Parallel
+Clarified that Stream.toList() preserves encounter order for ordered streams, even when the execution is parallel.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Cross-element state vs independent element processing.
+30-SECOND MEMORY TRICK
+map()                = Change
+flatMap()            = Open + Flatten
+reduce()             = One Result
+collect()            = Container Result
+findFirst()          = First
+findAny()            = Any
+stream()             = Sequential
+parallelStream()     = Parallel
+Collection           = Store
+Stream               = Process
+peek()               = Observe
+map()                = Transform
+forEach()            = Any Order in Parallel
+forEachOrdered()     = Encounter Order
+groupingBy()         = Many Groups
+partitioningBy()     = True / False
+limit()              = Take
+skip()               = Ignore
+sorted()             = Natural Order
+Comparator           = Custom Order
+Optional             = Explicit Absence
+null                 = Implicit Absence
+Lazy                 = Execute Later
+Eager                = Execute Now
+Stateless            = Independent
+Stateful             = Needs Context
+Key improvements
+Added executable examples and expected outputs for all 13 comparisons.
+Corrected sorted() vs Comparator to the precise comparison of sorted() vs sorted(Comparator).
+Clarified that Stream.toList() preserves encounter order for ordered streams, even when the execution is parallel.
+Avoided unsafe .get() calls by using orElse() where a Stream may be empty.
+Cheatsheet with Input, Code, Output, Explanation,
+and Interview Point for all 15 topics. The examples are compact and suitable for your QuickRevision text notes.
+TOP 15 SENIOR DEVELOPER INTERVIEW QUESTIONS
+PERFORMANCE, REAL-WORLD DESIGN & STREAM INTERNALS
+
+==============================================================================
+
+QUESTION 1: Why is Lazy Evaluation important in Stream API?
+------------------------------------------------------------------------------
+INPUT:
+[5, 15, 25]
+Code Without Terminal Operation:
+Stream<Integer> stream =
+    List.of(5,15,25)
+        .stream()
+        .filter(n -> {
+            System.out.println("Checking: " + n);
+            return n > 10;
+        });
+
+CODE:
+.stream()
+        .filter(n -> {
+        .stream()
+        .filter(n -> {
+        .toList();
+
+OUTPUT:
+Checking: 5
+Checking: 15
+Checking: 25
+[15, 25]
+Interview Point:
+Lazy evaluation avoids unnecessary processing and enables
+short-circuiting and operation fusion.
+Memory Trick:
+Lazy = Execute Later
+
+EXPLANATION:
+Intermediate operations do not execute until a terminal operation is called.
+
+==============================================================================
+
+QUESTION 2: What is Stream Fusion?
+------------------------------------------------------------------------------
+INPUT:
+[5, 15, 25]
+
+CODE:
+List<Integer> result =
+    List.of(5,15,25)
+        .stream()
+        .filter(n -> n > 10)
+        .map(n -> n * 2)
+        .toList();
+System.out.println(result);
+
+OUTPUT:
+[30, 50]
+Internal Processing:
+5  -> filter fails
+15 -> filter passes -> map to 30
+25 -> filter passes -> map to 50
+Important:
+The Stream does not normally create one temporary List after filter()
+and another temporary List after map().
+Interview Point:
+Stream Fusion reduces unnecessary intermediate storage by passing
+each element through the connected pipeline stages.
+Memory Trick:
+Fusion = One Pass
+
+EXPLANATION:
+Stream Fusion combines multiple intermediate operations into a
+single element-by-element traversal.
+
+==============================================================================
+
+QUESTION 3: Why should Primitive Streams be used for numerical processing?
+------------------------------------------------------------------------------
+INPUT:
+[10, 20, 30]
+
+CODE:
+int sum =
+    List.of(10,20,30)
+        .stream()
+        .mapToInt(Integer::intValue)
+        .sum();
+System.out.println(sum);
+
+OUTPUT:
+60
+Primitive Stream Types:
+IntStream
+LongStream
+DoubleStream
+Interview Point:
+Use IntStream, LongStream, or DoubleStream for large numerical
+calculations to reduce wrapper-object overhead.
+Memory Trick:
+Primitive Stream = No Wrapper Objects
+
+EXPLANATION:
+Primitive Streams work directly with primitive values and avoid
+repeated boxing and unboxing.
+
+==============================================================================
+
+QUESTION 4: What is Boxing and Unboxing overhead?
+------------------------------------------------------------------------------
+INPUT:
+[10, 20, 30]
+Code Using Wrapper Stream:
+int sum =
+    Stream.of(10,20,30)
+          .reduce(0, Integer::sum);
+System.out.println(sum);
+
+CODE:
+int -> Integer
+Integer -> int
+    Stream.of(10,20,30)
+          .reduce(0, Integer::sum);
+    IntStream.of(10,20,30)
+IntStream
+
+OUTPUT:
+60
+Difference:
+Stream<Integer>
+Works with Integer wrapper objects.
+IntStream
+Works directly with int values.
+Interview Point:
+For high-volume numeric processing, primitive Streams can reduce
+boxing, unboxing, memory allocation, and garbage-collection pressure.
+
+EXPLANATION:
+Boxing:
+int -> Integer
+Unboxing:
+Integer -> int
+
+==============================================================================
+
+QUESTION 5: Why can parallelStream() be slower than stream()?
+------------------------------------------------------------------------------
+INPUT:
+[1, 2, 3, 4]
+Sequential Code:
+List<Integer> result =
+    List.of(1,2,3,4)
+        .stream()
+        .map(n -> n * 2)
+        .toList();
+System.out.println(result);
+
+CODE:
+.stream()
+        .map(n -> n * 2)
+        .toList();
+        .parallelStream()
+        .map(n -> n * 2)
+        .toList();
+Use parallelStream() only after benchmarking a sufficiently large,
+
+OUTPUT:
+[2, 4, 6, 8]
+Important:
+The output is the same, but the parallel version may be slower for
+such a small dataset because parallel setup costs can exceed the work.
+Interview Point:
+Use parallelStream() only after benchmarking a sufficiently large,
+CPU-intensive, stateless workload.
+Avoid for:
+Database calls
+REST calls
+File I/O
+Small collections
+Shared mutable state
+
+EXPLANATION:
+Parallel processing introduces task splitting, thread scheduling,
+coordination, and result-combining overhead.
+
+==============================================================================
+
+QUESTION 6: How does Stream processing affect memory consumption?
+------------------------------------------------------------------------------
+INPUT:
+[1, 2, 3, 4]
+Code Collecting Results:
+List<Integer> result =
+    List.of(1,2,3,4)
+        .stream()
+        .map(n -> n * 10)
+        .toList();
+System.out.println(result);
+
+CODE:
+.stream()
+        .map(n -> n * 10)
+        .toList();
+    .stream()
+    .map(n -> n * 10)
+    .forEach(System.out::println);
+
+OUTPUT:
+10
+20
+30
+40
+Memory Note:
+No final result List is created.
+Important:
+Stateful operations such as sorted() and distinct() may require
+buffering or tracking elements.
+Interview Point:
+Streams do not automatically guarantee low memory consumption.
+Collection, sorting, distinct processing, and stateful operations
+can still require significant memory.
+
+EXPLANATION:
+Memory usage depends on whether the pipeline streams results,
+buffers elements, or collects everything into memory.
+
+==============================================================================
+
+QUESTION 7: Why are Streams useful for Bulk Processing?
+------------------------------------------------------------------------------
+INPUT:
+Order amounts:
+[1000.0, 2000.0, 3000.0]
+
+CODE:
+double total =
+    List.of(1000.0,2000.0,3000.0)
+        .stream()
+        .filter(amount -> amount >= 2000)
+        .mapToDouble(Double::doubleValue)
+        .sum();
+System.out.println(total);
+
+OUTPUT:
+5000.0
+
+EXPLANATION:
+1000.0 -> Removed
+2000.0 -> Included
+3000.0 -> Included
+Total    -> 5000.0
+Interview Point:
+Streams are useful for bulk transformations, reporting, aggregation,
+and in-memory data-processing pipelines.
+
+==============================================================================
+
+QUESTION 8: How should an efficient Stream Pipeline be designed?
+------------------------------------------------------------------------------
+INPUT:
+[40, 10, 30, 5, 20]
+After filter:
+[40, 30, 20]
+After sorted:
+[20, 30, 40]
+After map:
+[200, 300, 400]
+Interview Point:
+Filter early, minimize data before stateful operations, avoid
+unnecessary pipeline stages, and keep lambdas stateless.
+Memory Trick:
+Filter
+  ->
+Transform
+  ->
+Sort if required
+  ->
+Collect
+
+CODE:
+.stream()
+        .filter(n -> n >= 20)
+        .sorted()
+        .map(n -> n * 10)
+        .toList();
+  ->
+  ->
+  ->
+
+OUTPUT:
+[200, 300, 400]
+Flow:
+
+EXPLANATION:
+Apply inexpensive and highly selective filters before costly
+operations such as sorting or complex mapping.
+
+==============================================================================
+
+QUESTION 9: How do you debug a Stream Pipeline?
+------------------------------------------------------------------------------
+INPUT:
+[5, 15, 25]
+
+CODE:
+List<Integer> result =
+    List.of(5,15,25)
+        .stream()
+        .peek(n -> System.out.println("Source: " + n))
+        .filter(n -> n > 10)
+        .peek(n -> System.out.println("Filtered: " + n))
+        .map(n -> n * 2)
+        .toList();
+System.out.println("Result: " + result);
+
+OUTPUT:
+Source: 5
+Source: 15
+Filtered: 15
+Source: 25
+Filtered: 25
+Result: [30, 50]
+Interview Point:
+peek() is useful for temporary pipeline observation, but a debugger,
+tests, or structured logging is preferable for production diagnosis.
+
+EXPLANATION:
+Use peek() to temporarily observe elements between pipeline stages.
+
+==============================================================================
+
+QUESTION 10: Why should peek() not contain business logic?
+------------------------------------------------------------------------------
+INPUT:
+["java", "spring"]
+Good Code:
+List<String> result =
+    List.of("java","spring")
+        .stream()
+        .peek(System.out::println)
+        .map(String::toUpperCase)
+        .toList();
+System.out.println(result);
+
+CODE:
+.stream()
+        .peek(System.out::println)
+        .map(String::toUpperCase)
+        .toList();
+    .stream()
+    .peek(saved::add)
+
+OUTPUT:
+java
+spring
+[JAVA, SPRING]
+Bad Code:
+List<String> saved = new ArrayList<>();
+List.of("java","spring")
+    .stream()
+    .peek(saved::add)
+    .count();
+Problem:
+Business behavior becomes dependent on a side effect inside the
+Stream pipeline.
+Interview Point:
+Use peek() for debugging or observation. Use map(), collect(), or
+an explicit processing stage for required business operations.
+Memory Trick:
+peek = See, not Change
+
+EXPLANATION:
+peek() is primarily an observation operation. Putting critical side
+effects inside it makes the pipeline difficult to reason about.
+
+==============================================================================
+
+QUESTION 11: When should you create a Custom Collector?
+------------------------------------------------------------------------------
+INPUT:
+["Java", "Spring", "Kafka"]
+Simple Custom Collector Example:
+String result =
+    Stream.of("Java","Spring","Kafka")
+          .collect(
+              StringBuilder::new,
+              (sb, value) -> {
+                  if(sb.length() > 0) {
+                      sb.append(" | ");
+                  }
+                  sb.append(value);
+              },
+              (left, right) -> {
+                  if(left.length() > 0 && right.length() > 0) {
+                      left.append(" | ");
+                  }
+                  left.append(right);
+              })
+          .toString();
+System.out.println(result);
+
+CODE:
+Stream.of("Java","Spring","Kafka")
+          .collect(
+              StringBuilder::new,
+              (sb, value) -> {
+              (left, right) -> {
+
+OUTPUT:
+Java | Spring | Kafka
+Collector Parts:
+Supplier
+Creates the result container.
+Accumulator
+Adds one element to the container.
+Combiner
+Combines partial containers during parallel execution.
+Interview Point:
+Use a Custom Collector for reusable domain aggregation, but prefer
+built-in collectors when they already express the requirement clearly.
+
+EXPLANATION:
+Create a Custom Collector when built-in collectors cannot express
+a reusable domain-specific aggregation clearly.
+
+==============================================================================
+
+QUESTION 12: When would you create a Custom Spliterator?
+------------------------------------------------------------------------------
+INPUT:
+[10, 20, 30]
+
+CODE:
+Spliterator<Integer> spliterator =
+    List.of(10,20,30)
+        .spliterator();
+spliterator.tryAdvance(System.out::println);
+spliterator.forEachRemaining(System.out::println);
+
+OUTPUT:
+10
+20
+30
+
+EXPLANATION:
+tryAdvance()
+Processes one element.
+forEachRemaining()
+Processes all remaining elements.
+Custom Spliterator Declaration:
+class MySpliterator
+        implements Spliterator<Integer> {
+    // Implement:
+    // tryAdvance()
+    // trySplit()
+    // estimateSize()
+    // characteristics()
+}
+Interview Point:
+A Custom Spliterator is an advanced choice for specialized traversal,
+large custom sources, or improved parallel decomposition.
+Memory Trick:
+Spliterator = Split + Iterator
+
+==============================================================================
+
+QUESTION 13: What are the common Parallel Stream pitfalls?
+------------------------------------------------------------------------------
+INPUT:
+[1, 2, 3, 4, 5]
+Unsafe Code:
+List<Integer> result =
+    new ArrayList<>();
+List.of(1,2,3,4,5)
+    .parallelStream()
+    .forEach(result::add);
+Possible Problem:
+Missing values
+Unexpected ordering
+Data corruption
+Race conditions
+Safe Code:
+List<Integer> result =
+    List.of(1,2,3,4,5)
+        .parallelStream()
+        .map(n -> n * 10)
+        .toList();
+System.out.println(result);
+
+CODE:
+.parallelStream()
+    .forEach(result::add);
+        .parallelStream()
+        .map(n -> n * 10)
+        .toList();
+
+OUTPUT:
+[10, 20, 30, 40, 50]
+Other Pitfalls:
+Small datasets
+Blocking operations
+Ordering requirements
+Non-associative reduction
+Shared common ForkJoinPool
+Excessive task splitting
+Interview Point:
+Keep parallel Stream operations stateless, non-interfering, and free
+from shared mutation.
+
+EXPLANATION:
+The biggest pitfall is modifying shared mutable state from multiple
+worker threads.
+
+==============================================================================
+
+QUESTION 14: Why is Immutable Data Processing important?
+------------------------------------------------------------------------------
+INPUT:
+["java", "spring"]
+
+CODE:
+result.add("KAFKA");
+
+OUTPUT:
+UnsupportedOperationException
+Interview Point:
+Immutable processing improves predictability and reduces the risks
+associated with shared mutable state and parallel execution.
+
+EXPLANATION:
+The original source remains unchanged.
+Important:
+Stream.toList() returns an unmodifiable List.
+
+==============================================================================
+
+QUESTION 15: Explain the Internal Working of Stream API.
+------------------------------------------------------------------------------
+INPUT:
+[1, 2, 3, 4]
+
+CODE:
+List<Integer> result =
+    List.of(1,2,3,4)
+        .stream()
+        .filter(n -> n % 2 == 0)
+        .map(n -> n * 10)
+        .toList();
+System.out.println(result);
+
+OUTPUT:
+[20, 40]
+Internal Flow:
+Collection
+    |
+    v
+Stream Source
+    |
+    v
+Spliterator
+    |
+    v
+Intermediate Operation: filter()
+    |
+    v
+Intermediate Operation: map()
+    |
+    v
+Terminal Operation: toList()
+    |
+    v
+Result: [20, 40]
+Step-by-Step:
+
+EXPLANATION:
+A Stream obtains data from a source, traverses it using a Spliterator,
+builds a lazy pipeline, and starts processing when a terminal operation
+is called.
+
+==============================================================================
+
+QUESTION 1: Collection provides the source data.
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 2: Spliterator traverses the source.
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 3: filter() and map() build lazy pipeline stages.
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 4: toList() triggers pipeline execution.
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 5: Elements flow through filter() and map().
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+Not applicable. This is a conceptual or comparison question.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+The question tests understanding of the stated Java Stream API concept and its correct interview usage.
+
+==============================================================================
+
+QUESTION 6: The final values are collected into the result List.
+------------------------------------------------------------------------------
+INPUT:
+Conceptual question / use the sample data shown in the code.
+
+CODE:
+-> Intermediate operations execute later.
+    -> Multiple operations run in one element-by-element traversal.
+    -> Avoid wrapper-object overhead.
+    -> Primitive to wrapper.
+    -> Wrapper to primitive.
+    -> Split, schedule, coordinate, and combine.
+    -> Collecting and stateful operations may store elements.
+    -> Filter, transform, and aggregate data declaratively.
+    -> Filter early and avoid unnecessary operations.
+    -> Use peek() temporarily.
+    -> Custom reusable aggregation.
+    -> Custom traversal and splitting.
+    -> Avoid shared mutable state.
+    -> Create new results without modifying the source.
+    -> Source -> Spliterator -> Intermediate -> Terminal -> Result.
+
+OUTPUT:
+Refer to the result described in the explanation. For conceptual questions, there is no runtime output.
+
+EXPLANATION:
+Interview One-Liner:
+Stream API uses a Spliterator to traverse the source, builds a lazy
+pipeline of intermediate operations, and executes that pipeline when
+a terminal operation is invoked.
+30-SECOND REVISION
+Lazy Evaluation
+    -> Intermediate operations execute later.
+Stream Fusion
+    -> Multiple operations run in one element-by-element traversal.
+Primitive Streams
+    -> Avoid wrapper-object overhead.
+Boxing
+    -> Primitive to wrapper.
+Unboxing
+    -> Wrapper to primitive.
+Parallel Overhead
+    -> Split, schedule, coordinate, and combine.
+Memory Consumption
+    -> Collecting and stateful operations may store elements.
+Bulk Processing
+    -> Filter, transform, and aggregate data declaratively.
+Pipeline Design
+    -> Filter early and avoid unnecessary operations.
+Debugging
+    -> Use peek() temporarily.
+Custom Collector
+    -> Custom reusable aggregation.
+Custom Spliterator
+    -> Custom traversal and splitting.
+Parallel Pitfall
+    -> Avoid shared mutable state.
+Immutable Processing
+    -> Create new results without modifying the source.
+Internal Working
+    -> Source -> Spliterator -> Intermediate -> Terminal -> Result.
+
+==============================================================================
