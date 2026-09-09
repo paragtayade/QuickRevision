@@ -1,0 +1,240 @@
+AWS ECS Deployment Configuration (Interview Cheat Sheet)
+
+1. ECR Repository
+Repository Name: payment-service
+
+Image URI:
+123456789.dkr.ecr.us-east-1.amazonaws.com/payment-service:latest
+
+2. ECS Cluster
+Cluster Name: banking-prod-cluster
+
+Infrastructure:
+    Fargate
+        OR
+    EC2
+
+Environment:
+    Production
+
+3. Task Definition
+Task Definition Name:
+payment-service-task
+
+Launch Type:
+Fargate
+
+Container Configuration
+Container Name:
+payment-service
+
+Image:
+123456789.dkr.ecr.us-east-1.amazonaws.com/payment-service:latest
+
+Port Mapping:
+8080
+
+Essential:
+Yes
+
+CPU & Memory
+Task CPU:
+512 (.5 vCPU)
+
+Task Memory:
+1024 (1 GB)
+
+Environment Variables
+SPRING_PROFILES_ACTIVE=prod
+
+DB_URL=jdbc:oracle:thin:@hostname:1521/service
+
+DB_USERNAME=admin
+
+DB_PASSWORD=*****
+
+4. Execution Role
+Role Name:
+ecsTaskExecutionRole
+
+
+Permissions:
+
+AmazonECSTaskExecutionRolePolicy
+
+ECR Read Access
+
+CloudWatch Logs Access
+
+
+Used For:
+
+Pull Docker Image
+Write Logs
+
+5. Task Role
+Role Name:
+payment-service-role
+
+
+Permissions:
+
+S3 Read/Write
+
+SNS Publish
+
+SQS Send/Receive
+
+Secrets Manager Read
+
+Parameter Store Read
+
+
+Used By:
+
+Spring Boot Application
+
+6. ECS Service
+Service Name:
+payment-service
+
+Desired Tasks:
+2
+
+Minimum Tasks:
+2
+
+Maximum Tasks:
+10
+
+
+Deployment Strategy:
+
+Rolling Update
+
+7. Networking Configuration
+VPC
+banking-prod-vpc
+
+Subnets
+Private Subnet 1
+
+Private Subnet 2
+
+Public Subnet
+
+Public IP
+Disabled (Recommended)
+
+ALB handles internet traffic
+
+8. Security Group
+ALB Security Group
+
+Inbound
+
+80     HTTP    0.0.0.0/0
+
+443    HTTPS   0.0.0.0/0
+
+ECS Security Group
+
+Inbound
+
+8080
+
+Source:
+ALB Security Group
+
+9. Application Load Balancer
+Name:
+payment-alb
+
+
+Listener
+
+80 → Redirect → 443
+
+443 → Target Group
+
+
+Target Group
+
+payment-target-group
+
+Protocol:
+HTTP
+
+Port:
+8080
+
+
+Health Check
+
+Path:
+/actuator/health
+
+Success Code:
+200
+
+10. CloudWatch Logs
+Log Group:
+/ecs/payment-service
+
+Retention:
+30 Days
+
+
+Container Logs:
+
+stdout
+
+stderr
+
+Spring Boot Logs
+
+Spring Boot Dockerfile
+FROM eclipse-temurin:21-jdk
+
+COPY target/payment-service.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java","-jar","app.jar"]
+
+Complete Production Flow
+Spring Boot App
+       ↓
+Maven Package
+       ↓
+JAR File
+       ↓
+Docker Build
+       ↓
+Docker Image
+       ↓
+Push to ECR
+       ↓
+ECS Cluster
+       ↓
+Task Definition
+       ↓
+Execution Role
+       ↓
+Task Role
+       ↓
+ECS Service
+       ↓
+ALB + Target Group
+       ↓
+CloudWatch Logs
+       ↓
+Application Live
+
+30-Second Senior Developer Interview Answer
+
+We package the Spring Boot application as a JAR, create a Docker image, and push it to ECR. 
+In ECS, we create a Cluster, Task Definition, and Service. The Task Definition contains image URI,
+CPU, memory, ports, environment variables, Execution Role, and Task Role. The Service maintains 
+the desired number of tasks and is attached to an ALB. The ALB routes traffic to ECS tasks and performs health checks. 
+CloudWatch captures application logs, while auto-scaling can increase or decrease task count based on CPU or memory usage.
