@@ -373,7 +373,6 @@
         }
 
         .view-button {
-            display: block;
             width: 100%;
             min-height: 43px;
 
@@ -390,8 +389,6 @@
             color: #ffffff;
 
             font-weight: 800;
-            text-align: center;
-            text-decoration: none;
             cursor: pointer;
 
             transition:
@@ -723,7 +720,7 @@
 
         <p class="section-description">
             Search by topic or select a technology category.
-            Each revision guide opens in a separate browser tab.
+            Each text guide opens in a separate browser tab.
         </p>
 
 
@@ -967,7 +964,7 @@
 
             return name
                 .replace(/🚀/g, "")
-                .replace(/\.(txt|pdf)$/i, "")
+                .replace(/\.txt$/i, "")
                 .trim();
         }
 
@@ -1192,39 +1189,6 @@
 
 
         /*
-         * Build the URL for a revision guide.
-         * Most guides in this repository have no .txt extension,
-         * so every non-PDF file uses GitHub's download_url.
-         * PDF files use the published GitHub Pages URL.
-         */
-        function getResourceViewUrl(resource) {
-            if (!resource || !resource.name) {
-                return "";
-            }
-
-            const lowerName = resource.name.toLowerCase();
-
-            if (!lowerName.endsWith(".pdf")) {
-                return resource.download_url || "";
-            }
-
-            const resourcePath = resource.path || resource.name;
-            const encodedPath = resourcePath
-                .split("/")
-                .map(function (part) {
-                    return encodeURIComponent(part);
-                })
-                .join("/");
-
-            return "https://"
-                + repositoryOwner
-                + ".github.io/"
-                + repositoryName
-                + "/"
-                + encodedPath;
-        }
-
-        /*
          * Render revision-guide cards.
          *
          * The cards contain buttons rather than links.
@@ -1341,20 +1305,28 @@
 
                     const viewButton =
                         document.createElement(
-                            "a"
+                            "button"
                         );
+
                     viewButton.className =
                         "view-button";
-                    viewButton.href =
-                        getResourceViewUrl(
-                            resource
-                        );
-                    viewButton.target =
-                        "_blank";
-                    viewButton.rel =
-                        "noopener noreferrer";
+
+                    viewButton.type =
+                        "button";
+
                     viewButton.textContent =
                         "View Revision Guide";
+
+
+                    viewButton.addEventListener(
+                        "click",
+                        function () {
+
+                            openTextFile(
+                                resource
+                            );
+                        }
+                    );
 
 
                     card.appendChild(
@@ -1379,6 +1351,48 @@
                     );
                 }
             );
+        }
+
+
+        /*
+         * Open the selected text file directly.
+         *
+         * This fixes the earlier 404 error because
+         * viewer.html is no longer required.
+         *
+         * download_url is supplied by the repository API.
+         */
+
+        function openTextFile(resource) {
+
+            if (!resource.download_url) {
+
+                alert(
+                    "The selected revision guide cannot be opened."
+                );
+
+                return;
+            }
+
+
+            const newWindow =
+                window.open(
+                    resource.download_url,
+                    "_blank"
+                );
+
+
+            if (newWindow) {
+
+                newWindow.opener =
+                    null;
+
+            } else {
+
+                alert(
+                    "Your browser blocked the new tab. Please allow pop-ups for this website."
+                );
+            }
         }
 
 
@@ -1515,7 +1529,7 @@
 
 
         /*
-         * Load all root-level revision resources.
+         * Load all root-level text resources.
          *
          * Any future file added directly to the main
          * branch root appears after the page refreshes.
@@ -1608,7 +1622,7 @@
 
 
                 statusMessage.textContent =
-                    "Select View Revision Guide to open the complete guide in a new browser tab.";
+                    "Select View Revision Guide to open the complete text guide in a new browser tab.";
 
 
                 renderResources(
