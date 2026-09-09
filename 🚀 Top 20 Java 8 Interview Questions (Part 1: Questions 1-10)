@@ -1,37 +1,40 @@
-I found an internal interview-discussion record mentioning Java 8, Spring, and microservices topics relevant to your interview preparation, including a question about explaining Java 7/8/11/17 features.
------------------------------------------------------------
-Top 20 Java 8 Interview Questions (Part 1: Questions 1-10)
------------------------------------------------------------
-1. What are the important features introduced in Java 8?
-Answer
+=========================================================
+JAVA 8 INTERVIEW QUESTIONS (1-20)
+FORMAT:
+Question → Input → Code → Output → Explanation
+=========================================================
 
-Java 8 introduced several revolutionary features that brought functional programming capabilities to Java.
+1. What are the Important Features Introduced in Java 8?
 
-Features
+Input:
+Traditional Java Programming
+
+Code:
 Lambda Expressions
-Functional Interfaces
 Stream API
+Functional Interfaces
 Method References
+Optional
 Default Methods
-Static Methods in Interfaces
-Optional Class
-Date and Time API
+Date-Time API
 Parallel Streams
-Nashorn JavaScript Engine
 
-Interview Answer
+Output:
+Less Code
+Better Readability
+Functional Programming Support
 
-"Java 8 introduced Lambda Expressions, Stream API, Functional Interfaces, Method References, Optional Class, Default Methods, and the new Date-Time API, making Java more concise and functional."
+Explanation:
+Java 8 introduced Functional Programming concepts into Java and significantly reduced boilerplate code.
+
+---------------------------------------------------------
 
 2. What is a Lambda Expression?
-Answer
 
-A lambda expression is an anonymous function used to implement functional interfaces.
+Input:
+Runnable Task
 
-Syntax
-(parameters) -> expression
-
-Example
+Code:
 
 Before Java 8
 
@@ -42,113 +45,160 @@ Runnable r = new Runnable() {
     }
 };
 
-
 After Java 8
 
 Runnable r = () -> System.out.println("Hello");
+r.run();
 
-Advantages
-Less Code
-Better Readability
-Functional Programming Support
+Output:
 
-Interview Answer
+Hello
 
-"A Lambda Expression is an anonymous function that provides a concise way to implement functional interfaces."
+Explanation:
+A Lambda Expression is an anonymous function used to implement Functional Interfaces with less code.
+
+---------------------------------------------------------
 
 3. What is a Functional Interface?
-Answer
 
-A Functional Interface contains exactly one abstract method.
+Input:
+10 + 20
 
-Examples
-Runnable
-Callable
-Comparator
-Predicate
-Function
-Consumer
-Supplier
+Code:
 
-Custom Functional Interface
 @FunctionalInterface
 interface Calculator {
-    int add(int a, int b);
+    int add(int a,int b);
 }
 
-Lambda Usage
-Calculator c = (a,b) -> a+b;
+Calculator calc = (a,b) -> a+b;
 
-Interview Answer
+System.out.println(calc.add(10,20));
 
-"A Functional Interface contains exactly one abstract method and can be implemented using lambda expressions."
+Output:
 
-4. What is @FunctionalInterface Annotation?
-Answer
+30
 
-This annotation indicates that the interface is intended to be a Functional Interface.
+Explanation:
+A Functional Interface contains exactly one abstract method and can be implemented using Lambdas.
 
-Example
+---------------------------------------------------------
+
+4. What is @FunctionalInterface?
+
+Input:
+Functional Interface Definition
+
+Code:
+
 @FunctionalInterface
 interface Test {
     void display();
 }
 
-Benefits
-Compile-time Validation
-Better Readability
-Prevents Extra Abstract Methods
+Output:
 
-Interview Answer
+Compiles Successfully
 
-"@FunctionalInterface ensures the interface contains only one abstract method and provides compile-time validation."
+Explanation:
+Provides compile-time validation that only one abstract method exists.
 
-5. What are predefined Functional Interfaces in Java 8?
-Answer
+---------------------------------------------------------
 
-Java 8 introduced interfaces under:
-
-java.util.function
-
-Most Important Interfaces
-Predicate<T>
-Function<T,R>
-Consumer<T>
-Supplier<T>
-UnaryOperator<T>
-BinaryOperator<T>
-
-Examples
+5. What are Predefined Functional Interfaces?
 
 Predicate
 
-Predicate<Integer> even = n -> n%2==0;
+Input:
+10
 
+Code:
+
+Predicate<Integer> even =
+        n -> n % 2 == 0;
+
+System.out.println(even.test(10));
+
+Output:
+
+true
+
+Explanation:
+Predicate accepts input and returns boolean.
+
+-------------------------
 
 Function
 
-Function<String,Integer> f = String::length;
+Input:
+Java
 
+Code:
+
+Function<String,Integer> len =
+        String::length;
+
+System.out.println(len.apply("Java"));
+
+Output:
+
+4
+
+Explanation:
+Function converts Input → Output.
+
+-------------------------
 
 Consumer
 
-Consumer<String> c = System.out::println;
+Input:
+Hello
 
+Code:
+
+Consumer<String> print =
+        System.out::println;
+
+print.accept("Hello");
+
+Output:
+
+Hello
+
+Explanation:
+Consumer accepts input but returns nothing.
+
+-------------------------
 
 Supplier
 
-Supplier<String> s = () -> "Hello";
+Input:
+No Input
 
-Interview Answer
+Code:
 
-"Predicate, Function, Consumer, and Supplier are the most commonly used predefined functional interfaces in Java 8."
+Supplier<String> s =
+        () -> "Java";
+
+System.out.println(s.get());
+
+Output:
+
+Java
+
+Explanation:
+Supplier provides data without taking input.
+
+---------------------------------------------------------
 
 6. What is Stream API?
-Answer
 
-Stream API is used to process collections in a functional style.
+Input:
 
-Example
+["John","Mike","Tom"]
+
+Code:
+
 List<String> names =
 Arrays.asList("John","Mike","Tom");
 
@@ -156,353 +206,292 @@ names.stream()
      .filter(n -> n.startsWith("J"))
      .forEach(System.out::println);
 
-Output
+Output:
+
 John
 
-Advantages
-Less Code
-Lazy Evaluation
-Parallel Processing
-Improved Readability
+Explanation:
+Stream API processes collections in a functional and declarative style.
 
-Interview Answer
+---------------------------------------------------------
 
-"Stream API provides a declarative way to process collections using operations such as filter, map, reduce, and collect."
+7. Difference Between Collection and Stream
 
-7. Difference Between Collection and Stream?
-Collection
-Stores Data
-Eager Processing
+Input:
 
-Stream
-Processes Data
-Lazy Processing
+["A","B","C"]
 
-Example
+Code:
 
-Collection
+Collection Example
 
 list.add("A");
 
-
-Stream
+Stream Example
 
 list.stream()
     .filter(x -> x.startsWith("A"));
 
-Interview Answer
+Output:
 
-"A Collection stores data, whereas a Stream processes data without modifying the original collection."
+[A]
 
-8. What is Lazy Evaluation in Streams?
-Answer
+Explanation:
+Collection stores data.
+Stream processes data.
 
-Intermediate operations are not executed until a terminal operation is called.
+---------------------------------------------------------
 
-Example
+8. What is Lazy Evaluation?
+
+Input:
+
+[1,2,3,4]
+
+Code:
+
 Stream.of(1,2,3,4)
       .filter(n -> {
           System.out.println(n);
-          return n%2==0;
+          return n % 2 == 0;
       });
 
-
-Output
+Output:
 
 No Output
 
+Explanation:
+Nothing executes because there is no terminal operation.
 
-Because terminal operation is missing.
+Correct Code:
 
-Correct
 Stream.of(1,2,3,4)
-      .filter(n -> n%2==0)
+      .filter(n -> n % 2 == 0)
       .count();
 
-Interview Answer
+Output:
 
-"Streams use lazy evaluation, meaning operations execute only when a terminal operation is invoked."
+2
 
-9. What are Intermediate and Terminal Operations?
-Intermediate Operations
+---------------------------------------------------------
 
-Return Stream.
+9. Intermediate vs Terminal Operations
 
-Examples:
+Input:
 
+[5,10,15,20]
+
+Code:
+
+list.stream()
+    .filter(x -> x > 10)
+    .map(x -> x * 2)
+    .collect(Collectors.toList());
+
+Output:
+
+[30,40]
+
+Explanation:
+
+Intermediate Operations:
 filter()
 map()
 sorted()
 distinct()
-limit()
-skip()
 
-Terminal Operations
-
-Return Result.
-
-Examples:
-
+Terminal Operations:
 collect()
 count()
-forEach()
 reduce()
-findFirst()
+forEach()
 
-Example
-list.stream()
-    .filter(x -> x>10)
-    .map(x -> x*2)
-    .collect(Collectors.toList());
+---------------------------------------------------------
 
-Interview Answer
+10. What is map()?
 
-"Intermediate operations produce another stream, whereas terminal operations produce the final result."
+Input:
 
-10. What is map() in Stream API?
-Answer
+["john","mike"]
 
-map() transforms each element into another form.
-
-Example
-List<String> names =
-Arrays.asList("john","mike");
+Code:
 
 List<String> upper =
 names.stream()
      .map(String::toUpperCase)
      .collect(Collectors.toList());
 
-Output
+Output:
+
 [JOHN, MIKE]
 
-Real Banking Example
+Explanation:
+map() transforms each element into another form.
 
-Convert Account Entities into DTOs.
+---------------------------------------------------------
 
-accounts.stream()
-        .map(AccountDTO::new)
-        .toList();
+11. What is filter()?
 
-Interview Answer
+Input:
 
-"map() transforms each stream element into another object while preserving the number of elements."
+[1,2,3,4,5,6]
 
-Java 8 Revision Cheat Sheet
-Lambda               → Anonymous Function
-
-Functional Interface → One Abstract Method
-
-@FunctionalInterface → Compile-Time Validation
-
-Predicate            → Input → Boolean
-
-Function             → Input → Output
-
-Consumer             → Input, No Output
-
-Supplier             → No Input, Output
-
-Stream               → Functional Collection Processing
-
-Intermediate Ops     → filter, map, sorted
-
-Terminal Ops         → collect, count, reduce
-
-map()                → Transform Data
-
-
-Part 2 (Questions 11-20) will cover:
-
-filter()
-flatMap()
-reduce()
-Method References
-Optional
-Default Methods
-Static Methods
-Date-Time API
-Parallel Streams
-findFirst vs findAny
-
-
------------------------------------------------------------
-Top 20 Java 8 Interview Questions (Part 2: Questions 11-20)
------------------------------------------------------------
-11. What is filter() in Stream API?
-Answer
-
-filter() is used to select elements that satisfy a given condition.
-
-Syntax
-stream.filter(condition)
-
-Example
-List<Integer> numbers =
-Arrays.asList(1,2,3,4,5,6);
+Code:
 
 numbers.stream()
-       .filter(n -> n%2==0)
+       .filter(n -> n % 2 == 0)
        .forEach(System.out::println);
 
-Output
+Output:
+
 2
 4
 6
 
-Banking Example
+Explanation:
+filter() selects elements that satisfy a condition.
 
-Get active accounts only.
-
-accounts.stream()
-        .filter(Account::isActive)
-        .toList();
-
-Interview Answer
-
-"filter() is an intermediate operation used to select elements matching a specific condition."
+---------------------------------------------------------
 
 12. What is flatMap()?
-Answer
 
-map() returns one object for one input.
+Input:
 
-flatMap() converts multiple collections into a single stream.
+[[A,B],[C,D]]
 
-Example
-List<List<String>> data =
-Arrays.asList(
- Arrays.asList("A","B"),
- Arrays.asList("C","D")
-);
+Code:
 
 data.stream()
     .flatMap(List::stream)
     .forEach(System.out::println);
 
-Output
+Output:
+
 A
 B
 C
 D
 
-Interview Answer
+Explanation:
+flatMap() converts nested collections into a single stream.
 
-"flatMap() flattens nested collections into a single stream."
+---------------------------------------------------------
 
 13. What is reduce()?
-Answer
 
-reduce() combines stream elements into a single result.
+Input:
 
-Example
-List<Integer> nums =
-Arrays.asList(1,2,3,4,5);
+[1,2,3,4,5]
 
-int sum = nums.stream()
-              .reduce(0, Integer::sum);
+Code:
+
+int sum =
+nums.stream()
+    .reduce(0, Integer::sum);
 
 System.out.println(sum);
 
-Output
+Output:
+
 15
 
-Find Maximum
-int max =
-nums.stream()
-    .reduce(Integer.MIN_VALUE,
-            Integer::max);
+Explanation:
+reduce() combines all elements into a single value.
 
-Interview Answer
-
-"reduce() performs aggregation operations such as sum, max, min, or custom calculations."
+---------------------------------------------------------
 
 14. What is Method Reference?
-Answer
 
-Method Reference is a short form of Lambda Expression.
+Input:
 
-Syntax
-ClassName::methodName
+["Java","Spring","Kafka"]
 
-Lambda
-list.forEach(x ->
-System.out.println(x));
+Code:
 
-Method Reference
+Lambda:
+
+list.forEach(x -> System.out.println(x));
+
+Method Reference:
+
 list.forEach(System.out::println);
 
-Types
-Static Method Reference
-Instance Method Reference
-Constructor Reference
+Output:
 
-Interview Answer
+Java
+Spring
+Kafka
 
-"Method references provide a concise way of referring to existing methods using the :: operator."
+Explanation:
+Method Reference is a shorter form of Lambda Expression.
+
+---------------------------------------------------------
 
 15. What is Optional Class?
-Answer
 
-Optional helps avoid NullPointerException.
+Input:
 
-Without Optional
-String name = null;
-System.out.println(name.length());
+null
 
-Result
-NullPointerException
+Code:
 
-With Optional
 Optional<String> name =
 Optional.ofNullable(null);
 
 System.out.println(
 name.orElse("Unknown"));
 
-Output
+Output:
+
 Unknown
 
-Important Methods
-isPresent()
-get()
-orElse()
-orElseGet()
-orElseThrow()
-ifPresent()
+Explanation:
+Optional helps avoid NullPointerException.
 
-Interview Answer
+---------------------------------------------------------
 
-"Optional is a container object used to safely handle null values and reduce NullPointerException."
+16. Difference Between orElse() and orElseGet()
 
-16. Difference Between orElse() and orElseGet()?
-orElse()
+Input:
 
-Always executes.
+Optional.of("Java")
+
+Code:
 
 Optional.of("Java")
         .orElse(getValue());
 
+Output:
 
-Even if value exists.
+Java
 
-orElseGet()
+Explanation:
+getValue() executes even though Optional contains a value.
 
-Executes only when value is absent.
+-------------------------
+
+Code:
 
 Optional.of("Java")
         .orElseGet(() -> getValue());
 
-Interview Answer
+Output:
 
-"orElse() eagerly evaluates the default value, whereas orElseGet() lazily evaluates it only when required."
+Java
 
-17. What are Default Methods in Interfaces?
-Answer
+Explanation:
+getValue() executes only when value is absent.
 
-Default methods allow interfaces to contain implementation.
+---------------------------------------------------------
 
-Example
+17. What are Default Methods?
+
+Input:
+
+Car Object
+
+Code:
+
 interface Vehicle {
 
     default void start() {
@@ -510,29 +499,28 @@ interface Vehicle {
     }
 }
 
-Implementation
 class Car implements Vehicle {
 }
 
-Usage
 new Car().start();
 
-Output
+Output:
+
 Starting
 
-Advantage
-Backward Compatibility
+Explanation:
+Default methods allow implementation inside interfaces.
 
-Interview Answer
-
-"Default methods allow adding method implementations to interfaces without breaking existing classes."
+---------------------------------------------------------
 
 18. What are Static Methods in Interfaces?
-Answer
 
-Java 8 allows static methods inside interfaces.
+Input:
 
-Example
+10,20
+
+Code:
+
 interface Calculator {
 
     static int add(int a,int b) {
@@ -540,179 +528,100 @@ interface Calculator {
     }
 }
 
-Usage
 System.out.println(
 Calculator.add(10,20));
 
-Output
+Output:
+
 30
 
-Interview Answer
+Explanation:
+Static methods belong to interfaces and do not require object creation.
 
-"Static methods belong to interfaces and can be called without creating an object."
+---------------------------------------------------------
 
-19. What is New Date and Time API?
-Answer
+19. What is New Date-Time API?
 
-Java 8 introduced the java.time package.
+Input:
 
-Older APIs:
+Current Date
 
-Date
-Calendar
+Code:
 
-
-had thread-safety and design issues.
-
-New Classes
-LocalDate
-LocalTime
-LocalDateTime
-ZonedDateTime
-Period
-Duration
-
-Example
 LocalDate today =
 LocalDate.now();
 
 System.out.println(today);
 
-Output
-2026-08-31
+Output:
 
-Add Days
+2026-09-09
+
+Explanation:
+Java 8 Date-Time API is immutable, thread-safe and easy to use.
+
+-------------------------
+
+Input:
+
+Add 10 Days
+
+Code:
+
 LocalDate.now()
          .plusDays(10);
 
-Interview Answer
+Output:
 
-"Java 8 Date-Time API provides immutable, thread-safe, and easy-to-use date handling classes."
+2026-09-19
+
+---------------------------------------------------------
 
 20. What are Parallel Streams?
-Answer
 
-Parallel Streams execute operations using multiple CPU cores.
+Input:
 
-Normal Stream
-list.stream()
+[1,2,3,4,5]
 
-Parallel Stream
+Code:
+
 list.parallelStream()
-
-Example
-List<Integer> nums =
-IntStream.rangeClosed(1,100)
-         .boxed()
-         .toList();
-
-nums.parallelStream()
     .forEach(System.out::println);
 
-Advantages
-Better Performance
-Parallel Processing
-Utilizes Multiple CPU Cores
+Output:
 
-Disadvantages
-Thread Overhead
-Order Not Guaranteed
-Not Suitable For Small Collections
+3
+1
+5
+2
+4
 
-Interview Answer
+(Order Not Guaranteed)
 
-"Parallel Streams improve performance by processing data concurrently using the ForkJoinPool framework."
+Explanation:
+Parallel Streams use ForkJoinPool and multiple CPU cores for processing.
 
-Java 8 Stream Operations Cheat Sheet
-filter()       → Select records
+=========================================================
+JAVA 8 ONE-LINE MEMORY TRICKS
+=========================================================
 
-map()          → Transform records
-
-flatMap()      → Flatten nested collections
-
-sorted()       → Sort records
-
-distinct()     → Remove duplicates
-
-limit()        → Restrict count
-
-skip()         → Skip records
-
-reduce()       → Aggregate result
-
-collect()      → Convert Stream to Collection
-
-count()        → Count elements
-
-findFirst()    → First element
-
-findAny()      → Any matching element
-
-Java 8 Functional Interfaces Cheat Sheet
-Predicate<T>
-Input    → T
-Output   → boolean
-
-Function<T,R>
-Input    → T
-Output   → R
-
-Consumer<T>
-Input    → T
-Output   → void
-
-Supplier<T>
-Input    → None
-Output   → T
-
-UnaryOperator<T>
-Input    → T
-Output   → T
-
-BinaryOperator<T>
-Input    → T,T
-Output   → T
-
-Senior Java Developer Quick Revision (Java 8)
 Lambda            → Anonymous Function
-
 FunctionalInterface → One Abstract Method
-
+Predicate         → Input → Boolean
+Function          → Input → Output
+Consumer          → Input Only
+Supplier          → Output Only
 Stream API        → Functional Collection Processing
-
 filter()          → Select Data
-
 map()             → Transform Data
-
 flatMap()         → Flatten Collections
-
 reduce()          → Aggregate Data
-
+collect()         → Convert Data
 Method Reference  → Class::Method
-
 Optional          → Null Safety
-
-Default Method    → Implementation in Interface
-
-Static Method     → Utility Method in Interface
-
+Default Method    → Interface Implementation
+Static Method     → Utility Method
 LocalDate         → New Date API
-
 Parallel Stream   → Multi-Core Processing
-
-Predicate         → Returns Boolean
-
-Function          → Converts Input to Output
-
-Consumer          → Accepts Input
-
-Supplier          → Supplies Data
-
-collect()         → Convert Stream Result
-
 findFirst()       → First Element
-
 findAny()         → Any Matching Element
-
-
-These 20 questions (Part 1 + Part 2) cover nearly 80-90% of Java 8 interview questions commonly asked for Senior Java Developer, Spring Boot, Microservices, and Banking-domain interviews.
