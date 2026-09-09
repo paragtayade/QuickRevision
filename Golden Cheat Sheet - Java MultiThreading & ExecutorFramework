@@ -1,0 +1,1187 @@
+================================================================================
+JAVA MULTITHREADING INTERVIEW REVISION
+STRICT FORMAT: QUESTION -> INPUT -> CODE -> OUTPUT -> EXPLANATION
+================================================================================
+
+Total questions: 55
+
+################################################################################
+CORE MULTITHREADING AND JAVA 21
+################################################################################
+
+Question: 1. What is a Thread?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+A thread is the smallest unit of execution within a process.
+Multiple threads can run concurrently within the same process.
+Interview One-Liner:
+A thread is a lightweight sub-process that enables concurrent execution.
+
+--------------------------------------------------------------------------------
+
+Question: 2. What is Multithreading?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+Multithreading is the execution of multiple threads concurrently to improve application responsiveness and throughput.
+Interview One-Liner:
+Multithreading allows multiple tasks to execute simultaneously within the same application.
+
+--------------------------------------------------------------------------------
+
+Question: 3. Difference Between Process and Thread
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Process
+Independent execution unit
+Separate memory
+Heavyweight
+Higher creation cost
+Thread
+Part of a process
+Shared memory
+Lightweight
+Lower creation cost
+Interview One-Liner:
+Processes have separate memory, while threads share memory within the same process.
+
+--------------------------------------------------------------------------------
+
+Question: 4. How Do You Create a Thread in Java?
+
+Input:
+A task that prints "Running".
+
+Code:
+Thread t = new Thread(() -> System.out.println("Running"));
+t.start();
+
+Output:
+Running
+
+Explanation:
+new Thread(...) creates a Thread object. Calling start() asks the JVM to run the task on a new thread.
+Modern applications commonly use ExecutorService or virtual threads instead of manually managing many platform threads.
+
+--------------------------------------------------------------------------------
+
+Question: 5. Difference Between start() and run()
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Creates a new thread
+run()
+start() creates a new thread, run() executes like a normal method.
+start()
+Asynchronous
+Calls JVM scheduler
+Executes in current thread
+Synchronous
+Normal method call
+Interview One-Liner:
+
+--------------------------------------------------------------------------------
+
+Question: 6. Explain Thread Lifecycle
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+NEW -> RUNNABLE -> RUNNING -> WAITING/BLOCKED -> TERMINATED
+NEW
+v
+RUNNABLE
+v
+RUNNING
+v
+WAITING / BLOCKED / TIMED_WAITING
+v
+TERMINATED
+Interview One-Liner:
+
+--------------------------------------------------------------------------------
+
+Question: 7. What is Thread Scheduler?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+JVM component responsible for selecting runnable threads.
+Interview One-Liner:
+Thread scheduling behavior depends on the JVM and operating system.
+
+--------------------------------------------------------------------------------
+
+Question: 8. What is Context Switching?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+CPU switches execution from one thread to another.
+Interview One-Liner:
+Context switching improves concurrency but introduces overhead.
+
+--------------------------------------------------------------------------------
+
+Question: 9. What is a Daemon Thread?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+Background thread that terminates when all user threads finish.
+Examples:
+Garbage Collector
+Monitoring Threads
+Interview One-Liner:
+Daemon threads provide background services to user threads.
+
+--------------------------------------------------------------------------------
+
+Question: 10. What is Thread Priority?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+A hint to the scheduler regarding thread execution preference.
+Interview One-Liner:
+Thread priority does not guarantee execution order.
+Synchronization
+
+--------------------------------------------------------------------------------
+
+Question: 11. What is Synchronization?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+Synchronization ensures only one thread accesses shared resources at a time.
+Interview One-Liner:
+Synchronization prevents concurrent modification of shared data.
+
+--------------------------------------------------------------------------------
+
+Question: 12. Why Do We Need Synchronization?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+Prevent race conditions
+Prevent inconsistent data
+Maintain data integrity
+Interview One-Liner:
+Synchronization provides thread safety.
+
+--------------------------------------------------------------------------------
+
+Question: 13. What is Race Condition?
+
+Input:
+Shared counter accessed by multiple threads.
+
+Code:
+count++;
+
+Output:
+Output is nondeterministic when the increment is not protected.
+
+Explanation:
+A race condition occurs when multiple threads update shared data and the result depends 
+on execution timing. count++ is a read-modify-write operation and is not atomic.
+
+--------------------------------------------------------------------------------
+
+Question: 14. Difference Between synchronized Method and Block
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+synchronized Method
+synchronized Block
+Locks entire method
+Less flexible
+Locks specific section of code
+More flexible
+Better performance
+Interview One-Liner:
+Synchronized blocks provide finer-grained locking.
+
+--------------------------------------------------------------------------------
+
+Question: 15. What is Intrinsic Lock (Monitor)?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Every Java object has an internal monitor lock used by synchronized code.
+Answer:
+Interview One-Liner:
+Every Java object contains its own monitor.
+
+--------------------------------------------------------------------------------
+
+Question: 16. What is Deadlock?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Thread1 -> LockA -> LockB
+Thread2 -> LockB -> LockA
+Answer:
+Two or more threads wait forever for each other's locks.
+Example:
+Interview One-Liner:
+Deadlock is a circular lock dependency.
+
+--------------------------------------------------------------------------------
+
+Question: 17. How Do You Prevent Deadlock?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Techniques:
+Consistent lock ordering
+Lock timeout
+tryLock()
+Avoid nested locks
+Interview One-Liner:
+Always acquire locks in the same order.
+
+--------------------------------------------------------------------------------
+
+Question: 18. What is Livelock?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+Threads keep responding to each other but make no actual progress.
+Interview One-Liner:
+In livelock, threads are active but stuck.
+
+--------------------------------------------------------------------------------
+
+Question: 19. What is Starvation?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+A thread never gets CPU time or resources.
+Interview One-Liner:
+Starvation occurs when one thread is continuously denied execution.
+
+--------------------------------------------------------------------------------
+
+Question: 20. Difference Between volatile and synchronized
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+synchronized
+volatile provides visibility, synchronized provides visibility and mutual exclusion.
+volatile
+Visibility only
+No locking
+Faster
+No atomicity
+Visibility + Atomicity
+Uses locking
+Slower
+Thread-safe
+Interview One-Liner:
+Inter-Thread Communication
+
+--------------------------------------------------------------------------------
+
+Question: 21. Difference Between sleep(), wait(), and join()
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Must be called inside synchronized block
+sleep()
+Pauses current thread
+Does NOT release lock
+wait()
+Releases lock
+join()
+Waits for another thread to finish
+Interview One-Liner:
+wait() releases the lock, sleep() does not.
+
+--------------------------------------------------------------------------------
+
+Question: 22. Difference Between notify() and notifyAll()
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+notify()
+Wakes one waiting thread
+notifyAll()
+Wakes all waiting threads
+Interview One-Liner:
+notifyAll() is generally safer when multiple threads may be waiting.
+
+--------------------------------------------------------------------------------
+
+Question: 23. What is Producer-Consumer Problem?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Producer -> Queue -> Consumer
+Classic synchronization problem solved using wait/notify or BlockingQueue.
+Answer:
+One thread produces data.
+Another thread consumes data.
+Interview One-Liner:
+
+--------------------------------------------------------------------------------
+
+Question: 24. What is BlockingQueue?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+BlockingQueue greatly simplifies producer-consumer implementation.
+Answer:
+Thread-safe queue used in producer-consumer scenarios.
+Benefits:
+Built-in synchronization
+Blocks automatically when full or empty
+Interview One-Liner:
+Advanced Concurrency
+
+--------------------------------------------------------------------------------
+
+Question: 25. What is Executor Framework?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+Framework for managing thread creation and execution.
+Benefits:
+Thread pooling
+Better resource management
+Improved scalability
+Interview One-Liner:
+Separates task submission from thread management.
+
+--------------------------------------------------------------------------------
+
+Question: 26. What is Thread Pool?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+Collection of reusable worker threads.
+Benefits:
+Improved performance
+Reduced thread creation overhead
+Better memory utilization
+Interview One-Liner:
+Reuse threads instead of creating them repeatedly.
+
+--------------------------------------------------------------------------------
+
+Question: 27. Difference Between Runnable and Callable
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+run()
+call()
+Runnable
+No return value
+Cannot throw checked exception
+Callable
+Returns value
+Can throw checked exception
+Interview One-Liner:
+Use Callable when a result is needed.
+
+--------------------------------------------------------------------------------
+
+Question: 28. What is Future?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+get()
+isDone()
+cancel()
+Future.get() blocks until the result is available.
+Answer:
+Represents result of an asynchronous computation.
+Important Methods:
+Interview One-Liner:
+
+--------------------------------------------------------------------------------
+
+Question: 29. What is CompletableFuture?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+CompletableFuture enables non-blocking async programming.
+Answer:
+Advanced Future introduced in Java 8.
+Supports asynchronous pipelines.
+Supports chaining and combining tasks.
+Interview One-Liner:
+
+--------------------------------------------------------------------------------
+
+Question: 30. What is ConcurrentHashMap?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Better scalability than synchronized HashMap
+ConcurrentHashMap is the preferred thread-safe Map in Java.
+Answer:
+Thread-safe implementation of Map.
+Designed for high concurrency.
+Advantages:
+Concurrent reads
+Better performance
+Interview One-Liner:
+Java 21 Bonus Questions
+
+--------------------------------------------------------------------------------
+
+Question: 31. What are Virtual Threads?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+Lightweight threads introduced in Java 21.
+Allow millions of concurrent tasks.
+Interview One-Liner:
+Virtual Threads make thread-per-request architecture practical again.
+
+--------------------------------------------------------------------------------
+
+Question: 32. Platform Thread vs Virtual Thread
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Platform Thread
+OS thread
+Heavyweight
+Higher memory usage
+Thousands possible
+Virtual Thread
+JVM managed
+Lightweight
+Low memory
+Millions possible
+Interview One-Liner:
+Virtual Threads dramatically reduce thread management cost.
+
+--------------------------------------------------------------------------------
+
+Question: 33. Can Database Transactions Run in @Async?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+Yes.
+Transaction does not automatically propagate to async thread.
+Interview One-Liner:
+Transactions are thread-bound and do not automatically cross thread boundaries.
+
+--------------------------------------------------------------------------------
+
+Question: 34. What is ThreadLocal?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+Provides a separate copy of a variable for each thread.
+Use Cases:
+User Context
+Request Tracking
+Correlation ID
+Database Connection
+Interview One-Liner:
+ThreadLocal provides thread-specific storage without synchronization.
+
+--------------------------------------------------------------------------------
+
+Question: 35. What is AtomicInteger?
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Answer:
+Thread-safe counter using CAS (Compare-And-Swap).
+Benefits:
+No synchronization required
+High performance
+Interview One-Liner:
+AtomicInteger provides lock-free atomic operations.
+
+--------------------------------------------------------------------------------
+
+################################################################################
+EXECUTOR FRAMEWORK AND VIRTUAL THREADS
+################################################################################
+
+Question: 1. Why ExecutorService?
+
+Input:
+Submit 1,000 tasks while limiting reusable worker threads.
+
+Code:
+// Avoid creating one platform thread per task
+for (int i = 0; i < 1000; i++) {
+    new Thread(task).start();
+}
+
+// Prefer managed thread reuse
+ExecutorService executor = Executors.newFixedThreadPool(10);
+executor.submit(task);
+executor.shutdown();
+
+Output:
+The submitted task runs using a worker from the fixed thread pool.
+
+Explanation:
+ExecutorService separates task submission from thread management and reuses worker threads.
+Always shut down an ExecutorService when it is no longer needed.
+
+--------------------------------------------------------------------------------
+
+Question: 2. Runnable vs Callable
+
+Input:
+Runnable prints Hello. Callable returns SUCCESS.
+
+Code:
+Runnable runnable = () -> System.out.println("Hello");
+Callable<String> callable = () -> "SUCCESS";
+
+Output:
+Runnable output: Hello
+Callable result: SUCCESS
+
+Explanation:
+Runnable does not return a result. Callable returns a value and may throw checked exceptions.
+
+--------------------------------------------------------------------------------
+
+Question: 3. Future
+
+Input:
+A Callable task submitted to an ExecutorService.
+
+Code:
+Future<String> future = executor.submit(task);
+String result = future.get();
+
+Output:
+The value returned by the Callable task.
+
+Explanation:
+Future represents an asynchronous result. future.get() blocks the current thread until the 
+result is available.
+
+--------------------------------------------------------------------------------
+
+Question: 4. CompletableFuture
+
+Input:
+An asynchronous operation returning Hello.
+
+Code:
+CompletableFuture<String> future =
+        CompletableFuture.supplyAsync(() -> "Hello");
+
+String result = future.join();
+
+Output:
+Hello
+
+Explanation:
+CompletableFuture supports asynchronous pipelines, chaining, combining, and completion handling. 
+join() returns the result and wraps failures in an unchecked CompletionException.
+
+--------------------------------------------------------------------------------
+
+Question: 5. Multiple APIs
+
+Input:
+Customer, account, and fraud service calls.
+
+Code:
+CompletableFuture<String> customer = getCustomer();
+CompletableFuture<String> account = getAccount();
+CompletableFuture<String> fraud = getFraud();
+
+CompletableFuture.allOf(customer, account, fraud).join();
+
+Output:
+Completes after all three CompletableFuture tasks complete, or completes exceptionally if a combined task fails.
+
+Explanation:
+allOf() combines multiple CompletableFuture instances and allows the caller to wait for all of them as one stage.
+
+--------------------------------------------------------------------------------
+
+Question: 6. thenApply vs thenCompose
+
+Input:
+A completed User stage.
+
+Code:
+CompletableFuture<String> nameFuture =
+        future.thenApply(user -> user.getName());
+
+CompletableFuture<Account> accountFuture =
+        future.thenCompose(user -> getAccount(user));
+
+Output:
+thenApply result: a transformed value
+thenCompose result: a flattened CompletableFuture<Account>
+
+Explanation:
+thenApply performs value-to-value transformation. thenCompose is used when the mapping 
+function already returns CompletableFuture and prevents nested futures.
+
+--------------------------------------------------------------------------------
+
+Question: 7. Fixed Thread Pool
+
+Input:
+Payment API tasks with at most 20 pool workers.
+
+Code:
+ExecutorService executor = Executors.newFixedThreadPool(20);
+executor.submit(task);
+executor.shutdown();
+
+Output:
+The task runs on one of the fixed pool workers.
+
+Explanation:
+A fixed thread pool limits the number of concurrently active pool threads and reuses them for submitted tasks.
+
+--------------------------------------------------------------------------------
+
+Question: 8. Scheduled Executor
+
+Input:
+Run a task initially at once and then every five seconds.
+
+Code:
+ScheduledExecutorService executor =
+        Executors.newScheduledThreadPool(1);
+
+executor.scheduleAtFixedRate(
+        task, 0, 5, TimeUnit.SECONDS);
+
+// Later, when scheduling is no longer needed:
+// executor.shutdown();
+
+Output:
+The task is scheduled repeatedly at a fixed rate.
+
+Explanation:
+ScheduledExecutorService supports delayed and periodic task execution.
+
+--------------------------------------------------------------------------------
+
+Question: 9. Virtual Thread
+
+Input:
+One request-processing task.
+
+Code:
+Thread thread = Thread.startVirtualThread(() -> process());
+thread.join();
+
+Output:
+The process() task executes on a virtual thread.
+
+Explanation:
+Virtual threads are lightweight JVM-managed threads designed to support large numbers of concurrent blocking tasks.
+
+--------------------------------------------------------------------------------
+
+Question: 10. Virtual Thread Executor
+
+Input:
+Submit one task per virtual thread.
+
+Code:
+try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    Future<?> future = executor.submit(() -> process());
+    future.get();
+}
+
+Output:
+The submitted task runs on its own virtual thread.
+
+Explanation:
+newVirtualThreadPerTaskExecutor() creates a new virtual thread for each submitted task. 
+The try-with-resources block closes the executor after submitted tasks finish.
+
+--------------------------------------------------------------------------------
+
+Question: 11. Virtual Thread vs Platform Thread
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Platform Thread
+OS Thread
+Expensive
+Thousands
+Virtual Thread
+JVM Managed
+Cheap
+Millions
+One-Liner
+Platform = Heavy
+Virtual = Lightweight
+
+--------------------------------------------------------------------------------
+
+Question: 12. When NOT to Use Virtual Threads?
+
+Input:
+CPU-intensive prime-number calculation.
+
+Code:
+int processors = Runtime.getRuntime().availableProcessors();
+ExecutorService executor = Executors.newFixedThreadPool(processors);
+executor.submit(() -> calculatePrime());
+executor.shutdown();
+
+Output:
+The CPU-bound task runs using a bounded platform-thread pool.
+
+Explanation:
+Virtual threads mainly improve scalability for blocking workloads. They do not make CPU-intensive calculations
+faster, so CPU-bound work is normally bounded near available processor capacity.
+
+--------------------------------------------------------------------------------
+
+Question: 13. Structured Concurrency
+
+Input:
+A fund transfer needs customer, account, and fraud results.
+
+Code:
+try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+    var customer = scope.fork(this::getCustomer);
+    var account = scope.fork(this::getAccount);
+    var fraud = scope.fork(this::getFraud);
+
+    scope.join().throwIfFailed();
+}
+
+Output:
+All subtasks complete successfully, or the scope reports failure and cancels unfinished sibling tasks.
+
+Explanation:
+Structured concurrency treats related subtasks as one unit, making their lifetime, failure handling, and
+cancellation easier to manage. API availability depends on the Java release and preview settings.
+
+--------------------------------------------------------------------------------
+
+Question: 14. ConcurrentHashMap
+
+Input:
+Multiple threads update a shared cache.
+
+Code:
+ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
+map.put("account-101", "ACTIVE");
+String status = map.get("account-101");
+
+Output:
+ACTIVE
+
+Explanation:
+ConcurrentHashMap supports thread-safe map operations with better concurrency than synchronizing all access to a regular HashMap.
+
+--------------------------------------------------------------------------------
+
+Question: 15. BlockingQueue
+
+Input:
+Producer adds A and consumer removes it.
+
+Code:
+BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+queue.put("A");
+String value = queue.take();
+
+Output:
+A
+
+Explanation:
+BlockingQueue provides thread-safe producer-consumer coordination. put() may wait when bounded and full, while take() waits when empty.
+
+--------------------------------------------------------------------------------
+
+Question: 16. ReentrantLock
+
+Input:
+Try to acquire a lock within two seconds.
+
+Code:
+if (lock.tryLock(2, TimeUnit.SECONDS)) {
+    try {
+        // protected work
+    } finally {
+        lock.unlock();
+    }
+}
+
+Output:
+True branch runs only if the lock is acquired within two seconds.
+
+Explanation:
+ReentrantLock provides capabilities such as timed lock acquisition. Always unlock in a finally block after successful acquisition.
+
+--------------------------------------------------------------------------------
+
+Question: 17. ForkJoinPool
+
+Input:
+A divide-and-conquer task for a large array.
+
+Code:
+ForkJoinPool pool = new ForkJoinPool();
+ForkJoinTask<Integer> future = pool.submit(task);
+Integer result = future.join();
+pool.shutdown();
+
+Output:
+The value produced by the submitted ForkJoinTask.
+
+Explanation:
+ForkJoinPool is designed for recursively split CPU-bound tasks and uses work stealing among worker threads.
+
+--------------------------------------------------------------------------------
+
+Question: 18. Work Stealing
+
+Input:
+Not applicable. This is a conceptual or comparison question.
+
+Code:
+Not applicable. No executable code is required for this concept.
+
+Output:
+Not applicable. This concept does not produce a fixed runtime output.
+
+Explanation:
+Scenario
+One thread becomes idle.
+Idle Thread
+steals work
+from busy thread
+One-Liner
+Work Stealing improves CPU utilization.
+
+--------------------------------------------------------------------------------
+
+Question: 19. Executor Shutdown
+
+Input:
+An ExecutorService that has finished accepting required work.
+
+Code:
+executor.shutdown();
+
+Output:
+The executor stops accepting new tasks and completes previously submitted tasks.
+
+Explanation:
+Always shut down an ExecutorService that the application owns. shutdown() starts an orderly shutdown.
+
+--------------------------------------------------------------------------------
+
+Question: 20. Most Asked Senior Question
+
+Input:
+An I/O-heavy JDBC operation.
+
+Code:
+try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    Future<?> future = executor.submit(() -> jdbcCall());
+    future.get();
+}
+
+Output:
+The blocking JDBC call executes on a virtual thread.
+
+Explanation:
+Virtual threads can make thread-per-request blocking code scalable for many I/O-heavy workloads. 
+This does not mean they universally replace reactive programming; the choice depends on workload and architecture.
+
+--------------------------------------------------------------------------------
