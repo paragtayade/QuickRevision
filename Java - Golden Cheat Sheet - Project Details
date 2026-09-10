@@ -1,0 +1,490 @@
+Excellent interview strategy. Instead of memorizing architecture blocks, convert them into interviewer-style questions and answers.
+
+JPMC Dining Data Modernization
+Architecture Explained as Interview Questions
+Q1. Tell me about your last project architecture.
+Answer
+
+In my last project at JPMC, I worked on a Dining Data Modernization platform.
+
+The objective was to collect restaurant and lifestyle content from external providers, process and standardize the data, store it in AWS S3, and make it available for analytics and downstream business systems.
+
+The platform was built using:
+
+Spring Boot
+Spring Batch
+AWS S3
+Kafka
+AWS Glue
+Athena
+Aurora PostgreSQL
+AWS ECS
+
+
+The architecture followed an event-driven microservices design that provided:
+
+Loose Coupling
+Scalability
+Fault Isolation
+Independent Deployments
+Cloud-Native Processing
+
+Q2. Explain the end-to-end architecture flow.
+Answer
+External APIs
+      |
+      V
+Extraction Service
+      |
+      V
+S3 Raw Bucket
+      |
+      V
+Publisher Service
+      |
+      V
+Kafka
+      |
+------------------------------------------------
+|          |            |            |
+Audit   Analytics  Notification   Error
+      |
+      V
+Aurora PostgreSQL
+      |
+      V
+AWS Glue
+      |
+      V
+Refined S3
+      |
+      V
+Athena
+      |
+      V
+Business Reports
+
+
+Flow:
+
+1. External APIs provide dining data.
+2. Extraction Service fetches data.
+3. Store raw data in S3.
+4. Publisher Service reads S3.
+5. Publish events to Kafka.
+6. Consumer services process events.
+7. Glue transforms data.
+8. Athena generates reports.
+
+Q3. Why was this project needed?
+Answer
+
+The business received dining content from multiple external providers.
+
+Challenges:
+
+Huge Data Volume
+Different Formats
+Analytics Requirement
+Manual Processing
+Scalability Issues
+
+
+Business wanted:
+
+Centralized Data Platform
+Automated Pipelines
+Analytics
+Cloud Scalability
+Reliable Processing
+
+Q4. What is the role of the Extraction Service?
+Answer
+
+Extraction Service is responsible for:
+
+Calling External APIs
+Validating Responses
+Transforming Content
+Storing Raw Files in S3
+Updating Job Status
+
+
+Flow:
+
+External API
+     |
+     V
+Extraction Service
+     |
+     V
+AWS S3
+
+
+Technology:
+
+Spring Boot
+Spring Batch
+AWS SDK
+REST APIs
+
+Q5. Why did you use Spring Batch?
+Answer
+
+Spring Batch is designed for large-volume processing.
+
+Benefits:
+
+Chunk Processing
+Job Restart Capability
+Fault Tolerance
+Parallel Processing
+Job Monitoring
+
+
+Example:
+
+100,000 Records
+
+Chunk Size = 500
+
+Commit every 500 records
+
+
+This reduces memory consumption.
+
+Q6. Why store data in S3 first?
+Answer
+
+S3 acts as a landing zone.
+
+Benefits:
+
+Highly Durable
+Cheap Storage
+Large File Support
+Audit History
+Reprocessing Capability
+
+
+If downstream systems fail:
+
+Data remains available in S3.
+
+No Data Loss
+
+Q7. Why didn't you directly send data from Extraction Service to Kafka?
+Answer
+
+This is a common architect-level question.
+
+Bad Design
+External API
+     |
+Extraction Service
+     |
+Kafka
+
+
+Problems:
+
+Tight Coupling
+Hard Scaling
+No Reprocessing
+Difficult Recovery
+
+Better Design
+Extraction Service
+     |
+S3
+     |
+Publisher Service
+     |
+Kafka
+
+
+Benefits:
+
+Independent Scaling
+Failure Recovery
+Reusable Data
+Loose Coupling
+
+Q8. What does Publisher Service do?
+Answer
+
+Responsibilities:
+
+Read Files from S3
+Parse JSON
+Apply Business Rules
+Transform Data
+Publish Kafka Events
+
+
+Example Event:
+
+{
+  "restaurantId":"123",
+  "city":"New York",
+  "action":"CREATE"
+}
+
+Q9. Why Kafka?
+Answer
+
+Kafka was used because multiple downstream systems consumed the same business event.
+
+Benefits:
+
+Asynchronous Communication
+High Throughput
+Scalability
+Fault Tolerance
+Replay Support
+
+Q10. Why Kafka instead of REST communication?
+Answer
+REST
+Synchronous
+Tightly Coupled
+Consumer Failure Affects Producer
+
+Kafka
+Asynchronous
+Loose Coupling
+Retry Support
+Event Retention
+Replay Capability
+
+
+If consumer is down:
+
+Event remains in Kafka.
+
+No Data Loss.
+
+Q11. What Kafka topics did you use?
+Answer
+
+Examples:
+
+restaurant-topic
+offer-topic
+notification-topic
+audit-topic
+
+
+Producer:
+
+kafkaTemplate.send(
+    "restaurant-topic",
+    payload);
+
+Q12. What consumer services were listening to Kafka?
+Answer
+Audit Service
+Notification Service
+Analytics Service
+Error Service
+
+
+Each service consumes independently.
+
+@KafkaListener(
+ topics="restaurant-topic")
+public void consume(Event e){
+    process(e);
+}
+
+Q13. What database did you use and why?
+Answer
+
+We used:
+
+AWS Aurora PostgreSQL
+
+
+Used for:
+
+Audit Data
+Job Status
+Business Data
+Processing Metadata
+
+
+Why Aurora:
+
+Managed Service
+High Availability
+ACID Compliance
+Automatic Backup
+Read Replicas
+
+Q14. How did you handle failures?
+Answer
+
+We implemented:
+
+Retry
+DLT
+Monitoring
+Alerting
+
+
+Architecture:
+
+Main Topic
+    |
+ Exception
+    |
+Retry Topic
+    |
+ Exception
+    |
+DLT
+
+
+Benefits:
+
+No Message Loss
+Easy Investigation
+Replay Support
+
+Q15. What happens when Kafka Consumer fails?
+Answer
+
+Example:
+
+Kafka Event
+      |
+Consumer
+      |
+Exception
+
+
+Solution:
+
+Retry 3 Times
+
+If still failing
+
+Send to DLT
+
+Q16. How did you monitor the system?
+Answer
+
+We monitored:
+
+Kafka Lag
+API Latency
+CPU Usage
+Memory Usage
+Pods
+Database Connections
+Errors
+
+
+Tools:
+
+CloudWatch
+Splunk
+Dynatrace
+Prometheus
+Grafana
+
+Q17. How was the application deployed?
+Answer
+
+Deployment flow:
+
+Git
+ |
+Jenkins
+ |
+Build Jar
+ |
+Docker Image
+ |
+ECR
+ |
+AWS ECS
+
+
+Microservices were containerized using Docker and deployed on ECS.
+
+Q18. How did the system scale?
+Answer
+
+Initially:
+
+3 Pods
+
+
+When traffic increased:
+
+10 Pods
+
+
+Using:
+
+Horizontal Pod Autoscaler
+
+
+No application code changes were required.
+
+Q19. What production issue did you face?
+Answer
+
+Issue:
+
+External Provider APIs became slow
+
+
+Impact:
+
+Batch Jobs Delayed
+Processing Slower
+
+
+Solution:
+
+Step Function Retry
+Checkpoint Restart
+S3 Recovery Point
+Monitoring Alerts
+
+
+Result:
+
+Improved Reliability
+Reduced Failures
+
+Q20. Why was this architecture chosen?
+Answer
+Business Reasons
+Large Data Volume
+Multiple Consumers
+Analytics Needs
+Future Growth
+
+Technical Reasons
+Event Driven
+Cloud Native
+Highly Scalable
+Fault Tolerant
+Maintainable
+Loosely Coupled
+
+Final JPMC Manager/Architect Round Question
+Q21. Summarize your project in one minute.
+Answer
+
+"I worked on JPMC's Dining Data Modernization platform where external dining content 
+was ingested through Spring Batch extraction services, stored in AWS S3 for durability,
+processed by publisher services, distributed through Kafka topics, consumed by analytics,
+audit and notification services, transformed through AWS Glue, and reported through Athena. 
+The solution was cloud-native, event-driven, highly scalable, fault-tolerant, and 
+capable of processing large datasets using Spring Boot, Kafka, AWS ECS, Aurora PostgreSQL, S3, Glue, and Athena."
+This Q&A format is exactly what interviewers at JPMC, MUFG, Goldman Sachs, Morgan Stanley, 
+RBC, and Solution Architect rounds typically follow. It is much easier to revise than memorizing large architecture diagrams.
