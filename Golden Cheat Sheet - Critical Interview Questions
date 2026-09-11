@@ -2446,7 +2446,7 @@ distribute partitions among consumers for scalable processing."
 ###################################################################################################
 ####Question 7 : 
 Count how many times a substring is present using Java Streams.
-
+###################################################################################################
 ==============================================================================
 QUESTION
 ==============================================================================
@@ -2481,3 +2481,886 @@ Output:
 
 
 ###################################################################################################
+Question 8:
+Find 2nd highest salary of the employee having employe table with id, name, salary and explain the query
+###################################################################################################
+
+SELECT salary
+93
+FROM employee
+94
+ORDER BY salary DESC
+95
+LIMIT 1 OFFSET 1;
+
+
+
+###################################################################################################
+Question 9:
+
+Where the applications are deployed it is EKS or Ec2 and why EKS/EC2 chosen
+
+###################################################################################################
+
+
+==============================================================================
+EKS vs EC2 (Short Comparison)
+==============================================================================
+
+EKS
+---
+• Managed Kubernetes Service
+• Best for Microservices
+• Auto Scaling of Pods
+• Self Healing
+• Rolling Deployments
+• Less Operational Effort
+
+EC2
+---
+• Virtual Machine
+• Best for Simple Applications
+• Manual Scaling
+• No Self Healing
+• Manual Deployments
+• More Operational Effort
+
+==============================================================================
+
+INTERVIEW ANSWER
+==============================================================================
+
+"We used EKS because our project had multiple Spring Boot microservices.
+EKS provides Kubernetes features like auto-scaling, self-healing, load
+balancing, and rolling deployments.
+
+EC2 is suitable for simpler applications,
+but managing many microservices on EC2 would require more manual effort."
+
+
+
+###################################################################################################
+Question 10:
+
+What is serialization? What is benefit of using it?
+
+###################################################################################################
+
+
+==============================================================================
+WHAT IS SERIALIZATION?
+==============================================================================
+
+Serialization is the process of converting a Java Object into a byte stream
+so that it can be stored in a file, database, cache, or transmitted over a
+network.
+
+Object
+  |
+  v
+Byte Stream
+
+==============================================================================
+
+EXAMPLE
+==============================================================================
+
+Employee emp = new Employee(101, "John");
+
+Serializable Object
+      |
+      v
+Bytes
+      |
+      v
+File / Network / Kafka / Cache
+
+==============================================================================
+
+WHY DO WE USE SERIALIZATION?
+==============================================================================
+
+1. Send Objects Across Network
+   Example: REST, RMI
+
+2. Store Objects In File
+   Example: Save object state
+
+3. Caching
+   Example: Redis, Hazelcast
+
+4. Messaging
+   Example: Kafka, RabbitMQ
+
+5. Session Replication
+   Example: Distributed Applications
+
+==============================================================================
+
+JAVA EXAMPLE
+==============================================================================
+
+class Employee implements Serializable {
+
+    private int id;
+    private String name;
+}
+
+==============================================================================
+
+WHAT IS DESERIALIZATION?
+==============================================================================
+
+Opposite of Serialization.
+
+Byte Stream
+     |
+     v
+Java Object
+
+==============================================================================
+
+INTERVIEW ANSWER (30 SECONDS)
+==============================================================================
+
+"Serialization is the process of converting a Java object into a byte stream
+so that it can be stored or transmitted over a network. The main benefit is
+that objects can be easily persisted, shared between applications, cached,
+or sent through messaging systems like Kafka.
+
+Deserialization converts the
+byte stream back into the original object."
+
+==============================================================================
+
+ONE-LINE ANSWER
+==============================================================================
+
+Serialization converts an object into bytes for storage or transmission,
+while deserialization converts bytes back into an object.
+==============================================================================
+
+
+###################################################################################################
+Question 11:
+
+Scenario - There is event consumed and need to call Rest API, 
+there will lot events coming and if RestTemplate is blocking continuously because of some failure in downstream module, how we can achieve asynchronous here
+
+
+###################################################################################################
+
+==============================================================================
+SCENARIO
+==============================================================================
+
+Kafka Consumer receives events and calls a downstream REST API.
+
+Problem:
+
+Events are coming continuously.
+
+Kafka Consumer
+      |
+      v
+RestTemplate Call
+      |
+      v
+Downstream Service Slow/Down
+
+Since RestTemplate is synchronous (blocking), consumer threads get blocked,
+consumer lag increases, and Kafka processing slows down.
+
+==============================================================================
+
+BAD APPROACH
+==============================================================================
+
+@KafkaListener(topics = "payment-topic")
+public void consume(Event event) {
+
+    restTemplate.postForObject(url, event, String.class);
+
+}
+
+Problem:
+
+Consumer waits for API response.
+
+No new messages processed until response comes.
+
+==============================================================================
+
+BETTER APPROACH 1 (MOST COMMON)
+==============================================================================
+
+Publish another Kafka Event.
+
+Consumer-1
+      |
+      v
+validation-topic
+      |
+      v
+API-Processor Service
+      |
+      v
+REST API Call
+
+Benefits:
+
+✔ Fully Asynchronous
+✔ Decoupled Services
+✔ Better Scalability
+✔ Retry Support
+✔ DLT Support
+
+==============================================================================
+
+BETTER APPROACH 2 >> (SPRING WEBCLIENT)
+==============================================================================
+
+Replace RestTemplate with WebClient.
+
+webClient.post()
+         .uri(url)
+         .bodyValue(event)
+         .retrieve()
+         .bodyToMono(String.class)
+         .subscribe();
+
+Benefits:
+
+✔ Non-blocking
+✔ Reactive
+✔ Higher Throughput
+✔ Suitable for Large Kafka Volumes
+
+==============================================================================
+
+BETTER APPROACH 3  >> Use @Async
+==============================================================================
+
+
+@Async
+public void callApi(Event event){
+
+    restTemplate.postForObject(
+         url,
+         event,
+         String.class
+    );
+}
+
+Consumer:
+
+@KafkaListener(topics = "payment-topic")
+public void consume(Event event){
+
+    apiService.callApi(event);
+
+}
+
+Benefit:
+
+Kafka consumer thread returns immediately.
+
+==============================================================================
+
+PRODUCTION BANKING APPROACH
+==============================================================================
+
+Kafka Topic
+     |
+     v
+Consumer
+     |
+     v
+Internal Processing
+     |
+     +--> callback-topic
+              |
+              v
+      Dedicated Callback Service
+              |
+              v
+          WebClient
+              |
+              v
+      External REST API
+
+If API fails:
+
+Retry
+   |
+DLT
+   |
+Alert
+
+==============================================================================
+
+INTERVIEW ANSWER
+==============================================================================
+
+"RestTemplate is blocking, so if the downstream API is slow, Kafka consumer
+threads will get blocked and consumer lag will increase. 
+
+To make processing
+asynchronous, we can use Spring WebClient, which is non-blocking and reactive.
+
+
+In large-scale banking systems, we typically decouple the REST call by
+publishing another Kafka event and letting a dedicated service process the
+callback asynchronously. 
+
+We also use Retry, Circuit Breaker, and DLT for
+failure handling."
+
+==============================================================================
+
+ONE-LINE ANSWER
+==============================================================================
+
+"Replace blocking RestTemplate with non-blocking WebClient or publish another
+Kafka event and process the REST call asynchronously in a separate service."
+==============================================================================
+
+
+###################################################################################################
+Question 12:
+
+Scenario - WHAT IS THREAD-SAFE CODE?
+
+
+###################################################################################################
+
+
+==============================================================================
+WHAT IS THREAD-SAFE CODE?
+==============================================================================
+
+Thread-safe code means multiple threads can access the same code or object
+simultaneously without causing incorrect results or data inconsistency.
+
+==============================================================================
+
+EXAMPLE (NOT THREAD SAFE)
+==============================================================================
+
+int count = 0;
+
+count++;
+
+Suppose:
+
+Thread-1 reads count = 0
+Thread-2 reads count = 0
+
+Thread-1 updates count = 1
+Thread-2 updates count = 1
+
+Expected:
+
+2
+
+Actual:
+
+1
+
+This problem is called:
+
+Race Condition
+
+==============================================================================
+
+THREAD-SAFE SOLUTION
+==============================================================================
+
+Using AtomicInteger
+
+AtomicInteger count = new AtomicInteger();
+
+count.incrementAndGet();
+
+Now:
+
+Thread-1 --> Safe
+Thread-2 --> Safe
+
+Result:
+
+count = 2
+
+==============================================================================
+
+HOW TO MAKE CODE THREAD SAFE?
+==============================================================================
+
+1. synchronized
+
+public synchronized void increment() {
+    count++;
+}
+
+2. AtomicInteger
+
+AtomicInteger count = new AtomicInteger();
+
+3. Concurrent Collections
+
+ConcurrentHashMap
+CopyOnWriteArrayList
+
+4. Immutable Objects
+
+String
+LocalDate
+Record Classes
+
+==============================================================================
+
+REAL SPRING BOOT INTERVIEW EXAMPLE
+==============================================================================
+
+Bad:
+
+@Service
+public class CounterService {
+
+    int count = 0;
+
+    public void increment() {
+        count++;
+    }
+}
+
+Multiple API requests can corrupt count.
+
+Better:
+
+AtomicInteger count = new AtomicInteger();
+
+public void increment() {
+    count.incrementAndGet();
+}
+
+==============================================================================
+
+INTERVIEW ANSWER (30 SECONDS)
+==============================================================================
+
+"Thread-safe code ensures that multiple threads can access and modify shared
+resources concurrently without causing race conditions or inconsistent data.
+We can make code thread-safe using synchronized blocks, AtomicInteger,
+ConcurrentHashMap, locks, or immutable objects."
+
+==============================================================================
+
+ONE-LINE ANSWER
+==============================================================================
+
+Thread-safe code produces correct and consistent results even when multiple
+threads access it simultaneously.
+==============================================================================
+
+
+###################################################################################################
+Question 13:
+
+Scenario - WHAT IS THREAD-SAFE CODE?
+
+
+###################################################################################################
+
+
+==============================================================================
+WHAT IS THREAD-SAFE CODE?
+==============================================================================
+
+Thread-safe code means multiple threads can access the same code or object
+simultaneously without causing incorrect results or data inconsistency.
+
+==============================================================================
+
+EXAMPLE (NOT THREAD SAFE)
+==============================================================================
+
+int count = 0;
+
+count++;
+
+Suppose:
+
+Thread-1 reads count = 0
+Thread-2 reads count = 0
+
+Thread-1 updates count = 1
+Thread-2 updates count = 1
+
+Expected:
+
+2
+
+Actual:
+
+1
+
+This problem is called:
+
+Race Condition
+
+==============================================================================
+
+THREAD-SAFE SOLUTION
+==============================================================================
+
+Using AtomicInteger
+
+AtomicInteger count = new AtomicInteger();
+
+count.incrementAndGet();
+
+Now:
+
+Thread-1 --> Safe
+Thread-2 --> Safe
+
+Result:
+
+count = 2
+
+==============================================================================
+
+HOW TO MAKE CODE THREAD SAFE?
+==============================================================================
+
+1. synchronized
+
+public synchronized void increment() {
+    count++;
+}
+
+2. AtomicInteger
+
+AtomicInteger count = new AtomicInteger();
+
+3. Concurrent Collections
+
+ConcurrentHashMap
+CopyOnWriteArrayList
+
+4. Immutable Objects
+
+String
+LocalDate
+Record Classes
+
+==============================================================================
+
+REAL SPRING BOOT INTERVIEW EXAMPLE
+==============================================================================
+
+Bad:
+
+@Service
+public class CounterService {
+
+    int count = 0;
+
+    public void increment() {
+        count++;
+    }
+}
+
+Multiple API requests can corrupt count.
+
+Better:
+
+AtomicInteger count = new AtomicInteger();
+
+public void increment() {
+    count.incrementAndGet();
+}
+
+==============================================================================
+
+INTERVIEW ANSWER (30 SECONDS)
+==============================================================================
+
+"Thread-safe code ensures that multiple threads can access and modify shared
+resources concurrently without causing race conditions or inconsistent data.
+We can make code thread-safe using synchronized blocks, AtomicInteger,
+ConcurrentHashMap, locks, or immutable objects."
+
+==============================================================================
+
+ONE-LINE ANSWER
+==============================================================================
+
+Thread-safe code produces correct and consistent results even when multiple
+threads access it simultaneously.
+==============================================================================
+
+
+###################################################################################################
+Question 14:
+
+Scenario -What is composite primary key, how can we create in Spring data JPA, how you created in your last project.
+
+###################################################################################################
+
+
+
+==============================================================================
+WHAT IS A COMPOSITE PRIMARY KEY?
+==============================================================================
+
+A Composite Primary Key means multiple columns together form the primary key.
+
+Example:
+
+RISK_CONTROL
+
+RISK_ID    CONTROL_ID     STATUS
+
+101        201            ACTIVE
+101        202            ACTIVE
+102        201            INACTIVE
+
+Primary Key:
+
+(RISK_ID, CONTROL_ID)
+
+Neither column alone is unique.
+
+Together they are unique.
+
+==============================================================================
+
+HOW TO CREATE IN SPRING DATA JPA?
+==============================================================================
+
+Using @Embeddable and @EmbeddedId
+
+==============================================================================
+
+STEP 1: COMPOSITE KEY CLASS
+==============================================================================
+
+@Embeddable
+public class RiskControlId implements Serializable {
+
+    private Long riskId;
+    private Long controlId;
+}
+
+==============================================================================
+
+STEP 2: ENTITY
+==============================================================================
+
+@Entity
+public class RiskControl {
+
+    @EmbeddedId
+    private RiskControlId id;
+
+    private String status;
+}
+
+==============================================================================
+
+STEP 3: REPOSITORY
+==============================================================================
+
+public interface RiskControlRepository
+      extends JpaRepository<RiskControl, RiskControlId> {
+}
+
+==============================================================================
+
+HOW WE USED IT IN BANKING PROJECT?
+==============================================================================
+
+In MUFG/JPMC-style projects, we used composite keys for mapping tables.
+
+Example:
+
+USER_ROLE
+
+USER_ID     ROLE_ID
+
+1001        1
+1001        2
+1002        1
+
+Primary Key:
+
+(USER_ID, ROLE_ID)
+
+Reason:
+
+A user can have multiple roles, and the same role can belong to multiple users.
+
+==============================================================================
+
+INTERVIEW ANSWER (30 SECONDS)
+==============================================================================
+
+"A composite primary key consists of two or more columns that together uniquely
+identify a record. 
+
+In Spring Data JPA, I create it using an @Embeddable key class and 
+reference it in the entity using @EmbeddedId. 
+
+In my banking projects, we used composite keys mainly for mapping tables such as User-Role, Risk-Control,
+and Account-Product relationships where uniqueness was determined by multiple columns rather than a single ID."
+
+==============================================================================
+
+ONE-LINE ANSWER
+==============================================================================
+
+Composite Primary Key = Multiple columns together form the primary key, implemented in JPA using @Embeddable and @EmbeddedId.
+==============================================================================
+
+
+
+###################################################################################################
+Question 15:
+
+Scenario : Tell me business logic where you got the project handled situation and how you handled, within team
+
+###################################################################################################
+
+This is a very common behavioral + technical interview question for Senior Developer / Lead roles.
+
+Situation from MUFG Banking Project
+Problem
+
+In our Risk Control & Governance (RCG) project, multiple microservices were publishing risk events to Kafka.
+
+Risk Service
+      |
+      v
+Kafka
+      |
+      v
+Control Service
+      |
+      v
+Audit Service
+
+============================================================================================================================================================
+One day, the business team reported that some risk records were showing different statuses across systems.
+
+Example:
+
+Risk Service      -> APPROVED
+Control Service   -> PENDING
+Audit Service     -> FAILED
+
+
+Business users were seeing inconsistent data.
+============================================================================================================================================================
+Challenge
+
+The issue was difficult because:
+
+• No application errors
+• Kafka messages were produced successfully
+• Only some transactions were impacted
+• Multiple teams involved
+============================================================================================================================================================
+How I Handled It
+Step 1: War Room Discussion
+============================================================================================================================================================
+I coordinated with:
+
+• Business Team
+• QA Team
+• Kafka Team
+• Database Team
+• Support Team
+
+
+We collected:
+
+Transaction IDs
+Kafka Offsets
+Application Logs
+Database Entries
+============================================================================================================================================================
+Step 2: Root Cause Analysis
+============================================================================================================================================================
+After log analysis, we found:
+
+Consumer was failing during DB updates
+
+
+When Oracle had temporary connection issues:
+
+Kafka Event Consumed
+      |
+      X
+DB Save Failed
+
+
+But retry handling was missing for certain scenarios.
+============================================================================================================================================================
+Step 3: Solution
+============================================================================================================================================================
+Implemented:
+
+1. Retry Pattern
+2. Dead Letter Topic (DLT)
+3. Better Monitoring
+4. Consumer Error Handling
+
+
+Example:
+
+Event
+   |
+   v
+Consumer
+   |
+Success --> Save DB
+   |
+Failure --> Retry
+   |
+Still Fail --> DLT
+============================================================================================================================================================
+Step 4: Team Coordination
+============================================================================================================================================================
+I worked with team members to:
+
+• Create fix branch
+• Perform code review
+• Execute regression testing
+• Validate production data
+• Monitor deployment
+
+Result
+✔ Zero data loss
+✔ Improved reliability
+✔ Faster recovery
+✔ Better monitoring
+✔ Business issue resolved
+============================================================================================================================================================
+Interview Answer (2 Minutes)
+
+"In my MUFG banking project, we faced a production issue where risk status information was inconsistent across multiple microservices. 
+I coordinated with business, QA, support, and development teams to analyze logs and Kafka events. We identified that database failures 
+during Kafka consumption were causing certain records to remain unprocessed. I proposed implementing retries, Dead Letter Topics, and
+enhanced monitoring. After code reviews, testing, and deployment, the issue was resolved, and we significantly improved system reliability 
+while preventing future data loss. This experience helped me strengthen both technical troubleshooting and team collaboration skills."
+
+
+============================================================================================================================================================
+One-Line Version
+
+"I handled a production issue involving Kafka consumer failures and data inconsistency by driving root cause analysis across teams, 
+implementing Retry and DLT patterns, and successfully restoring data reliability."
+
+============================================================================================================================================================
