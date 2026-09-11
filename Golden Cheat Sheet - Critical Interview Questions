@@ -1988,3 +1988,496 @@ and dependency injection will fail with a NoSuchBeanDefinitionException during a
 One-Line Interview Answer
 ====================================================================
 "@Service tells Spring to create and manage the class as a bean; without it, Spring won't create the bean and @Autowired injection will fail." ✅
+
+
+
+###################################################################################################
+####Question 6 : 
+
+How Kafka partitions and brokers will work
+
+###################################################################################################
+
+==============================================================================
+KAFKA PARTITIONS AND BROKERS - INTERVIEW READY NOTES
+==============================================================================
+
+1. WHAT IS A KAFKA BROKER?
+==============================================================================
+
+A Broker is a Kafka server responsible for storing messages and handling
+producer and consumer requests.
+
+Example:
+
+Kafka Cluster
+
+Broker-1
+Broker-2
+Broker-3
+
+Think of a Broker as a Kafka server that stores partitions.
+
+Interview Answer:
+A Broker is a Kafka server that stores topic partitions and handles message
+exchange between producers and consumers.
+
+==============================================================================
+
+2. WHAT IS A PARTITION?
+==============================================================================
+
+A Topic is divided into multiple partitions.
+
+Example:
+
+payment-topic
+
+Partition-0
+Partition-1
+Partition-2
+
+Messages are stored sequentially inside a partition.
+
+Partition-0
+
+Offset 0
+Offset 1
+Offset 2
+Offset 3
+
+Benefits:
+- Parallel Processing
+- High Throughput
+- Scalability
+
+Interview Answer:
+Partitions allow Kafka to process messages in parallel and scale horizontally.
+
+==============================================================================
+
+3. WHY DO WE NEED PARTITIONS?
+==============================================================================
+
+Without Partitions:
+
+Producer
+   |
+   v
+Topic
+   |
+   v
+Consumer
+
+Limited Throughput
+
+With Partitions:
+
+Producer
+   |
+payment-topic
+   |
+------------------------------------------------
+|                      |                       |
+v                      v                       v
+P0                     P1                      P2
+
+Multiple consumers can process data simultaneously.
+
+Benefit:
+
+More partitions = More parallel processing
+
+==============================================================================
+
+4. PARTITIONS DISTRIBUTED ACROSS BROKERS
+==============================================================================
+
+Kafka Cluster:
+
+Broker-1
+Broker-2
+Broker-3
+
+Topic:
+
+payment-topic
+
+P0
+P1
+P2
+P3
+P4
+P5
+
+Distribution:
+
+Broker-1
+  P0
+  P3
+
+Broker-2
+  P1
+  P4
+
+Broker-3
+  P2
+  P5
+
+This balances storage and processing across brokers.
+
+==============================================================================
+
+5. REPLICATION FOR FAULT TOLERANCE
+==============================================================================
+
+Replication Factor = 3
+
+Example:
+
+P0 Leader --> Broker-1
+
+Replica --> Broker-2
+Replica --> Broker-3
+
+Broker-1
+  P0 (Leader)
+
+Broker-2
+  P0 (Replica)
+
+Broker-3
+  P0 (Replica)
+
+If Broker-1 crashes:
+
+Broker-2 automatically becomes Leader.
+
+Benefit:
+
+- No Data Loss
+- High Availability
+- Fault Tolerance
+
+==============================================================================
+
+6. HOW PRODUCER SELECTS A PARTITION?
+==============================================================================
+
+Producer:
+
+kafkaTemplate.send(
+   "payment-topic",
+   paymentId,
+   paymentEvent
+);
+
+Kafka uses:
+
+hash(key) % numberOfPartitions
+
+Example:
+
+PAY1001 --> P0
+PAY1002 --> P1
+PAY1003 --> P2
+
+Important:
+
+Same Key Always Goes To Same Partition
+
+Benefit:
+
+Message Ordering Maintained
+
+==============================================================================
+
+7. CONSUMER GROUP PROCESSING
+==============================================================================
+
+Topic:
+
+P0 P1 P2 P3 P4 P5
+
+Consumers:
+
+Pod-1
+Pod-2
+Pod-3
+Pod-4
+Pod-5
+Pod-6
+
+Consumer Group:
+
+groupId = payment-group
+
+Assignment:
+
+P0 --> Pod-1
+P1 --> Pod-2
+P2 --> Pod-3
+P3 --> Pod-4
+P4 --> Pod-5
+P5 --> Pod-6
+
+Result:
+
+All 6 Pods Process Events In Parallel
+
+==============================================================================
+
+8. WHAT IF WE HAVE MORE PODS THAN PARTITIONS?
+==============================================================================
+
+Topic:
+
+P0
+P1
+P2
+
+Consumers:
+
+Pod-1
+Pod-2
+Pod-3
+Pod-4
+Pod-5
+Pod-6
+
+Assignment:
+
+P0 --> Pod-1
+P1 --> Pod-2
+P2 --> Pod-3
+
+Pod-4 --> Idle
+Pod-5 --> Idle
+Pod-6 --> Idle
+
+Important Rule:
+
+Number Of Active Consumers
+Cannot Exceed
+Number Of Partitions
+
+==============================================================================
+
+9. REAL INTERVIEW SCENARIO
+==============================================================================
+
+Question:
+
+You Have 6 Pods.
+How Will Kafka Events Be Processed?
+
+Answer:
+
+It Depends On:
+
+1. Partitions
+2. Consumer Group
+3. Consumer Concurrency
+
+Example:
+
+Topic Partitions = 6
+
+Pods = 6
+
+Result:
+
+P0 --> Pod-1
+P1 --> Pod-2
+P2 --> Pod-3
+P3 --> Pod-4
+P4 --> Pod-5
+P5 --> Pod-6
+
+All Pods Participate.
+
+If Topic Has Only 3 Partitions:
+
+Only 3 Pods Will Consume.
+Remaining Pods Stay Idle.
+
+==============================================================================
+
+10. CONSUMER CONCURRENCY
+==============================================================================
+
+Example:
+
+@KafkaListener(
+    topics = "payment-topic",
+    concurrency = "3"
+)
+
+Means:
+
+1 Pod
+3 Consumer Threads
+
+Structure:
+
+Pod-1
+
+Consumer-1
+Consumer-2
+Consumer-3
+
+Thus Scaling Can Be Done By:
+
+A) More Pods
+
+1 Pod --> 6 Pods
+
+B) More Consumer Threads
+
+1 Consumer --> 3 Consumers
+
+C) Both
+
+6 Pods × 2 Threads = 12 Consumers
+
+==============================================================================
+
+11. WHAT HAPPENS IF A POD CRASHES?
+==============================================================================
+
+Suppose:
+
+P2 --> Pod-3
+
+Pod-3 Fails
+
+Kafka Performs:
+
+Consumer Rebalancing
+
+New Assignment:
+
+P2 --> Pod-4
+
+Processing Continues Automatically.
+
+No Manual Intervention Required.
+
+==============================================================================
+
+12. WHO IS RESPONSIBLE FOR MESSAGE DISTRIBUTION?
+==============================================================================
+
+Correct Answer:
+
+Kafka Partitions
+Kafka Consumer Groups
+Kafka Consumer Concurrency
+
+NOT Kubernetes.
+
+Kubernetes only creates Pods.
+
+Kafka decides:
+
+- Which Consumer Gets Which Partition
+- Load Distribution
+- Rebalancing
+- Parallel Processing
+
+==============================================================================
+
+13. REAL BANKING EXAMPLE (MUFG/JPMC)
+==============================================================================
+
+Transaction Volume:
+
+10 Million Payments Daily
+
+Infrastructure:
+
+6 Brokers
+12 Partitions
+6 Pods
+Concurrency = 2
+
+Result:
+
+6 Pods × 2 Threads
+
+= 12 Consumers
+
+Assignment:
+
+P0  --> Consumer-1
+P1  --> Consumer-2
+P2  --> Consumer-3
+...
+P11 --> Consumer-12
+
+Maximum Parallel Processing Achieved
+
+==============================================================================
+
+INTERVIEW ANSWER (2 MINUTES)
+==============================================================================
+
+"A Kafka Broker is a Kafka server that stores topic partitions. A topic is
+divided into partitions to achieve parallel processing. Partitions are
+distributed across brokers and replicated for fault tolerance. Producers
+publish messages to partitions based on the message key. Consumers belong to a
+consumer group, and Kafka automatically assigns partitions among consumers. If
+a topic has 6 partitions and 6 consumers, each consumer processes one partition.
+If consumers exceed partitions, some consumers remain idle. Therefore,
+partitions, brokers, consumer groups, and consumer concurrency are the key
+components responsible for scalability and parallel processing in Kafka."
+
+==============================================================================
+
+ONE-LINE INTERVIEW ANSWER
+==============================================================================
+
+"Brokers store partitions, partitions enable parallelism, and consumer groups
+distribute partitions among consumers for scalable processing."
+
+==============================================================================
+
+
+###################################################################################################
+####Question 7 : 
+Count how many times a substring is present using Java Streams.
+
+==============================================================================
+QUESTION
+==============================================================================
+
+Count how many times a substring is present using Java Streams.
+
+Input:
+
+String str = "abc56eioio65dkj56";
+String input = "56";
+
+
+==============================================================================
+
+USING SPLIT + STREAM
+==============================================================================
+
+Code:
+
+String str = "abc56eioio65dkj56";
+String input = "56";
+
+long count =
+    java.util.Arrays.stream(str.split(input, -1))
+                    .count() - 1;
+
+System.out.println(count);
+
+Output:
+
+2
+
+
+###################################################################################################
