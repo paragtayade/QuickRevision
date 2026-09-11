@@ -843,4 +843,439 @@ and eventually routed to a DLT for reprocessing and investigation." 🚀
 
 One-Line Interview Answer
 
-"Producer → Input Topic → Kafka Streams Processing → Output Topic → Consumer → Database → Status Topic/Callback; monitoring is done through logs, consumer lag, Kafka metrics, retries, alerts, and Dead Letter Topics."
+"Producer → Input Topic → Kafka Streams Processing → Output Topic → Consumer → Database → Status Topic/Callback; 
+
+monitoring is done through logs, consumer lag, Kafka metrics, retries, alerts, and Dead Letter Topics."
+
+
+====================================================================
+Real Banking Example (MUFG/JPMC Style) - Detailed Explanation
+Architecture
+====================================================================
+Payment Service
+      |
+      v
+payment-topic
+      |
+      v
+Kafka Streams
+      |
+      +--> Fraud Validation
+      |
+      +--> AML Validation
+      |
+      +--> Risk Check
+      |
+      v
+validated-payment-topic
+      |
+      v
+Payment Consumer
+      |
+      v
+Oracle Database
+      |
+      +--> payment-status-topic
+      |
+      +--> notification-topic
+      |
+      +--> audit-topic
+      |
+      +--> payment-dlt
+
+====================================================================
+Business Scenario
+====================================================================
+Suppose a corporate customer initiates a payment of $50,000 through online banking.
+
+{
+  "paymentId":"PAY1001",
+  "customerId":"C100",
+  "amount":50000,
+  "currency":"USD"
+}
+
+
+The payment should go through multiple validations before money is actually transferred.
+====================================================================
+Step 1: Payment Service Produces Event
+====================================================================
+The Payment Service receives the request.
+
+@PostMapping("/payments")
+public PaymentResponse createPayment(
+        @RequestBody PaymentRequest request) {
+
+    kafkaTemplate.send("payment-topic", request);
+
+    return new PaymentResponse("REQUEST_ACCEPTED");
+}
+
+
+Instead of doing heavy validations synchronously, the service publishes the event to Kafka.
+
+Why?
+Faster response
+Better scalability
+Asynchronous processing
+
+
+Flow:
+
+Client
+   |
+Payment Service
+   |
+payment-topic
+====================================================================
+Step 2: Event Stored in payment-topic
+====================================================================
+Kafka persists the event.
+
+Partition 0
+
+Offset 1001
+Offset 1002
+Offset 1003
+
+
+Benefits:
+
+Durability
+Replay capability
+Fault tolerance
+====================================================================
+Step 3: Kafka Streams Consumes Event
+====================================================================
+Kafka Streams reads the payment event.
+
+KStream<String, PaymentEvent> paymentStream =
+       builder.stream("payment-topic");
+
+payment-topic
+     |
+     v
+Kafka Streams
+
+
+Now Streams performs multiple validations.
+====================================================================
+Step 4: Fraud Validation
+====================================================================
+Checks for suspicious activity.
+
+Examples:
+
+Same user sends 20 payments in 1 minute
+Payment from unusual country
+Large amount transaction
+Blacklisted account
+
+
+Code:
+
+paymentStream.filter(
+  (k,v) -> fraudService.isValid(v)
+);
+
+
+If fraud detected:
+
+Status = FRAUD_SUSPECTED
+
+
+Move to:
+
+payment-dlt
+
+
+or
+
+fraud-review-topic
+====================================================================
+Step 5: AML Validation
+AML = Anti-Money Laundering
+====================================================================
+Regulatory requirement.
+
+Checks:
+
+OFAC List
+Sanctioned Countries
+PEP Customers
+Money Laundering Rules
+
+
+Example:
+
+Customer sends money to sanctioned country.
+
+
+Result:
+
+Pass
+Fail
+
+
+If failed:
+
+Reject Payment
+Generate Compliance Alert
+====================================================================
+Step 6: Risk Check
+====================================================================
+Risk Engine checks:
+
+Credit Limit
+Daily Transaction Limit
+Account Status
+Available Balance
+
+
+Example:
+
+Daily Limit = $40,000
+
+Payment = $50,000
+
+
+Result:
+
+REJECTED
+
+
+Otherwise:
+
+APPROVED
+====================================================================
+Step 7: Publish to validated-payment-topic
+====================================================================
+If all validations succeed:
+
+validatedStream.to(
+     "validated-payment-topic"
+);
+
+
+Flow:
+
+payment-topic
+      |
+Kafka Streams
+      |
+validated-payment-topic
+
+
+This means:
+
+Fraud Passed
+AML Passed
+Risk Passed
+====================================================================
+Step 8: Payment Consumer
+====================================================================
+Consumer processes approved payments.
+
+@KafkaListener(
+   topics = "validated-payment-topic"
+)
+public void process(PaymentEvent event){
+
+}
+
+
+Responsibilities:
+
+Create Transaction
+Generate Reference Number
+Persist Data
+Update Status
+====================================================================
+Step 9: Save to Oracle Database
+paymentRepository.save(payment);
+====================================================================
+
+Database:
+
+PAYMENT_TABLE
+
+PAYMENT_ID
+CUSTOMER_ID
+AMOUNT
+STATUS
+CREATED_DATE
+
+
+Example:
+
+PAY1001
+C100
+50000
+SUCCESS
+====================================================================
+Step 10: Publish Status Event
+====================================================================
+After successful persistence.
+
+kafkaTemplate.send(
+   "payment-status-topic",
+   statusEvent
+);
+
+
+Event:
+
+{
+   "paymentId":"PAY1001",
+   "status":"SUCCESS"
+}
+
+
+Purpose:
+
+Notify Source System
+Update UI
+Trigger downstream workflows
+
+
+Flow:
+
+Oracle DB
+    |
+payment-status-topic
+====================================================================
+Step 11: Notification Topic
+====================================================================
+Publish user notification event.
+
+kafkaTemplate.send(
+   "notification-topic",
+   notificationEvent
+);
+
+
+Consumed by:
+
+Email Service
+SMS Service
+Push Service
+
+
+Customer receives:
+
+"Payment PAY1001 completed successfully."
+====================================================================
+Step 12: Audit Topic
+====================================================================
+Every banking transaction must be audited.
+
+kafkaTemplate.send(
+   "audit-topic",
+   auditEvent
+);
+
+
+Audit stores:
+
+Who initiated
+When initiated
+Amount
+Status
+IP Address
+Timestamp
+
+
+Required for:
+
+Compliance
+Regulations
+Investigations
+Reporting
+
+Step 13: Dead Letter Topic (payment-dlt)
+
+Used for failures.
+
+Examples:
+
+Invalid JSON
+Database Failure
+Null Data
+Business Validation Failure
+Processing Exception
+
+
+Flow:
+
+payment-topic
+      |
+      +--> Success
+      |
+      +--> payment-dlt
+
+
+Code:
+
+catch(Exception ex){
+   dltProducer.send(
+      "payment-dlt",
+      event
+   );
+}
+
+
+Benefits:
+
+No Data Loss
+Retry Later
+Root Cause Analysis
+
+Complete End-to-End Flow
+Customer
+   |
+   v
+Payment API
+   |
+   v
+payment-topic
+   |
+   v
+Kafka Streams
+   |
+   +--> Fraud Check
+   |
+   +--> AML Check
+   |
+   +--> Risk Check
+   |
+   v
+validated-payment-topic
+   |
+   v
+Payment Consumer
+   |
+   v
+Oracle DB
+   |
+   +--> payment-status-topic
+   |
+   +--> notification-topic
+   |
+   +--> audit-topic
+   |
+   +--> payment-dlt
+
+Interview Answer (3 Minutes)
+
+"In our banking project, when a payment request is received, the Payment Service publishes the event to payment-topic.
+
+Kafka Streams consumes the event and performs multiple validations such as Fraud Validation, AML Validation, and Risk Checks. 
+
+Once all validations pass, the event is published to validated-payment-topic. A Payment Consumer then consumes the validated event
+and persists it into Oracle Database.
+
+After successful persistence, separate events are published to payment-status-topic for callback/status updates, 
+notification-topic for customer notifications, and audit-topic for regulatory audit tracking.
+Any failures during processing are routed to payment-dlt for retry and investigation. 
+This event-driven architecture provides loose coupling, scalability, 
+fault tolerance, auditability, and regulatory compliance, which are critical requirements in banking systems like MUFG and JPMC." 🚀
