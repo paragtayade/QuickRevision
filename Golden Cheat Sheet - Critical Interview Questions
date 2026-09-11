@@ -1,0 +1,846 @@
+####Question 1 : Microservice Design Pattern used in last project and explanation about the design
+###################################################################################################
+
+For your MUFG Risk Governance & Control (RCG) Project, this is a strong Senior Developer / Solution Architect interview answer.
+
+Interview Answer:
+ "Our application followed Domain-Driven Microservices with Event-Driven Architecture.
+Services were independently deployable Spring Boot microservices running on AWS ECS/OpenShift.
+
+Communication was both synchronous using REST APIs and asynchronous using Kafka.
+
+We used API Gateway, Database-per-Service, Saga Pattern, Circuit Breaker, Retry Pattern, and Dead Letter Topics for resiliency."
+
+High-Level Architecture
+                    API Gateway
+                          |
+     ------------------------------------------------
+     |              |               |               |
+     v              v               v               v
+ User Service   Risk Service   Control Service   Audit Service
+     |              |               |               |
+     ------------------------------------------------
+                          |
+                          v
+                        Kafka
+                          |
+           --------------------------------
+           |              |              |
+           v              v              v
+     Notification    Reporting      Compliance
+       Service         Service        Service
+
+====================================================================
+1. API Gateway Pattern
+====================================================================
+Why?
+
+Single entry point for all clients.
+
+Client
+   |
+   v
+API Gateway
+   |
+   v
+Microservices
+
+====================================================================
+Responsibilities:
+
+Authentication
+Authorization
+Routing
+Rate Limiting
+Logging
+====================================================================
+
+Example:
+
+
+/api/risks
+/api/controls
+/api/audit
+
+
+All requests first reach gateway.
+====================================================================
+Benefit
+Centralized Security
+Reduced Client Complexity
+Single Endpoint
+
+
+====================================================================
+2. Database Per Service Pattern
+====================================================================
+Each service owns its database.
+
+Risk Service
+      |
+   Risk DB
+
+Control Service
+      |
+  Control DB
+
+Audit Service
+      |
+  Audit DB
+
+====================================================================
+
+
+Why?
+
+Avoid tight coupling.
+
+Benefit
+Independent Deployment
+Independent Scaling
+No Shared Schema
+====================================================================
+3. Event-Driven Architecture
+====================================================================
+
+
+Most important pattern used.
+
+
+
+Risk Created
+      |
+      v
+risk-topic
+      |
+      +---- Compliance Service
+      |
+      +---- Audit Service
+      |
+      +---- Notification Service
+
+====================================================================
+
+
+Producer:
+
+kafkaTemplate.send(
+   "risk-topic",
+   riskEvent
+);
+
+====================================================================
+
+
+
+Consumer:
+
+@KafkaListener(topics="risk-topic")
+public void consume(RiskEvent event){
+   process(event);
+}
+
+
+
+Benefit
+Loose Coupling
+Scalability
+Asynchronous Processing
+
+
+====================================================================
+4. Saga Pattern
+====================================================================
+
+
+Used when multiple services participate in one business transaction.
+
+Example
+
+Risk Creation Workflow
+
+Step 1 Risk Service
+Step 2 Control Service
+Step 3 Approval Service
+Step 4 Audit Service
+
+
+====================================================================
+
+Success Flow
+
+
+Risk Created
+      |
+Control Created
+      |
+Approval Created
+      |
+Audit Entry Created
+
+
+
+====================================================================
+
+Failure Flow
+
+
+
+If Approval fails:
+
+
+
+Approval Failed
+      |
+Compensating Transaction
+      |
+Rollback Control
+      |
+Rollback Risk
+
+
+
+====================================================================
+
+Benefit:
+
+No Distributed Transactions
+Suitable for Microservices
+Eventual Consistency
+
+
+
+====================================================================
+5. Circuit Breaker Pattern
+====================================================================
+
+
+Used for external API calls.
+
+Risk Service
+      |
+      v
+External System
+
+
+If target system fails repeatedly:
+
+Closed
+ -> Open
+ -> Half Open
+ -> Closed
+
+
+
+====================================================================
+
+Using Resilience4j:
+
+@CircuitBreaker(name="riskService")
+public Response getRisk(){
+    return client.call();
+}
+
+
+====================================================================
+
+
+Benefit
+Prevents Cascading Failures
+Improves Stability
+
+
+
+
+
+====================================================================
+6. Retry Pattern
+====================================================================
+
+Temporary failures handled automatically.
+
+
+@Retry(name="riskApi")
+public Response getData(){
+    return service.call();
+}
+
+
+
+
+Retry Sequence:
+
+Try 1
+Try 2
+Try 3
+Fail
+
+
+
+
+Benefit
+Handles Transient Failures
+Improves Reliability
+
+
+
+====================================================================
+
+7. Dead Letter Topic (DLT)
+====================================================================
+
+
+Failed Kafka messages moved to DLT.
+
+risk-topic
+     |
+     +---- Success
+     |
+     +---- risk-dlt
+
+
+Example:
+
+Invalid JSON
+Database Down
+Validation Error
+
+Benefit
+No Data Loss
+Easy Reprocessing
+
+
+====================================================================
+8. Outbox Pattern
+====================================================================
+
+Used to avoid DB-Kafka inconsistency.
+
+Without Outbox:
+
+DB Saved
+Kafka Publish Failed
+
+
+Data becomes inconsistent.
+
+
+
+
+====================================================================
+With Outbox:
+
+Save Business Data
+       |
+       v
+Save Outbox Event
+       |
+       v
+Publisher Reads Outbox
+       |
+       v
+Kafka Topic
+
+
+====================================================================
+
+Benefit
+Guaranteed Event Delivery
+Reliable Messaging
+
+
+
+
+====================================================================
+9. CQRS Pattern (Reporting)
+
+====================================================================
+
+In banking systems reports require heavy reads.
+
+Write Service
+      |
+      v
+Kafka
+      |
+      v
+Read Database
+
+Benefit
+Fast Reporting
+Separate Read/Write Scaling
+
+
+====================================================================
+
+
+
+Complete Production Flow
+User
+ |
+ v
+API Gateway
+ |
+ v
+Risk Service
+ |
+ +--> Risk DB
+ |
+ +--> Kafka Topic
+ |
+ +--> Outbox Table
+ |
+ v
+Kafka
+ |
+ +--> Control Service
+ |
+ +--> Compliance Service
+ |
+ +--> Audit Service
+ |
+ +--> Notification Service
+ |
+ +--> DLT (Failure)
+
+
+====================================================================
+
+
+2-Minute Interview Answer
+
+"In my last MUFG banking project we followed Domain-Driven Microservices architecture using
+Spring Boot, Kafka, Oracle, and AWS/OpenShift.
+
+We primarily used
+API Gateway, 
+Database-per-Service,
+Event-Driven Architecture,
+Saga Pattern,
+Circuit Breaker, 
+Retry Pattern, 
+Dead Letter Topics, 
+and Outbox Pattern.
+
+API Gateway handled routing and security, 
+Kafka enabled asynchronous communication, 
+Saga managed multi-service transactions,
+Circuit Breaker and Retry improved resiliency, 
+and DLT handled failed events. 
+
+This architecture allowed 
+independent deployment,
+high scalability, 
+fault tolerance,
+and loose coupling 
+
+across more than 30 enterprise microservices."
+
+
+====================================================================
+
+
+####Question 2 : Kafka Streams, how events will flow to topics and how you are consuming and how it will be monitored if any error occurs
+###################################################################################################
+Kafka Streams - Event Flow, Consumption & Error Monitoring (Interview Ready Answer)
+
+
+
+Architecture Flow
+
+
+Source System
+      |
+      v
+Producer Service
+      |
+      v
+payment-topic
+      |
+      v
+Kafka Streams Application
+      |
+      +--> Validation
+      +--> Transformation
+      +--> Enrichment
+      +--> Aggregation
+      |
+      +--> success-topic
+      |
+      +--> error-topic / DLT
+      |
+      v
+Consumer Service
+      |
+      v
+Database
+      |
+      v
+Callback / Status Topic
+      |
+      v
+Source System
+
+
+
+
+====================================================================
+1. How Events Flow Through Kafka Streams
+====================================================================
+
+Step 1: Producer Publishes Event
+
+
+kafkaTemplate.send("payment-topic", paymentEvent);
+
+
+Example:
+
+{
+  "paymentId":"P1001",
+  "amount":5000,
+  "status":"INITIATED"
+}
+
+
+Stored in:
+
+payment-topic
+
+
+====================================================================
+
+
+Step 2: Kafka Streams Consumes Event
+StreamsBuilder builder = new StreamsBuilder();
+
+KStream<String, PaymentEvent> stream =
+      builder.stream("payment-topic");
+
+
+Kafka Streams continuously polls records from the topic.
+
+
+
+payment-topic
+     |
+     v
+Kafka Streams
+
+
+====================================================================
+Step 3: Process Event
+
+
+Validation
+stream.filter(
+    (key,value) -> value.getAmount() > 0
+);
+
+
+====================================================================
+
+
+Transformation
+stream.mapValues(event -> {
+    event.setStatus("VALIDATED");
+    return event;
+});
+
+
+
+====================================================================
+
+
+Enrichment
+stream.mapValues(this::enrichCustomerInfo);
+
+
+
+====================================================================
+
+
+Step 4: Publish To Output Topic
+processedStream.to("validated-payment-topic");
+
+
+
+====================================================================
+
+
+Flow:
+
+payment-topic
+      |
+Kafka Streams
+      |
+validated-payment-topic
+
+
+
+====================================================================
+
+
+
+Step 5: Consumer Reads Processed Data
+@KafkaListener(topics="validated-payment-topic")
+public void consume(PaymentEvent event){
+     saveToDatabase(event);
+}
+
+
+
+====================================================================
+2. What Happens After Database Persistence?
+====================================================================
+paymentRepository.save(payment);
+
+
+After successful commit:
+
+Update Status
+PROCESSING → SUCCESS
+
+====================================================================
+
+Publish Status Event
+
+
+kafkaTemplate.send(
+   "payment-status-topic",
+   statusEvent
+);
+
+====================================================================
+
+
+Notify Source System
+
+Two approaches:
+
+====================================================================
+
+
+REST Callback
+
+restTemplate.postForObject(
+   callbackUrl,
+   response,
+   String.class
+);
+
+
+====================================================================
+
+Kafka Event Callback (Preferred)
+
+
+payment-status-topic
+      |
+      v
+Source System Consumer
+
+
+
+====================================================================
+3. Error Handling in Kafka Streams
+====================================================================
+Scenario 1: Invalid Message
+====================================================================
+Example:
+
+{
+  "paymentId": null
+}
+
+
+Validation fails.
+
+
+Move to:
+
+payment-dlt
+
+====================================================================
+Scenario 2: Database Down
+repository.save(payment);
+
+
+throws exception.
+
+Flow:
+
+Retry
+   |
+Fail
+   |
+DLT
+====================================================================
+Scenario 3: Deserialization Error
+
+Corrupted JSON:
+
+{invalid-json}
+
+
+Handler:
+
+props.put(
+ StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG,
+ LogAndContinueExceptionHandler.class
+);
+
+
+====================================================================
+
+Options:
+
+LogAndContinue
+LogAndFail
+Custom Handler
+
+
+====================================================================
+4. Monitoring Kafka Streams in Production
+====================================================================
+
+
+Logs
+log.error("Processing failed", e);
+
+====================================================================
+Tools:
+
+Splunk
+ELK
+CloudWatch
+Datadog
+====================================================================
+Consumer Lag Monitoring
+====================================================================
+
+
+Formula:
+
+Consumer Lag =
+Latest Offset - Consumer Offset
+
+
+
+
+Example:
+
+Latest Offset = 10000
+Current Offset = 9500
+
+Lag = 500
+
+
+====================================================================
+
+Monitoring Tools:
+
+Kafka Manager
+Burrow
+Prometheus
+Grafana
+Confluent Control Center
+
+
+====================================================================
+Kafka Metrics
+
+Important metrics:
+
+records-consumed-rate
+records-processed-rate
+consumer-lag
+failed-records
+error-rate
+commit-latency
+
+====================================================================
+Visualized in:
+
+Prometheus + Grafana
+
+Dead Letter Topic Monitoring
+payment-topic
+      |
+      +-- SUCCESS
+      |
+      +-- payment-dlt
+
+
+We create alerts when messages appear in DLT.
+
+DLT Count > 0
+      |
+      v
+Email Alert
+PagerDuty Alert
+ServiceNow Incident
+
+
+====================================================================
+Real Banking Example (MUFG/JPMC Style)
+
+
+Payment Service
+      |
+      v
+payment-topic
+      |
+      v
+Kafka Streams
+      |
+      +--> Fraud Validation
+      |
+      +--> AML Validation
+      |
+      +--> Risk Check
+      |
+      v
+validated-payment-topic
+      |
+      v
+Payment Consumer
+      |
+      v
+Oracle Database
+      |
+      +--> payment-status-topic
+      |
+      +--> notification-topic
+      |
+      +--> audit-topic
+      |
+      +--> payment-dlt
+
+
+====================================================================
+2-Minute Interview Answer
+
+"In our project, producers publish events to an input Kafka topic. 
+
+Kafka Streams consumes the events and performs validation, transformation, enrichment, and aggregation before publishing them to output topics. 
+
+Downstream consumers read the processed events and persist them into Oracle DB.
+
+After successful persistence, a status event is published to another Kafka topic or a callback API is invoked to notify the source system.
+
+
+
+====================================================================
+For monitoring, we use Prometheus and Grafana for Kafka metrics, Splunk/ELK for logs, 
+
+consumer lag monitoring, 
+and Dead Letter Topics for failed messages. 
+Any processing, deserialization, or database failures are retried 
+and eventually routed to a DLT for reprocessing and investigation." 🚀
+
+====================================================================
+
+One-Line Interview Answer
+
+"Producer → Input Topic → Kafka Streams Processing → Output Topic → Consumer → Database → Status Topic/Callback; monitoring is done through logs, consumer lag, Kafka metrics, retries, alerts, and Dead Letter Topics."
