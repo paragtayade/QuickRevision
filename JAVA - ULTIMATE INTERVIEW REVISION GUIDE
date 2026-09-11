@@ -1,0 +1,4006 @@
+==============================================================================
+ULTIMATE INTERVIEW REVISION GUIDE
+JAVA, SQL, SPRING BOOT, MICROSERVICES, AWS AND KUBERNETES
+==============================================================================
+
+CONTENTS
+==============================================================================
+
+SECTION A  : JAVA CODING PROGRAMS
+SECTION B  : SQL PROGRAMS
+SECTION C  : JAVA 8 AND MODERN JAVA
+SECTION D  : MULTITHREADING AND COLLECTIONS
+SECTION E  : JVM, MEMORY AND TROUBLESHOOTING
+SECTION F  : DATABASE CONCEPTS
+SECTION G  : SPRING BOOT AND SPRING DATA JPA
+SECTION H  : MICROSERVICES DESIGN
+SECTION I  : AWS
+SECTION J  : KUBERNETES
+
+==============================================================================
+SECTION A: JAVA CODING PROGRAMS
+==============================================================================
+
+==============================================================================
+1. CHECK WHETHER A STRING IS PALINDROME
+==============================================================================
+
+A palindrome reads the same from left to right and right to left.
+
+Examples:
+
+madam  -> Palindrome
+level  -> Palindrome
+java   -> Not Palindrome
+
+CODE:
+
+public static boolean isPalindrome(String str) {
+
+    if (str == null) {
+        return false;
+    }
+
+    int left = 0;
+    int right = str.length() - 1;
+
+    while (left < right) {
+
+        if (str.charAt(left) != str.charAt(right)) {
+            return false;
+        }
+
+        left++;
+        right--;
+    }
+
+    return true;
+}
+
+INPUT:
+
+System.out.println(isPalindrome("madam"));
+System.out.println(isPalindrome("java"));
+
+OUTPUT:
+
+true
+false
+
+EXPLANATION:
+
+Two pointers are used.
+
+left starts from the beginning.
+right starts from the end.
+
+Characters are compared until both pointers meet.
+
+TIME COMPLEXITY:
+
+O(N)
+
+SPACE COMPLEXITY:
+
+O(1)
+
+INTERVIEW ANSWER:
+
+"I used two pointers to compare characters from both ends. If any characters
+are different, the string is not a palindrome. The time complexity is O(N)
+and no additional collection is required."
+
+==============================================================================
+2. JUNIT TEST FOR isPalindrome()
+==============================================================================
+
+JUNIT 5 CODE:
+
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+class PalindromeTest {
+
+    @Test
+    void shouldReturnTrueForPalindrome() {
+        assertTrue(isPalindrome("madam"));
+        assertTrue(isPalindrome("level"));
+        assertTrue(isPalindrome(""));
+    }
+
+    @Test
+    void shouldReturnFalseForNonPalindrome() {
+        assertFalse(isPalindrome("java"));
+        assertFalse(isPalindrome(null));
+    }
+}
+
+EXPLANATION:
+
+assertTrue() verifies that the method returns true.
+
+assertFalse() verifies that the method returns false.
+
+We test:
+
+1. Valid palindrome
+2. Empty string
+3. Non-palindrome
+4. Null input
+
+==============================================================================
+3. COUNT FREQUENCY OF STRINGS
+==============================================================================
+
+INPUT:
+
+List<String> fruits =
+        Arrays.asList("apple", "banana", "mango", "apple");
+
+CODE:
+
+Map<String, Long> result = fruits.stream()
+        .collect(Collectors.groupingBy(
+                Function.identity(),
+                LinkedHashMap::new,
+                Collectors.counting()
+        ));
+
+System.out.println(result);
+
+OUTPUT:
+
+{apple=2, banana=1, mango=1}
+
+EXPLANATION:
+
+Function.identity()
+    Uses the fruit name itself as the map key.
+
+Collectors.counting()
+    Counts the occurrence of every fruit.
+
+LinkedHashMap
+    Preserves the first occurrence order.
+
+INTERVIEW ANSWER:
+
+"I used groupingBy with Function.identity as the key and counting as the
+downstream collector. LinkedHashMap preserves the input order."
+
+==============================================================================
+4. PRINT ODD AND EVEN NUMBERS ALTERNATELY USING TWO THREADS
+==============================================================================
+
+SIMPLE CODE:
+
+class NumberPrinter {
+
+    private int number = 1;
+    private final int limit = 10;
+
+    public synchronized void printOdd() {
+
+        while (number <= limit) {
+
+            while (number % 2 == 0) {
+                waitSafely();
+            }
+
+            if (number <= limit) {
+                System.out.println("Odd  : " + number++);
+                notifyAll();
+            }
+        }
+    }
+
+    public synchronized void printEven() {
+
+        while (number <= limit) {
+
+            while (number % 2 != 0) {
+                waitSafely();
+            }
+
+            if (number <= limit) {
+                System.out.println("Even : " + number++);
+                notifyAll();
+            }
+        }
+    }
+
+    private void waitSafely() {
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public static void main(String[] args) {
+
+        NumberPrinter printer = new NumberPrinter();
+
+        new Thread(printer::printOdd).start();
+        new Thread(printer::printEven).start();
+    }
+}
+
+OUTPUT:
+
+Odd  : 1
+Even : 2
+Odd  : 3
+Even : 4
+...
+Even : 10
+
+EXPLANATION:
+
+synchronized
+    Allows only one thread to execute the method at a time.
+
+wait()
+    Releases the monitor lock and pauses the current thread.
+
+notifyAll()
+    Notifies other waiting threads.
+
+while is used instead of if because a thread must recheck the condition after
+it wakes up.
+
+==============================================================================
+5. CHECK WHETHER ONE STRING IS ROTATION OF ANOTHER
+==============================================================================
+
+CODE:
+
+public static boolean isRotation(String first, String second) {
+
+    if (first == null || second == null) {
+        return false;
+    }
+
+    return first.length() == second.length()
+            && (first + first).contains(second);
+}
+
+INPUT:
+
+System.out.println(isRotation("abcde", "cdeab"));
+
+OUTPUT:
+
+true
+
+EXPLANATION:
+
+first + first becomes:
+
+abcdeabcde
+
+This contains:
+
+cdeab
+
+The strings must have the same length.
+
+TIME COMPLEXITY:
+
+The conceptual interview answer is O(N), although the exact complexity of
+contains() depends on the Java substring-search implementation.
+
+==============================================================================
+6. LONGEST VALID PARENTHESES
+==============================================================================
+
+INPUT:
+
+String s = "(()";
+
+EXPECTED OUTPUT:
+
+2
+
+CODE:
+
+public static int longestValidParentheses(String s) {
+
+    Deque<Integer> stack = new ArrayDeque<>();
+
+    stack.push(-1);
+
+    int maxLength = 0;
+
+    for (int i = 0; i < s.length(); i++) {
+
+        if (s.charAt(i) == '(') {
+
+            stack.push(i);
+
+        } else {
+
+            stack.pop();
+
+            if (stack.isEmpty()) {
+
+                stack.push(i);
+
+            } else {
+
+                maxLength =
+                    Math.max(maxLength, i - stack.peek());
+            }
+        }
+    }
+
+    return maxLength;
+}
+
+OUTPUT:
+
+2
+
+EXPLANATION:
+
+The stack stores indexes rather than characters.
+
+-1 acts as the initial boundary.
+
+For '(':
+    Store its index.
+
+For ')':
+    Remove the matching opening index.
+
+If the stack becomes empty:
+    Current closing bracket becomes the new invalid boundary.
+
+Otherwise:
+
+Current valid length = current index - top boundary index
+
+TIME COMPLEXITY:
+
+O(N)
+
+SPACE COMPLEXITY:
+
+O(N)
+
+==============================================================================
+7. CUSTOM TRANSFORMER FUNCTIONAL INTERFACE
+==============================================================================
+
+FUNCTIONAL INTERFACE:
+
+@FunctionalInterface
+interface Transformer<T, R> {
+
+    R transform(T input);
+}
+
+STUDENT CLASS:
+
+class Student {
+
+    private int id;
+    private String name;
+    private int rollNo;
+    private String department;
+
+    public Student(
+            int id,
+            String name,
+            int rollNo,
+            String department) {
+
+        this.id = id;
+        this.name = name;
+        this.rollNo = rollNo;
+        this.department = department;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getRollNo() {
+        return rollNo;
+    }
+}
+
+GET STUDENT NAME:
+
+Transformer<Student, String> getName =
+        Student::getName;
+
+String name = getName.transform(
+        new Student(1, "Amit", 101, "IT")
+);
+
+OUTPUT:
+
+Amit
+
+STUDENTS WHOSE NAME STARTS WITH "A":
+
+List<Student> result = students.stream()
+        .filter(student ->
+                student.getName().startsWith("A"))
+        .collect(Collectors.toList());
+
+CONVERT LIST TO Map<Integer, String>:
+
+Map<Integer, String> studentMap = students.stream()
+        .collect(Collectors.toMap(
+                Student::getRollNo,
+                Student::getName,
+                (existingValue, newValue) -> existingValue
+        ));
+
+EXPLANATION:
+
+Key:
+    Student roll number.
+
+Value:
+    Student name.
+
+Merge function:
+    Handles duplicate roll numbers.
+
+==============================================================================
+8. DATE SEVEN DAYS AFTER CURRENT DATE
+==============================================================================
+
+CODE:
+
+LocalDate futureDate =
+        LocalDate.now().plusDays(7);
+
+System.out.println(futureDate);
+
+EXPLANATION:
+
+LocalDate represents a date without time and timezone.
+
+LocalDate is immutable.
+
+plusDays(7) returns a new LocalDate object and does not modify the original.
+
+==============================================================================
+9. EMPLOYEE STREAM OPERATIONS
+==============================================================================
+
+EMPLOYEE CLASS:
+
+class Employee {
+
+    private String name;
+    private String roleDescription;
+    private int projectId;
+    private double salary;
+    private String address;
+
+    public String getName() {
+        return name;
+    }
+
+    public int getProjectId() {
+        return projectId;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+}
+
+A. SUM SALARY BY PROJECT ID:
+
+Map<Integer, Double> salaryByProject =
+        employees.stream()
+            .collect(Collectors.groupingBy(
+                    Employee::getProjectId,
+                    Collectors.summingDouble(
+                            Employee::getSalary)
+            ));
+
+B. EMPLOYEES WITH SALARY GREATER THAN 50,000:
+
+List<Employee> highSalaryEmployees =
+        employees.stream()
+            .filter(employee ->
+                    employee.getSalary() > 50000)
+            .collect(Collectors.toList());
+
+C. MINIMUM SALARY EMPLOYEE:
+
+Optional<Employee> minimum =
+        highSalaryEmployees.stream()
+            .min(Comparator.comparingDouble(
+                    Employee::getSalary));
+
+D. MAXIMUM SALARY EMPLOYEE:
+
+Optional<Employee> maximum =
+        highSalaryEmployees.stream()
+            .max(Comparator.comparingDouble(
+                    Employee::getSalary));
+
+SAFE RESULT HANDLING:
+
+minimum.ifPresent(employee ->
+        System.out.println(employee.getName()));
+
+EXPLANATION:
+
+Optional is returned because the filtered list may be empty.
+
+==============================================================================
+10. FIND FIRST NAME STARTING WITH "K"
+==============================================================================
+
+INPUT:
+
+List<String> names = Arrays.asList(
+        "sakishi",
+        "klice",
+        "sachin",
+        "kin"
+);
+
+CODE:
+
+String result = names.stream()
+        .filter(name -> name.startsWith("k"))
+        .findFirst()
+        .orElse("Not found");
+
+OUTPUT:
+
+klice
+
+EXPLANATION:
+
+filter()
+    Selects names starting with "k".
+
+findFirst()
+    Returns the first matching value as Optional.
+
+orElse()
+    Returns a default value when no match exists.
+
+==============================================================================
+11. CUSTOM COMPARATOR
+==============================================================================
+
+SORT BY SALARY ASCENDING:
+
+employees.sort(
+    Comparator.comparingDouble(Employee::getSalary)
+);
+
+SORT BY SALARY DESCENDING:
+
+employees.sort(
+    Comparator.comparingDouble(Employee::getSalary)
+              .reversed()
+);
+
+SORT BY SALARY AND THEN NAME:
+
+employees.sort(
+    Comparator.comparingDouble(Employee::getSalary)
+              .thenComparing(Employee::getName)
+);
+
+TRADITIONAL APPROACH:
+
+class SalaryComparator
+        implements Comparator<Employee> {
+
+    @Override
+    public int compare(Employee first, Employee second) {
+
+        return Double.compare(
+                first.getSalary(),
+                second.getSalary()
+        );
+    }
+}
+
+INTERVIEW ANSWER:
+
+"Comparator provides external custom sorting. The compare method returns a
+negative number, zero, or a positive number depending on object ordering."
+
+==============================================================================
+12. CUSTOM IMMUTABLE CLASS
+==============================================================================
+
+JAVA 8 COMPATIBLE CODE:
+
+public final class Account {
+
+    private final long id;
+    private final String name;
+    private final List<String> roles;
+
+    public Account(
+            long id,
+            String name,
+            List<String> roles) {
+
+        this.id = id;
+        this.name = name;
+
+        this.roles = Collections.unmodifiableList(
+                new ArrayList<>(roles)
+        );
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+}
+
+IMMUTABILITY RULES:
+
+1. Make the class final.
+2. Make fields private and final.
+3. Initialize all fields in the constructor.
+4. Do not provide setters.
+5. Create defensive copies of mutable input objects.
+6. Do not expose internal mutable objects.
+
+WHY DEFENSIVE COPY?
+
+Without copy, the caller could modify the original List and indirectly change
+the Account object.
+
+==============================================================================
+SECTION B: SQL PROGRAMS
+==============================================================================
+
+==============================================================================
+13. BRANCHES WITH AVERAGE BALANCE GREATER THAN 1,000
+==============================================================================
+
+TABLES:
+
+CUSTOMER
+customer_id
+customer_name
+account_number
+
+ACCOUNT
+account_number
+branch_name
+balance
+
+QUERY:
+
+SELECT branch_name,
+       AVG(balance) AS average_balance
+FROM account
+GROUP BY branch_name
+HAVING AVG(balance) > 1000;
+
+EXPLANATION:
+
+GROUP BY branch_name
+    Creates one group for each branch.
+
+AVG(balance)
+    Calculates the average balance for each branch.
+
+HAVING
+    Filters grouped results.
+
+The Customer table is not required unless customer information is needed.
+
+WITH JOIN:
+
+SELECT a.branch_name,
+       AVG(a.balance) AS average_balance
+FROM customer c
+JOIN account a
+  ON c.account_number = a.account_number
+GROUP BY a.branch_name
+HAVING AVG(a.balance) > 1000;
+
+==============================================================================
+14. STUDENT COUNT PER DEPARTMENT
+==============================================================================
+
+TABLES:
+
+STUDENT
+id
+name
+roll_no
+dept_id
+
+DEPARTMENT
+dept_id
+dept_name
+
+QUERY:
+
+SELECT d.dept_id,
+       d.dept_name,
+       COUNT(s.id) AS student_count
+FROM department d
+LEFT JOIN student s
+  ON s.dept_id = d.dept_id
+GROUP BY d.dept_id, d.dept_name;
+
+WHY LEFT JOIN?
+
+It also returns departments having zero students.
+
+WHY COUNT(s.id), NOT COUNT(*)?
+
+For a department with no matching students:
+
+COUNT(s.id) returns 0.
+
+COUNT(*) may count the department row and return 1.
+
+RELATIONSHIPS:
+
+department.dept_id
+    Primary key of Department.
+
+student.id
+    Primary key of Student.
+
+student.dept_id
+    Foreign key referencing department.dept_id.
+
+RELATIONSHIP TYPE:
+
+One Department -> Many Students
+
+==============================================================================
+SECTION C: JAVA 8 AND MODERN JAVA
+==============================================================================
+
+==============================================================================
+15. JAVA RECORDS
+==============================================================================
+
+Records are concise data-carrier classes.
+
+CODE:
+
+public record EmployeeDto(
+        int id,
+        String name,
+        double salary
+) {
+}
+
+AUTOMATICALLY PROVIDED:
+
+1. Canonical constructor
+2. Accessor methods
+3. equals()
+4. hashCode()
+5. toString()
+
+ACCESSOR EXAMPLE:
+
+EmployeeDto employee =
+        new EmployeeDto(1, "Amit", 50000);
+
+System.out.println(employee.name());
+
+IMPORTANT:
+
+A record's fields cannot be reassigned after construction.
+
+However, a record is not automatically deeply immutable if it contains a
+mutable object such as ArrayList.
+
+==============================================================================
+16. SEALED CLASSES
+==============================================================================
+
+Sealed classes restrict permitted subclasses. 【1-2a8f8d】
+
+CODE:
+
+public sealed interface Payment
+        permits CardPayment, UpiPayment {
+}
+
+final class CardPayment implements Payment {
+}
+
+final class UpiPayment implements Payment {
+}
+
+A permitted subclass must be:
+
+final
+sealed
+or non-sealed
+
+USE CASE:
+
+Use sealed classes when the possible domain types are known and controlled.
+
+Example:
+
+Payment
+    |
+    +--> CardPayment
+    +--> UpiPayment
+
+==============================================================================
+17. STREAMS VS COLLECTIONS
+==============================================================================
+
+COLLECTION:
+
+Stores data.
+
+Examples:
+
+List
+Set
+Map
+
+STREAM:
+
+Processes data using operations such as:
+
+filter
+map
+sorted
+reduce
+collect
+
+IMPORTANT DIFFERENCES:
+
+Collection can normally be reused.
+
+Stream is consumed after a terminal operation.
+
+Collection stores elements.
+
+Stream does not store elements.
+
+Collection operations are generally eager.
+
+Stream intermediate operations are lazy.
+
+INTERVIEW ANSWER:
+
+"A Collection stores data, whereas a Stream provides a pipeline for processing
+data. A stream does not modify or store its source data and is consumed once."
+
+==============================================================================
+18. FUNCTIONAL INTERFACE
+==============================================================================
+
+A functional interface contains exactly one abstract method.
+
+CODE:
+
+@FunctionalInterface
+interface Calculator {
+
+    int calculate(int first, int second);
+}
+
+USAGE:
+
+Calculator addition =
+        (first, second) -> first + second;
+
+System.out.println(
+        addition.calculate(10, 20)
+);
+
+OUTPUT:
+
+30
+
+A functional interface may also contain:
+
+default methods
+static methods
+Object class methods
+
+==============================================================================
+19. OPTIONAL
+==============================================================================
+
+Optional represents a value that may or may not be present.
+
+CODE:
+
+Optional<Employee> employee =
+        repository.findById(101L);
+
+String name = employee
+        .map(Employee::getName)
+        .orElse("Employee not found");
+
+BENEFITS:
+
+1. Makes absence explicit.
+2. Reduces direct null manipulation.
+3. Supports map, filter and flatMap.
+4. Encourages safe default or exception handling.
+
+THROW EXCEPTION WHEN EMPTY:
+
+Employee result = employee.orElseThrow(
+        () -> new EmployeeNotFoundException(
+                "Employee not found")
+);
+
+BEST PRACTICE:
+
+Use Optional mainly for method return types.
+
+Avoid:
+
+optional.get()
+
+unless presence is already guaranteed.
+
+==============================================================================
+20. var KEYWORD
+==============================================================================
+
+var provides local variable type inference.
+
+CODE:
+
+var name = "Parag";
+
+Compiler infers:
+
+String name
+
+CODE:
+
+var employees =
+        new ArrayList<Employee>();
+
+LIMITATIONS:
+
+1. Only local variables.
+2. An initializer is required.
+3. Cannot be used for fields.
+4. Cannot be used for method return type.
+5. Cannot be used for method parameters.
+6. Java remains statically typed.
+
+==============================================================================
+21. SWITCH EXPRESSIONS
+==============================================================================
+
+CODE:
+
+String description = switch (status) {
+
+    case "A" -> "Active";
+    case "I" -> "Inactive";
+    case "P" -> "Pending";
+    default -> "Unknown";
+};
+
+BENEFITS:
+
+1. Returns a value.
+2. Cleaner syntax.
+3. No accidental fall-through.
+4. Usually no break statement.
+
+MULTILINE CASE:
+
+String result = switch (status) {
+
+    case "A" -> {
+        log.info("Active status");
+        yield "Active";
+    }
+
+    default -> "Unknown";
+};
+
+==============================================================================
+22. MULTILINE STRING
+==============================================================================
+
+Java 15+ uses text blocks.
+
+CODE:
+
+String json = """
+        {
+          "id": 101,
+          "name": "Parag"
+        }
+        """;
+
+BENEFIT:
+
+Avoids repeated newline and quote escaping.
+
+==============================================================================
+23. CUSTOM EXCEPTION
+==============================================================================
+
+UNCHECKED EXCEPTION:
+
+public class PaymentNotFoundException
+        extends RuntimeException {
+
+    public PaymentNotFoundException(
+            String message) {
+
+        super(message);
+    }
+}
+
+THROW:
+
+throw new PaymentNotFoundException(
+        "Payment not found: " + paymentId
+);
+
+CHECKED EXCEPTION:
+
+public class FileProcessingException
+        extends Exception {
+
+    public FileProcessingException(String message) {
+        super(message);
+    }
+}
+
+RuntimeException is commonly used for unrecoverable business and application
+errors.
+
+==============================================================================
+SECTION D: MULTITHREADING AND COLLECTIONS
+==============================================================================
+
+==============================================================================
+24. RUNNABLE VS CALLABLE
+==============================================================================
+
+RUNNABLE:
+
+Method:
+    run()
+
+Return value:
+    No value
+
+Checked exception:
+    Cannot declare checked exception
+
+CALLABLE:
+
+Method:
+    call()
+
+Return value:
+    Returns value
+
+Checked exception:
+    Can throw checked exception
+
+CODE:
+
+Callable<Integer> task = () -> 10 + 20;
+
+ExecutorService executor =
+        Executors.newSingleThreadExecutor();
+
+Future<Integer> result =
+        executor.submit(task);
+
+System.out.println(result.get());
+
+executor.shutdown();
+
+OUTPUT:
+
+30
+
+==============================================================================
+25. IMPLEMENT RUNNABLE OR EXTEND THREAD?
+==============================================================================
+
+PREFERRED:
+
+Implement Runnable.
+
+CODE:
+
+Runnable task =
+        () -> System.out.println("Running");
+
+Thread thread = new Thread(task);
+
+thread.start();
+
+WHY RUNNABLE IS BETTER:
+
+1. Java supports only single class inheritance.
+2. Separates task logic from thread management.
+3. Task can be reused.
+4. Task can be submitted to ExecutorService.
+5. Easier unit testing.
+6. Promotes composition over inheritance.
+
+==============================================================================
+26. WHY EXECUTORSERVICE?
+==============================================================================
+
+CODE:
+
+ExecutorService executor =
+        Executors.newFixedThreadPool(5);
+
+executor.submit(
+        () -> processPayment()
+);
+
+executor.shutdown();
+
+BENEFITS:
+
+1. Reuses threads.
+2. Controls maximum thread count.
+3. Queues submitted tasks.
+4. Supports Future results.
+5. Supports graceful shutdown.
+6. Avoids creating one new thread per request.
+
+PRODUCTION NOTE:
+
+Always choose pool size and queue policy according to workload. Unbounded task
+queues can cause memory issues.
+
+==============================================================================
+27. FUTURE VS COMPLETABLEFUTURE
+==============================================================================
+
+FUTURE:
+
+Future<String> future =
+        executor.submit(() -> loadPayment());
+
+String result = future.get();
+
+get() normally blocks until the result becomes available.
+
+COMPLETABLEFUTURE:
+
+CompletableFuture.supplyAsync(
+        this::loadPayment
+)
+.thenApply(this::validatePayment)
+.thenAccept(this::savePayment)
+.exceptionally(exception -> {
+
+    log.error("Payment failed", exception);
+
+    return null;
+});
+
+DIFFERENCE:
+
+Future:
+    Basic asynchronous result holder.
+    Difficult to chain multiple operations.
+    get() is blocking.
+
+CompletableFuture:
+    Supports chaining.
+    Supports combining tasks.
+    Supports callbacks.
+    Supports exception handling.
+    Can provide non-blocking completion stages.
+
+==============================================================================
+28. WHY HASHSET STORES UNIQUE ELEMENTS
+==============================================================================
+
+HashSet internally uses a HashMap.
+
+Each set element is stored as a HashMap key.
+
+Uniqueness is determined using:
+
+hashCode()
+equals()
+
+If two elements have the same hash bucket, equals() is used to determine
+whether they are logically equal.
+
+CAN WE USE A TRADITIONAL LOOP?
+
+Enhanced for loop can be used:
+
+for (String value : set) {
+    System.out.println(value);
+}
+
+Index-based loop cannot be used directly:
+
+set.get(index)
+
+HashSet does not provide get(index) because it has no index-based ordering.
+
+==============================================================================
+29. LINKEDHASHMAP INSERTION ORDER
+==============================================================================
+
+LinkedHashMap uses:
+
+1. Hash table for lookup.
+2. Doubly linked list for iteration order.
+
+CODE:
+
+Map<Integer, String> map =
+        new LinkedHashMap<>();
+
+map.put(2, "B");
+map.put(1, "A");
+map.put(3, "C");
+
+System.out.println(map);
+
+OUTPUT:
+
+{2=B, 1=A, 3=C}
+
+The linked entries maintain the insertion order.
+
+==============================================================================
+30. INTERNAL WORKING OF ARRAYLIST
+==============================================================================
+
+ArrayList uses a dynamically resizable array.
+
+OPERATIONS:
+
+get(index)
+    O(1)
+
+append
+    Amortized O(1)
+
+insert in middle
+    O(N)
+
+remove from middle
+    O(N)
+
+WHEN CAPACITY IS FULL:
+
+1. A larger array is created.
+2. Existing elements are copied.
+3. The new element is inserted.
+
+DOES RESIZING IMPACT PERFORMANCE?
+
+One resize is expensive, but resizing does not happen for every insertion.
+
+Therefore, append remains amortized O(1).
+
+IF EXPECTED SIZE IS KNOWN:
+
+List<Employee> employees =
+        new ArrayList<>(10000);
+
+This reduces repeated resizing.
+
+==============================================================================
+31. CONCURRENTHASHMAP VS synchronizedMap()
+==============================================================================
+
+CONCURRENTHASHMAP:
+
+Map<String, Integer> map =
+        new ConcurrentHashMap<>();
+
+Features:
+
+1. Designed for high concurrency.
+2. Multiple operations can proceed concurrently.
+3. Provides atomic methods such as computeIfAbsent().
+4. Does not allow null keys or null values.
+5. Iterators are weakly consistent.
+
+SYNCHRONIZED MAP:
+
+Map<String, Integer> map =
+        Collections.synchronizedMap(
+                new HashMap<>()
+        );
+
+Features:
+
+1. Wraps the map with synchronization.
+2. A common lock protects operations.
+3. Iteration requires manual synchronization.
+
+SAFE ITERATION:
+
+synchronized (map) {
+
+    for (Map.Entry<String, Integer> entry
+            : map.entrySet()) {
+
+        System.out.println(entry);
+    }
+}
+
+INTERVIEW ANSWER:
+
+"ConcurrentHashMap provides better concurrency through its internal concurrent
+design, while synchronizedMap serializes access through a common wrapper lock."
+
+==============================================================================
+32. ARRAYLIST LOOP OUTPUT
+==============================================================================
+
+CODE:
+
+List<Integer> list = new ArrayList<>();
+
+list.add(1);
+
+for (int i = 0; i < list.size(); i++) {
+
+    list.add(2);
+
+    System.out.println(list.get(i));
+}
+
+OUTPUT:
+
+1
+2
+2
+2
+2
+...
+
+Eventually, the program can terminate with OutOfMemoryError.
+
+WHY?
+
+Initially:
+
+i = 0
+list.size() = 1
+
+Every iteration:
+
+i increases by 1.
+list size also increases by 1.
+
+Therefore:
+
+i < list.size()
+
+continues to remain true.
+
+FIX:
+
+int originalSize = list.size();
+
+for (int i = 0; i < originalSize; i++) {
+
+    list.add(2);
+
+    System.out.println(list.get(i));
+}
+
+==============================================================================
+33. RETURN FROM FINALLY
+==============================================================================
+
+CODE:
+
+public int validate() {
+
+    try {
+
+        return 1;
+
+    } catch (Exception e) {
+
+        return 2;
+
+    } finally {
+
+        return 3;
+    }
+}
+
+RESULT:
+
+Without exception:
+    3
+
+With a handled exception:
+    3
+
+WHY?
+
+The return statement in finally overrides the return from try or catch.
+
+BEST PRACTICE:
+
+Never return from a finally block.
+
+A return in finally may also hide an exception.
+
+==============================================================================
+34. BINARY SEARCH TREE AND DFS
+==============================================================================
+
+BST RULE:
+
+Values in the left subtree are less than the node.
+
+Values in the right subtree are greater than the node.
+
+DFS TRAVERSALS:
+
+PREORDER:
+
+Root -> Left -> Right
+
+Use:
+    Copying tree
+    Prefix expression
+
+INORDER:
+
+Left -> Root -> Right
+
+Use:
+    Returns sorted values for a valid BST
+
+POSTORDER:
+
+Left -> Right -> Root
+
+Use:
+    Deleting tree
+    Dependency-first processing
+
+Example:
+
+        10
+       /  \
+      5   15
+
+Preorder:
+10, 5, 15
+
+Inorder:
+5, 10, 15
+
+Postorder:
+5, 15, 10
+
+==============================================================================
+35. STRING MEMORY
+==============================================================================
+
+CODE:
+
+String a = "abc";
+
+String b = "abc";
+
+String c = new String("abc");
+
+MEMORY:
+
+String pool:
+
+"abc"
+
+a -> pooled "abc"
+b -> same pooled "abc"
+
+Heap:
+
+c -> separate String object whose content is "abc"
+
+RESULT:
+
+a == b
+    true
+
+a == c
+    false
+
+a.equals(c)
+    true
+
+EXPLANATION:
+
+== compares references.
+
+equals() compares content.
+
+==============================================================================
+SECTION E: JVM AND TROUBLESHOOTING
+==============================================================================
+
+==============================================================================
+36. DEBUG OutOfMemoryError
+==============================================================================
+
+COMMON CAUSES:
+
+1. Unbounded cache.
+2. Static collection continuously growing.
+3. Large database result loaded into memory.
+4. Large Kafka batch.
+5. ThreadLocal not cleared.
+6. Too many threads.
+7. Large files fully loaded into memory.
+8. Low container memory limit.
+9. Memory leak caused by retained object references.
+
+ENABLE HEAP DUMP:
+
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=/var/log/app/heap.hprof
+
+TOOLS:
+
+1. Eclipse Memory Analyzer
+2. Java Mission Control
+3. VisualVM
+4. jcmd
+5. jmap
+6. GC logs
+7. Prometheus and Grafana
+8. Kubernetes container-memory metrics
+
+PROCESS:
+
+1. Capture heap dump.
+2. Identify largest retained objects.
+3. Check GC behavior.
+4. Locate allocation or retention path.
+5. Fix leak or unbounded growth.
+6. Retest under load.
+7. Increase memory only if the application genuinely needs it.
+
+INTERVIEW ANSWER:
+
+"I first capture a heap dump and GC logs, analyze retained objects using MAT
+or Java Mission Control, identify whether the issue is a leak, unbounded
+cache, large batch, or incorrect container sizing, and fix the root cause
+before increasing heap."
+
+==============================================================================
+37. DEBUG DEADLOCK
+==============================================================================
+
+DEADLOCK EXAMPLE:
+
+Thread 1:
+
+lock A
+then waits for lock B
+
+Thread 2:
+
+lock B
+then waits for lock A
+
+TOOLS:
+
+jcmd <pid> Thread.print
+
+or:
+
+jstack <pid>
+
+The thread dump normally shows threads waiting for locks held by each other.
+
+FIXES:
+
+1. Acquire locks in the same order.
+2. Avoid deeply nested locks.
+3. Reduce synchronized scope.
+4. Use ReentrantLock.tryLock() with timeout.
+5. Avoid calling external services while holding a lock.
+6. Use concurrent collections where suitable.
+
+CONSISTENT ORDER:
+
+synchronized (lockA) {
+
+    synchronized (lockB) {
+        // processing
+    }
+}
+
+Every thread must acquire A before B.
+
+==============================================================================
+38. groupingBy() VS partitioningBy()
+==============================================================================
+
+groupingBy():
+
+Creates any number of groups.
+
+CODE:
+
+Map<String, List<Employee>> byDepartment =
+        employees.stream()
+            .collect(Collectors.groupingBy(
+                    Employee::getDepartment
+            ));
+
+Possible keys:
+
+IT
+HR
+FINANCE
+OPERATIONS
+
+partitioningBy():
+
+Creates two Boolean groups.
+
+CODE:
+
+Map<Boolean, List<Employee>> salaryGroups =
+        employees.stream()
+            .collect(Collectors.partitioningBy(
+                    employee ->
+                        employee.getSalary() > 50000
+            ));
+
+Result keys:
+
+true
+false
+
+MEMORY TRICK:
+
+groupingBy
+    Many groups
+
+partitioningBy
+    Two groups: true and false
+
+==============================================================================
+39. STREAM API, SEQUENTIAL AND PARALLEL STREAMS
+==============================================================================
+
+STREAM API:
+
+A declarative API for processing data using operations such as:
+
+filter
+map
+sorted
+reduce
+collect
+
+SEQUENTIAL:
+
+list.stream()
+
+Uses one processing sequence.
+
+PARALLEL:
+
+list.parallelStream()
+
+May process elements across multiple threads in the common ForkJoinPool.
+
+ORDERED RESULT:
+
+list.parallelStream()
+    .forEachOrdered(System.out::println);
+
+IMPORTANT:
+
+forEach()
+    Does not guarantee encounter order for a parallel stream.
+
+forEachOrdered()
+    Preserves encounter order when the source has an encounter order.
+
+PARALLEL STREAM IS SUITABLE WHEN:
+
+1. Data set is sufficiently large.
+2. Operations are independent.
+3. Work is CPU intensive.
+4. No shared mutable state.
+5. Ordering cost is acceptable.
+
+Do not assume parallel stream is always faster.
+
+==============================================================================
+40. IMMUTABILITY AND JAVA 17
+==============================================================================
+
+Immutability means object state cannot change after construction.
+
+JAVA 17 FEATURE:
+
+Records provide concise immutable-data modeling.
+
+CODE:
+
+public record Customer(
+        long id,
+        String name
+) {
+}
+
+IMPORTANT:
+
+Record components are final.
+
+However:
+
+record Customer(
+    long id,
+    List<String> roles
+) {}
+
+is not deeply immutable if the list can be modified.
+
+DEFENSIVE RECORD:
+
+public record Customer(
+        long id,
+        List<String> roles
+) {
+
+    public Customer {
+
+        roles = List.copyOf(roles);
+    }
+}
+
+==============================================================================
+SECTION F: DATABASE CONCEPTS
+==============================================================================
+
+==============================================================================
+41. HANDLE LARGE IN CLAUSE
+==============================================================================
+
+PROBLEM:
+
+SELECT *
+FROM employee
+WHERE id IN (1, 2, 3, ... thousands of IDs);
+
+ISSUES:
+
+1. Large SQL statement.
+2. Parsing overhead.
+3. Database-specific limits.
+4. Poor maintainability.
+5. Potentially inefficient execution plan.
+
+SOLUTIONS:
+
+1. Split IDs into smaller batches.
+2. Insert IDs into a temporary or staging table.
+3. Join with the staging table.
+4. Use database collection parameters where supported.
+5. Use EXISTS or JOIN where logically appropriate.
+6. Process large jobs in pages or batches.
+
+STAGING TABLE SOLUTION:
+
+SELECT e.*
+FROM employee e
+JOIN requested_employee_id r
+  ON r.employee_id = e.id;
+
+Always check the database execution plan.
+
+==============================================================================
+42. DATABASE NORMALIZATION: 1NF AND 2NF
+==============================================================================
+
+FIRST NORMAL FORM:
+
+1. Each column contains an atomic value.
+2. No repeating groups.
+3. Every row can be uniquely identified.
+
+BAD:
+
+employee(
+    id,
+    phone_numbers = "111,222"
+)
+
+GOOD:
+
+employee(
+    id,
+    name
+)
+
+employee_phone(
+    employee_id,
+    phone_number
+)
+
+SECOND NORMAL FORM:
+
+1. Table must already be in 1NF.
+2. Every non-key column must depend on the complete composite primary key.
+3. No partial dependency.
+
+EXAMPLE:
+
+order_item(
+    order_id,
+    product_id,
+    product_name,
+    quantity
+)
+
+Composite key:
+
+order_id + product_id
+
+product_name depends only on product_id, not the complete composite key.
+
+Move product details to:
+
+product(
+    product_id,
+    product_name
+)
+
+==============================================================================
+43. ACID: ATOMICITY
+==============================================================================
+
+Atomicity means:
+
+All operations succeed or all operations roll back.
+
+EXAMPLE:
+
+@Transactional
+public void transfer(
+        long sender,
+        long receiver,
+        BigDecimal amount) {
+
+    debit(sender, amount);
+
+    credit(receiver, amount);
+}
+
+If credit fails after debit:
+
+The complete transaction rolls back.
+
+==============================================================================
+44. ACID: DURABILITY
+==============================================================================
+
+Durability means:
+
+After a database transaction is successfully committed, its changes remain
+persisted even after a restart or failure, according to the database's
+configured durability guarantees.
+
+Example:
+
+Payment transaction committed
+
+System restarts
+
+Committed payment remains available.
+
+==============================================================================
+45. DATABASE INDEX
+==============================================================================
+
+An index is an additional database structure used to locate rows faster.
+
+CODE:
+
+CREATE INDEX idx_employee_department
+ON employee(department_id);
+
+BENEFITS:
+
+1. Faster filtering.
+2. Faster joins.
+3. Faster lookup.
+4. May improve ordering and grouping.
+
+COSTS:
+
+1. Additional storage.
+2. Slower INSERT.
+3. Slower UPDATE.
+4. Slower DELETE.
+5. Index maintenance.
+
+Do not create indexes blindly.
+
+Use:
+
+EXPLAIN PLAN
+AWR report
+slow-query analysis
+query selectivity
+
+==============================================================================
+SECTION G: SPRING BOOT AND SPRING DATA JPA
+==============================================================================
+
+==============================================================================
+46. STEREOTYPE ANNOTATIONS
+==============================================================================
+
+@Component
+
+Generic Spring-managed component.
+
+@Service
+
+Business-logic layer.
+
+@Repository
+
+Persistence and data-access layer.
+
+@Controller
+
+Spring MVC controller returning views or responses.
+
+@RestController
+
+@Controller + @ResponseBody for REST APIs.
+
+All specialized stereotypes participate in component scanning.
+
+==============================================================================
+47. @Service ON REPOSITORY OR @Repository ON SERVICE
+==============================================================================
+
+The class may still be registered as a Spring bean because both annotations
+are component stereotypes.
+
+However, this is not recommended.
+
+CORRECT:
+
+@Service
+class PaymentService {
+    // Business logic
+}
+
+@Repository
+class PaymentDao {
+    // Database access
+}
+
+WHY CORRECT ANNOTATION MATTERS:
+
+1. Communicates architectural responsibility.
+2. Improves code readability.
+3. Supports tooling and conventions.
+4. @Repository marks persistence components and participates in persistence
+   exception translation.
+
+==============================================================================
+48. @PropertySource
+==============================================================================
+
+Loads an additional properties file into the Spring Environment.
+
+CONFIGURATION:
+
+@Configuration
+@PropertySource("classpath:custom.properties")
+public class ApplicationConfig {
+}
+
+custom.properties:
+
+payment.timeout=5000
+
+USAGE:
+
+@Value("${payment.timeout}")
+private int timeout;
+
+For multiple related configuration values, prefer:
+
+@ConfigurationProperties
+
+because it is type-safe and easier to validate.
+
+==============================================================================
+49. @PathVariable VS @RequestParam
+==============================================================================
+
+@PathVariable identifies a resource through the URI path.
+
+CODE:
+
+@GetMapping("/employees/{id}")
+public Employee getEmployee(
+        @PathVariable long id) {
+
+    return service.getEmployee(id);
+}
+
+REQUEST:
+
+GET /employees/101
+
+@RequestParam passes query parameters used for filtering, sorting, paging, or
+optional controls.
+
+CODE:
+
+@GetMapping("/employees")
+public List<Employee> search(
+        @RequestParam String department) {
+
+    return service.search(department);
+}
+
+REQUEST:
+
+GET /employees?department=IT
+
+MEMORY TRICK:
+
+PathVariable
+    Which resource?
+
+RequestParam
+    How should results be filtered or controlled?
+
+==============================================================================
+50. RESOLVE BEAN AMBIGUITY
+==============================================================================
+
+PROBLEM:
+
+Two implementations of the same interface exist.
+
+interface NotificationService {
+}
+
+@Service("emailNotification")
+class EmailNotificationService
+        implements NotificationService {
+}
+
+@Service("smsNotification")
+class SmsNotificationService
+        implements NotificationService {
+}
+
+SOLUTION 1: @Qualifier
+
+@Service
+class PaymentService {
+
+    private final NotificationService notification;
+
+    public PaymentService(
+        @Qualifier("emailNotification")
+        NotificationService notification) {
+
+        this.notification = notification;
+    }
+}
+
+SOLUTION 2: @Primary
+
+@Primary
+@Service
+class EmailNotificationService
+        implements NotificationService {
+}
+
+@Primary defines the default candidate.
+
+@Qualifier explicitly selects a candidate.
+
+==============================================================================
+51. @ControllerAdvice VS @RestControllerAdvice
+==============================================================================
+
+@ControllerAdvice:
+
+Provides global controller support.
+
+For JSON response, @ResponseBody may be required.
+
+@RestControllerAdvice:
+
+@ControllerAdvice + @ResponseBody
+
+Recommended for REST API exception responses.
+
+CODE:
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(
+            EmployeeNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handle(
+            EmployeeNotFoundException exception) {
+
+        ErrorResponse response =
+            new ErrorResponse(
+                "EMPLOYEE_NOT_FOUND",
+                exception.getMessage()
+            );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(response);
+    }
+}
+
+==============================================================================
+52. ACID PROPERTIES IN A TRANSACTION
+==============================================================================
+
+ATOMICITY:
+
+All operations succeed or all roll back.
+
+CONSISTENCY:
+
+The database moves from one valid state to another valid state while
+maintaining defined constraints.
+
+ISOLATION:
+
+Concurrent transactions are controlled so they do not incorrectly interfere
+with one another.
+
+DURABILITY:
+
+Committed changes remain persisted.
+
+CODE:
+
+@Transactional
+public void transfer() {
+
+    debit();
+
+    credit();
+}
+
+==============================================================================
+53. @Transactional PROPAGATION LEVELS
+==============================================================================
+
+REQUIRED:
+
+Default.
+
+Joins the existing transaction or creates a new one.
+
+REQUIRES_NEW:
+
+Suspends the current transaction and creates a new transaction.
+
+SUPPORTS:
+
+Uses the existing transaction if present. Otherwise runs without one.
+
+MANDATORY:
+
+Requires an existing transaction. Throws an exception if none exists.
+
+NOT_SUPPORTED:
+
+Suspends the current transaction and runs without a transaction.
+
+NEVER:
+
+Throws an exception if a transaction exists.
+
+NESTED:
+
+Creates a nested transaction using a savepoint when supported.
+
+CODE:
+
+@Transactional(
+    propagation = Propagation.REQUIRES_NEW
+)
+public void saveAudit() {
+}
+
+USE CASE:
+
+An audit record may need its own independent transaction.
+
+Spring documents `@Transactional` as a way to declare transactional semantics
+at method or class level. 【2-efdbd0】
+
+IMPORTANT:
+
+Transaction behavior is normally proxy-based.
+
+Calling a transactional method from another method in the same class may
+bypass the proxy.
+
+==============================================================================
+54. @Transient IN JPA
+==============================================================================
+
+CODE:
+
+@Entity
+class Employee {
+
+    @Id
+    private Long id;
+
+    private String firstName;
+
+    private String lastName;
+
+    @Transient
+    private String displayName;
+}
+
+displayName is not mapped to a database column.
+
+DIFFERENCE:
+
+@Transient
+    JPA persistence exclusion.
+
+transient keyword
+    Java serialization exclusion.
+
+==============================================================================
+55. MYSQL IN DEV AND ORACLE IN PROD
+==============================================================================
+
+Use Spring profiles.
+
+application-dev.yml:
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/appdb
+    username: dev_user
+    password: ${DEV_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+application-prod.yml:
+
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@//oracle-host:1521/PRODDB
+    username: prod_user
+    password: ${PROD_DB_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
+
+ACTIVATE PROFILE:
+
+java -jar application.jar \
+  --spring.profiles.active=prod
+
+IMPORTANT:
+
+1. Include correct JDBC drivers.
+2. Avoid database-specific SQL where portability is required.
+3. Use Flyway or Liquibase with validated database-specific scripts.
+4. Store credentials in a secret-management system.
+
+==============================================================================
+56. SCAN COMPONENTS OUTSIDE BASE PACKAGE
+==============================================================================
+
+APPLICATION CLASS:
+
+package com.a.b;
+
+TARGET COMPONENTS:
+
+com.x.y
+
+SOLUTION:
+
+@SpringBootApplication(
+    scanBasePackages = {
+        "com.a.b",
+        "com.x.y"
+    }
+)
+public class Application {
+
+    public static void main(String[] args) {
+
+        SpringApplication.run(
+                Application.class,
+                args
+        );
+    }
+}
+
+Alternative:
+
+@ComponentScan({
+    "com.a.b",
+    "com.x.y"
+})
+
+==============================================================================
+57. LOAD COMMON-LIBRARY BEANS WITHOUT COMPONENT SCAN
+==============================================================================
+
+COMMON LIBRARY CONFIGURATION:
+
+@Configuration
+public class CommonLibraryConfiguration {
+
+    @Bean
+    public CommonClient commonClient() {
+
+        return new CommonClient();
+    }
+}
+
+APPLICATION:
+
+@SpringBootApplication
+@Import(CommonLibraryConfiguration.class)
+public class Application {
+}
+
+EXPLANATION:
+
+@Import explicitly imports configuration.
+
+For reusable Spring Boot starter libraries, use auto-configuration with
+conditional bean definitions.
+
+==============================================================================
+58. RECOMMENDED SPRING EXCEPTION HANDLING
+==============================================================================
+
+PROCESS:
+
+1. Throw domain-specific exception from service.
+2. Handle globally with @RestControllerAdvice.
+3. Return a consistent error DTO.
+4. Use correct HTTP status.
+5. Log correlation ID.
+6. Do not expose internal stack traces.
+
+ERROR DTO:
+
+public record ErrorResponse(
+        String code,
+        String message,
+        Instant timestamp
+) {
+}
+
+EXCEPTION:
+
+throw new EmployeeNotFoundException(
+        "Employee not found: " + id
+);
+
+RESPONSE:
+
+HTTP 404
+
+{
+  "code": "EMPLOYEE_NOT_FOUND",
+  "message": "Employee not found: 101",
+  "timestamp": "..."
+}
+
+==============================================================================
+59. DTO VALIDATION
+==============================================================================
+
+DTO:
+
+public class UserRequest {
+
+    @NotBlank(
+        message = "Name is required"
+    )
+    private String name;
+
+    @Email(
+        message = "Invalid email"
+    )
+    private String email;
+
+    @Min(
+        value = 18,
+        message = "Age must be at least 18"
+    )
+    private int age;
+}
+
+CONTROLLER:
+
+@PostMapping("/users")
+public ResponseEntity<UserResponse> save(
+        @Valid @RequestBody UserRequest request) {
+
+    return ResponseEntity.ok(
+            userService.save(request)
+    );
+}
+
+GLOBAL HANDLER:
+
+Handle:
+
+MethodArgumentNotValidException
+
+Return field-level validation messages.
+
+==============================================================================
+60. SAVE USER WITH MULTIPLE ADDRESSES
+==============================================================================
+
+USER ENTITY:
+
+@Entity
+public class User {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<Address> addresses =
+            new ArrayList<>();
+
+    public void addAddress(Address address) {
+
+        addresses.add(address);
+
+        address.setUser(this);
+    }
+}
+
+ADDRESS ENTITY:
+
+@Entity
+public class Address {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String city;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "user_id",
+        nullable = false
+    )
+    private User user;
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+}
+
+SAVE:
+
+User user = new User();
+
+user.addAddress(address1);
+user.addAddress(address2);
+
+userRepository.save(user);
+
+EXPLANATION:
+
+@OneToMany
+    One user has multiple addresses.
+
+@ManyToOne
+    Multiple addresses belong to one user.
+
+CascadeType.ALL
+    User operations cascade to addresses.
+
+orphanRemoval = true
+    Removing an address from the collection can delete the orphaned row.
+
+==============================================================================
+61. FACTORY PATTERN IN SPRING BOOT
+==============================================================================
+
+PURPOSE:
+
+Creates or selects an implementation based on input without large if-else
+blocks.
+
+INTERFACE:
+
+interface PaymentProcessor {
+
+    String getType();
+
+    void process();
+}
+
+IMPLEMENTATIONS:
+
+@Component
+class CardProcessor
+        implements PaymentProcessor {
+
+    public String getType() {
+        return "CARD";
+    }
+
+    public void process() {
+        System.out.println("Card payment");
+    }
+}
+
+FACTORY:
+
+@Component
+class PaymentProcessorFactory {
+
+    private final Map<String, PaymentProcessor>
+            processors;
+
+    PaymentProcessorFactory(
+            List<PaymentProcessor> processorList) {
+
+        processors = processorList.stream()
+            .collect(Collectors.toMap(
+                PaymentProcessor::getType,
+                Function.identity()
+            ));
+    }
+
+    PaymentProcessor getProcessor(String type) {
+
+        PaymentProcessor processor =
+                processors.get(type);
+
+        if (processor == null) {
+
+            throw new IllegalArgumentException(
+                    "Unsupported payment type: "
+                    + type
+            );
+        }
+
+        return processor;
+    }
+}
+
+USAGE:
+
+factory.getProcessor("CARD").process();
+
+==============================================================================
+62. RETRY PATTERN
+==============================================================================
+
+Retry Pattern repeats a failed operation when the failure is temporary.
+
+CONFIGURATION:
+
+@EnableRetry
+@Configuration
+class RetryConfiguration {
+}
+
+CODE:
+
+@Retryable(
+    retryFor = ResourceAccessException.class,
+    maxAttempts = 3,
+    backoff = @Backoff(
+        delay = 1000,
+        multiplier = 2
+    )
+)
+public PaymentResponse callPaymentApi() {
+
+    return paymentClient.call();
+}
+
+RECOVERY:
+
+@Recover
+public PaymentResponse recover(
+        ResourceAccessException exception) {
+
+    return PaymentResponse.failed();
+}
+
+USE RETRY FOR:
+
+1. Temporary timeout.
+2. Temporary database connectivity problem.
+3. Short service unavailability.
+4. Transient network failure.
+
+DO NOT RETRY:
+
+1. Invalid request.
+2. Authentication failure without credential change.
+3. Business validation failure.
+4. Permanent resource-not-found error.
+
+PRODUCTION CONTROLS:
+
+Timeout
+Backoff
+Maximum attempts
+Circuit breaker
+Metrics
+Idempotency
+
+==============================================================================
+63. SPRING CLOUD API GATEWAY
+==============================================================================
+
+CONFIGURATION:
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: payment-service
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - StripPrefix=1
+
+FLOW:
+
+Client
+  |
+  v
+API Gateway
+  |
+  +--> Match Path Predicate
+  |
+  +--> Execute Filters
+  |
+  +--> Resolve Service
+  |
+  +--> Forward Request
+  |
+  v
+Payment Service
+
+COMMON RESPONSIBILITIES:
+
+1. Routing.
+2. Authentication filters.
+3. Rate limiting.
+4. Correlation identifiers.
+5. Request/response logging controls.
+6. Cross-cutting headers.
+
+Do not place core business logic in the gateway.
+
+==============================================================================
+64. AUTHENTICATION AND AUTHORIZATION IN MICROSERVICES
+==============================================================================
+
+FLOW:
+
+User
+  |
+  v
+Identity Provider
+  |
+  v
+OAuth2/OIDC Token
+  |
+  v
+API Gateway
+  |
+  v
+Microservice Resource Server
+
+SPRING SECURITY CONFIGURATION:
+
+@Bean
+SecurityFilterChain securityFilterChain(
+        HttpSecurity http)
+        throws Exception {
+
+    return http
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+
+            .requestMatchers(
+                "/actuator/health"
+            ).permitAll()
+
+            .requestMatchers(
+                "/admin/**"
+            ).hasRole("ADMIN")
+
+            .anyRequest()
+            .authenticated()
+        )
+        .oauth2ResourceServer(oauth ->
+            oauth.jwt(Customizer.withDefaults())
+        )
+        .build();
+}
+
+CONTROLS:
+
+1. TLS.
+2. OAuth2/OIDC.
+3. JWT signature and claim validation.
+4. Role or scope authorization.
+5. Service identity for service-to-service calls.
+6. Least-privilege IAM permissions.
+7. Secret management.
+8. Audit logging.
+9. Token expiration.
+10. Input validation.
+
+==============================================================================
+65. SPRING BOOT ACTUATOR
+==============================================================================
+
+DEPENDENCY:
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>
+        spring-boot-starter-actuator
+    </artifactId>
+</dependency>
+
+CONFIGURATION:
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          health,info,metrics,prometheus
+
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+USES:
+
+1. Health status.
+2. Application information.
+3. Metrics.
+4. Prometheus integration.
+5. Liveness and readiness probes.
+6. Operational diagnostics.
+
+SECURITY:
+
+Do not expose all Actuator endpoints publicly.
+
+==============================================================================
+SECTION H: MICROSERVICES
+==============================================================================
+
+==============================================================================
+66. DISTRIBUTED TRANSACTION MANAGEMENT
+==============================================================================
+
+PROBLEM:
+
+One business transaction updates multiple microservices and databases.
+
+A local @Transactional annotation cannot cover databases owned by separate
+microservices.
+
+RECOMMENDED DESIGN:
+
+Service A
+   |
+   +--> Save local data
+   |
+   +--> Save outbox event
+   |
+   v
+Kafka
+   |
+   v
+Service B
+   |
+   +--> Save local data
+   |
+   +--> Publish next event
+
+PATTERNS:
+
+1. Saga.
+2. Transactional Outbox.
+3. Idempotent Consumer.
+4. Retry with backoff.
+5. DLT.
+6. Compensation.
+7. Reconciliation.
+8. Correlation ID.
+
+RESULT:
+
+Eventual consistency rather than one immediate global database transaction.
+
+==============================================================================
+67. ORCHESTRATION VS CHOREOGRAPHY SAGA
+==============================================================================
+
+ORCHESTRATION:
+
+Central orchestrator controls the flow.
+
+Order Orchestrator
+      |
+      +--> Payment Service
+      |
+      +--> Inventory Service
+      |
+      +--> Notification Service
+
+ADVANTAGES:
+
+1. Workflow is easier to understand.
+2. Central state visibility.
+3. Compensation is centrally controlled.
+
+DISADVANTAGES:
+
+1. Orchestrator is an important dependency.
+2. Possible central complexity.
+
+CHOREOGRAPHY:
+
+Services react to events.
+
+Order Created
+      |
+      v
+Payment Service
+      |
+Payment Completed
+      |
+      v
+Inventory Service
+      |
+Inventory Reserved
+      |
+      v
+Notification Service
+
+ADVANTAGES:
+
+1. Loose coupling.
+2. No central workflow controller.
+3. Natural for smaller event flows.
+
+DISADVANTAGES:
+
+1. Difficult to trace as events increase.
+2. Risk of cyclic event dependencies.
+3. Business flow may become distributed across many services.
+
+==============================================================================
+68. FIX OutOfMemoryError IN MICROSERVICES
+==============================================================================
+
+PROCESS:
+
+1. Check container or Pod memory limit.
+2. Capture heap dump.
+3. Enable and review GC logs.
+4. Analyze retained objects.
+5. Check unbounded caches.
+6. Check large Kafka batches.
+7. Check large database result sets.
+8. Stream large files.
+9. Close resources.
+10. Configure JVM container heap correctly.
+11. Add memory alerts.
+12. Retest under load.
+13. Scale only after root cause is understood.
+
+KUBERNETES EXAMPLE:
+
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "500m"
+
+  limits:
+    memory: "1Gi"
+    cpu: "1"
+
+A container exceeding its memory limit may be terminated with an OOM-related
+condition.
+
+==============================================================================
+69. TWO SERVICE INSTANCES UPDATE THE SAME DATABASE ROW
+==============================================================================
+
+SOLUTION 1: OPTIMISTIC LOCKING
+
+@Entity
+class Account {
+
+    @Id
+    private Long id;
+
+    @Version
+    private Long version;
+
+    private BigDecimal balance;
+}
+
+FLOW:
+
+Instance A reads version 1.
+
+Instance B reads version 1.
+
+Instance A updates row to version 2.
+
+Instance B tries to update version 1.
+
+Instance B receives an optimistic-locking exception.
+
+Use when conflicts are relatively uncommon.
+
+SOLUTION 2: PESSIMISTIC LOCKING
+
+@Lock(LockModeType.PESSIMISTIC_WRITE)
+@Query("""
+    select a
+    from Account a
+    where a.id = :id
+""")
+Optional<Account> findForUpdate(
+        @Param("id") Long id
+);
+
+Use when contention is expected and strict serialization is required.
+
+Be careful about:
+
+1. Lock duration.
+2. Deadlocks.
+3. Transaction timeout.
+4. Reduced throughput.
+
+==============================================================================
+70. MICROSERVICE COMMUNICATION
+==============================================================================
+
+SYNCHRONOUS:
+
+REST
+gRPC
+
+Use when immediate response is required.
+
+Example:
+
+Payment Service calls Account Service to validate balance.
+
+ASYNCHRONOUS:
+
+Kafka
+RabbitMQ
+
+Use for:
+
+1. Notifications.
+2. Audit.
+3. Reporting.
+4. Event propagation.
+5. Long-running workflows.
+6. Callbacks.
+7. Loose coupling.
+
+PRODUCTION CONTROLS:
+
+Timeout
+Circuit breaker
+Retry
+Bulkhead
+Idempotency
+Schema versioning
+Distributed tracing
+Authentication
+Monitoring
+
+==============================================================================
+71. SAVE DATA IN TWO SERVICES WHEN ONE IS DOWN
+==============================================================================
+
+SCENARIO:
+
+Service A is available.
+
+Service B is down.
+
+Do not attempt to treat both databases as one local transaction.
+
+SOLUTION:
+
+Service A Transaction
+      |
+      +--> Save Service A data
+      |
+      +--> Save Outbox record
+      |
+      v
+Commit
+      |
+      v
+Outbox Publisher
+      |
+      v
+Kafka
+      |
+Service B is down
+      |
+Kafka event remains available
+      |
+Service B recovers
+      |
+      v
+Service B consumes and saves data
+
+IF SERVICE B PERMANENTLY FAILS:
+
+1. Retry stops after configured attempts.
+2. Route to DLT where applicable.
+3. Raise alert.
+4. Execute compensation when business rules require rollback.
+5. Run reconciliation.
+6. Perform controlled replay.
+
+INTERVIEW ANSWER:
+
+"We use Saga, Outbox Pattern, idempotent consumers, retry, DLT, compensation,
+and reconciliation. This provides eventual consistency without tightly
+coupling two service databases."
+
+==============================================================================
+SECTION I: AWS
+==============================================================================
+
+==============================================================================
+72. AWS AUTO SCALING
+==============================================================================
+
+AUTO SCALING GROUP CONFIGURATION:
+
+Minimum capacity
+Desired capacity
+Maximum capacity
+
+SCALING POLICIES:
+
+1. Target tracking.
+2. Step scaling.
+3. Scheduled scaling.
+4. Predictive scaling where appropriate.
+
+EXAMPLE:
+
+Target average CPU:
+60 percent
+
+High demand:
+Add EC2 instances.
+
+Low demand:
+Remove excess EC2 instances after configured stabilization and policy
+conditions.
+
+AWS documents that EC2 Auto Scaling can add or remove capacity based on
+policies and replace unhealthy instances to maintain desired capacity.
+【3-0e74b1】【4-edc13e】
+
+HANDLE UNPREDICTABLE TRAFFIC:
+
+1. Use metric-based target tracking.
+2. Use ALB.
+3. Configure minimum and maximum boundaries.
+4. Scale on suitable metrics.
+5. Use queues to absorb spikes.
+6. Cache frequently accessed data.
+7. Perform load testing.
+8. Monitor latency, errors, CPU, memory, and queue depth.
+
+CPU alone is not suitable for every application.
+
+==============================================================================
+73. DEPLOY DOCKER IMAGE TO EC2 USING JENKINS
+==============================================================================
+
+FLOW:
+
+Developer Push
+      |
+      v
+Jenkins Pipeline
+      |
+      +--> Maven Build
+      |
+      +--> Unit Tests
+      |
+      +--> Sonar Scan
+      |
+      +--> Docker Build
+      |
+      +--> Push Image to ECR
+      |
+      +--> Deploy on EC2
+      |
+      v
+Health Check
+
+BUILD:
+
+mvn clean test package
+
+docker build \
+  -t payment-service:${BUILD_NUMBER} .
+
+TAG:
+
+docker tag \
+  payment-service:${BUILD_NUMBER} \
+  ${ECR_URI}/payment-service:${BUILD_NUMBER}
+
+PUSH:
+
+docker push \
+  ${ECR_URI}/payment-service:${BUILD_NUMBER}
+
+EC2 DEPLOYMENT:
+
+docker pull \
+  ${ECR_URI}/payment-service:${BUILD_NUMBER}
+
+docker stop payment-service || true
+
+docker rm payment-service || true
+
+docker run -d \
+  --name payment-service \
+  -p 8080:8080 \
+  ${ECR_URI}/payment-service:${BUILD_NUMBER}
+
+BEST PRACTICES:
+
+1. Use EC2 IAM Role.
+2. Do not store permanent credentials in scripts.
+3. Use immutable image tags or image digests.
+4. Run health check after deployment.
+5. Keep rollback image available.
+6. Centralize logs and metrics.
+
+==============================================================================
+74. IAM ROLE VS IAM USER
+==============================================================================
+
+IAM USER:
+
+1. Long-lived AWS identity.
+2. Usually represents a person or special integration.
+3. Can have console password.
+4. Can have access keys.
+
+IAM ROLE:
+
+1. Assumed identity.
+2. Provides temporary credentials.
+3. Used by EC2, ECS tasks, Lambda, EKS workloads, or federated users.
+4. Preferred for AWS workload access.
+
+EXAMPLE:
+
+EC2 Application
+      |
+      v
+EC2 IAM Role
+      |
+      v
+S3 / Secrets Manager
+
+Do not embed AWS access keys inside source code or Docker images.
+
+==============================================================================
+75. SERVERLESS REAL-TIME ARCHITECTURE
+==============================================================================
+
+API FLOW:
+
+Client
+   |
+   v
+API Gateway
+   |
+   v
+Lambda
+   |
+   v
+DynamoDB
+   |
+   +--> EventBridge
+   |
+   +--> SNS
+   |
+   +--> SQS
+
+FILE PROCESSING:
+
+S3 Upload
+   |
+   v
+S3 Event
+   |
+   v
+Lambda
+   |
+   +--> DynamoDB
+   |
+   +--> SNS Notification
+
+BENEFITS:
+
+1. Automatic infrastructure management.
+2. Event-driven execution.
+3. Suitable scaling behavior for variable workloads.
+4. Pay-for-use model where applicable.
+5. Easy integration with managed AWS services.
+
+CONSIDERATIONS:
+
+1. Cold starts.
+2. Execution duration limits.
+3. Observability.
+4. Idempotency.
+5. Vendor-specific integration.
+6. Cost under sustained high load.
+
+==============================================================================
+76. CONFIGURATION AND SECRETS IN AWS
+==============================================================================
+
+NON-SENSITIVE CONFIGURATION:
+
+1. Environment variables.
+2. Systems Manager Parameter Store.
+3. Application configuration service.
+
+SECRETS:
+
+1. AWS Secrets Manager.
+2. Encrypted Parameter Store where suitable.
+
+FLOW:
+
+Application
+    |
+    v
+IAM Role
+    |
+    v
+Secrets Manager
+    |
+    v
+Database Credential
+
+BEST PRACTICES:
+
+1. Never store passwords in Git.
+2. Never bake secrets into Docker images.
+3. Use IAM authentication where supported.
+4. Rotate secrets.
+5. Encrypt values.
+6. Audit secret access.
+7. Mask secrets in logs.
+
+==============================================================================
+77. ECR
+==============================================================================
+
+ECR means:
+
+Elastic Container Registry.
+
+PURPOSE:
+
+Stores and manages container images.
+
+FLOW:
+
+Jenkins
+   |
+   +--> Build Docker Image
+   |
+   +--> Scan Image
+   |
+   +--> Push to ECR
+   |
+   v
+ECS / EKS / EC2 pulls the image
+
+GOOD PRACTICES:
+
+1. Use image scanning.
+2. Use lifecycle policies.
+3. Use immutable tags or digests.
+4. Restrict access with IAM.
+5. AvoidD not store secrets in images.
+6. Remove old unused images according to policy.
+
+==============================================================================
+78. AWS PERFORMANCE MANAGEMENT
+==============================================================================
+
+PROCESS:
+
+1. Measure before tuning.
+2. Identify the actual bottleneck.
+3. Apply targeted optimization.
+4. Load test again.
+5. Compare metrics.
+
+APPLICATION:
+
+1. Tune thread pools.
+2. Tune connection pools.
+3. Paginate APIs.
+4. Compress responses.
+5. Avoid blocking calls where applicable.
+6. Use asynchronous processing for heavy work.
+
+DATABASE:
+
+1. Optimize SQL.
+2. Add appropriate indexes.
+3. Review execution plans.
+4. Use caching carefully.
+5. Use read replicas for suitable read workloads.
+6. Avoid retrieving unnecessary columns or rows.
+
+INFRASTRUCTURE:
+
+1. Scale EC2 instances, ECS tasks, or Kubernetes Pods.
+2. Right-size CPU and memory.
+3. Use ALB.
+4. Use Auto Scaling.
+5. Use CDN for static content.
+
+MONITORING:
+
+CloudWatch
+APM
+Prometheus
+Grafana
+Application logs
+Database metrics
+
+IMPORTANT CORRECTION:
+
+Deleting logs is not a performance-management strategy.
+
+Instead:
+
+1. Use correct log level.
+2. Configure log rotation.
+3. Configure retention.
+4. Ship logs asynchronously.
+5. Avoid excessive logging in high-volume loops.
+
+==============================================================================
+79. S3 OBJECT STORAGE AND CONSISTENCY
+==============================================================================
+
+S3 stores data as objects inside buckets.
+
+OBJECT DETAILS:
+
+1. Bucket.
+2. Object key.
+3. Object data.
+4. Metadata.
+5. Optional version ID.
+
+COMMON CONTROLS:
+
+1. Encryption.
+2. Versioning.
+3. Lifecycle policies.
+4. IAM policies.
+5. Bucket policies.
+6. Storage classes.
+7. Object Lock where required.
+
+INTERVIEW ANSWER:
+
+"Amazon S3 is object storage. Files are stored as objects inside buckets and
+identified by keys. We use IAM, encryption, versioning, lifecycle policies,
+and suitable storage classes to manage security, durability, retention, and
+cost."
+
+==============================================================================
+80. ECS HEALTH CHECK
+==============================================================================
+
+TWO LEVELS:
+
+LEVEL 1: CONTAINER HEALTH CHECK
+
+Runs a command inside the container.
+
+TASK DEFINITION EXAMPLE:
+
+{
+  "healthCheck": {
+    "command": [
+      "CMD-SHELL",
+      "curl -f http://localhost:8080/actuator/health || exit 1"
+    ],
+    "interval": 30,
+    "timeout": 5,
+    "retries": 3,
+    "startPeriod": 60
+  }
+}
+
+LEVEL 2: LOAD BALANCER TARGET HEALTH CHECK
+
+ALB calls an application health endpoint.
+
+Example:
+
+/actuator/health/readiness
+
+MONITOR:
+
+1. Desired task count.
+2. Running task count.
+3. Healthy targets.
+4. Application response.
+5. CPU.
+6. Memory.
+7. Error rate.
+8. Response time.
+9. Application logs.
+10. Deployment events.
+
+==============================================================================
+81. APPLICATION LOAD BALANCER
+==============================================================================
+
+FLOW:
+
+Client
+   |
+   v
+ALB Listener
+   |
+   v
+Host or Path Rule
+   |
+   v
+Target Group
+   |
+   +--> Healthy Target 1
+   |
+   +--> Healthy Target 2
+   |
+   +--> Healthy Target 3
+
+TARGETS MAY INCLUDE:
+
+EC2 instances
+ECS tasks through supported target types
+IP addresses
+Lambda for supported ALB integrations
+
+ALB RESPONSIBILITIES:
+
+1. Receives HTTP/HTTPS requests.
+2. Evaluates listener rules.
+3. Selects target group.
+4. Sends traffic to healthy registered targets.
+5. Supports host-based routing.
+6. Supports path-based routing.
+7. Supports TLS termination.
+8. Performs target health checks.
+
+==============================================================================
+SECTION J: KUBERNETES
+==============================================================================
+
+==============================================================================
+82. SCALE UP AND DOWN IN KUBERNETES
+==============================================================================
+
+MANUAL SCALING:
+
+kubectl scale deployment \
+  payment-service \
+  --replicas=6
+
+Scaling a Deployment changes the desired replica count. Kubernetes then
+creates or removes Pods to reach that state. 【5-9a8c91】【6-11623f】
+
+HPA CONFIGURATION:
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+
+metadata:
+  name: payment-service
+
+spec:
+
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: payment-service
+
+  minReplicas: 2
+  maxReplicas: 10
+
+  metrics:
+
+    - type: Resource
+
+      resource:
+
+        name: cpu
+
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+FLOW:
+
+CPU usage increases
+      |
+      v
+HPA calculates desired replicas
+      |
+      v
+Deployment replica count increases
+      |
+      v
+New Pods are scheduled
+
+SCALE TYPES:
+
+Horizontal:
+    Add or remove Pods.
+
+Vertical:
+    Increase or decrease CPU and memory assigned to Pods.
+
+Cluster:
+    Add or remove worker nodes through the chosen cluster-scaling mechanism.
+
+==============================================================================
+83. KUBERNETES FAILOVER
+==============================================================================
+
+CONTAINER FAILURE:
+
+Kubelet can restart the container according to Pod restart policy.
+
+POD FAILURE:
+
+Deployment and ReplicaSet maintain the desired number of Pod replicas.
+
+NODE FAILURE:
+
+Pods managed by controllers can be replaced on available nodes after the
+cluster detects the node condition and controller behavior applies.
+
+READINESS PROBE:
+
+readinessProbe:
+
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+
+  initialDelaySeconds: 20
+  periodSeconds: 10
+
+A failed readiness probe prevents the Pod from being considered ready for
+normal Service traffic.
+
+LIVENESS PROBE:
+
+livenessProbe:
+
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+A failed liveness probe can cause the container to be restarted.
+
+HIGH AVAILABILITY CONTROLS:
+
+1. Multiple replicas.
+2. Readiness probe.
+3. Liveness probe.
+4. Pod anti-affinity or topology spreading where needed.
+5. Pod Disruption Budget.
+6. Multiple worker nodes.
+7. Monitoring and alerting.
+
+==============================================================================
+84. KUBERNETES DEPLOYMENT
+==============================================================================
+
+DEPLOYMENT YAML:
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: payment-service
+
+spec:
+
+  replicas: 3
+
+  selector:
+
+    matchLabels:
+      app: payment-service
+
+  strategy:
+
+    type: RollingUpdate
+
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
+  template:
+
+    metadata:
+
+      labels:
+        app: payment-service
+
+    spec:
+
+      containers:
+
+        - name: payment-service
+
+          image: repository/payment-service:1.0
+
+          ports:
+
+            - containerPort: 8080
+
+          readinessProbe:
+
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+
+            initialDelaySeconds: 20
+            periodSeconds: 10
+
+          resources:
+
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+
+DEPLOY:
+
+kubectl apply -f deployment.yml
+
+CHECK STATUS:
+
+kubectl rollout status \
+  deployment/payment-service
+
+ROLLBACK:
+
+kubectl rollout undo \
+  deployment/payment-service
+
+ARCHITECTURE:
+
+Deployment
+     |
+     v
+ReplicaSet
+     |
+     v
+Pods
+     |
+     v
+Containers
+
+DEPLOYMENT PROVIDES:
+
+1. Desired replica management.
+2. Rolling updates.
+3. Rollback.
+4. Declarative application state.
+5. Replacement of failed Pods through its controller hierarchy.
+
+==============================================================================
+85. KUBERNETES SERVICE
+==============================================================================
+
+A Kubernetes Service provides a stable network endpoint for a changing set of
+Pods.
+
+SERVICE YAML:
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: payment-service
+
+spec:
+
+  selector:
+    app: payment-service
+
+  ports:
+
+    - port: 80
+      targetPort: 8080
+
+  type: ClusterIP
+
+FLOW:
+
+Client Service
+      |
+      v
+payment-service DNS
+      |
+      v
+Kubernetes Service
+      |
+      +--> Ready Pod 1
+      |
+      +--> Ready Pod 2
+      |
+      +--> Ready Pod 3
+
+Service traffic is directed to matching endpoints. Kubernetes documentation
+describes Services as distributing network traffic to available Pods for an
+exposed workload. 【5-9a8c91】
+
+SERVICE TYPES:
+
+ClusterIP:
+
+Internal cluster access.
+
+NodePort:
+
+Exposes the Service through a port on nodes.
+
+LoadBalancer:
+
+Requests an external load balancer in supported environments.
+
+ExternalName:
+
+Maps the Service to an external DNS name.
+
+INTERVIEW ANSWER:
+
+"A Kubernetes Service provides stable networking and service discovery for
+Pods. Pods can be replaced and their IPs can change, but the Service name and
+virtual endpoint remain stable."
+
+==============================================================================
+FINAL RAPID REVISION
+==============================================================================
+
+Palindrome
+    Two pointers
+
+Fruit Frequency
+    groupingBy + counting
+
+Odd/Even Threads
+    synchronized + wait + notifyAll
+
+String Rotation
+    Equal length + doubled string contains second
+
+Longest Parentheses
+    Stack of indexes
+
+Functional Interface
+    One abstract method
+
+Immutable Class
+    final class + final fields + no setters + defensive copy
+
+Runnable vs Callable
+    No result vs result
+
+ExecutorService
+    Managed reusable thread pool
+
+Future vs CompletableFuture
+    Basic async result vs composable async stages
+
+HashSet
+    HashMap-based uniqueness using hashCode and equals
+
+ArrayList
+    Resizable array; append is amortized O(1)
+
+ConcurrentHashMap
+    Better concurrent access than synchronizedMap
+
+OutOfMemoryError
+    Heap dump + GC logs + retained-object analysis
+
+Deadlock
+    Thread dump + consistent lock ordering
+
+groupingBy
+    Multiple groups
+
+partitioningBy
+    Boolean true/false groups
+
+Large IN Clause
+    Batch or staging-table JOIN
+
+Atomicity
+    All operations commit or all roll back
+
+Durability
+    Committed data remains persisted
+
+Index
+    Faster reads with write and storage cost
+
+Spring Exception Handling
+    Domain exception + RestControllerAdvice
+
+DTO Validation
+    @Valid + validation annotations
+
+Spring Profiles
+    Environment-specific configuration
+
+Bean Ambiguity
+    @Qualifier or @Primary
+
+Distributed Transaction
+    Saga + Outbox + Idempotency
+
+Orchestration
+    Central workflow controller
+
+Choreography
+    Event-driven service reactions
+
+Concurrent Row Update
+    @Version optimistic locking
+
+Two-Service Save
+    Local transaction + Outbox + Kafka + Saga
+
+AWS Auto Scaling
+    Metrics + policy + min/desired/max capacity
+
+EC2 Deployment
+    Jenkins + Docker + ECR + health check
+
+IAM Role
+    Temporary workload credentials
+
+ECR
+    Managed container-image registry
+
+ECS Health
+    Container health + load-balancer target health
+
+Kubernetes Scaling
+    Replica count or HPA
+
+Kubernetes Failover
+    Controllers replace failed Pods
+
+Kubernetes Deployment
+    Replica management + rolling update + rollback
+
+Kubernetes Service
+    Stable endpoint and Pod traffic routing
+
+==============================================================================
+END OF INTERVIEW REVISION GUIDE
+==============================================================================
