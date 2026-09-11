@@ -4712,3 +4712,43 @@ analysis, unit tests, integration tests, automated regression suites, code
 reviews, QA validation, and production smoke testing."
 
 ==============================================================================
+
+
+
+###################################################################################################
+Question 23 :
+Given:
+
+Have you struggled anywhere in the journey of your experience and how do you come out of from the struggle and given the solution
+
+###################################################################################################
+
+==============================================================================
+REGRESSION TESTING - SHORT INTERVIEW ANSWER
+==============================================================================
+
+"In my last project, before implementing a feature, we performed impact
+analysis to identify affected APIs, database tables, Kafka topics, and
+downstream systems.
+
+To ensure the new feature didn't break existing functionality, we used:
+
+✔ JUnit & Mockito Unit Tests
+✔ Integration Tests
+✔ Automated Regression Suite (Jenkins)
+✔ QA Regression Testing
+✔ Code Reviews
+✔ Smoke Testing after Deployment
+
+For example, if we added a new Risk Status, we tested not only the new
+functionality but also existing risk creation, approval, audit, notification,
+and Kafka flows to ensure nothing was impacted."
+
+==============================================================================
+ONE-LINE ANSWER
+==============================================================================
+
+"We ensured no impact on existing code through impact analysis, unit testing,
+integration testing, automated regression testing, code reviews, and QA
+validation."
+==============================================================================
