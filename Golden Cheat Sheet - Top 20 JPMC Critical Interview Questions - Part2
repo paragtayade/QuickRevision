@@ -1,0 +1,897 @@
+Below is a short interview-ready revision sheet with correct Java code, SQL queries, Spring configuration, Kafka flow, and concise explanations.
+
+==============================================================================
+SELF-INTRODUCTION
+==============================================================================
+
+"I am a Senior Java Developer with over 13 years of experience in banking and
+financial services. I have worked on Spring Boot, Microservices, REST APIs,
+Kafka, Oracle, Docker, Kubernetes, AWS, and CI/CD. In my recent project, I
+developed risk governance and control microservices, implemented synchronous
+REST and asynchronous Kafka integrations, handled production issues, and
+participated in design, coding, code review, testing, and deployment."
+
+==============================================================================
+PROJECT SUMMARY
+==============================================================================
+
+"My recent project was a banking Risk Governance and Control platform. We
+developed Spring Boot microservices for risk, control, approval, audit, and
+notification workflows. REST APIs were used for immediate request-response
+operations, while Kafka was used for asynchronous event processing. Services
+were independently deployed as containers and persisted data in Oracle."
+
+==============================================================================
+1. DEPENDENCY INJECTION AND INVERSION OF CONTROL
+==============================================================================
+
+DEPENDENCY INJECTION:
+
+Dependency Injection means providing an object's dependencies from outside
+instead of creating them inside the class.
+
+Without DI:
+
+@Service
+public class PaymentService {
+
+    private PaymentRepository repository =
+            new PaymentRepository();
+}
+
+With DI:
+
+@Service
+public class PaymentService {
+
+    private final PaymentRepository repository;
+
+    public PaymentService(PaymentRepository repository) {
+        this.repository = repository;
+    }
+}
+
+INVERSION OF CONTROL:
+
+IoC means Spring controls object creation, configuration, lifecycle, and
+dependency management instead of our application code.
+
+Flow:
+
+Spring Container
+      |
+      +--> Creates PaymentRepository
+      |
+      +--> Creates PaymentService
+      |
+      +--> Injects Repository into Service
+
+SHORT DIFFERENCE:
+
+IoC = Overall principle where control is given to Spring.
+
+DI = Technique through which Spring supplies dependencies.
+
+INTERVIEW ANSWER:
+
+"IOC means Spring controls object creation and lifecycle. Dependency Injection
+is the mechanism by which Spring supplies required objects to a class,
+improving loose coupling and testability."
+
+==============================================================================
+2. DIFFERENCE BETWEEN THREE TYPES OF DI
+==============================================================================
+
+A. CONSTRUCTOR INJECTION - RECOMMENDED
+
+@Service
+public class PaymentService {
+
+    private final PaymentRepository repository;
+
+    public PaymentService(PaymentRepository repository) {
+        this.repository = repository;
+    }
+}
+
+Advantages:
+
+• Dependency is mandatory
+• Supports final fields
+• Easy unit testing
+• Object cannot be created in an incomplete state
+
+------------------------------------------------------------------------------
+
+B. SETTER INJECTION
+
+@Service
+public class PaymentService {
+
+    private PaymentRepository repository;
+
+    @Autowired
+    public void setRepository(PaymentRepository repository) {
+        this.repository = repository;
+    }
+}
+
+Use:
+
+Optional or replaceable dependency.
+
+------------------------------------------------------------------------------
+
+C. FIELD INJECTION
+
+@Service
+public class PaymentService {
+
+    @Autowired
+    private PaymentRepository repository;
+}
+
+Disadvantages:
+
+• Harder to unit test
+• Dependency is hidden
+• Cannot use final
+• Not recommended for new code
+
+------------------------------------------------------------------------------
+
+BEST ANSWER:
+
+"Constructor injection is preferred for mandatory dependencies, setter
+injection is suitable for optional dependencies, and field injection is
+concise but harder to test and maintain."
+
+==============================================================================
+3. CONVERT LIST OF STRINGS TO UPPERCASE
+==============================================================================
+
+INPUT:
+
+List<String> fruits = Arrays.asList("banana", "apple");
+
+CODE:
+
+List<String> result = fruits.stream()
+        .map(String::toUpperCase)
+        .collect(Collectors.toList());
+
+System.out.println(result);
+
+OUTPUT:
+
+[BANANA, APPLE]
+
+JAVA 16+ ALTERNATIVE:
+
+List<String> result = fruits.stream()
+        .map(String::toUpperCase)
+        .toList();
+
+Since the interview discussion specifies Java 8, use collectors.toList().
+
+==============================================================================
+4. WHAT DOES map() DO?
+==============================================================================
+
+map() transforms every stream element into another value.
+
+Flow:
+
+banana --> BANANA
+apple  --> APPLE
+
+Example:
+
+List<Integer> lengths = fruits.stream()
+        .map(String::length)
+        .collect(Collectors.toList());
+
+Output:
+
+[6, 5]
+
+ONE-LINER:
+
+"map performs one-to-one transformation and returns a new stream."
+
+==============================================================================
+5. DIFFERENCE BETWEEN filter() AND map()
+==============================================================================
+
+filter():
+
+Selects elements based on a condition.
+
+List<String> result = fruits.stream()
+        .filter(s -> s.startsWith("a"))
+        .collect(Collectors.toList());
+
+Output:
+
+[apple]
+
+map():
+
+Transforms elements.
+
+List<String> result = fruits.stream()
+        .map(String::toUpperCase)
+        .collect(Collectors.toList());
+
+Output:
+
+[BANANA, APPLE]
+
+SHORT DIFFERENCE:
+
+filter = Select data
+
+map = Transform data
+
+==============================================================================
+6. FIRST NON-REPEATED CHARACTER IN "SWISS"
+PLAIN JAVA WITHOUT STREAMS
+==============================================================================
+
+CODE:
+
+String str = "SWISS";
+
+Map<Character, Integer> frequency =
+        new LinkedHashMap<>();
+
+for (char ch : str.toCharArray()) {
+    frequency.put(
+            ch,
+            frequency.getOrDefault(ch, 0) + 1
+    );
+}
+
+for (char ch : str.toCharArray()) {
+    if (frequency.get(ch) == 1) {
+        System.out.println(ch);
+        break;
+    }
+}
+
+OUTPUT:
+
+W
+
+EXPLANATION:
+
+Frequency:
+
+S = 3
+W = 1
+I = 1
+
+The second loop follows the original string order, so W is returned first.
+
+==============================================================================
+7. TIME COMPLEXITY
+==============================================================================
+
+First loop:
+
+O(N)
+
+Second loop:
+
+O(N)
+
+Total:
+
+O(N) + O(N) = O(N)
+
+Space Complexity:
+
+O(K)
+
+K represents the number of distinct characters.
+
+INTERVIEW ANSWER:
+
+"The time complexity is O(N) because we traverse the string twice, and
+2N is simplified to N. The auxiliary space is O(K)."
+
+==============================================================================
+8. RETURN HIGHEST SALARY
+==============================================================================
+
+Only highest salary:
+
+SELECT MAX(salary) AS highest_salary
+FROM employee;
+
+Employee having the highest salary:
+
+SELECT id, name, salary
+FROM employee
+WHERE salary = (
+    SELECT MAX(salary)
+    FROM employee
+);
+
+The second query returns all employees tied for the highest salary.
+
+==============================================================================
+9. WHAT DOES MAX() DO? WHAT ABOUT NULL?
+==============================================================================
+
+MAX() is an aggregate function that returns the maximum non-null value.
+
+Query:
+
+SELECT MAX(salary)
+FROM employee;
+
+Given:
+
+10000
+20000
+NULL
+15000
+
+Result:
+
+20000
+
+Behavior:
+
+• MAX ignores NULL values.
+• If every salary is NULL, MAX returns NULL.
+• If no rows qualify, MAX also returns NULL.
+
+Optional default value:
+
+SELECT COALESCE(MAX(salary), 0)
+FROM employee;
+
+Result when no non-null salary exists:
+
+0
+
+==============================================================================
+10. DEPARTMENTS HAVING MORE THAN 6 EMPLOYEES
+==============================================================================
+
+Query:
+
+SELECT department_id, COUNT(*) AS employee_count
+FROM employee
+GROUP BY department_id
+HAVING COUNT(*) > 6;
+
+EXPLANATION:
+
+GROUP BY:
+
+Creates one group for each department.
+
+COUNT(*):
+
+Counts employees in each department.
+
+HAVING:
+
+Filters grouped results.
+
+IMPORTANT:
+
+WHERE filters rows before grouping.
+
+HAVING filters groups after grouping.
+
+==============================================================================
+11. DOES GROUP BY ALLOW AGGREGATE FUNCTIONS?
+==============================================================================
+
+Yes.
+
+Common aggregate functions:
+
+COUNT()
+SUM()
+AVG()
+MIN()
+MAX()
+
+Example:
+
+SELECT department_id,
+       COUNT(*) AS employee_count,
+       AVG(salary) AS average_salary,
+       MAX(salary) AS highest_salary
+FROM employee
+GROUP BY department_id;
+
+Rule:
+
+Every selected column that is not aggregated must normally appear in the
+GROUP BY clause.
+
+==============================================================================
+12. WHAT ARE MICROSERVICES AND WHY KAFKA?
+==============================================================================
+
+Microservices architecture divides a large application into small,
+independently deployable services organized around business capabilities.
+
+Example:
+
+Payment Service
+Risk Service
+Audit Service
+Notification Service
+
+Why Kafka:
+
+• Asynchronous communication
+• Loose coupling
+• High event throughput
+• Durable event storage
+• Replay capability
+• Multiple independent consumers
+• Partition-based parallel processing
+
+INTERVIEW ANSWER:
+
+"We used microservices to independently develop, deploy, and scale business
+capabilities. Kafka was used for high-volume asynchronous events where the
+producer should not wait for every downstream consumer."
+
+==============================================================================
+13. WHY KAFKA INSTEAD OF REST API?
+==============================================================================
+
+REST:
+
+Payment Service
+      |
+      v
+Notification API
+      |
+Wait for Response
+
+If Notification API is unavailable, the caller may fail or wait.
+
+Kafka:
+
+Payment Service
+      |
+      v
+payment-topic
+      |
+      +--> Notification Consumer
+      |
+      +--> Audit Consumer
+      |
+      +--> Reporting Consumer
+
+Kafka is preferred when:
+
+• Immediate response is not required
+• Multiple systems need the same event
+• Producer and consumer need loose coupling
+• Events must survive temporary consumer downtime
+• Replay or high throughput is required
+
+REST is preferred when:
+
+• Immediate response is required
+• The requester needs the result before continuing
+
+ONE-LINER:
+
+"REST is synchronous request-response communication; Kafka provides durable,
+asynchronous, event-driven communication."
+
+==============================================================================
+14. WHAT IS A KAFKA PARTITION?
+==============================================================================
+
+A Kafka topic is divided into partitions.
+
+Example:
+
+payment-topic
+
+Partition-0
+Partition-1
+Partition-2
+
+Benefits:
+
+• Parallel consumer processing
+• Horizontal scalability
+• Distributed storage
+• Ordering within each partition
+
+Messages with the same key are normally routed consistently so related events
+can maintain partition-level order.
+
+Example:
+
+paymentId = P1001 --> Partition-1
+
+Kafka topics must have sufficient partitions to support desired consumer
+concurrency. 【1-fa3f59】
+
+==============================================================================
+15. ASYNCHRONOUS USE CASE
+==============================================================================
+
+Banking Example:
+
+Payment Service
+      |
+      v
+payment-created-topic
+      |
+      +--> Fraud Service
+      |
+      +--> Audit Service
+      |
+      +--> Notification Service
+      |
+      +--> Reporting Service
+
+Reason for asynchronous processing:
+
+The Payment Service does not need to wait for audit, notification, or reporting
+to finish before accepting the payment request.
+
+Benefits:
+
+• Faster source response
+• Loose coupling
+• Independent scaling
+• Better failure isolation
+• Retry and DLT support
+
+==============================================================================
+16. WHAT IS AN IMMUTABLE SEQUENCE IN A PARTITION?
+==============================================================================
+
+Correct Kafka term:
+
+An append-only ordered log.
+
+Events are appended to the end of a partition and assigned sequential offsets.
+
+Example:
+
+Partition-0:
+
+Offset 0 --> Event-A
+Offset 1 --> Event-B
+Offset 2 --> Event-C
+
+Existing records are not updated like normal database rows.
+
+Important:
+
+Kafka guarantees record ordering within a partition, not across all partitions.
+
+==============================================================================
+17. WERE YOUR SERVICES PRODUCERS OR CONSUMERS?
+==============================================================================
+
+Both.
+
+Producer Example:
+
+Risk Service publishes a status event.
+
+kafkaTemplate.send(
+        "risk-status-topic",
+        riskId,
+        event
+);
+
+Consumer Example:
+
+Audit Service receives the event.
+
+@KafkaListener(
+    topics = "risk-status-topic",
+    groupId = "audit-group"
+)
+public void consume(RiskStatusEvent event) {
+    auditService.save(event);
+}
+
+INTERVIEW ANSWER:
+
+"Our services acted as both producers and consumers. A service produced events
+after a business change and consumed events belonging to its own downstream
+responsibility."
+
+==============================================================================
+18. COMPLETE KAFKA USE CASE
+==============================================================================
+
+Risk Approval Flow:
+
+User
+ |
+ v
+Risk REST API
+ |
+ v
+Risk Service
+ |
+ +--> Validate Request
+ |
+ +--> Save Risk in Oracle
+ |
+ +--> Publish risk-approved-topic
+              |
+              +--> Control Service
+              |
+              +--> Audit Service
+              |
+              +--> Notification Service
+
+Producer:
+
+kafkaTemplate.send(
+        "risk-approved-topic",
+        event.getRiskId().toString(),
+        event
+);
+
+Consumer:
+
+@KafkaListener(
+    topics = "risk-approved-topic",
+    groupId = "control-service-group"
+)
+public void consume(RiskEvent event) {
+    controlService.process(event);
+}
+
+Failure Flow:
+
+Processing Failure
+      |
+      v
+Retry
+      |
+      v
+Retries Exhausted
+      |
+      v
+risk-approved-topic.DLT
+
+SHORT ANSWER:
+
+"After risk approval, the Risk Service persisted the business state and
+published an event. Control, Audit, and Notification services consumed it
+independently. We used retries, idempotency, DLT, monitoring, and correlation
+IDs for reliable processing."
+
+==============================================================================
+19. DEFAULT SPRING BEAN SCOPE
+==============================================================================
+
+The default Spring bean scope is:
+
+singleton
+
+Example:
+
+@Service
+public class PaymentService {
+}
+
+Spring creates one shared PaymentService bean instance per Spring IoC
+container. 【2-090452】
+
+Important:
+
+Spring singleton means one instance per Spring container, not necessarily one
+instance across every application, JVM, or Kubernetes Pod.
+
+==============================================================================
+20. ADVANTAGE OF SINGLETON SCOPE
+==============================================================================
+
+Advantages:
+
+• Less object creation
+• Lower memory overhead
+• Bean can be reused
+• Suitable for stateless services
+• Centralized lifecycle management
+
+Important:
+
+Singleton beans should generally avoid mutable shared request-specific data,
+because multiple threads may use the same bean.
+
+Good:
+
+public Payment process(Payment payment) {
+    return repository.save(payment);
+}
+
+Risky:
+
+private String currentUser;
+
+The second field could be overwritten by concurrent requests.
+
+==============================================================================
+21. CAN WE CHANGE THE BEAN SCOPE?
+==============================================================================
+
+Yes.
+
+Example:
+
+@Component
+@Scope("prototype")
+public class ReportBuilder {
+}
+
+Other common scopes include:
+
+• singleton
+• prototype
+• request
+• session
+• application
+• websocket
+
+Request and session scopes require a web-aware application context.
+【2-090452】
+
+==============================================================================
+22. WHAT IS PROTOTYPE SCOPE?
+HOW TO CHANGE SINGLETON TO PROTOTYPE?
+==============================================================================
+
+Prototype scope creates a new bean instance whenever the bean is requested
+from the Spring container. 【2-090452】
+
+Code:
+
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class ReportBuilder {
+}
+
+Alternative:
+
+@Component
+@Scope("prototype")
+public class ReportBuilder {
+}
+
+Configuration using @Bean:
+
+@Configuration
+public class AppConfig {
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public ReportBuilder reportBuilder() {
+        return new ReportBuilder();
+    }
+}
+
+SHORT DIFFERENCE:
+
+Singleton:
+
+One shared bean instance per IoC container.
+
+Prototype:
+
+New instance each time the container is asked for the bean.
+
+IMPORTANT FOLLOW-UP:
+
+Directly constructor-injecting a prototype bean into a singleton usually
+resolves the prototype at singleton creation time. When a fresh instance is
+required repeatedly, use ObjectProvider.
+
+Code:
+
+@Service
+public class ReportService {
+
+    private final ObjectProvider<ReportBuilder> provider;
+
+    public ReportService(
+            ObjectProvider<ReportBuilder> provider) {
+        this.provider = provider;
+    }
+
+    public void generate() {
+        ReportBuilder builder = provider.getObject();
+    }
+}
+
+==============================================================================
+FINAL QUICK REVISION
+==============================================================================
+
+1. IoC:
+   Spring controls objects.
+
+2. DI:
+   Spring supplies dependencies.
+
+3. Best DI:
+   Constructor injection.
+
+4. map:
+   Transform elements.
+
+5. filter:
+   Select elements.
+
+6. SWISS:
+   First non-repeated = W.
+
+7. Complexity:
+   O(N).
+
+8. Highest salary:
+   MAX(salary).
+
+9. MAX and NULL:
+   NULL values ignored; all NULL means NULL result.
+
+10. Department count:
+    GROUP BY + HAVING COUNT(*) > 6.
+
+11. GROUP BY:
+    Works with aggregate functions.
+
+12. Microservices:
+    Small independently deployable services.
+
+13. Kafka vs API:
+    Async eventing vs synchronous request-response.
+
+14. Partition:
+    Unit of parallelism and partition-level ordering.
+
+15. Async use case:
+    Audit, notification, reporting, callbacks.
+
+16. Partition sequence:
+    Append-only ordered records with offsets.
+
+17. Kafka role:
+    Services can be both producers and consumers.
+
+18. Kafka flow:
+    Producer --> Topic --> Consumer --> DB/DLT.
+
+19. Default scope:
+    Singleton.
+
+20. Singleton advantage:
+    Reuse and lower object-creation overhead.
+
+21. Scope change:
+    Use @Scope.
+
+22. Prototype:
+    New bean whenever requested from the container.
+
+Main improvements
+Correctness: Clarified MAX() null behavior, GROUP BY versus HAVING, Kafka ordering, and Spring singleton semantics.
+Java 8 compatibility: Used Collectors.toList() instead of Stream.toList().
+Interview clarity: Each answer includes a direct definition, minimal code, expected output, and one useful follow-up.
+Project relevance: Kafka examples use banking risk, audit, notification, and control workflows.
