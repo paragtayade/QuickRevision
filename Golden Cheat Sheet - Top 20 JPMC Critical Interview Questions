@@ -3364,3 +3364,1351 @@ One-Line Version
 implementing Retry and DLT patterns, and successfully restoring data reliability."
 
 ============================================================================================================================================================
+
+###################################################################################################
+Question 16:
+
+Scenario : 6.	Let's have String have spaces in prefix and suffix and in between,
+
+how to count the words in String of non-spaces characters without changing the given string
+###################################################################################################
+
+
+
+String str = "   Java    Spring   Kafka    AWS   ";
+
+long count = Arrays.stream(str.split("\\s+"))
+                   .filter(s -> !s.isEmpty())
+                   .count();
+
+System.out.println(count);
+
+Output
+4
+
+Explanation
+split("\\s+")
+   ↓
+["", "Java", "Spring", "Kafka", "AWS"]
+
+filter(!isEmpty())
+   ↓
+["Java", "Spring", "Kafka", "AWS"]
+
+count()
+   ↓
+4
+
+Interview Answer
+
+"I split the string using regular expression \\s+ to handle multiple spaces, filter out empty strings caused by leading/trailing spaces, and then use count() to get the total number of words."
+
+One-Liner
+long count = Arrays.stream(str.split("\\s+"))
+                   .filter(s -> !s.isBlank())
+                   .count();
+
+###################################################################################################
+Question 17:
+Given:	If a String contains digits and characters how to bi-forget digits and strings separately. 
+Ex: address contains - 123, Bengaluru
+
+
+String address = "123, Bengaluru";
+
+###################################################################################################
+
+
+Separate:
+
+Digits  --> 123
+String  --> Bengaluru
+
+==============================================================================
+
+BEST SHORT SOLUTION (STREAMS)
+==============================================================================
+
+String address = "123, Bengaluru";
+
+String digits = address.chars()
+        .filter(Character::isDigit)
+        .mapToObj(c -> String.valueOf((char)c))
+        .collect(Collectors.joining());
+
+String text = address.chars()
+        .filter(Character::isLetter)
+        .mapToObj(c -> String.valueOf((char)c))
+        .collect(Collectors.joining());
+
+System.out.println("Digits : " + digits);
+System.out.println("Text   : " + text);
+
+==============================================================================
+
+OUTPUT
+==============================================================================
+
+Digits : 123
+Text   : Bengaluru
+
+==============================================================================
+
+EVEN SHORTER (INTERVIEW PREFERRED)
+==============================================================================
+
+String address = "123, Bengaluru";
+
+String digits = address.replaceAll("\\D", "");
+String text   = address.replaceAll("[^A-Za-z]", "");
+
+System.out.println(digits); // 123
+System.out.println(text);   // Bengaluru
+
+==============================================================================
+
+INTERVIEW ANSWER
+==============================================================================
+
+"I can separate digits and characters either using Java Streams with
+Character::isDigit and Character::isLetter, or more simply using regex.
+replaceAll('\\D','') extracts digits and replaceAll('[^A-Za-z]','')
+extracts alphabetic characters."
+
+==============================================================================
+
+ONE-LINER
+==============================================================================
+
+String digits = str.replaceAll("\\D", "");
+String text   = str.replaceAll("[^A-Za-z]", "");
+
+==============================================================================
+
+
+###################################################################################################
+Question 18:
+Given:	If a String contains digits and characters how to bi-forget digits and strings separately. 
+Ex: address contains - 123, Bengaluru
+
+
+String address = "123, Bengaluru";
+
+###################################################################################################
+
+==============================================================================
+QUESTION
+==============================================================================
+
+Given:
+
+String address = "123, Bengaluru";
+
+Separate:
+
+Digits  --> 123
+String  --> Bengaluru
+
+==============================================================================
+
+BEST SHORT SOLUTION (STREAMS)
+==============================================================================
+
+String address = "123, Bengaluru";
+
+String digits = address.chars()
+        .filter(Character::isDigit)
+        .mapToObj(c -> String.valueOf((char)c))
+        .collect(Collectors.joining());
+
+String text = address.chars()
+        .filter(Character::isLetter)
+        .mapToObj(c -> String.valueOf((char)c))
+        .collect(Collectors.joining());
+
+System.out.println("Digits : " + digits);
+System.out.println("Text   : " + text);
+
+==============================================================================
+
+OUTPUT
+==============================================================================
+
+Digits : 123
+Text   : Bengaluru
+
+==============================================================================
+
+                            OR EVEN SHORTER (INTERVIEW PREFERRED)
+==============================================================================
+
+String address = "123, Bengaluru";
+
+String digits = address.replaceAll("\\D", "");
+String text   = address.replaceAll("[^A-Za-z]", "");
+
+System.out.println(digits); // 123
+System.out.println(text);   // Bengaluru
+
+
+
+###################################################################################################
+Question 19:
+Given: 	How your last project implementation initiates, either Jira or confluence how was the process you took before starting coding
+
+###################################################################################################
+
+
+==============================================================================
+HOW A REQUIREMENT STARTED IN MY LAST PROJECT BEFORE CODING
+==============================================================================
+
+INTERVIEW QUESTION
+==============================================================================
+
+How was work assigned?
+
+Did it start from Jira or Confluence?
+
+What process did you follow before coding?
+
+==============================================================================
+
+ANSWER
+==============================================================================
+
+In our MUFG Banking project, every requirement usually started from a
+Business Requirement Document (BRD) or Functional Specification available
+in Confluence.
+
+The work item was then created as a Jira Story.
+
+Flow:
+
+Business Team
+      |
+      v
+BRD / Confluence Document
+      |
+      v
+Jira Epic
+      |
+      v
+Jira Story
+      |
+      v
+Sprint Planning
+      |
+      v
+Development
+      |
+      v
+Testing
+      |
+      v
+Deployment
+
+==============================================================================
+
+STEP 1 - REQUIREMENT ANALYSIS
+==============================================================================
+
+Before starting coding, I first read:
+
+• Jira Story
+• Acceptance Criteria
+• Confluence Document
+• API Specifications
+• Database Changes
+• Business Rules
+
+I try to understand:
+
+1. What business problem are we solving?
+2. Which microservices are impacted?
+3. Which APIs are impacted?
+4. Which database tables are impacted?
+5. Any Kafka events involved?
+
+==============================================================================
+
+STEP 2 - DISCUSSION WITH BA/PO
+==============================================================================
+
+If requirements were unclear:
+
+I scheduled discussion with:
+
+• Business Analyst
+• Product Owner
+• Architect
+
+Questions Asked:
+
+• Expected output?
+• Validation rules?
+• Error scenarios?
+• Non-functional requirements?
+
+==============================================================================
+
+STEP 3 - IMPACT ANALYSIS
+==============================================================================
+
+Then I check:
+
+Frontend Impact
+Backend Impact
+Database Impact
+Kafka Impact
+Downstream System Impact
+
+Example:
+
+New Risk Status Added
+
+Impact:
+
+✔ Risk Service
+✔ Kafka Event
+✔ Control Service
+✔ Audit Service
+✔ Database Table
+
+==============================================================================
+
+STEP 4 - TECHNICAL DESIGN
+==============================================================================
+
+Before coding I prepare:
+
+API Design
+Database Design
+Kafka Design
+Sequence Flow
+
+Example:
+
+UI
+ |
+Risk API
+ |
+Kafka Topic
+ |
+Consumer
+ |
+Oracle DB
+
+==============================================================================
+
+STEP 5 - TASK BREAKDOWN
+==============================================================================
+
+I divide story into tasks.
+
+Example:
+
+Task 1:
+Create Entity
+
+Task 2:
+Repository Changes
+
+Task 3:
+Service Logic
+
+Task 4:
+Kafka Producer
+
+Task 5:
+Kafka Consumer
+
+Task 6:
+Unit Test Cases
+
+==============================================================================
+
+STEP 6 - CODING
+==============================================================================
+
+After requirement understanding:
+
+1. Create feature branch
+2. Implement code
+3. Write Unit Tests
+4. Run Sonar Checks
+5. Local Testing
+
+==============================================================================
+
+STEP 7 - CODE REVIEW
+==============================================================================
+
+Create Pull Request.
+
+Review Items:
+
+• Clean Code
+• Performance
+• Exception Handling
+• Security
+• Unit Tests
+
+==============================================================================
+
+STEP 8 - QA TESTING
+==============================================================================
+
+After merge:
+
+Deploy to QA
+
+Perform:
+
+• Functional Testing
+• Regression Testing
+• Integration Testing
+
+==============================================================================
+
+STEP 9 - UAT AND PRODUCTION
+==============================================================================
+
+Business validates feature.
+
+Then:
+
+QA --> UAT --> Production
+
+==============================================================================
+
+INTERVIEW ANSWER (2 MINUTES)
+==============================================================================
+
+"In my last MUFG banking project, requirements usually started from a
+Confluence business document and a Jira story. Before coding,
+
+I first reviewed
+the acceptance criteria, business rules, API contracts, database changes,
+and Kafka event flow.
+
+If anything was unclear, I discussed it with the
+Business Analyst, Product Owner, and Architect.
+
+Then I performed impact
+analysis to identify affected microservices, databases, APIs, and downstream
+systems. 
+
+After preparing the technical design and task breakdown, I created
+a feature branch, implemented the solution, wrote unit tests, and completed
+peer code reviews.
+
+The feature was then deployed to QA, validated through
+integration and regression testing, and finally promoted to production after
+business approval."
+
+==============================================================================
+
+ONE-LINE ANSWER
+==============================================================================
+
+"Requirement → Confluence/Jira → Analysis → BA Discussion → Impact Analysis →
+Technical Design → Coding → Code Review → QA → UAT → Production."
+
+==============================================================================
+
+
+###################################################################################################
+Question 20 :
+Given:
+
+Have you done performance testing and what tools are used for the performance testing 
+and what problems faced and how fixes you have given in performance testing,
+what tools are used to find the errors/metrics during performance testing
+
+###################################################################################################
+
+
+==============================================================================
+PERFORMANCE TESTING - INTERVIEW ANSWER
+==============================================================================
+
+QUESTION
+==============================================================================
+
+Have you done Performance Testing?
+
+What tools were used?
+
+What issues did you find?
+
+How did you fix them?
+
+How did you monitor metrics and errors?
+
+==============================================================================
+
+ANSWER
+==============================================================================
+
+Yes, I have actively participated in performance testing for our banking
+microservices before production releases.
+
+==============================================================================
+TOOLS USED
+==============================================================================
+
+Performance Testing:
+
+• JMeter
+• LoadRunner (Client Team)
+• Postman Collection Runner (Small Testing)
+
+Monitoring:
+
+• Grafana
+• Prometheus
+• Splunk
+• ELK/Kibana
+• OpenShift Dashboard
+• AWS CloudWatch
+
+Database Monitoring:
+
+• Oracle AWR Report
+• Explain Plan
+• SQL Developer
+
+==============================================================================
+
+PERFORMANCE TEST SCENARIO
+==============================================================================
+
+API:
+
+POST /risk/create
+
+Expected Load:
+
+1000 Requests/Minute
+
+JMeter Test:
+
+50 Users
+100 Users
+500 Users
+1000 Users
+
+Initial Results:
+
+Response Time:
+
+Before:
+2 sec
+
+Load Increased:
+12 sec
+
+Some API Calls Failed
+
+==============================================================================
+
+HOW WE IDENTIFIED THE ISSUE
+==============================================================================
+
+Step 1: Check JMeter Report
+
+Observed:
+
+• High Response Time
+• Throughput Drop
+• Error Percentage Increased
+
+------------------------------------------------------------------------------
+
+Step 2: Check Grafana Dashboard
+
+Observed:
+
+CPU Usage = 90%
+
+Memory Usage = Normal
+
+Database Wait Time = High
+
+------------------------------------------------------------------------------
+
+Step 3: Check Splunk Logs
+
+Observed:
+
+Slow SQL Query Executing
+
+Example:
+
+SELECT *
+FROM RISK_TABLE
+WHERE STATUS='OPEN';
+
+Execution Time:
+
+8 Seconds
+
+==============================================================================
+
+ROOT CAUSE
+==============================================================================
+
+Missing Database Index
+
+Table:
+
+5 Million Records
+
+Query:
+
+SELECT *
+FROM RISK_TABLE
+WHERE STATUS='OPEN';
+
+Full Table Scan Happening
+
+==============================================================================
+
+FIX IMPLEMENTED
+==============================================================================
+
+Created Index:
+
+CREATE INDEX IDX_STATUS
+ON RISK_TABLE(STATUS);
+
+After Fix:
+
+Query Time:
+
+8 sec
+  ↓
+100 ms
+
+API Response:
+
+12 sec
+  ↓
+1.5 sec
+
+==============================================================================
+
+SECOND ISSUE - KAFKA CONSUMER LAG
+==============================================================================
+
+Load Test:
+
+5000 Events/Minute
+
+Problem:
+
+Kafka Consumer Lag Increasing
+
+Investigation:
+
+Partitions = 3
+
+Pods = 6
+
+Only 3 Consumers Active
+
+Fix:
+
+Partitions Increased:
+
+3
+↓
+12
+
+Consumer Concurrency:
+
+1
+↓
+3
+
+Result:
+
+Lag Reduced Significantly
+
+==============================================================================
+
+THIRD ISSUE - CONNECTION POOL EXHAUSTION
+==============================================================================
+
+Load:
+
+1000 Concurrent Requests
+
+Error:
+
+Timeout Waiting For Connection
+
+Hikari Pool:
+
+maximumPoolSize = 10
+
+Fix:
+
+maximumPoolSize = 30
+
+Result:
+
+No Timeouts
+
+==============================================================================
+
+METRICS WE MONITORED
+==============================================================================
+
+Application Metrics:
+
+• Response Time
+• Throughput
+• Error Rate
+• Active Threads
+
+Kafka Metrics:
+
+• Consumer Lag
+• Messages/sec
+• Failed Messages
+
+Database Metrics:
+
+• Slow Queries
+• Connection Pool Usage
+• DB Wait Time
+
+Infrastructure Metrics:
+
+• CPU Usage
+• Memory Usage
+• Pod Count
+• Pod Restart Count
+
+==============================================================================
+
+TOOLS USED FOR ERROR ANALYSIS
+==============================================================================
+
+Splunk:
+
+Search by:
+
+• Transaction Id
+• Risk Id
+• Event Id
+
+Grafana:
+
+• CPU
+• Memory
+• Kafka Lag
+
+Prometheus:
+
+• Application Metrics
+
+Oracle:
+
+• AWR Reports
+• Explain Plan
+
+==============================================================================
+
+FINAL RESULT
+==============================================================================
+
+Response Time:
+
+12 sec
+↓
+1.5 sec
+
+Consumer Lag:
+
+Very High
+↓
+Near Zero
+
+Database Query:
+
+8 sec
+↓
+100 ms
+
+No Connection Pool Errors
+
+==============================================================================
+
+BEST INTERVIEW ANSWER (2 MINUTES)
+==============================================================================
+
+"Yes, I participated in performance testing using JMeter.
+
+We tested our
+Spring Boot microservices with increasing user loads
+
+and monitored the
+application through Grafana, Prometheus, Splunk, OpenShift dashboards,
+and Oracle AWR reports. 
+
+One major issue we found was slow database queries
+caused by missing indexes, resulting in response times increasing from
+2 seconds to around 12 seconds under load. 
+
+After analyzing execution plans,
+we created appropriate indexes and reduced query execution times to
+milliseconds. We also identified Kafka consumer lag due to insufficient
+partitions and fixed it by increasing partitions and consumer concurrency.
+
+
+Another issue was database connection pool exhaustion, which we resolved by
+tuning HikariCP configuration. 
+So > After optimization, response time improved
+significantly, consumer lag reduced, and the application successfully handled
+the expected business load."
+
+==============================================================================
+
+ONE-LINE ANSWER
+==============================================================================
+
+"We used JMeter for load testing and Grafana, Prometheus, Splunk, and Oracle
+AWR reports for monitoring; we fixed slow SQL queries, Kafka consumer lag,
+and connection pool bottlenecks to improve performance."
+==============================================================================
+
+
+
+###################################################################################################
+Question 21 :
+Given:
+
+Have you struggled anywhere in the journey of your experience and how do you come out of from the struggle and given the solution
+
+###################################################################################################
+
+
+==============================================================================
+STRUGGLE IN MY CAREER AND HOW I OVERCAME IT
+(BEHAVIORAL INTERVIEW QUESTION)
+==============================================================================
+
+QUESTION
+==============================================================================
+
+Have you struggled anywhere in your project journey?
+
+How did you overcome it?
+
+What solution did you provide?
+
+==============================================================================
+
+ANSWER
+==============================================================================
+
+Yes, one of the biggest challenges I faced was during a banking project where
+we migrated a large monolithic application into multiple Spring Boot
+microservices communicating through Kafka.
+
+Initially everything worked fine in lower environments, but during integration
+testing we started seeing intermittent data inconsistencies.
+
+==============================================================================
+
+SITUATION
+==============================================================================
+
+Architecture:
+
+Risk Service
+     |
+Kafka
+     |
+Control Service
+     |
+Audit Service
+
+Issue:
+
+Some transactions were successfully processed in one service but were missing
+in another service.
+
+Example:
+
+Risk Service      -> APPROVED
+Control Service   -> APPROVED
+Audit Service     -> No Record
+
+Business users started reporting mismatched data.
+
+==============================================================================
+
+CHALLENGE
+==============================================================================
+
+The issue was difficult because:
+
+• Not reproducible 100% of the time
+• No obvious application errors
+• Multiple microservices involved
+• Multiple teams involved
+• Thousands of Kafka events processed daily
+
+Initially, I was not very experienced with distributed event-driven systems,
+so understanding exactly where the message flow was breaking was challenging.
+
+==============================================================================
+
+WHAT I DID
+==============================================================================
+
+Step 1 - Broke Problem Into Smaller Pieces
+
+Instead of investigating the whole system, I traced:
+
+Event ID
+      |
+Kafka Topic
+      |
+Kafka Partition
+      |
+Consumer Logs
+      |
+Database Records
+
+==============================================================================
+
+Step 2 - Worked Closely With Team
+==============================================================================
+
+I consulted:
+
+• Senior Architect
+• Kafka SME
+• Database Team
+• QA Team
+
+Rather than struggling alone, I leveraged team expertise.
+
+==============================================================================
+
+Step 3 - Deep Log Analysis
+==============================================================================
+
+Used:
+
+• Splunk
+• Kibana
+• OpenShift Logs
+
+Tracked:
+
+EventId
+RiskId
+Kafka Offset
+Partition
+
+Discovered:
+
+Some consumers failed during DB updates.
+
+==============================================================================
+
+Step 4 - Reproduced In QA
+==============================================================================
+
+We simulated:
+
+• Database downtime
+• Network delays
+• Kafka consumer failures
+
+After simulation we reproduced the issue.
+
+==============================================================================
+
+ROOT CAUSE
+==============================================================================
+
+Consumer processed event.
+
+Database update failed.
+
+No proper retry mechanism existed.
+
+Result:
+
+Event lost from business flow.
+
+==============================================================================
+
+SOLUTION IMPLEMENTED
+==============================================================================
+
+I proposed:
+
+1. Retry Mechanism
+2. Dead Letter Topic (DLT)
+3. Better Logging
+4. Monitoring Dashboard
+5. Idempotent Processing
+
+Flow:
+
+Event
+   |
+Consumer
+   |
+Failure
+   |
+Retry
+   |
+Failure Again
+   |
+DLT
+
+==============================================================================
+
+RESULT
+==============================================================================
+
+✔ No Event Loss
+
+✔ Better Traceability
+
+✔ Faster Root Cause Analysis
+
+✔ Improved Reliability
+
+✔ Business Issue Resolved
+
+==============================================================================
+
+WHAT I LEARNED
+==============================================================================
+
+1. Never assume logs tell the complete story immediately.
+
+2. Reproducing a production issue in lower environments is critical.
+
+3. Large problems should be broken into smaller traceable components.
+
+4. Collaboration is often faster than working in isolation.
+
+5. Monitoring and observability are as important as coding.
+
+==============================================================================
+
+BEST INTERVIEW ANSWER (2 MINUTES)
+==============================================================================
+
+"One significant challenge in my banking project was diagnosing intermittent
+data inconsistencies between microservices communicating through Kafka.
+Initially, the issue was difficult to reproduce and involved multiple teams.
+
+
+I started by tracing business transactions using event IDs, partitions,
+offsets, and application logs. After collaborating with architects, QA,
+and database teams, we reproduced the problem by simulating database failures
+in a lower environment. 
+
+We discovered that certain Kafka consumer failures
+during database updates were not being handled properly. I helped implement
+retry mechanisms, Dead Letter Topics, idempotent processing, and monitoring.
+
+
+As a result, we eliminated data loss and significantly improved system
+reliability. The experience taught me the importance of structured problem
+solving, collaboration, and observability in distributed systems."
+
+==============================================================================
+
+ONE-LINE ANSWER
+==============================================================================
+
+"My biggest struggle was debugging intermittent Kafka-based data inconsistencies
+across microservices, and I overcame it through systematic log analysis,
+issue simulation, team collaboration, and implementation of Retry, DLT,
+and monitoring solutions."
+
+==============================================================================
+
+
+
+
+###################################################################################################
+Question 22 :
+Given:
+
+Have you struggled anywhere in the journey of your experience and how do you come out of from the struggle and given the solution
+
+###################################################################################################
+
+
+==============================================================================
+REGRESSION TESTING IN MY LAST PROJECT
+==============================================================================
+
+INTERVIEW QUESTION
+==============================================================================
+
+How was regression testing done?
+
+How do you ensure a new feature does not impact existing functionality?
+
+==============================================================================
+
+ANSWER
+==============================================================================
+
+In our banking project, every Jira story went through multiple validation
+levels before production.
+
+We did not rely only on QA testing.
+
+We used a combination of:
+
+1. Unit Testing
+2. Integration Testing
+3. Regression Testing
+4. Automation Testing
+5. Code Review
+6. Performance Testing
+
+==============================================================================
+
+STEP 1 - UNIT TESTING
+==============================================================================
+
+Before raising PR:
+
+Developer writes JUnit + Mockito test cases.
+
+Coverage Target:
+
+80%+
+
+Example:
+
+New Risk Validation Rule Added
+
+Validate:
+
+✔ Valid Risk
+✔ Invalid Risk
+✔ Null Input
+✔ Boundary Conditions
+
+This ensures new code works correctly.
+
+==============================================================================
+
+STEP 2 - INTEGRATION TESTING
+==============================================================================
+
+Test interaction between:
+
+API
+ |
+Kafka
+ |
+Consumer
+ |
+Oracle DB
+
+Validate:
+
+✔ Data Saved
+✔ Event Published
+✔ Consumer Processing
+
+==============================================================================
+
+STEP 3 - REGRESSION TESTING
+==============================================================================
+
+QA Team executes existing test suite.
+
+Example:
+
+New Feature:
+
+Add New Risk Status
+
+QA Tests:
+
+✔ Risk Creation
+✔ Risk Update
+✔ Risk Approval
+✔ Audit Generation
+✔ Notifications
+✔ Kafka Events
+
+Even though only one feature changed,
+all previously working features are tested again.
+
+==============================================================================
+
+STEP 4 - AUTOMATION TESTING
+==============================================================================
+
+Automated Regression Suite
+
+Tools:
+
+• Selenium
+• Rest Assured
+• Postman Collections
+• Jenkins Pipeline
+
+Whenever code deployed:
+
+Regression Suite Runs Automatically
+
+==============================================================================
+
+STEP 5 - CODE REVIEW
+==============================================================================
+
+Before Merge:
+
+Senior Developers Check:
+
+✔ Logic
+✔ Side Effects
+✔ Security
+✔ Performance
+✔ Existing Flows
+
+Many issues get caught before QA.
+
+==============================================================================
+
+STEP 6 - IMPACT ANALYSIS
+==============================================================================
+
+Before coding I always perform impact analysis.
+
+Questions:
+
+Which APIs are affected?
+
+Which tables are affected?
+
+Which Kafka topics are affected?
+
+Which downstream systems are affected?
+
+Example:
+
+New Column Added
+
+Impact:
+
+✔ Entity
+✔ Repository
+✔ Service
+✔ API Response
+✔ Kafka Event
+
+==============================================================================
+
+STEP 7 - FEATURE TOGGLE (USED SOMETIMES)
+==============================================================================
+
+For risky changes:
+
+Feature Flag Enabled
+
+Old Logic
+      |
+      v
+Production
+
+New Logic
+      |
+Feature Flag OFF
+
+Users unaffected.
+
+After validation:
+
+Feature Flag ON
+
+==============================================================================
+
+REAL EXAMPLE
+==============================================================================
+
+Requirement:
+
+Add New Risk Status:
+
+"UNDER_REVIEW"
+
+Potential Impact:
+
+Approval Workflow
+Audit Workflow
+Notifications
+Reports
+
+Actions Taken:
+
+✔ Added Unit Tests
+✔ Added Integration Tests
+✔ QA Regression Execution
+✔ End-to-End Testing
+✔ Production Smoke Testing
+
+Result:
+
+No impact on existing statuses.
+
+==============================================================================
+
+HOW WE ENSURE NO BREAKAGE?
+==============================================================================
+
+1. Unit Tests
+2. Integration Tests
+3. Automation Regression Suite
+4. Peer Code Review
+5. Impact Analysis
+6. QA Regression
+7. UAT Validation
+8. Smoke Testing After Deployment
+
+==============================================================================
+
+BEST INTERVIEW ANSWER (2 MINUTES)
+==============================================================================
+
+"In my last banking project, regression testing was performed whenever a new feature or enhancement was developed. 
+Before coding, we performed impact analysis to identify all affected APIs, database tables, Kafka topics, and downstream systems. 
+
+During development, we wrote JUnit and Mockito test cases and executed integration tests. 
+
+After implementation, the QA team performed regression testing using both manual and automated test suites. 
+We also used code reviews, automation pipelines, and end-to-end testing to validate that existing functionality continued to work correctly. 
+In some cases, we used feature flags to safely deploy changes. This multi-layer validation approach ensured that new functionality did not impact existing business processes."
+
+==============================================================================
+
+ONE-LINE ANSWER
+==============================================================================
+
+"We ensured new features did not impact existing functionality through impact
+analysis, unit tests, integration tests, automated regression suites, code
+reviews, QA validation, and production smoke testing."
+
+==============================================================================
