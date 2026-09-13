@@ -1,0 +1,2075 @@
+==============================================================================
+INTERVIEW QUESTIONS AND ANSWERS
+JAVA | SQL | SPRING BOOT | MICROSERVICES | AWS | KUBERNETES
+==============================================================================
+
+FORMAT USED FOR EVERY TOPIC:
+QUESTION -> SIMPLE ANSWER -> SIMPLE CODE/CONFIG -> EXPLANATION -> KEY POINT
+
+NOTE:
+Code is kept short wherever possible. For advanced problems, the code is kept
+correct and followed by an easy explanation that can be spoken in an interview.
+
+==============================================================================
+SECTION A: JAVA CODING QUESTIONS
+==============================================================================
+
+==============================================================================
+QUESTION 1: Palindrome and JUnit Test?
+==============================================================================
+
+public static boolean isPalindrome(String str) {
+    if (str == null) return false;
+
+    int left = 0;
+    int right = str.length() - 1;
+
+    while (left < right) {
+        if (str.charAt(left++) != str.charAt(right--)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+JUnit 5
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+class PalindromeTest {
+
+    @Test
+    void shouldValidatePalindrome() {
+        assertTrue(isPalindrome("madam"));
+        assertTrue(isPalindrome(""));
+        assertFalse(isPalindrome("java"));
+        assertFalse(isPalindrome(null));
+    }
+}
+
+Complexity: Time O(n), Space O(1).
+
+==============================================================================
+QUESTION 2: Frequency of Fruits?
+==============================================================================
+
+List<String> fruits =
+        Arrays.asList("apple", "banana", "mango", "apple");
+
+Map<String, Long> frequency = fruits.stream()
+        .collect(Collectors.groupingBy(
+                Function.identity(),
+                LinkedHashMap::new,
+                Collectors.counting()
+        ));
+
+System.out.println(frequency);
+
+OUTPUT:
+{apple=2, banana=1, mango=1}
+
+groupingBy() groups equal strings and counting() counts each group.
+
+==============================================================================
+QUESTION 3: Print Odd and Even Numbers Alternately?
+==============================================================================
+
+class NumberPrinter {
+
+    private int number = 1;
+    private final int limit = 10;
+
+    public synchronized void printOdd() {
+        while (number <= limit) {
+            while (number % 2 == 0) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+
+            if (number <= limit) {
+                System.out.println("Odd  : " + number++);
+                notifyAll();
+            }
+        }
+    }
+
+    public synchronized void printEven() {
+        while (number <= limit) {
+            while (number % 2 != 0) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+
+            if (number <= limit) {
+                System.out.println("Even : " + number++);
+                notifyAll();
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        NumberPrinter printer = new NumberPrinter();
+
+        new Thread(printer::printOdd).start();
+        new Thread(printer::printEven).start();
+    }
+}
+
+Explanation: wait() releases the lock and pauses the wrong thread. notifyAll() wakes the other thread.
+
+==============================================================================
+QUESTION 4: String Rotation?
+==============================================================================
+
+public static boolean isRotation(String first, String second) {
+    return first != null
+            && second != null
+            && first.length() == second.length()
+            && (first + first).contains(second);
+}
+
+System.out.println(isRotation("abcde", "cdeab")); // true
+
+abcdeabcde contains cdeab, so it is a rotation.
+
+==============================================================================
+QUESTION 5: Longest Valid Parentheses?
+==============================================================================
+
+public static int longestValidParentheses(String s) {
+    Stack<Integer> stack = new Stack<>();
+    stack.push(-1);
+
+    int max = 0;
+
+    for (int i = 0; i < s.length(); i++) {
+        if (s.charAt(i) == '(') {
+            stack.push(i);
+        } else {
+            stack.pop();
+
+            if (stack.isEmpty()) {
+                stack.push(i);
+            } else {
+                max = Math.max(max, i - stack.peek());
+            }
+        }
+    }
+    return max;
+}
+
+System.out.println(longestValidParentheses("(()")); // 2
+
+Complexity: Time O(n), Space O(n).
+
+==============================================================================
+QUESTION 6: Transformer, Student Filter and Map?
+==============================================================================
+
+@FunctionalInterface
+interface Transformer<T, R> {
+    R transform(T input);
+}
+
+class Student {
+    private final int id;
+    private final String name;
+    private final int rollNo;
+    private final String dept;
+
+    public Student(int id, String name, int rollNo, String dept) {
+        this.id = id;
+        this.name = name;
+        this.rollNo = rollNo;
+        this.dept = dept;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getRollNo() {
+        return rollNo;
+    }
+}
+
+Get Name Using Transformer
+Transformer<Student, String> nameTransformer = Student::getName;
+
+String name = nameTransformer.transform(
+        new Student(1, "Amit", 101, "IT")
+);
+
+Students Whose Names Start with A
+List<Student> result = students.stream()
+        .filter(s -> s.getName().startsWith("A"))
+        .collect(Collectors.toList());
+
+Convert to Map<RollNo, Name>
+Map<Integer, String> studentMap = students.stream()
+        .collect(Collectors.toMap(
+                Student::getRollNo,
+                Student::getName,
+                (oldValue, newValue) -> oldValue
+        ));
+
+The merge function handles duplicate roll numbers.
+
+==============================================================================
+QUESTION 7: Date Seven Days After Current Date?
+==============================================================================
+
+LocalDate date = LocalDate.now().plusDays(7);
+
+System.out.println(date);
+
+LocalDate is immutable, so plusDays() returns a new date.
+
+==============================================================================
+QUESTION 8: Employee Salary Operations?
+==============================================================================
+
+class Employee {
+    private String name;
+    private String roleDesc;
+    private int projectId;
+    private double salary;
+    private String address;
+
+    public int getProjectId() { return projectId; }
+    public double getSalary() { return salary; }
+}
+
+Sum Salary by Project ID
+Map<Integer, Double> salaryByProject = employees.stream()
+        .collect(Collectors.groupingBy(
+                Employee::getProjectId,
+                Collectors.summingDouble(Employee::getSalary)
+        ));
+
+Salary Greater Than 50,000
+List<Employee> eligible = employees.stream()
+        .filter(e -> e.getSalary() > 50000)
+        .collect(Collectors.toList());
+
+Minimum and Maximum
+Optional<Employee> min = eligible.stream()
+        .min(Comparator.comparingDouble(Employee::getSalary));
+
+Optional<Employee> max = eligible.stream()
+        .max(Comparator.comparingDouble(Employee::getSalary));
+
+==============================================================================
+QUESTION 9: First Name Starting with K?
+==============================================================================
+
+List<String> names =
+        Arrays.asList("sakishi", "klice", "sachin", "kin");
+
+String result = names.stream()
+        .filter(name -> name.startsWith("k"))
+        .findFirst()
+        .orElse("Not found");
+
+System.out.println(result); // klice
+
+==============================================================================
+QUESTION 10: Custom Comparator?
+==============================================================================
+
+Comparator<Employee> salaryComparator =
+        Comparator.comparingDouble(Employee::getSalary);
+
+employees.sort(salaryComparator);
+
+Descending Order
+employees.sort(
+        Comparator.comparingDouble(Employee::getSalary).reversed()
+);
+
+Traditional Implementation
+class SalaryComparator implements Comparator<Employee> {
+
+    @Override
+    public int compare(Employee e1, Employee e2) {
+        return Double.compare(e1.getSalary(), e2.getSalary());
+    }
+}
+
+==============================================================================
+QUESTION 11: Custom Immutable Class?
+==============================================================================
+
+public final class Account {
+
+    private final long id;
+    private final String name;
+    private final List<String> roles;
+
+    public Account(long id, String name, List<String> roles) {
+        this.id = id;
+        this.name = name;
+        this.roles = List.copyOf(roles);
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+}
+
+Rules:
+
+1. Make class final
+2. Make fields private final
+3. Initialize fields through constructor
+4. Do not provide setters
+5. Use defensive copies for mutable fields
+
+List.copyOf() requires Java 10+. In Java 8:
+
+this.roles = Collections.unmodifiableList(
+        new ArrayList<>(roles)
+);
+
+==============================================================================
+SECTION B: SQL QUESTIONS
+==============================================================================
+
+==============================================================================
+QUESTION 12: Branches with Average Balance Greater Than 1,000?
+==============================================================================
+
+Only the Account table is required:
+
+SELECT branch_name,
+       AVG(balance) AS average_balance
+FROM account
+GROUP BY branch_name
+HAVING AVG(balance) > 1000;
+
+If customer details are also required:
+
+SELECT a.branch_name,
+       AVG(a.balance) AS average_balance
+FROM customer c
+JOIN account a
+  ON c.account_number = a.account_number
+GROUP BY a.branch_name
+HAVING AVG(a.balance) > 1000;
+
+WHERE filters rows. HAVING filters grouped results.
+
+==============================================================================
+QUESTION 13: Student Count per Department?
+==============================================================================
+
+SELECT d.dept_id,
+       d.dept_name,
+       COUNT(s.id) AS student_count
+FROM department d
+LEFT JOIN student s
+  ON s.dept_id = d.dept_id
+GROUP BY d.dept_id, d.dept_name;
+
+Use LEFT JOIN to include departments with zero students.
+
+RELATIONSHIPS:
+department.dept_id = Primary Key
+student.id         = Primary Key
+student.dept_id    = Foreign Key referencing department.dept_id
+
+One department can have many students, so it is a one-to-many relationship.
+
+==============================================================================
+SECTION C: MODERN JAVA QUESTIONS
+==============================================================================
+
+==============================================================================
+QUESTION 14: Java Records?
+==============================================================================
+
+Records are concise data-carrier classes.
+
+public record EmployeeDto(
+        int id,
+        String name,
+        double salary
+) {}
+
+The compiler provides constructor, accessors, equals(), hashCode(), and toString().
+
+Record components are final, but a record is only deeply immutable when its contained objects are also immutable.
+
+==============================================================================
+QUESTION 15: Sealed Classes?
+==============================================================================
+
+Sealed classes restrict which classes can extend them.
+
+public sealed interface Payment
+        permits CardPayment, UpiPayment {
+}
+
+final class CardPayment implements Payment {
+}
+
+final class UpiPayment implements Payment {
+}
+
+Use them when the permitted domain types are known and controlled.
+
+==============================================================================
+QUESTION 16: Streams vs Collections?
+==============================================================================
+
+Collection:
+Stores data.
+
+Stream:
+Processes data.
+
+Collection can be reused.
+Stream is consumed once.
+
+Collection evaluates eagerly.
+Stream intermediate operations are lazy.
+
+Collection supports direct modification.
+Stream normally produces a result without modifying its source.
+
+==============================================================================
+QUESTION 17: Functional Interface?
+==============================================================================
+
+A functional interface contains exactly one abstract method.
+
+@FunctionalInterface
+interface Calculator {
+    int calculate(int a, int b);
+}
+
+Calculator add = (a, b) -> a + b;
+
+System.out.println(add.calculate(10, 20)); // 30
+
+It may still contain default, static, and inherited Object methods.
+
+==============================================================================
+QUESTION 18: Optional?
+==============================================================================
+
+Use Optional primarily as a return type when a value may be absent.
+
+Optional<Employee> employee =
+        repository.findById(101L);
+
+String name = employee
+        .map(Employee::getName)
+        .orElse("Not found");
+
+BENEFITS:
+
+Makes absence explicit
+Reduces direct null checking
+Supports map, filter, flatMap and orElse
+
+Avoid calling get() without checking presence.
+
+==============================================================================
+QUESTION 19: var Keyword?
+==============================================================================
+
+var provides local variable type inference.
+
+var name = "Parag";               // String
+var employees = new ArrayList<>(); // ArrayList<Object>
+
+LIMITATIONS:
+
+Only local variables
+Must have initializer
+Cannot be a field, method parameter or return type
+
+Java remains statically typed.
+
+==============================================================================
+QUESTION 20: Switch Expression?
+==============================================================================
+
+String category = switch (status) {
+    case "A" -> "Active";
+    case "I" -> "Inactive";
+    case "P" -> "Pending";
+    default -> "Unknown";
+};
+
+It returns a value and avoids accidental fall-through.
+
+==============================================================================
+QUESTION 21: Multiline String?
+==============================================================================
+
+Java 15+ text block:
+
+String json = """
+        {
+          "id": 101,
+          "name": "Parag"
+        }
+        """;
+
+==============================================================================
+QUESTION 22: Custom Exception?
+==============================================================================
+
+public class PaymentNotFoundException
+        extends RuntimeException {
+
+    public PaymentNotFoundException(String message) {
+        super(message);
+    }
+}
+
+throw new PaymentNotFoundException(
+        "Payment not found: " + paymentId
+);
+
+Use a checked exception only when the caller is expected to recover explicitly.
+
+==============================================================================
+SECTION D: CONCURRENCY AND COLLECTIONS QUESTIONS
+==============================================================================
+
+==============================================================================
+QUESTION 23: Runnable vs Callable?
+==============================================================================
+
+Runnable:
+Returns no result
+Cannot declare checked exceptions
+run()
+
+Callable:
+Returns a result
+Can throw checked exceptions
+call()
+
+Callable<Integer> task = () -> 10 + 20;
+
+Future<Integer> future =
+        Executors.newSingleThreadExecutor().submit(task);
+
+==============================================================================
+QUESTION 24: Runnable vs Extending Thread?
+==============================================================================
+
+Implementing Runnable is normally better:
+
+Runnable task = () -> System.out.println("Running");
+new Thread(task).start();
+
+WHY:
+
+Java allows only single class inheritance
+Separates task from thread management
+Runnable can be submitted to ExecutorService
+Improves reuse and testing
+
+==============================================================================
+QUESTION 25: Why ExecutorService?
+==============================================================================
+
+It manages a reusable thread pool.
+
+ExecutorService executor =
+        Executors.newFixedThreadPool(5);
+
+executor.submit(() -> processPayment());
+
+executor.shutdown();
+
+BENEFITS:
+
+Controlled thread count
+Thread reuse
+Task queuing
+Future support
+Graceful shutdown
+
+==============================================================================
+QUESTION 26: Future vs CompletableFuture?
+==============================================================================
+
+Future:
+Usually blocking get()
+Difficult to combine tasks
+Limited callback support
+
+CompletableFuture:
+Callbacks and chaining
+Combines multiple async operations
+Supports exception handling
+
+CompletableFuture.supplyAsync(this::loadPayment)
+        .thenApply(this::validatePayment)
+        .thenAccept(this::savePayment)
+        .exceptionally(ex -> {
+            log.error("Processing failed", ex);
+            return null;
+        });
+
+==============================================================================
+QUESTION 27: Why HashSet Stores Unique Elements?
+==============================================================================
+
+HashSet internally uses a HashMap. Elements are stored as map keys.
+
+Uniqueness is decided using:
+
+hashCode()
+equals()
+
+You can use an enhanced traditional loop:
+
+for (String value : set) {
+    System.out.println(value);
+}
+
+What you cannot meaningfully use is an index-based loop because HashSet has no get(index) and does not preserve positional indexes.
+
+==============================================================================
+QUESTION 28: LinkedHashMap Insertion Order?
+==============================================================================
+
+LinkedHashMap combines:
+
+Hash table for fast lookup
+Doubly linked list for iteration order
+
+Map<Integer, String> map = new LinkedHashMap<>();
+map.put(2, "B");
+map.put(1, "A");
+
+System.out.println(map); // {2=B, 1=A}
+
+==============================================================================
+QUESTION 29: ArrayList Internal Working?
+==============================================================================
+
+ArrayList uses a resizable internal array.
+
+get(index)      = O(1)
+append average  = Amortized O(1)
+middle insert   = O(n)
+remove          = O(n)
+
+When capacity is insufficient, it creates a larger array and copies elements. A resize is costly, but it does not happen on every insertion, so appending remains amortized O(1).
+
+If size is known:
+
+List<Employee> employees = new ArrayList<>(10000);
+
+==============================================================================
+QUESTION 30: ConcurrentHashMap vs synchronizedMap?
+==============================================================================
+
+ConcurrentHashMap:
+Fine-grained concurrent access
+Reads generally do not lock entire map
+Atomic methods such as computeIfAbsent()
+Does not allow null keys or values
+
+Collections.synchronizedMap():
+Single wrapper lock for operations
+Lower concurrency under contention
+Iteration requires external synchronization
+May follow underlying map's null rules
+
+Safe synchronized-map iteration:
+
+synchronized (map) {
+    for (Map.Entry<K, V> entry : map.entrySet()) {
+        // process
+    }
+}
+
+==============================================================================
+QUESTION 31: Infinite ArrayList Loop Output?
+==============================================================================
+
+List<Integer> list = new ArrayList<>();
+list.add(1);
+
+for (int i = 0; i < list.size(); i++) {
+    list.add(2);
+    System.out.println(list.get(i));
+}
+
+RESULT:
+1
+2
+2
+2
+...
+
+The loop normally keeps growing because every iteration increases both i and list.size(). Eventually it may fail with OutOfMemoryError.
+
+Fix:
+
+int initialSize = list.size();
+
+for (int i = 0; i < initialSize; i++) {
+    list.add(2);
+    System.out.println(list.get(i));
+}
+
+==============================================================================
+QUESTION 32: Return from finally?
+==============================================================================
+
+public int validate() {
+    try {
+        return 1;
+    } catch (Exception e) {
+        return 2;
+    } finally {
+        return 3;
+    }
+}
+
+Result in both handled paths:
+
+3
+
+The finally return overrides try and catch returns. Avoid returning from finally.
+
+==============================================================================
+QUESTION 33: BST and DFS Traversals?
+==============================================================================
+
+A Binary Search Tree follows:
+
+Left subtree values < Node
+Right subtree values > Node
+
+DFS traversals:
+
+Preorder:  Root, Left, Right
+Inorder:   Left, Root, Right
+Postorder: Left, Right, Root
+
+Inorder traversal of a valid BST returns sorted values.
+
+==============================================================================
+QUESTION 34: String Memory?
+==============================================================================
+
+String a = "abc";
+String b = "abc";
+String c = new String("abc");
+
+a and b reference the same interned literal in the string pool.
+c references a separate String object.
+
+a == b        // true
+a == c        // false
+a.equals(c)   // true
+
+== compares references. equals() compares content.
+
+==============================================================================
+QUESTION 35: Debug OutOfMemoryError?
+==============================================================================
+
+Capture diagnostics:
+
+Heap dump
+GC logs
+JVM metrics
+Thread dump when relevant
+
+Useful JVM configuration:
+
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=/var/log/app/heap.hprof
+
+Analyze using:
+
+Eclipse Memory Analyzer
+Java Mission Control
+VisualVM
+jcmd / jmap
+APM and container memory metrics
+
+Check for:
+
+Unbounded caches
+Static collections
+Large result sets
+ThreadLocal retention
+Large Kafka batches
+Unclosed resources
+Incorrect container heap sizing
+
+Fix the retention cause before merely increasing heap.
+
+==============================================================================
+QUESTION 36: Debug Deadlock?
+==============================================================================
+
+Capture thread dump:
+
+jcmd <pid> Thread.print
+
+or:
+
+jstack <pid>
+
+Look for threads waiting on locks held by one another.
+
+Avoid nested inconsistent lock ordering:
+
+synchronized (lockA) {
+    synchronized (lockB) {
+    }
+}
+
+All code should acquire locks in the same order. Prefer tryLock() with timeout for controllable recovery.
+
+==============================================================================
+QUESTION 37: groupingBy() vs partitioningBy()?
+==============================================================================
+
+groupingBy() creates multiple groups:
+
+Map<String, List<Employee>> byDepartment =
+        employees.stream()
+                .collect(Collectors.groupingBy(Employee::getDepartment));
+
+partitioningBy() creates exactly two Boolean groups:
+
+Map<Boolean, List<Employee>> bySalary =
+        employees.stream()
+                .collect(Collectors.partitioningBy(
+                        e -> e.getSalary() > 50000
+                ));
+
+Memory trick:
+
+groupingBy = Many groups
+partitioningBy = True/False groups
+
+==============================================================================
+QUESTION 38: Sequential, Parallel and Ordered Streams?
+==============================================================================
+
+list.stream();          // sequential
+list.parallelStream();  // parallel
+
+Ordered output from parallel stream:
+
+list.parallelStream()
+        .forEachOrdered(System.out::println);
+
+Parallel processing does not always improve performance. It is more suitable for sufficiently large, independent, CPU-oriented operations. Avoid shared mutable state.
+
+==============================================================================
+QUESTION 39: Immutability and Java 17?
+==============================================================================
+
+An immutable object cannot change after construction.
+
+Java 17 supports concise immutable-data modeling using records:
+
+public record Customer(long id, String name) {
+}
+
+Records provide final state components, but contained mutable objects still need defensive copying.
+
+==============================================================================
+SECTION E: DATABASE QUESTIONS
+==============================================================================
+
+==============================================================================
+QUESTION 40: Large IN Clause?
+==============================================================================
+
+Avoid constructing extremely large SQL literals.
+
+Better approaches:
+
+Batch IDs into smaller groups
+Use a temporary or staging table and JOIN
+Use database-supported collection/table parameters
+Replace unnecessary IN with JOIN or EXISTS
+Process very large workloads in batches
+
+EXAMPLE:
+
+SELECT e.*
+FROM employee e
+JOIN requested_employee_id r
+  ON r.employee_id = e.id;
+
+Also check the actual execution plan and indexes.
+
+==============================================================================
+QUESTION 41: Normalization: 1NF and 2NF?
+==============================================================================
+
+1NF
+Each column contains atomic values
+No repeating groups
+Each row is uniquely identifiable
+
+Bad:
+
+employee(id, phones = "111,222")
+
+Better:
+
+employee(id, name)
+employee_phone(employee_id, phone)
+
+2NF
+Must be in 1NF
+Every non-key column depends on the complete composite key
+
+If the table has a single-column primary key, partial dependency cannot occur.
+
+==============================================================================
+QUESTION 42: ACID: Atomicity and Durability?
+==============================================================================
+
+Atomicity
+
+All operations succeed or all roll back.
+
+@Transactional
+public void transfer() {
+    debit();
+    credit();
+}
+
+Durability
+
+After a committed transaction, the result remains persisted even after a system failure, subject to the database's durability configuration.
+
+==============================================================================
+QUESTION 43: Database Index?
+==============================================================================
+
+An index is an auxiliary structure that helps locate rows faster.
+
+CREATE INDEX idx_employee_dept
+ON employee(department_id);
+
+BENEFITS:
+
+Faster filtering, joins and some ordering
+
+Costs:
+
+Additional storage
+Slower insert, update and delete
+Maintenance overhead
+
+Use execution plans instead of indexing every column.
+
+==============================================================================
+SECTION F: SPRING BOOT AND JPA QUESTIONS
+==============================================================================
+
+==============================================================================
+QUESTION 44: Stereotype Annotations?
+==============================================================================
+
+@Component  = Generic Spring bean
+@Service    = Business-service layer
+@Repository = Persistence layer
+@Controller = MVC controller
+
+@Service
+public class PaymentService {
+}
+
+@Service and @Repository are specialized @Component annotations.
+
+==============================================================================
+QUESTION 45: Using @Service and @Repository Vice Versa?
+==============================================================================
+
+The classes may still be discovered as beans because both are component stereotypes, but using them incorrectly reduces architectural clarity.
+
+@Repository additionally identifies persistence components for Spring's persistence exception translation behavior.
+
+Use:
+
+@Service    on business logic
+@Repository on data-access implementation
+
+==============================================================================
+QUESTION 46: @PropertySource?
+==============================================================================
+
+Loads an additional properties file into Spring's environment.
+
+@Configuration
+@PropertySource("classpath:custom.properties")
+public class AppConfig {
+}
+
+@Value("${payment.timeout}")
+private int timeout;
+
+For structured Spring Boot configuration, prefer @ConfigurationProperties.
+
+==============================================================================
+QUESTION 47: @PathVariable vs @RequestParam?
+==============================================================================
+
+@GetMapping("/employees/{id}")
+public Employee get(@PathVariable long id) {
+    return service.get(id);
+}
+
+Request:
+
+/employees/101
+
+@GetMapping("/employees")
+public List<Employee> search(
+        @RequestParam String department) {
+    return service.search(department);
+}
+
+Request:
+
+/employees?department=IT
+
+Use @PathVariable to identify a resource and @RequestParam for filters, sorting, pagination, or optional inputs.
+
+==============================================================================
+QUESTION 48: Resolve Bean Ambiguity?
+==============================================================================
+
+@Service("emailNotification")
+class EmailNotification implements Notification {
+}
+
+@Service("smsNotification")
+class SmsNotification implements Notification {
+}
+
+Use @Qualifier:
+
+public PaymentService(
+        @Qualifier("emailNotification")
+        Notification notification) {
+    this.notification = notification;
+}
+
+Or make one default:
+
+@Primary
+@Service
+class EmailNotification implements Notification {
+}
+
+==============================================================================
+QUESTION 49: @ControllerAdvice vs @RestControllerAdvice?
+==============================================================================
+
+@ControllerAdvice:
+Global controller support; response behavior depends on @ResponseBody.
+
+@RestControllerAdvice:
+@ControllerAdvice + @ResponseBody
+Best for REST JSON error responses.
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(PaymentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handle(
+            PaymentNotFoundException ex) {
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("PAYMENT_NOT_FOUND",
+                                        ex.getMessage()));
+    }
+}
+
+==============================================================================
+QUESTION 50: ACID with @Transactional?
+==============================================================================
+
+@Transactional
+public void transfer(long from, long to, BigDecimal amount) {
+    debit(from, amount);
+    credit(to, amount);
+}
+
+Atomicity   = All succeed or rollback
+Consistency = Constraints remain valid
+Isolation   = Concurrent transactions are controlled
+Durability  = Committed changes persist
+
+Spring's @Transactional defines transactional semantics on classes or methods.
+
+==============================================================================
+QUESTION 51: Transaction Propagation?
+==============================================================================
+
+REQUIRED:
+Join current transaction or create one. Default.
+
+REQUIRES_NEW:
+Suspend current transaction and create a new one.
+
+SUPPORTS:
+Use current transaction if present; otherwise run without one.
+
+MANDATORY:
+Must already have a transaction.
+
+NOT_SUPPORTED:
+Suspend current transaction and run without one.
+
+NEVER:
+Fail if a transaction exists.
+
+NESTED:
+Use a savepoint when supported.
+
+@Transactional(
+    propagation = Propagation.REQUIRES_NEW
+)
+public void saveAudit() {
+}
+
+==============================================================================
+QUESTION 52: @Transient in JPA?
+==============================================================================
+
+@Transient
+private String displayName;
+
+The field is not persisted as a database column.
+
+Java's transient keyword relates to Java serialization. JPA's @Transient relates to ORM persistence.
+
+==============================================================================
+QUESTION 53: MySQL in Dev and Oracle in Production?
+==============================================================================
+
+Use Spring profiles.
+
+application-dev.yml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/appdb
+    username: dev_user
+    password: ${DEV_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+application-prod.yml
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@//oracle-host:1521/PRODDB
+    username: prod_user
+    password: ${PROD_DB_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
+
+Activate:
+
+-Dspring.profiles.active=prod
+
+Keep native, vendor-specific SQL isolated because MySQL and Oracle syntax can differ.
+
+==============================================================================
+QUESTION 54: Scan Components Outside Base Package?
+==============================================================================
+
+@SpringBootApplication(
+    scanBasePackages = {
+        "com.a.b",
+        "com.x.y"
+    }
+)
+public class Application {
+}
+
+Alternative:
+
+@ComponentScan({"com.a.b", "com.x.y"})
+
+==============================================================================
+QUESTION 55: Load Common-Library Beans Without Component Scan?
+==============================================================================
+
+Expose configuration from the common library:
+
+@Configuration
+public class CommonLibraryConfig {
+
+    @Bean
+    public CommonClient commonClient() {
+        return new CommonClient();
+    }
+}
+
+Import it:
+
+@SpringBootApplication
+@Import(CommonLibraryConfig.class)
+public class Application {
+}
+
+For a reusable Spring Boot library, package it as an auto-configuration module with conditional bean definitions.
+
+==============================================================================
+QUESTION 56: Recommended Exception Handling?
+==============================================================================
+
+Throw domain-specific exceptions from service layer
+Use @RestControllerAdvice globally
+Return consistent error response
+Log server details with correlation ID
+Do not expose stack traces to clients
+
+public record ErrorResponse(
+        String code,
+        String message,
+        Instant timestamp
+) {
+}
+
+==============================================================================
+QUESTION 57: DTO Validation?
+==============================================================================
+
+public class UserRequest {
+
+    @NotBlank
+    private String name;
+
+    @Email
+    private String email;
+
+    @Min(18)
+    private int age;
+}
+
+@PostMapping("/users")
+public ResponseEntity<UserResponse> save(
+        @Valid @RequestBody UserRequest request) {
+    return ResponseEntity.ok(service.save(request));
+}
+
+Handle MethodArgumentNotValidException in @RestControllerAdvice.
+
+==============================================================================
+QUESTION 58: Save User with Multiple Addresses?
+==============================================================================
+
+@Entity
+public class User {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<Address> addresses = new ArrayList<>();
+
+    public void addAddress(Address address) {
+        addresses.add(address);
+        address.setUser(this);
+    }
+}
+
+@Entity
+public class Address {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+}
+
+Save the parent:
+
+userRepository.save(user);
+
+CascadeType.ALL saves child addresses with the user.
+
+==============================================================================
+QUESTION 59: Factory Pattern in Spring Boot?
+==============================================================================
+
+Factory Pattern centralizes object creation based on runtime selection.
+
+interface PaymentProcessor {
+    String type();
+    void process();
+}
+
+@Component
+class PaymentProcessorFactory {
+
+    private final Map<String, PaymentProcessor> processors;
+
+    PaymentProcessorFactory(List<PaymentProcessor> processorList) {
+        this.processors = processorList.stream()
+                .collect(Collectors.toMap(
+                        PaymentProcessor::type,
+                        Function.identity()
+                ));
+    }
+
+    PaymentProcessor get(String type) {
+        PaymentProcessor processor = processors.get(type);
+
+        if (processor == null) {
+            throw new IllegalArgumentException(
+                    "Unsupported payment type: " + type
+            );
+        }
+        return processor;
+    }
+}
+
+It avoids large if-else or switch blocks.
+
+==============================================================================
+QUESTION 60: Retry Pattern?
+==============================================================================
+
+Retry repeats a failed operation when the failure is temporary.
+
+@Retryable(
+    retryFor = ResourceAccessException.class,
+    maxAttempts = 3,
+    backoff = @Backoff(delay = 1000, multiplier = 2)
+)
+public PaymentResponse callDownstream() {
+    return restClient.call();
+}
+
+@Recover
+public PaymentResponse recover(
+        ResourceAccessException ex) {
+    return PaymentResponse.failed();
+}
+
+Use retry with:
+
+Timeout
+Backoff
+Maximum attempts
+Circuit breaker
+Monitoring
+Idempotent operation
+
+Do not retry permanent validation failures.
+
+==============================================================================
+QUESTION 61: Spring Cloud API Gateway?
+==============================================================================
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: payment-service
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/payments/**
+          filters:
+            - StripPrefix=1
+
+FLOW:
+
+Client
+  |
+API Gateway
+  |
+Route matching
+  |
+Authentication / Filters
+  |
+Load-balanced destination service
+
+The gateway can centralize routing, security filters, rate limiting, correlation IDs, and cross-cutting concerns.
+
+==============================================================================
+QUESTION 62: Authentication and Authorization?
+==============================================================================
+
+Typical microservice flow:
+
+User
+  |
+Identity Provider
+  |
+JWT/OAuth2 Token
+  |
+API Gateway
+  |
+Microservice Resource Server
+
+Resource-server configuration:
+
+@Bean
+SecurityFilterChain security(HttpSecurity http)
+        throws Exception {
+
+    return http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/actuator/health")
+                    .permitAll()
+                    .requestMatchers("/admin/**")
+                    .hasRole("ADMIN")
+                    .anyRequest()
+                    .authenticated()
+            )
+            .oauth2ResourceServer(oauth ->
+                    oauth.jwt(Customizer.withDefaults()))
+            .build();
+}
+
+CONTROLS:
+
+TLS
+OAuth2/OIDC
+JWT validation
+Role/scope-based authorization
+Service identities
+Secrets management
+Audit logging
+Least-privilege access
+
+==============================================================================
+QUESTION 63: Spring Boot Actuator?
+==============================================================================
+
+Actuator exposes operational endpoints.
+
+Dependency:
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+Configuration:
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+USES:
+
+Health checks
+Metrics
+Readiness/liveness
+Application information
+Prometheus integration
+
+Secure sensitive actuator endpoints.
+
+==============================================================================
+SECTION G: MICROSERVICES QUESTIONS
+==============================================================================
+
+==============================================================================
+QUESTION 64: Distributed Transaction Management?
+==============================================================================
+
+Avoid traditional distributed locks or two-phase commit where possible.
+
+Recommended pattern:
+
+Local DB Transaction
+       |
+Outbox Event
+       |
+Kafka
+       |
+Downstream Local Transaction
+       |
+Compensation on failure
+
+Use:
+
+Saga
+Transactional Outbox
+Idempotent consumers
+Retries and DLT
+Correlation ID
+Reconciliation
+
+==============================================================================
+QUESTION 65: Saga: Orchestration vs Choreography?
+==============================================================================
+
+Orchestration
+Saga Orchestrator
+   |
+   +--> Payment Service
+   +--> Account Service
+   +--> Notification Service
+
+A central orchestrator commands each step and compensation.
+
+Choreography
+Payment Event
+   |
+Account Service Event
+   |
+Notification Service Event
+
+Each service reacts to events without a central controller.
+
+Orchestration:
+Easier to visualize complex workflows
+Central coordinator can become important dependency
+
+Choreography:
+Loose coupling
+Can become difficult to trace with many events
+
+==============================================================================
+QUESTION 66: Fix OutOfMemoryError in Microservices?
+==============================================================================
+
+1. Capture heap dump and GC logs
+2. Check pod/container memory limit
+3. Analyze retained objects
+4. Find unbounded caches, lists or buffers
+5. Limit request/Kafka batch size
+6. Stream large files and database results
+7. Close resources
+8. Configure JVM heap relative to container memory
+9. Add memory metrics and alerts
+10. Scale only after fixing the leak or allocation problem
+
+==============================================================================
+QUESTION 67: Two Instances Updating the Same DB Row?
+==============================================================================
+
+Use optimistic locking:
+
+@Entity
+class Account {
+
+    @Id
+    private Long id;
+
+    @Version
+    private Long version;
+
+    private BigDecimal balance;
+}
+
+If two instances update the same version, one succeeds and the other receives an optimistic-lock failure.
+
+For strict locking:
+
+@Lock(LockModeType.PESSIMISTIC_WRITE)
+@Query("select a from Account a where a.id = :id")
+Optional<Account> findForUpdate(@Param("id") Long id);
+
+Prefer optimistic locking when conflicts are uncommon.
+
+==============================================================================
+QUESTION 68: Microservice Communication?
+==============================================================================
+
+Synchronous:
+REST, gRPC
+Use when an immediate response is needed.
+
+Asynchronous:
+Kafka, RabbitMQ
+Use for events, callbacks, audit, notification and decoupling.
+
+Add:
+
+Timeouts
+Circuit breaker
+Retry with backoff
+Idempotency
+Distributed tracing
+Authentication
+Schema/version management
+
+==============================================================================
+QUESTION 69: Save Data in Two Services When One Is Down?
+==============================================================================
+
+Do not treat two separate databases as one local transaction.
+
+Use Saga and Outbox:
+
+Service A
+  |
+Save Local Data + Outbox
+  |
+Kafka Event
+  |
+Service B Down
+  |
+Event remains available / retries
+  |
+Service B recovers and saves
+
+If Service B permanently fails:
+
+Compensating event
+Manual recovery
+Reconciliation process
+
+This provides eventual consistency, not immediate atomic consistency.
+
+==============================================================================
+SECTION H: AWS QUESTIONS
+==============================================================================
+
+==============================================================================
+QUESTION 70: AWS Auto Scaling and Unpredictable Traffic?
+==============================================================================
+
+Configure:
+
+Minimum capacity
+Desired capacity
+Maximum capacity
+Target-tracking/scaling policies
+Health checks
+CloudWatch alarms
+
+Example policy:
+
+Average CPU target = 60%
+Scale out when demand increases
+Scale in after demand decreases
+
+EC2 Auto Scaling can add or remove instances according to scaling policies and replace unhealthy instances to maintain desired capacity.
+
+For container platforms, scale tasks or pods using suitable infrastructure and application metrics, not CPU alone.
+
+==============================================================================
+QUESTION 71: Deploy Docker Image to EC2 Using Jenkins?
+==============================================================================
+
+Developer Push
+     |
+Jenkins
+     |
+Maven Test/Build
+     |
+docker build
+     |
+Push Image to ECR
+     |
+EC2 pulls image
+     |
+docker run / deployment script
+     |
+Health Check
+
+EXAMPLE:
+
+docker build -t payment-service:${BUILD_NUMBER} .
+docker tag payment-service:${BUILD_NUMBER} \
+  ${ECR_URI}/payment-service:${BUILD_NUMBER}
+docker push ${ECR_URI}/payment-service:${BUILD_NUMBER}
+
+On EC2:
+
+docker pull ${ECR_URI}/payment-service:${BUILD_NUMBER}
+docker stop payment-service || true
+docker rm payment-service || true
+
+docker run -d \
+  --name payment-service \
+  -p 8080:8080 \
+  ${ECR_URI}/payment-service:${BUILD_NUMBER}
+
+Use IAM roles and deployment automation instead of storing permanent AWS credentials on EC2.
+
+==============================================================================
+QUESTION 72: IAM Role vs IAM User?
+==============================================================================
+
+IAM User:
+Long-lived identity for a person or specialized use case
+May have console password or access keys
+
+IAM Role:
+Assumed identity with temporary credentials
+Used by AWS services, applications and federated users
+
+For EC2 application access to S3 or Secrets Manager, attach an IAM role to the instance rather than embedding access keys.
+
+==============================================================================
+QUESTION 73: Serverless Real-Time Architecture?
+==============================================================================
+
+Client
+  |
+API Gateway
+  |
+Lambda
+  |
+DynamoDB
+  |
+EventBridge / SNS / SQS
+  |
+WebSocket API or Notification
+
+For file processing:
+
+S3 Upload
+   |
+S3 Event
+   |
+Lambda
+   |
+DynamoDB / SNS
+
+Use serverless when event-driven execution, automatic infrastructure management, and variable traffic fit the workload.
+
+==============================================================================
+QUESTION 74: Configuration and Secrets in AWS?
+==============================================================================
+
+Non-sensitive configuration:
+Environment variables
+AWS Systems Manager Parameter Store
+Application configuration service
+
+Secrets:
+AWS Secrets Manager
+Encrypted parameter storage
+
+Application flow:
+
+Application IAM Role
+       |
+AWS Secrets Manager
+       |
+Retrieve DB credentials at runtime
+
+Do not place passwords in source code, Docker images, Git, or Jenkins logs.
+
+==============================================================================
+QUESTION 75: ECR?
+==============================================================================
+
+Amazon ECR is a managed container-image registry.
+
+Jenkins
+  |
+Build Docker Image
+  |
+Push to ECR
+  |
+ECS/EKS/EC2 pulls image
+
+Use immutable tags or image digests for reliable deployments.
+
+==============================================================================
+QUESTION 76: AWS Performance Management?
+==============================================================================
+
+Measure first with CloudWatch/APM
+Scale tasks, pods or instances
+Tune CPU/memory requests and limits
+Use caching where appropriate
+Optimize database queries and indexes
+Use read replicas for suitable workloads
+Use CDN for static content
+Tune connection pools
+Compress and paginate APIs
+Use async queues for heavy work
+Run load tests
+
+Deleting logs is not a primary performance solution. Configure proper log levels, retention, rotation, and asynchronous shipping.
+
+==============================================================================
+QUESTION 77: S3 Storage and Consistency?
+==============================================================================
+
+S3 stores data as objects in buckets.
+
+An object has:
+
+Key
+Object data
+Metadata
+Optional version ID
+
+Use lifecycle policies, encryption, versioning, and appropriate access controls.
+
+==============================================================================
+QUESTION 78: ECS Health Checks?
+==============================================================================
+
+Two common levels:
+
+Container health check:
+Runs a command inside the container.
+
+Load-balancer target health check:
+Calls an application endpoint through ALB/NLB.
+
+Example task health check:
+
+{
+  "healthCheck": {
+    "command": [
+      "CMD-SHELL",
+      "curl -f http://localhost:8080/actuator/health || exit 1"
+    ],
+    "interval": 30,
+    "timeout": 5,
+    "retries": 3,
+    "startPeriod": 60
+  }
+}
+
+Also monitor:
+
+ECS desired vs running tasks
+ALB healthy targets
+Application logs
+CPU/memory
+Error rate
+Response latency
+Actuator readiness
+
+==============================================================================
+QUESTION 79: Application Load Balancer Distribution?
+==============================================================================
+
+An ALB listener evaluates listener rules and forwards matching requests to a target group.
+
+Client
+  |
+ALB Listener
+  |
+Host/Path Rule
+  |
+Target Group
+  |
+Healthy EC2 Instances / ECS Tasks / IP Targets
+
+Only healthy registered targets should receive normal traffic.
+
+==============================================================================
+SECTION I: KUBERNETES QUESTIONS
+==============================================================================
+
+==============================================================================
+QUESTION 80: Scale Up and Down?
+==============================================================================
+
+Manual scaling:
+
+kubectl scale deployment payment-service --replicas=6
+
+HPA:
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: payment-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: payment-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+Scaling a Deployment changes its replica count and creates or removes Pods.
+
+==============================================================================
+QUESTION 81: Kubernetes Failover?
+==============================================================================
+
+If a container fails:
+
+Kubelet restarts the container according to restart policy.
+
+If a Pod fails under a Deployment:
+
+Deployment/ReplicaSet creates a replacement Pod.
+
+If a node becomes unavailable:
+
+Pods managed by workload controllers can be recreated on available nodes.
+
+Readiness probes keep unready Pods out of normal Service traffic.
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+
+==============================================================================
+QUESTION 82: Kubernetes Deployment?
+==============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          image: repository/payment-service:1.0
+          ports:
+            - containerPort: 8080
+
+Apply:
+
+kubectl apply -f deployment.yml
+
+FLOW:
+
+Deployment
+   |
+ReplicaSet
+   |
+Pods
+   |
+Containers
+
+Deployments support declarative replica management and rolling updates.
+
+==============================================================================
+QUESTION 83: Kubernetes Service?
+==============================================================================
+
+A Service provides a stable network endpoint for a changing group of Pods.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+spec:
+  selector:
+    app: payment-service
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: ClusterIP
+
+FLOW:
+
+Consumer
+   |
+payment-service DNS
+   |
+Kubernetes Service
+   |
+Healthy matching Pods
+
+Common types:
+
+ClusterIP    = Internal access
+NodePort     = Exposes on node port
+LoadBalancer = Cloud load balancer
+ExternalName = DNS alias
+
+Services distribute network traffic to available matching Pods.
+
+Ultra-Short Revision
+Palindrome                    = Two pointers
+Frequency                     = groupingBy + counting
+Odd/Even threads              = synchronized + wait/notifyAll
+Rotation                      = (s1 + s1).contains(s2)
+Longest parentheses           = Stack of indexes
+Custom immutable              = final class + final fields + defensive copy
+Runnable vs Callable          = no result vs result
+Future vs CompletableFuture   = blocking holder vs composable async flow
+OOM                           = heap dump + retained-object analysis
+Deadlock                      = thread dump + consistent lock order
+groupingBy                    = many groups
+partitioningBy                = true/false
+Large IN                      = batch or staging-table JOIN
+Spring exception handling     = @RestControllerAdvice
+DTO validation                = @Valid + Jakarta validation
+Two-service transaction       = Saga + Outbox + idempotency
+AWS scaling                   = metrics + policies + health checks
+Kubernetes scaling            = replicas/HPA
+Kubernetes failover           = controllers recreate failed Pods
+Kubernetes Service            = stable endpoint and Pod routing
+
+Main improvements
+Correctness: Fixed edge cases such as null palindrome input, duplicate map keys, HashSet iteration, infinite ArrayList growth, and finally return behavior.
+Code quality: Used constructor-safe patterns, immutable data, idempotency concepts, validation, exception handling, and production-minded configuration.
+Interview value: Each answer provides the direct definition, minimal code/configuration, and a short explanation suitable for rapid revision.
+
+==============================================================================
+HOW TO EXPLAIN IN AN INTERVIEW
+==============================================================================
+1. Start with a one-line definition.
+2. Explain the simple code or configuration.
+3. Give one practical project example.
+4. Mention one benefit, limitation, or production consideration.
+5. Stop after the main answer unless the interviewer asks a follow-up.
+
+==============================================================================
+END OF INTERVIEW GUIDE
+==============================================================================
