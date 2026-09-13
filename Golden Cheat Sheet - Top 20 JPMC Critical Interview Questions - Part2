@@ -22,67 +22,80 @@ operations, while Kafka was used for asynchronous event processing. Services
 were independently deployed as containers and persisted data in Oracle."
 
 ==============================================================================
-1. DEPENDENCY INJECTION AND INVERSION OF CONTROL
+CONCEPT 1. DEPENDENCY INJECTION 
 ==============================================================================
 
-DEPENDENCY INJECTION:
+Dependency Injection (DI)
 
-Dependency Injection means providing an object's dependencies from outside
-instead of creating them inside the class.
+Definition:
+ Dependency Injection means providing dependencies from outside the class instead of creating them inside the class.
 
-Without DI:
+Memory Trick: 👉 Don't Create, Inject
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+❌ Without DI
+private UserService service = new UserService();
+-------------------------------------------------------------------------------------------------------------------------------------------------------
 
-@Service
-public class PaymentService {
+Class creates its own dependency.
 
-    private PaymentRepository repository =
-            new PaymentRepository();
+✅ With DI
+public UserController(UserService service) {  //Dependency is injected from outside.
+    this.service = service;
 }
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Interview One-Liner
 
-With DI:
+Dependency Injection is a design pattern where Spring creates the objects and injects them into classes, reducing coupling and improving testability.
 
-@Service
-public class PaymentService {
+Quick Difference
+Without DI	        With DI
+Uses new	        Spring injects
+Tight coupling	    Loose coupling
+Hard to test	    Easy to test
 
-    private final PaymentRepository repository;
+✅ "Don't create dependencies. Let Spring inject them."
 
-    public PaymentService(PaymentRepository repository) {
-        this.repository = repository;
-    }
-}
+============================================================================================================
 
-INVERSION OF CONTROL:
+CONCEPT 2: Inversion of Control (IoC)
+============================================================================================================
+Definition:
+ IoC means Spring controls object creation, configuration, lifecycle, and dependency management instead of your code.
 
-IoC means Spring controls object creation, configuration, lifecycle, and
-dependency management instead of our application code.
-
-Flow:
-
+Simple Flow
 Spring Container
-      |
-      +--> Creates PaymentRepository
-      |
-      +--> Creates PaymentService
-      |
-      +--> Injects Repository into Service
+      ↓
+Creates Repository
+      ↓
+Creates Service
+      ↓
+Injects Repository into Service
 
-SHORT DIFFERENCE:
+Memory Trick
 
-IoC = Overall principle where control is given to Spring.
+👉 IoC = Spring is the Boss
 
-DI = Technique through which Spring supplies dependencies.
+You don't create objects using new; Spring creates and manages them.
 
-INTERVIEW ANSWER:
+IoC vs DI
+IoC = Principle (Spring controls objects)
+DI = Technique (Spring injects dependencies)
+Interview One-Liner
 
-"IOC means Spring controls object creation and lifecycle. Dependency Injection
-is the mechanism by which Spring supplies required objects to a class,
-improving loose coupling and testability."
+"IoC means Spring manages object creation and lifecycle. DI is the mechanism used by Spring to provide required dependencies to a class."
+
+✅ Easy Remember:
+ IoC = Who controls? → Spring
+ DI = How are dependencies provided? → Injection
+
 
 ==============================================================================
 2. DIFFERENCE BETWEEN THREE TYPES OF DI
 ==============================================================================
 
-A. CONSTRUCTOR INJECTION - RECOMMENDED
+A. CONSTRUCTOR INJECTION
+
+
 
 @Service
 public class PaymentService {
@@ -94,14 +107,11 @@ public class PaymentService {
     }
 }
 
-Advantages:
+Interview One-Liner
 
-• Dependency is mandatory
-• Supports final fields
-• Easy unit testing
-• Object cannot be created in an incomplete state
+Constructor Injection is the preferred way of Dependency Injection because dependencies are mandatory, immutable (final), and easier to test. 🚀
 
-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 B. SETTER INJECTION
 
@@ -110,8 +120,8 @@ public class PaymentService {
 
     private PaymentRepository repository;
 
-    @Autowired
-    public void setRepository(PaymentRepository repository) {
+    @Autowired                                                  //Autowired also used on setter method
+    public void setRepository(PaymentRepository repository) {  //DI using setter method
         this.repository = repository;
     }
 }
@@ -120,7 +130,7 @@ Use:
 
 Optional or replaceable dependency.
 
-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 C. FIELD INJECTION
 
@@ -128,7 +138,7 @@ C. FIELD INJECTION
 public class PaymentService {
 
     @Autowired
-    private PaymentRepository repository;
+    private PaymentRepository repository;   //Autowired used on feild level.
 }
 
 Disadvantages:
@@ -138,7 +148,7 @@ Disadvantages:
 • Cannot use final
 • Not recommended for new code
 
-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 BEST ANSWER:
 
