@@ -2162,3 +2162,383 @@ ConcurrentHashMap provides better concurrency by locking only portions of the ma
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+EXPLANATION OF HASHSET 
+Why HashSet Allows Only Unique Elements?
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+When you add an element to HashSet:
+
+set.add("Java");
+
+
+HashSet checks:
+
+1. hashCode()
+2. equals()
+
+
+If the same object already exists:
+
+Duplicate Found
+↓
+Not Added
+
+
+Interview Answer:
+
+HashSet uses hashCode() and equals() to identify duplicates and allows only unique elements.
+
+==================================================
+
+Why Can't We Use Traditional for Loop?
+
+Traditional loop needs an index:
+
+list.get(0);
+list.get(1);
+
+
+Works for:
+
+ArrayList
+
+
+HashSet has:
+
+No Index
+No Order
+
+
+So:
+
+set.get(0);
+
+
+❌ Not Possible
+
+Use:
+
+for(String s : set)
+
+
+or
+
+set.forEach(System.out::println);
+
+
+Interview Answer:
+
+HashSet does not support indexes, so traditional for(int i=0...) loops cannot be used. We use for-each loop, Iterator, or Streams instead.
+
+==================================================
+
+One-Line Revision
+HashSet = Unique Elements
+hashCode() = Find location
+equals() = Check duplicate
+No Index = No get(0)
+Use For-Each / Iterator / Stream
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+##############################################################################################
+##############################################################################################
+ANOTHER NEW QUESTIONS MOSTLY ASKED ON CORE JAVA
+
+##############################################################################################
+##############################################################################################
+
+1. What will be the output?
+List<Integer> list = new ArrayList<>();
+list.add(1);
+
+for(int i = 0; i < list.size(); i++) {
+    list.add(2);
+    System.out.println(list.get(i));
+}
+
+Output
+1
+2
+2
+2
+2
+...
+
+Why?
+Inside the loop, you keep adding elements.
+
+i increases by 1
+list.size() also increases by 1
+
+So i never reaches list.size().
+
+Result:
+Infinite loop.
+-------------------------------------------------------------------------------------------------------------------
+2. What will validate() return?
+public int validate() {
+    try {
+        return 1;
+    }
+    catch(Exception e) {
+        return 2;
+    }
+    finally {
+        return 3;
+    }
+}
+
+Output
+3
+
+Why?
+finally always executes.
+
+If finally contains a return statement,
+it overrides return from try and catch.
+
+Interview Answer
+
+The method always returns 3 because the return statement in finally overrides all previous return statements.
+-------------------------------------------------------------------------------------------------------------------
+3. What is BST? What are DFS Traversals?
+BST (Binary Search Tree)
+Left Child  < Root
+Right Child > Root
+
+
+Example:
+
+        50
+       /  \
+     30    70
+
+DFS (Depth First Search)
+Preorder
+Root → Left → Right
+
+Inorder
+Left → Root → Right
+
+Postorder
+Left → Right → Root
+
+Important
+Inorder traversal of BST
+always gives sorted output.
+-------------------------------------------------------------------------------------------------------------------
+4. String Memory
+String a = "abc";
+String b = "abc";
+String c = new String("abc");
+
+Memory Layout
+String Pool
+------------
+abc
+
+Heap
+------------
+new String("abc")
+
+References
+a → points to pool object "abc"
+
+b → points to same pool object "abc"
+
+c → points to a new Heap object
+
+Comparisons
+a == b        // true
+a == c        // false
+a.equals(c)   // true
+
+Why?
+a and b share same object from String Pool.
+
+new String() always creates
+a new object in Heap.
+-------------------------------------------------------------------------------------------------------------------
+5. How to debug OutOfMemoryError?
+Common Reasons
+Memory Leak
+Huge Collections
+Large File Loading
+Too Many Objects
+
+Steps
+1. Enable Heap Dump
+
+2. Collect Heap Dump
+
+3. Analyze using Eclipse MAT
+
+4. Identify objects consuming memory
+
+5. Find memory leak/root cause
+
+JVM Option
+-XX:+HeapDumpOnOutOfMemoryError
+
+Interview Answer
+
+First collect the heap dump, analyze it using MAT, find objects consuming excessive memory, and identify memory leaks or large collections.
+-------------------------------------------------------------------------------------------------------------------
+6. How to debug Deadlock?
+What is Deadlock?
+Thread-1 waiting for Thread-2 lock
+
+Thread-2 waiting for Thread-1 lock
+
+Both wait forever.
+
+Debug Steps
+1. Take Thread Dump
+
+2. Use jstack
+
+3. Check BLOCKED threads
+
+4. Identify circular lock dependency
+
+Commands
+jstack <pid>
+
+
+or
+
+jcmd <pid> Thread.print
+
+Interview Answer
+
+I take a thread dump using jstack and identify threads that are waiting for each other's locks.
+-------------------------------------------------------------------------------------------------------------------
+7. groupingBy vs partitioningBy
+groupingBy
+
+Creates multiple groups.
+
+groupingBy(Employee::getDepartment)
+
+
+Output:
+
+IT
+HR
+Finance
+Support
+
+partitioningBy
+
+Always creates only 2 groups.
+
+partitioningBy(e -> e.getSalary() > 50000)
+
+
+Output:
+
+true
+false
+
+Interview Answer
+
+groupingBy can create multiple groups, whereas partitioningBy always splits data into two groups based on a boolean condition.
+-------------------------------------------------------------------------------------------------------------------
+8. What is Stream API?
+Stream API
+
+Used to process collections in a functional way.
+
+list.stream()
+    .filter(...)
+    .map(...)
+    .collect(...)
+
+Benefits
+Less Code
+Better Readability
+Supports Parallel Processing
+
+Sequential Stream
+list.stream()
+
+Uses single thread.
+Processes elements one by one.
+
+Parallel Stream
+list.parallelStream()
+
+Uses multiple threads.
+Processes elements concurrently.
+
+Preserve Order in Parallel Stream
+
+Use:
+
+forEachOrdered()
+
+
+Example:
+
+list.parallelStream()
+    .forEachOrdered(System.out::println);
+
+Interview Answer
+
+Stream API is used for functional data processing. Sequential streams use one thread, parallel streams use multiple threads. Use forEachOrdered() to preserve ordering in parallel streams.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+9. What is Immutability?
+Meaning
+Object state cannot be changed
+after object creation.
+
+
+Example:
+
+String s = "Java";
+
+
+String is immutable.
+
+Benefits
+Thread Safe
+Secure
+Easy Caching
+No Accidental Modification
+
+How to Create Immutable Class?
+final class
+
+private final fields
+
+No setters
+
+Initialize through constructor
+
+Java 17 Feature
+record Employee(int id, String name) {}
+
+Why Records?
+
+Compiler automatically generates:
+
+Constructor
+Getters
+equals()
+hashCode()
+toString()
+
+
+Fields are immutable.
+
+Interview Answer
+
+Immutability means an object's state cannot be modified after creation. 
+Java 17 Records provide an easy way to create immutable data classes with minimal boilerplate code.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
