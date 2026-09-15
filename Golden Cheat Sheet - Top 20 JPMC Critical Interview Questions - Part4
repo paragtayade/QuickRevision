@@ -1,0 +1,2164 @@
+
+----------------------------------------------------------------------------------------------
+Question 1:
+
+Explain differeent microservices pattern in short
+----------------------------------------------------------------------------------------------
+
+I found internal learning material on microservice patterns, including API Gateway, Service Discovery, Circuit Breaker, Event-Driven Communication, CQRS, Event Sourcing, Database per Service, and more.
+
+Most Common Microservices Patterns (Interview Short Answer)
+1. API Gateway Pattern
+
+Purpose: Single entry point for all client requests.
+
+Benefits:
+
+Authentication
+Routing
+Rate limiting
+Load balancing
+
+Example: Mobile App → API Gateway → Order Service / Payment Service
+
+2. Database Per Service Pattern
+
+Purpose: Each microservice owns its own database.
+
+Benefits:
+
+Loose coupling
+Independent deployment
+Independent scaling
+
+Example:
+
+Customer Service → Customer DB
+Payment Service → Payment DB
+3. Service Discovery Pattern
+
+Purpose: Services dynamically find each other.
+
+Tools:
+
+Eureka
+Consul
+Kubernetes Service Discovery
+
+Example: Payment Service finds Order Service without hardcoded URL.
+
+4. Circuit Breaker Pattern
+
+Purpose: Prevent cascading failures.
+
+Tools:
+
+Resilience4j
+Hystrix (legacy)
+
+Flow: Service Down → Circuit Opens → Fallback Response
+
+Benefit: Application remains responsive.
+
+5. Event-Driven Pattern
+
+Purpose: Services communicate using events/messages.
+
+Tools:
+
+Kafka
+RabbitMQ
+
+Flow: Order Created Event → Payment Service → Notification Service
+
+Benefit: Loose coupling and high scalability.
+
+6. CQRS (Command Query Responsibility Segregation)
+
+Purpose: Separate Read and Write operations.
+
+Example:
+
+Write DB for updates
+Read DB for reporting
+
+Benefit: Improves performance for large systems.
+
+7. Event Sourcing Pattern
+
+Purpose: Store events instead of current state.
+
+Example: Account Created → Money Deposited → Money Withdrawn
+
+Current balance is calculated from events.
+
+Benefit: Full audit history.
+
+8. Saga Pattern
+
+Purpose: Manage transactions across multiple microservices.
+
+Example: Order Service → Payment Service → Inventory Service
+
+If Inventory fails, Payment is rolled back.
+
+Benefit: Distributed transaction management.
+
+9. Aggregator Pattern
+
+Purpose: Combine data from multiple services.
+
+Example: Customer Dashboard API calls:
+
+Customer Service
+Account Service
+Loan Service
+
+Returns single response.
+
+10. Strangler Fig Pattern
+
+Purpose: Gradually replace a monolith with microservices.
+
+Flow: Monolith → New Microservice → More Services → Monolith Removed
+
+Benefit: Low-risk migration.
+
+Most Used Patterns in Banking Projects (MUFG/JPMC Style)
+
+✅ API Gateway
+ ✅ Database Per Service
+ ✅ Event-Driven (Kafka)
+ ✅ Circuit Breaker (Resilience4j)
+ ✅ Saga Pattern
+ ✅ CQRS
+ ✅ Service Discovery
+ ✅ Strangler Pattern (for modernization)
+
+One-Line Interview Answer
+
+"In my last banking project, we mainly used API Gateway, Database per Service, Event-Driven Communication using Kafka,
+Saga Pattern for distributed transactions, and Circuit Breaker using Resilience4j to build scalable and resilient microservices."
+
+
+----------------------------------------------------------------------------------------------
+Question 2:
+
+Explain Kafka Streams Event Flow (Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+How events flow?
+
+Producer publishes event to Kafka Topic (e.g., payment-topic).
+Kafka Streams application consumes the event.
+Stream processes the event (validation, transformation, enrichment).
+Processed event is published to another topic (e.g., validated-payment-topic).
+Consumer microservice reads from the output topic and persists data / calls downstream systems.
+
+Flow:
+
+Producer
+   ↓
+payment-topic
+   ↓
+Kafka Streams
+   ↓
+Validation / Transformation
+   ↓
+validated-topic
+   ↓
+Consumer Service
+   ↓
+Database / REST API
+
+How are you consuming?
+builder.stream("payment-topic")
+       .filter(...)
+       .mapValues(...)
+       .to("validated-topic");
+
+
+Kafka Streams continuously reads events from the input topic and processes them in real time.
+
+How do you monitor errors?
+
+1. Application Logs
+
+Check Stream processing exceptions.
+Monitor pod logs using Kubernetes/OpenShift.
+
+2. Dead Letter Topic (DLT)
+
+Failed messages are sent to DLT.
+Example: payment-dlt
+
+3. Metrics & Monitoring
+
+Prometheus + Grafana dashboards
+Kafka Consumer Lag
+Processing Rate
+Error Count
+
+4. Alerts
+
+Splunk / ELK / CloudWatch alerts
+High consumer lag
+DLT message count increase
+Application crashes
+One-Line Interview Answer
+
+"Events are published to Kafka topics, Kafka Streams consumes and processes them in real time,
+writes results to another topic, and downstream services consume them. We monitor processing 
+through logs, consumer lag, Grafana dashboards, and send failed messages to a Dead Letter Topic for analysis."
+
+
+
+----------------------------------------------------------------------------------------------
+Question 3:
+
+After Consuming Event, How Callback Happens? (Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+
+Real-Time Callback Example (Banking Payment)
+Scenario
+
+A customer transfers ₹10,000 using Internet Banking.
+
+Internet Banking (Source System)
+            ↓
+      payment-topic
+            ↓
+     Payment Service
+            ↓
+        Database
+
+Step 1: Source System Publishes Event
+{
+  "txnId":"TXN123",
+  "amount":10000,
+  "account":"123456"
+}
+
+
+Event goes to payment-topic.
+
+Step 2: Consumer Processes Event
+
+Payment Service consumes the event.
+
+Checks:
+
+Account exists?
+Sufficient balance?
+Fraud validation?
+Step 3: Persist to Database
+
+If all validations pass:
+
+Transaction Saved
+Status = SUCCESS
+
+
+in Transaction table.
+
+Step 4: Callback to Source System
+Option 1: REST Callback
+
+After DB commit:
+
+Payment Service
+       ↓
+POST /payment-status
+       ↓
+Internet Banking
+
+
+Response:
+
+{
+  "txnId":"TXN123",
+  "status":"SUCCESS"
+}
+
+
+Source system updates UI:
+
+Payment Successful
+Reference No : TXN123
+
+Option 2: Kafka Response Topic (More Common in Microservices)
+Internet Banking
+       ↓
+payment-topic
+       ↓
+Payment Service
+       ↓
+Database
+       ↓
+payment-status-topic
+       ↓
+Internet Banking Consumer
+
+
+Published event:
+
+{
+  "txnId":"TXN123",
+  "status":"SUCCESS"
+}
+
+
+Internet Banking consumes this event and updates transaction status.
+
+If Database Save Fails
+Payment Service
+       ↓
+Database Error
+
+
+Status event:
+
+{
+  "txnId":"TXN123",
+  "status":"FAILED"
+}
+
+
+or message moved to DLT for retry.
+
+Interview Answer (30 Seconds)
+
+"In our project, once a Kafka event is consumed, the service validates and persists the data into the database. 
+1)After successful persistence, it sends the result back to the source either through a callback REST API 
+                            OR
+2) by publishing a status event to another Kafka topic. 
+
+The source system receives the success or failure status and updates the user accordingly."
+
+
+
+----------------------------------------------------------------------------------------------
+Question 4:
+
+What pods mean, how can we scale ? (Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+
+What is a Pod? How can we scale? (Short Interview Answer)
+What is a Pod?
+
+A Pod is the smallest deployable unit in Kubernetes.
+
+It contains:
+
+One or more containers
+Shared IP
+Shared storage
+
+Example:
+
+1 Pod
+   ↓
+Spring Boot Application Container
+
+
+Think of a Pod as a running instance of your application.
+
+How can we scale?
+
+If traffic increases, Kubernetes creates more Pod replicas.
+
+Before Scaling:
+
+3 Pods
+Pod-1
+Pod-2
+Pod-3
+
+
+After Scaling:
+
+6 Pods
+Pod-1
+Pod-2
+Pod-3
+Pod-4
+Pod-5
+Pod-6
+
+
+Load Balancer distributes requests across all Pods.
+
+Types of Scaling
+
+1. Horizontal Scaling (Most Common)
+
+Increase number of Pods.
+
+3 Pods → 6 Pods
+
+
+2. Vertical Scaling
+
+Increase CPU/Memory of existing Pod.
+
+2 CPU → 4 CPU
+4 GB → 8 GB RAM
+
+Real Banking Example
+
+If Payment Service receives 10,000 requests per minute:
+
+2 Pods → High Load
+
+
+Kubernetes automatically scales to:
+
+2 Pods → 6 Pods → 10 Pods
+
+
+to handle the traffic.
+
+One-Line Interview Answer
+
+"A Pod is the smallest deployment unit in Kubernetes and usually contains a running application container. 
+We scale applications by increasing Pod replicas (horizontal scaling) using Kubernetes HPA, which automatically 
+adds more Pods when CPU or traffic increases."
+
+
+
+----------------------------------------------------------------------------------------------
+Question 5:
+
+You have 6 pods, you are fetching some data using select query and putting into the Kafka topic, 
+how it will process too downstream...?
+
+Weather all 6 pods will participate in accessing the kafka events or how it would be.?
+
+What is main component responsible here ?
+
+Is Kafka consumer concurrency/group is responsible here and some partitions should be there
+? (Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+
+Scenario: 6 Pods Reading Data and Publishing to Kafka
+Step 1: 6 Producer Pods
+
+Suppose you have 6 pods running the same application.
+
+Each pod:
+
+Read Records from DB
+        ↓
+Publish to Kafka Topic
+
+
+All 6 pods can participate in reading and publishing data.
+
+Step 2: Kafka Stores Events in Partitions
+
+Example:
+
+payment-topic
+
+Partition-0
+Partition-1
+Partition-2
+Partition-3
+Partition-4
+Partition-5
+
+
+Kafka distributes events across partitions.
+
+Step 3: Downstream Consumption
+
+Assume Consumer Service also has 6 pods and all belong to the same Consumer Group.
+
+Consumer Group: payment-cg
+
+Pod-1 → Partition-0
+Pod-2 → Partition-1
+Pod-3 → Partition-2
+Pod-4 → Partition-3
+Pod-5 → Partition-4
+Pod-6 → Partition-5
+
+
+Each partition is consumed by only one pod within a consumer group.
+
+Will All 6 Pods Consume Every Event?
+
+❌ No
+
+Each event belongs to one partition.
+
+Only the pod assigned to that partition processes that event.
+
+This avoids duplicate processing.
+
+Main Component Responsible?
+
+✅ Kafka Consumer Group Coordinator
+
+Responsibilities:
+
+Assign partitions to pods
+Rebalance when pods are added/removed
+Ensure only one consumer reads a partition within a group
+If Partitions = 3 and Pods = 6
+3 Partitions
+6 Consumer Pods
+
+
+Only 3 pods will be active.
+
+Remaining 3 pods stay idle.
+
+That's why we usually keep:
+
+Partitions >= Consumer Pods
+
+Interview Answer (30 Seconds)
+
+"If we have 6 pods consuming from Kafka, all pods do not process every event. Kafka partitions distribute the load.
+Within a consumer group, one partition is assigned to only one pod. The Kafka Consumer Group Coordinator handles partition 
+assignment and rebalancing. For maximum parallelism, the number of partitions should be equal to or greater than the number of consumer pods."
+
+
+
+----------------------------------------------------------------------------------------------
+Question 6:
+
+What is @Service annotation will do (Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+
+What does @Service do? (Short Interview Answer)
+Purpose
+
+@Service tells Spring that this class contains business logic and should be managed by the Spring Container.
+
+@Service
+public class PaymentService {
+}
+
+What happens internally?
+
+When Spring starts:
+
+Scans the classpath.
+Finds @Service classes.
+Creates an object (Bean).
+Stores it in Spring IOC Container.
+Makes it available for Dependency Injection (@Autowired).
+Example
+@Service
+public class PaymentService {
+}
+
+@RestController
+public class PaymentController {
+
+    @Autowired
+    private PaymentService service;
+}
+
+
+Spring automatically injects PaymentService.
+
+What if we don't use @Service?
+public class PaymentService {
+}
+
+
+Spring will not create a Bean.
+
+@Autowired
+private PaymentService service;
+
+
+Results in:
+
+NoSuchBeanDefinitionException
+
+
+because Spring cannot find the object.
+
+One-Line Interview Answer
+
+"@Service marks a class as a Service Layer component containing business logic. 
+Spring automatically creates and manages its bean in the IOC container, allowing it to be injected and reused throughout the application."
+
+
+
+----------------------------------------------------------------------------------------------
+Question 7:
+
+What will happen if we didn't mention @Service on the class? (Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+What happens if we don't mention @Service? (Short Interview Answer)
+
+If a class is not annotated with @Service (or another Spring stereotype like @Component), Spring will not create a bean for that class.
+
+public class PaymentService {
+}
+
+
+Spring ignores this class during component scanning.
+
+If you Autowire it
+@Autowired
+private PaymentService paymentService;
+
+
+Application startup fails with:
+
+NoSuchBeanDefinitionException
+
+
+because Spring cannot find the bean.
+
+Exception
+
+If you manually create the bean:
+
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public PaymentService paymentService() {
+        return new PaymentService();
+    }
+}
+
+
+then @Service is not required.
+
+One-Line Interview Answer
+
+"If @Service is not added, Spring will not create and manage the bean automatically.
+
+Any @Autowired dependency for that class will fail unless the bean is created manually using @Bean configuration."
+
+
+
+
+----------------------------------------------------------------------------------------------
+Question 8:
+
+What will happen if we didn't mention @Service on the class? (Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+
+How Kafka Partitions and Brokers Work? (Short Interview Answer)
+Broker
+
+A Broker is a Kafka server that stores and manages messages.
+
+Example:
+
+Kafka Cluster
+
+Broker-1
+Broker-2
+Broker-3
+
+
+Kafka distributes data across multiple brokers for scalability and fault tolerance.
+
+Partition
+
+A Topic is divided into multiple partitions.
+
+payment-topic
+
+Partition-0
+Partition-1
+Partition-2
+
+
+Partitions enable parallel processing.
+
+How Events are Stored?
+
+Producer sends messages:
+
+Msg-1 → Partition-0
+Msg-2 → Partition-1
+Msg-3 → Partition-2
+
+
+Kafka stores them inside brokers.
+
+Example:
+
+Broker-1 → Partition-0
+Broker-2 → Partition-1
+Broker-3 → Partition-2
+
+Why Partitions?
+
+Without partitions:
+
+1 Consumer
+
+
+With partitions:
+
+3 Partitions
+↓
+3 Consumers
+
+
+Multiple consumers can process data in parallel, increasing throughput.
+
+Replication
+
+For fault tolerance:
+
+Partition-0
+Leader → Broker-1
+Replica → Broker-2
+
+
+If Broker-1 fails:
+
+Broker-2 becomes Leader
+
+
+No data loss.
+
+One-Line Interview Answer
+
+"Kafka topics are split into partitions to enable parallel processing, and partitions are distributed across brokers. 
+
+Brokers store the data, while partitions allow multiple consumers to process messages concurrently. Replication ensures high availability if a broker fails."
+
+
+
+
+----------------------------------------------------------------------------------------------
+Question 9:
+
+10.	In the string str count number inputs are present - explain the solution
+String str = "abc56eioio65dkj56", String input = "56”.
+(Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+
+String str = "abc56eioio65dkj56";
+String input = "56";
+
+long count = java.util.stream.IntStream
+        .range(0, str.length() - input.length() + 1)               //IntStream.range from 0 to last digit
+        .filter(i -> str.startsWith(input, i))                      //filter uisng startsWith 
+        .count();                                                   //lastly count method
+
+System.out.println(count);
+
+
+
+
+
+----------------------------------------------------------------------------------------------
+Question 10:
+
+10.	In the string str count number inputs are present - explain the solution
+String str = "abc56eioio65dkj56", String input = "56”.
+(Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+Map<String, Integer> map =
+    Stream.of(str.replace("//", "").split(":"))                                    // use str.replace and split by ":"
+          .collect(Collectors.collectingAndThen(                                   //collect to List
+              Collectors.toList(),
+              list -> IntStream.range(0, list.size() / 2)
+                  .boxed()
+                  .collect(Collectors.toMap(                                       //Collect in Map
+                      i -> list.get(i * 2),
+                      i -> Integer.parseInt(list.get(i * 2 + 1))
+                  ))
+          ));
+
+System.out.println(map.get("A")); // 30
+System.out.println(map.get("F")); // 40                                         //use map.get(key)
+
+
+                  OR
+
+Map<String,Integer> map = Map.of(
+    "A",30,"F",40,"C",20,"D",100
+);
+
+System.out.println(map.get("A")); // 30
+
+
+
+
+
+----------------------------------------------------------------------------------------------
+Question 11:
+
+10.Find 2nd highest salary of the employee having employe table with id, name, salary and explain the query
+(Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+
+
+double secondHighest = employees.stream()
+        .map(Employee::getSalary)
+        .distinct()
+        .sorted(Comparator.reverseOrder())
+        .skip(1)
+        .findFirst()
+        .orElse(0.0);
+
+
+map()       -> Get all salaries
+distinct()  -> Remove duplicates
+sorted(desc)-> Highest to lowest
+skip(1)     -> Skip highest salary
+findFirst() -> Get next salary (2nd highest)
+
+
+
+
+----------------------------------------------------------------------------------------------
+Question 12:
+
+Where the applications are deployed it is EKS or Ec2 and why EKS/EC2 chosen
+(Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+
+Short Interview Answer
+
+"Our applications are deployed on EKS because 
+it provides container orchestration, auto-scaling, self-healing, and easier management of Spring Boot microservices. EC2 requires more manual server management."
+
+Very Short
+
+Why EKS?
+
+Auto Scaling
+Self Healing
+Load Balancing
+Easy Deployment
+
+One-Liner
+
+"We chose EKS over EC2 because EKS automatically manages and scales containerized microservices."
+
+----------------------------------------------------------------------------------------------
+Question 13:
+What is serialization? What is benefit of using it? (Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+What is Serialization? (Short Interview Answer)
+
+Serialization is the process of converting a Java object into a byte stream so it can be:
+
+Stored in a file
+Sent over the network
+Cached
+Transferred between systems
+Employee obj → Byte Stream
+
+Deserialization
+
+Converting the byte stream back into an object.
+
+Byte Stream → Employee obj
+
+Benefits
+
+✅ Send objects over network
+
+✅ Save object state in files
+
+✅ Store objects in cache/session
+
+✅ Transfer data between microservices
+
+Example
+class Employee implements Serializable {
+}
+
+One-Line Interview Answer
+
+"Serialization converts a Java object into a byte stream for storage or transmission, and deserialization converts it back to an object. It is mainly used for file storage, caching, sessions, and network communication."
+
+
+
+----------------------------------------------------------------------------------------------
+Question 14:
+Scenario - There is event consumed and need to call Rest API, 
+there will lot events coming and if RestTemplate is blocking continuously 
+because of some failure in downstream module, how we can achieve asynchronous here
+(Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+Scenario: Kafka Event → Call REST API → RestTemplate Blocking (Short Interview Answer)
+Problem
+Kafka Event
+    ↓
+Consumer
+    ↓
+RestTemplate Call
+    ↓
+Downstream System Slow/Down
+
+
+RestTemplate is blocking.
+
+If thousands of events arrive, consumer threads get blocked and consumer lag increases.
+
+Solution
+
+✅ Use WebClient (Spring WebFlux)
+
+webClient.post()
+         .uri(url)
+         .bodyValue(request)
+         .retrieve()
+         .bodyToMono(Response.class)
+         .subscribe();                                   //use subscribe method of webflux , so Threads are not waiting for response
+
+
+Benefit:
+
+Non-blocking
+Asynchronous
+Threads are not waiting for response
+Can handle more requests with fewer threads
+
+
+Additional Protection
+
+✅ Circuit Breaker (Resilience4j)
+
+✅ Retry Mechanism
+
+✅ Dead Letter Topic (DLT)
+
+✅ Separate Thread Pool / CompletableFuture
+
+Interview Answer
+
+"Since RestTemplate is blocking, a slow downstream service can block Kafka consumer threads and increase consumer lag.
+
+To make it asynchronous, we use Spring WebClient (WebFlux), which is non-blocking. We also use Circuit Breaker, Retry, and DLT to handle failures and improve resilience."
+
+----------------------------------------------------------------------------------------------
+Question 15:
+What does Thread-Safe Code mean? (Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+What does Thread-Safe Code mean? (Short Interview Answer)
+
+Thread-safe code means multiple threads can access and execute the code simultaneously without causing data inconsistency or race conditions.
+
+Non Thread-Safe Example
+count++;
+
+
+If two threads execute at the same time, one update may be lost.
+
+Thread-Safe Example
+synchronized void increment() {
+    count++;
+}
+
+
+or
+
+AtomicInteger count = new AtomicInteger();  //use AtomicInteger.incrementAndGet() for thread safety.
+count.incrementAndGet();
+
+Benefits
+
+✅ Correct data
+
+✅ No race conditions
+
+✅ Safe concurrent execution
+
+✅ Consistent results
+
+
+
+Real-Time Example
+Bank Account Balance = 1000
+
+Thread-1 Withdraws 500
+Thread-2 Withdraws 700
+
+
+Without thread safety:
+Incorrect Balance
+
+
+With thread safety:
+Correct Balance
+
+One-Line Interview Answer
+
+"Thread-safe code ensures that multiple threads can access shared resources concurrently without causing data corruption, inconsistent results, or race conditions."
+
+
+----------------------------------------------------------------------------------------------
+Question 16:
+What is Composite Primary Key? How did you create it in Spring Data JPA?
+(Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+
+A Composite Primary Key is a primary key made of multiple columns.
+
+Example:
+
+account_no + transaction_date
+
+
+Together uniquely identify a record.
+
+How to create in Spring Data JPA?
+
+Use @Embeddable and @EmbeddedId.
+
+@Embeddable
+class TransactionId {
+    private String accountNo;
+    private LocalDate txnDate;
+}
+
+@Entity
+class Transaction {
+
+    @EmbeddedId
+    private TransactionId id;
+}
+
+How I used in my project?
+
+"In my banking project, a transaction was uniquely identified using a combination of fields (for example, account number and transaction date/reference number). We created a composite key using @Embeddable and @EmbeddedId to avoid duplicate transaction records."
+
+One-Line Interview Answer
+
+"A composite primary key uses multiple columns to uniquely identify a record. In Spring Data JPA, we create it using @Embeddable and @EmbeddedId. In my project, we used it for uniquely identifying banking transactions using a combination of business fields."
+
+
+
+----------------------------------------------------------------------------------------------
+Question 17:
+What is Composite Primary Key? How did you create it in Spring Data JPA?
+(Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+To represent a column as Primary Key, what annotations are used in Spring Data JPA?
+For Single Primary Key
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)   // here is the solution
+private Long id;
+
+
+Annotations:
+
+✅ @Id → Marks the primary key column
+
+✅ @GeneratedValue → Auto-generates the key value
+
+For Composite Primary Key
+@Embeddable
+class EmployeeId {
+}
+
+@EmbeddedId
+private EmployeeId id;
+
+
+Annotations:
+
+✅ @Embeddable
+
+✅ @EmbeddedId
+
+Interview Answer
+
+"For a single primary key, we use @Id and optionally @GeneratedValue for auto-generation. For composite primary keys, we use @Embeddable and @EmbeddedId."
+
+
+
+----------------------------------------------------------------------------------------------
+Question 18:
+Count of Words (Ignoring Prefix/Suffix/Multiple Spaces) Using Streams
+----------------------------------------------------------------------------------------------
+
+
+Input
+
+String str = "   Hello   Java   Streams   World   ";
+
+Stream Solution
+long count = Arrays.stream(str.split("\\s+"))            //split based on spaces
+                   .filter(s -> !s.isEmpty())            //get the string which dont have space in it.
+                   .count();                           //and get the count
+
+System.out.println(count);
+
+
+Output:
+
+4
+
+Explanation
+split("\\s+")     -> Split by one or more spaces
+filter(!empty)    -> Remove empty strings
+count()           -> Count words
+
+Interview Answer
+
+"I split the string using \\s+, filter out empty strings, and use count() to get the number of words. This handles leading, trailing, and multiple spaces automatically."
+
+
+
+
+
+----------------------------------------------------------------------------------------------
+Question 19:
+
+Separate Digits and Characters Using Streams
+
+----------------------------------------------------------------------------------------------
+
+
+Input
+
+String str = "address contains - 123, Bengaluru";
+
+1)Digits Only
+String digits = str.chars()                                         // chars() for stream of characters
+        .filter(Character::isDigit)                                //Character::isDigit
+        .mapToObj(c -> String.valueOf((char) c))                   // use String.valueOf(c) to conever to string, so that can use Collectors.joinning() using collect()
+        .collect(Collectors.joining());
+
+System.out.println(digits);
+
+
+Output
+
+123
+
+2)Alphabets Only
+String text = str.chars() 
+        .filter(Character::isLetter)                                //Character::isLetter
+        .mapToObj(c -> String.valueOf((char) c))
+        .collect(Collectors.joining());
+
+System.out.println(text);
+
+
+Output
+
+addresscontainsBengaluru
+
+Interview Answer
+
+"I use chars() to convert the string into a stream of characters.
+Then I use Character.isDigit() to extract digits and Character.isLetter() to extract alphabets, finally collecting them using Collectors.joining()."
+
+Output:
+
+Digits  : 123
+Letters : addresscontainsBengaluru
+
+
+
+----------------------------------------------------------------------------------------------
+Question 20:
+
+
+What is a Palindrome? (Short Interview Answer)
+----------------------------------------------------------------------------------------------
+
+What is a Palindrome? (Short Interview Answer)
+
+A Palindrome is a word, string, or number that reads the same from left to right and right to left.
+
+Examples
+madam    -> Palindrome
+level    -> Palindrome
+121      -> Palindrome
+123      -> Not Palindrome
+hello    -> Not Palindrome
+
+Simple Java Check
+String str = "madam";
+
+boolean palindrome =
+        str.equals(new StringBuilder(str).reverse().toString());                 //use equals followed by >StringBuilder reverse method.
+
+System.out.println(palindrome);
+
+
+Output:
+
+true
+
+One-Line Interview Answer
+
+"A palindrome is a string or number that remains the same when reversed, such as 'madam', 'level', or '121'."
+
+
+
+---------------------------------------
+JUnit Test Case for isPalindrome()
+---------------------------------------
+Assume method:
+
+public boolean isPalindrome(String str) {
+    return str.equals(
+            new StringBuilder(str).reverse().toString());
+}
+
+JUnit 5 Test
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+class PalindromeTest {
+
+    @Test
+    void testPalindrome() {
+
+        assertTrue(isPalindrome("madam"));    //assertTrue() for palindrome strings 
+        assertTrue(isPalindrome("level"));
+        assertFalse(isPalindrome("hello"));   //assertFalse() for non-palindrome strings.
+    }
+
+    private boolean isPalindrome(String str) {
+        return str.equals(
+                new StringBuilder(str).reverse().toString());
+    }
+}
+
+Interview Explanation
+assertTrue()  -> Expected palindrome
+assertFalse() -> Expected non-palindrome
+
+One-Line Interview Answer
+
+"Using JUnit, I verify both positive and negative scenarios using assertTrue() for palindrome strings and assertFalse() for non-palindrome strings."
+
+
+
+----------------------------------------------------------------------------------------------
+Question 21:
+
+Input argument is List<String> fruits: ["apple","banana","mango","apple"] 
+Return value is a Map:  {"apple": 2, "banana": 1, "mango": 1}
+
+Count Frequency of Elements Using Streams
+----------------------------------------------------------------------------------------------
+
+Count Frequency of Elements Using Streams
+
+Input
+
+List<String> fruits =
+        List.of("apple", "banana", "mango", "apple");
+
+Stream Solution
+Map<String, Long> result = fruits.stream()
+        .collect(Collectors.groupingBy(
+                Function.identity(),
+                Collectors.counting()
+        ));
+
+System.out.println(result);
+
+
+Output
+
+{apple=2, banana=1, mango=1}
+
+Explanation
+stream()            -> Convert list to stream
+Function.identity() -> Use element as key
+counting()          -> Count occurrences
+groupingBy()        -> Create Map<Key, Count>
+
+Interview Answer
+
+"I use Collectors.groupingBy() with Function.identity() to group identical elements and Collectors.counting() to count their occurrences. 
+
+This returns a map containing each element and its frequency."
+
+
+----------------------------------------------------------------------------------------------
+Question 22:
+
+
+Use Two Threads to Print Even and Odd Numbers Alternately
+Concept
+----------------------------------------------------------------------------------------------
+
+Use 2 threads:
+
+Thread-1 → Prints Odd Numbers
+Thread-2 → Prints Even Numbers
+
+Use wait() and notify() so that one thread waits while the other prints.
+
+Output
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+------------------------------------------------------------------------------
+Simple Interview Code
+class NumberPrinter {
+    int num = 1;
+
+    synchronized void printOdd() throws Exception {  
+        while (num <= 10) {
+            if (num % 2 == 0) wait();                          //1st wait()
+            System.out.println(num++);                        //print num++
+            notify();                                         //once task is done, then notify()
+        }
+    }
+
+    synchronized void printEven() throws Exception {
+        while (num <= 10) {
+            if (num % 2 != 0) wait();
+            System.out.println(num++);
+            notify();
+        }
+    }
+}
+------------------------------------------------------------------------------
+Explanation
+wait()   -> Pause current thread
+notify() -> Wake up other thread
+
+Odd Thread prints 1
+Even Thread prints 2
+Odd Thread prints 3
+...
+
+------------------------------------------------------------------------------
+//MAIN METHOD >>
+------------------------------------------------------------------------------
+NumberPrinter np = new NumberPrinter();
+
+Thread odd = new Thread(() -> {
+    try {
+        np.printOdd();
+    } catch (Exception e) {
+    }
+});
+
+Thread even = new Thread(() -> {
+    try {
+        np.printEven();
+    } catch (Exception e) {
+    }
+});
+
+odd.start();
+even.start();
+------------------------------------------------------------------------------
+Interview Answer
+
+"I use two threads with wait() and notify(). 
+The odd thread prints odd numbers, the even thread prints even numbers, and synchronization ensures they print alternately without race conditions."
+
+----------------------------------------------------------------------------------------------
+Question 22:
+
+Write a Tranformer functional interface and use it to get the name from a Student class(id, name, rollNo, dept).
+1) Write a code to find all the students whose name starts with "A".
+
+2) Transform the List<Student> to Map<Integer, String> where key is rollNo, value is String.
+----------------------------------------------------------------------------------------------
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+------------------------------------------------------------------------------------------------------------
+@FunctionalInterface                                                      //@FunctionalInterface
+interface Transformer<T, R> {
+    R transform(T input);                                                 // R transform method with T as input.
+}
+------------------------------------------------------------------------------------------------------------
+class Student {
+    private int id;
+    private String name;
+    private int rollNo;
+    private String dept;
+
+    public Student(int id, String name, int rollNo, String dept) {
+        this.id = id;
+        this.name = name;
+        this.rollNo = rollNo;
+        this.dept = dept;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getRollNo() {
+        return rollNo;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+}
+------------------------------------------------------------------------------------------------------------
+public class Main {
+
+    public static void main(String[] args) {
+
+        List<Student> students = List.of(
+                new Student(1, "Amit", 101, "IT"),
+                new Student(2, "Raj", 102, "CSE"),
+                new Student(3, "Anita", 103, "ECE"),
+                new Student(4, "Mango", 104, "MECH")
+        );
+
+        // Get name using custom functional interface
+        Transformer<Student, String> nameTransformer = Student::getName;            //nameTransformer > assign  Student::getName;
+
+        String name = nameTransformer.transform(students.get(0));
+        System.out.println(name); // Amit
+
+        // Find students whose names start with "A"
+        List<Student> namesStartingWithA = students.stream()                         
+                .filter(s -> s.getName().startsWith("A"))                          //filter uisng startsWith() method.
+                .toList();
+
+        System.out.println(namesStartingWithA); // [Amit, Anita]
+
+                                                                         
+        Map<Integer, String> studentMap = students.stream()                       // Convert List<Student> to Map<rollNo, name>
+                .collect(Collectors.toMap(                                        //Collectors.toMap...
+                        Student::getRollNo,
+                        nameTransformer::transform                               //Interface::method transform used
+                ));
+
+        System.out.println(studentMap);
+    }
+}
+
+----------------------------------------------------------------------------------------------
+Question 23:
+
+How to find the date 7 days after the current date? (Short Interview Answer)
+
+----------------------------------------------------------------------------------------------
+
+LocalDate dateAfter7Days = LocalDate.now().plusDays(7);
+
+System.out.println(dateAfter7Days);
+
+
+
+
+----------------------------------------------------------------------------------------------
+Question 24:
+
+How to find the date 7 days after the current date? (Short Interview Answer)
+
+----------------------------------------------------------------------------------------------
+
+
+LocalDate dateAfter7Days = LocalDate.now().plusDays(7);
+
+System.out.println(dateAfter7Days);
+
+----------------------------------------------------------------------------------------------
+Question 25:
+
+Given the object Employee:name,roledesc,projectid,salary,address:
+1. find the sum of salary based on projectid
+2. list of employees where salary is greater than 50000. From this list find employees with min/max salary
+
+----------------------------------------------------------------------------------------------
+
+1)
+
+Map<Long, Double> salaryByProject = employeeList.stream()
+        .collect(Collectors.groupingBy(                                      //Collectors.groupingBy USING 2 parameters
+                Employee::getProjectId,                                      //projectId
+                Collectors.summingDouble(Employee::getSalary)                //Collectors.summingDouble method and use Employee::getSalary
+        ));
+
+
+
+2) Employee maxEmp = employeeList.stream()
+        .filter(e -> e.getSalary() > 50000)
+        .max(Comparator.comparing(Employee::getSalary))
+        .orElse(null);
+
+
+OR
+
+Employee minEmp = employeeList.stream()
+        .filter(e -> e.getSalary() > 50000)
+        .min(Comparator.comparing(Employee::getSalary))
+        .orElse(null);
+
+
+
+filter()     -> Salary > 50000
+max()        -> Highest salary employee
+min()        -> Lowest salary employee
+comparing()  -> Compare by salary
+
+
+
+----------------------------------------------------------------------------------------------
+Question 26:
+
+
+"Find the first element form below list which start with k:
+List<String> names = Arrays.asList(""sakishi"", ""klice"", ""sachin"",""kin"");"
+----------------------------------------------------------------------------------------------
+Code :
+
+List<String> names =
+        Arrays.asList("sakishi", "klice", "sachin", "kin");
+
+String result = names.stream()
+        .filter(name -> name.startsWith("k"))
+        .findFirst()
+        .orElse(null);
+
+System.out.println(result);
+
+
+stream()      -> Convert list to stream
+filter()      -> Keep names starting with 'k'
+findFirst()   -> Get first matching element
+orElse(null)  -> Return null if not found
+
+
+----------------------------------------------------------------------------------------------
+
+Question 27:
+
+How do u implement a custom comparator?
+
+----------------------------------------------------------------------------------------------
+
+
+Custom Comparator Using Streams (Short Interview Answer)
+1)Employee Salary Ascending
+employeeList.stream()
+        .sorted(Comparator.comparing(Employee::getSalary))          //sorted + Comparator.comparing + ::getSalary
+        .forEach(System.out::println);
+
+2)Employee Salary Descending
+employeeList.stream()
+        .sorted(Comparator.comparing(Employee::getSalary)        //sorted + Comparator.comparing + ::getSalary + reversed()
+                .reversed())
+        .forEach(System.out::println);
+
+3)Custom Comparator (Name Length)
+names.stream()
+     .sorted((a, b) -> a.length() - b.length())                   //sorted based in a - b length.    
+     .forEach(System.out::println);
+
+
+4)Multiple Fields
+
+Sort by salary, then name:
+
+employeeList.stream()
+        .sorted(Comparator.comparing(Employee::getSalary)       //Comparator.comparing  + thenComparing
+                .thenComparing(Employee::getName))
+        .forEach(System.out::println);
+
+Explanation
+comparing()     -> Create comparator
+reversed()      -> Descending order
+thenComparing() -> Secondary sort
+sorted()        -> Uses custom comparator
+
+Interview Answer
+
+"A custom comparator defines how objects should be compared. With Streams, I 
+se sorted() along with Comparator.comparing(), reversed(), or thenComparing() to implement custom sorting logic."
+
+
+
+----------------------------------------------------------------------------------------------
+
+Question 28:
+
+
+Design a Custom Immutable Class (Short Interview Answer)
+
+----------------------------------------------------------------------------------------------
+
+Rules for Immutable Class
+
+✅ Make class final
+
+✅ Make fields private final
+
+✅ Initialize fields through constructor
+
+✅ No setters
+
+✅ Return copies of mutable objects
+
+Example
+final class Employee {
+
+    private final int id;
+    private final String name;
+
+    public Employee(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+Usage
+Employee emp = new Employee(101, "John");
+
+System.out.println(emp.getId());
+System.out.println(emp.getName());
+
+Why Immutable?
+
+✅ Thread-safe
+
+✅ Cannot be modified after creation
+
+✅ Safe for caching
+
+✅ Safe as Map keys
+
+Interview Answer
+
+"An immutable class is a class whose state cannot be changed after object creation. To create it,
+I make the class final, 
+fields private final, initialize them through a constructor, and do not provide setters."
+
+
+
+----------------------------------------------------------------------------------------------
+
+NEW QUESTIONS MOSTLY ASKED ON CORE JAVA
+----------------------------------------------------------------------------------------------
+
+
+1. What are Java Records?
+What Problem Do They Solve?
+
+Before Java Records:
+
+class Employee {
+    private final int id;
+    private final String name;
+
+    // Constructor
+    // Getters
+    // equals()
+    // hashCode()
+    // toString()
+}
+
+
+Too much boilerplate code.
+
+Record
+record Employee(int id, String name) {}
+
+
+Compiler automatically generates:
+
+Constructor
+getters -> id(), name()
+equals()
+hashCode()
+toString()
+
+Benefits
+
+✅ Less boilerplate
+
+✅ Immutable by default
+
+✅ Better readability
+
+Interview Answer
+
+Records are immutable data carrier classes introduced in Java 16 that automatically generate constructor, accessors, equals, hashCode, and toString methods.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2. What are Sealed Classes?
+
+A sealed class restricts who can inherit from it.
+
+public sealed class Vehicle
+        permits Car, Truck {
+}
+
+
+Only:
+
+class Car extends Vehicle {}
+class Truck extends Vehicle {}
+
+
+Allowed.
+
+Benefits
+
+✅ Controlled inheritance
+
+✅ Better security
+
+✅ Better pattern matching support
+
+Interview Answer
+
+Sealed classes allow a class to explicitly control which classes can extend or implement it.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3. Difference Between Streams and Collections
+Collection	StreamStores data	Processes data
+Reusable	One-time use
+Eager loading	Lazy processing
+CRUD operations	Functional operations
+Example
+
+Collection:
+
+List<String> names = List.of("A","B");
+
+
+Stream:
+
+names.stream()
+     .filter(n -> n.startsWith("A"))
+     .toList();
+
+Interview Answer
+
+Collection stores data in memory, whereas Stream processes data using functional operations without storing it.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+4. What is a Functional Interface?
+
+An interface having exactly one abstract method.
+
+@FunctionalInterface
+interface Calculator {
+    int add(int a, int b);
+}
+
+
+Used by:
+
+Calculator c = (a,b) -> a+b;
+
+Common Examples
+Predicate
+Function
+Consumer
+Supplier
+Runnable
+
+Interview Answer
+
+A functional interface contains exactly one abstract method and is mainly used with lambda expressions.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+5. Why Optional?
+Problem
+String name = null;
+
+name.length();
+
+
+Throws:
+
+NullPointerException
+
+Solution
+Optional<String> name =
+        Optional.ofNullable(null);
+
+Benefits
+
+✅ Avoids NPE
+
+✅ No repeated null checks
+
+✅ Cleaner code
+
+✅ Expressive API
+
+Example
+name.ifPresent(System.out::println);
+
+name.orElse("Unknown");
+
+Interview Answer
+
+Optional is a container object used to handle null values safely and avoid NullPointerExceptions.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+6. What is var?
+
+Java automatically infers type.
+
+var name = "Sachin";
+
+
+Compiler converts to:
+
+String name = "Sachin";
+
+Benefits
+
+✅ Less code
+
+✅ Better readability
+
+Limitations
+var x; // Invalid
+
+Interview Answer
+
+var allows local variable type inference where the compiler automatically determines the variable type.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+7. What are Switch Expressions?
+
+Old Switch:
+
+switch(day){
+    case MON:
+        result="Work";
+        break;
+}
+
+
+New Switch:
+
+String result = switch(day){
+    case MON -> "Work";
+    case SUN -> "Holiday";
+    default -> "Unknown";
+};
+
+Benefits
+
+✅ Cleaner
+
+✅ Returns values
+
+✅ No break needed
+
+Interview Answer
+
+Switch expressions provide a concise way to return values directly from a switch statement.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+8. Multiline String
+
+Before Java 15
+
+String s =
+"Hello\n" +
+"Java\n" +
+"World";
+
+
+After Text Blocks
+
+String s = """
+        Hello
+        Java
+        World
+        """;
+
+Interview Answer
+
+Java Text Blocks allow multiline strings using triple double quotes.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+9. Custom Exception
+class InvalidAgeException extends Exception {
+
+    public InvalidAgeException(String msg) {
+        super(msg);
+    }
+}
+
+
+Usage:
+
+throw new InvalidAgeException("Age < 18");
+
+Interview Answer
+
+A custom exception is created by extending Exception or RuntimeException.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+10. Runnable vs Callable
+Runnable	Callablerun()	call()
+No return	Returns value
+No checked exception	Can throw exception
+Runnable
+Runnable r = () -> System.out.println("Hi");
+
+Callable
+Callable<Integer> c = () -> 100;
+
+Interview Answer
+
+Callable is preferred when a task needs to return a result or throw checked exceptions.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+11. Runnable vs Extending Thread
+
+Better:
+
+class Task implements Runnable
+
+
+Avoid:
+
+class Task extends Thread
+
+Why Runnable?
+
+✅ Supports inheritance
+
+✅ Better design
+
+✅ Task and Thread separated
+
+Interview Answer
+
+Implementing Runnable is preferred because Java supports single inheritance and it separates task logic from thread management.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+12. Why ExecutorService?
+
+Without ExecutorService:
+
+new Thread(...)
+
+
+Every request creates a thread.
+
+Expensive.
+
+ExecutorService
+ExecutorService service =
+    Executors.newFixedThreadPool(10);
+
+
+Reuses threads.
+
+Benefits
+
+✅ Thread pooling
+
+✅ Better performance
+
+✅ Less memory
+
+Interview Answer
+
+ExecutorService manages thread pools efficiently and avoids the overhead of creating new threads repeatedly.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+13. Future vs CompletableFuture
+Future
+Future<String> future =
+service.submit(task);
+
+future.get();
+
+
+Blocking call.
+
+CompletableFuture
+CompletableFuture
+    .supplyAsync(() -> "Java")
+    .thenApply(String::toUpperCase);
+
+
+Non-blocking.
+
+Benefits
+
+✅ Async processing
+
+✅ Chaining
+
+✅ Combining tasks
+
+Interview Answer
+
+CompletableFuture extends Future by supporting asynchronous, non-blocking programming and task chaining.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+14. Why HashSet Allows Unique Elements?
+
+Internally uses:
+
+hashCode()
+equals()
+
+Flow
+Add Object
+      ↓
+hashCode()
+      ↓
+Bucket
+      ↓
+equals()
+      ↓
+Duplicate?
+
+
+Duplicate rejected.
+
+Why no traditional for loop?
+for(int i=0;i<set.size();i++)
+
+
+❌ No index available
+
+Use:
+
+for(String s : set)
+
+
+or
+
+set.forEach(...)
+
+Interview Answer
+
+HashSet uses hashCode and equals methods to ensure element uniqueness and does not support indexed access.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+15. LinkedHashMap Insertion Order
+
+Internally:
+
+HashMap
+   +
+Doubly Linked List
+
+
+HashMap:
+
+Fast lookup
+
+
+Linked List:
+
+Maintain insertion order
+
+Interview Answer
+
+LinkedHashMap maintains insertion order using a doubly linked list in addition to HashMap storage.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+16. Internal Working of ArrayList
+Internally
+Object[]
+
+
+Dynamic Array.
+
+Initial Capacity
+10
+
+When Full
+10
+↓
+15
+↓
+22
+↓
+33
+
+
+(approximately 1.5x growth)
+
+Resizing
+Create new array
+Copy elements
+Replace old array
+
+Performance Issue?
+
+Resizing is costly occasionally:
+
+O(n)
+
+
+But happens infrequently.
+
+Most adds:
+
+O(1)
+
+
+Called:
+
+Amortized O(1)
+
+Interview Answer
+
+ArrayList uses a dynamically growing array. Resizing involves copying elements, but since resizing happens infrequently, insertion remains amortized O(1).
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+17. ConcurrentHashMap vs synchronizedMap()
+synchronizedMap
+Map map =
+Collections.synchronizedMap(
+       new HashMap<>());
+
+
+Entire map locked.
+
+One thread at a time
+
+ConcurrentHashMap
+ConcurrentHashMap map =
+        new ConcurrentHashMap();
+
+
+Locks only specific bucket/portion.
+
+Multiple threads
+can work simultaneously
+
+Performance
+ConcurrentHashMap
+          >
+synchronizedMap
+
+Interview Answer
+
+ConcurrentHashMap provides better concurrency by locking only portions of the map, whereas synchronizedMap locks the entire map for every operation.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
