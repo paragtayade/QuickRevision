@@ -2330,6 +2330,167 @@ Left → Right → Root
 Important
 Inorder traversal of BST
 always gives sorted output.
+
+
+#################### DETAIL EXPLANATION ####### SKIP IF TO BE REVISED FAST############################3
+#####################################################################################################
+What is BST (Binary Search Tree)?
+
+A BST is a special type of Binary Tree where:
+
+Left Child  < Root
+Right Child > Root
+
+
+Example:
+
+        50
+       /  \
+     30    70
+    / \   / \
+   20 40 60 80
+
+Why BST?
+
+Searching becomes faster because we can eliminate half the tree at every step.
+
+Example: Search 60
+
+60 > 50 → Go Right
+
+60 < 70 → Go Left
+
+Found 60
+
+
+Time Complexity:
+
+Search : O(log n)
+Insert : O(log n)
+Delete : O(log n)
+
+
+(for balanced BST)
+
+What is DFS (Depth First Search)?
+
+DFS means:
+
+Go as deep as possible first,
+then come back.
+
+
+DFS has 3 traversal types:
+
+Preorder
+Inorder
+Postorder
+
+
+Using the same tree:
+
+        50
+       /  \
+     30    70
+    / \   / \
+   20 40 60 80
+
+1. Preorder Traversal
+
+Rule:
+
+Root → Left → Right
+
+
+Steps:
+
+50
+30
+20
+40
+70
+60
+80
+
+
+Output:
+
+50 30 20 40 70 60 80
+
+Easy Remember
+Parent First
+Then Children
+
+2. Inorder Traversal
+
+Rule:
+
+Left → Root → Right
+
+
+Steps:
+
+20
+30
+40
+50
+60
+70
+80
+
+
+Output:
+
+20 30 40 50 60 70 80
+
+Important Interview Point
+
+For a BST:
+
+Inorder Traversal
+always produces
+sorted output.
+
+
+That's why interviewers frequently ask it.
+
+3. Postorder Traversal
+
+Rule:
+
+Left → Right → Root
+
+
+Steps:
+
+20
+40
+30
+60
+80
+70
+50
+
+
+Output:
+
+20 40 30 60 80 70 50
+
+Easy Remember
+Parent Last
+
+Quick Revision Table
+Traversal	Rule	OutputPreorder	Root Left Right	50 30 20 40 70 60 80
+Inorder	Left Root Right	20 30 40 50 60 70 80
+Postorder	Left Right Root	20 40 30 60 80 70 50
+Interview Answer (30 Seconds)
+
+"A Binary Search Tree is a binary tree where all left nodes are smaller than the root and all right nodes are greater than the root.
+
+DFS traversal has three types: Preorder (Root-Left-Right), Inorder (Left-Root-Right), and Postorder (Left-Right-Root). 
+A key property is that Inorder traversal of a BST always gives elements in sorted order."
+
+############################################################################3
 -------------------------------------------------------------------------------------------------------------------
 4. String Memory
 String a = "abc";
@@ -2489,7 +2650,11 @@ list.parallelStream()
 
 Interview Answer
 
-Stream API is used for functional data processing. Sequential streams use one thread, parallel streams use multiple threads. Use forEachOrdered() to preserve ordering in parallel streams.
+Stream API is used for functional data processing. 
+Sequential streams use one thread, 
+parallel streams use multiple threads.
+
+Use forEachOrdered() to preserve ordering in parallel streams.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 9. What is Immutability?
 Meaning
