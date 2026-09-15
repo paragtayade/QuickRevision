@@ -3410,3 +3410,392 @@ Interview Answer
 Actuator provides production-ready monitoring, health checks, metrics, 
 environment information, and application diagnostics through REST endpoints.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+###################################################################
+TOP 20 QUESTIONS ASKED ON AWS
+###################################################################
+
+
+1. Explain how Auto Scaling works in AWS? How do you handle unpredictable traffic?
+How Auto Scaling Works
+
+AWS Auto Scaling automatically increases or decreases the number of running instances/tasks based on predefined metrics.
+
+Typical metrics:
+
+CPU Utilization
+Memory Usage
+Request Count
+Network Traffic
+
+Example
+CPU > 70%
+     ↓
+Add 2 More EC2 Instances
+
+CPU < 30%
+     ↓
+Remove Extra Instances
+
+Unpredictable Traffic Handling
+
+Use:
+
+Auto Scaling Groups
+Application Load Balancer
+CloudWatch Alarms
+ECS Service Auto Scaling
+EKS HPA
+
+Banking Project Answer
+
+We configured Auto Scaling based on CloudWatch CPU thresholds. If CPU exceeded 70%, additional ECS tasks/pods 
+were provisioned automatically. 
+During low traffic periods, excess instances were removed to optimize cost.
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+2. How is a Docker Image Deployed to AWS EC2?
+Flow
+Developer
+    ↓
+Git
+    ↓
+Jenkins Pipeline
+    ↓
+Build Docker Image
+    ↓
+Push to ECR
+    ↓
+Deploy to EC2/ECS
+    ↓
+Docker Pull
+    ↓
+Container Running
+
+Jenkins Steps
+1. Checkout Code
+2. Maven Build
+3. Docker Build
+4. Push to ECR
+5. SSH to EC2
+6. Pull Latest Image
+7. Restart Container
+
+Interview Answer
+
+We use Jenkins CI/CD. Jenkins builds the Docker image, pushes it to ECR, 
+and then deploys the latest image on EC2 or ECS by pulling and restarting the container.
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+3. What are IAM Roles and how are they different from IAM Users?
+IAM User
+
+Represents:
+
+Human User
+Developer
+Admin
+DevOps Engineer
+
+
+Contains:
+
+Username
+Password
+Access Keys
+
+Example
+Parag Login
+
+IAM Role
+
+Represents:
+
+Application
+EC2
+Lambda
+ECS
+
+
+No passwords or access keys.
+
+AWS temporarily assigns permissions.
+
+Example
+EC2 Instance
+      ↓
+S3 Access
+
+
+Using IAM Role.
+
+Difference
+IAM User	IAM RoleHuman User	AWS Service/App
+Long-term Credentials	Temporary Credentials
+Login Possible	Cannot Login
+Interview Answer
+
+IAM Users are used by people, whereas IAM Roles are used by AWS services like EC2, ECS, 
+and Lambda to securely access other AWS resources without storing credentials.
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+4. Describe Serverless Architecture for Real-Time Applications
+Architecture
+Client
+   ↓
+API Gateway
+   ↓
+Lambda
+   ↓
+DynamoDB
+   ↓
+SNS/SQS/EventBridge
+
+Characteristics
+No Server Management
+Automatic Scaling
+Pay Per Request
+High Availability
+
+Example
+
+Real-time Order Processing:
+
+API Gateway
+     ↓
+Lambda
+     ↓
+Save Order
+     ↓
+Publish Event
+
+Interview Answer
+
+Serverless architecture uses services such as API Gateway, Lambda, DynamoDB, and EventBridge. 
+AWS automatically manages infrastructure and scaling, allowing us to focus only on business logic.
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+5. How do you handle Configuration Management and Secrets?
+Configuration
+
+Use:
+
+application.properties
+Spring Profiles
+AWS Parameter Store
+
+Secrets
+
+Store in:
+
+AWS Secrets Manager
+
+
+Examples:
+
+DB Password
+API Keys
+Tokens
+Certificates
+
+
+Application reads secret during startup.
+
+Benefits
+No Hardcoded Passwords
+Central Management
+Automatic Rotation
+Encryption
+
+Interview Answer
+
+Application configurations are managed through profiles, and sensitive information 
+such as passwords and API keys are stored securely in AWS Secrets Manager.
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+6. What is ECR?
+
+ECR means:
+
+Elastic Container Registry
+
+
+AWS-managed Docker image repository.
+
+Flow
+Build Docker Image
+      ↓
+Push to ECR
+      ↓
+ECS/EKS/EC2 Pull Image
+      ↓
+Run Container
+
+Benefits
+Private Repository
+Secure
+Managed by AWS
+CI/CD Integration
+
+Interview Answer
+
+ECR is AWS's managed Docker image repository used for storing and versioning container images as part of CI/CD pipelines.
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+7. What do you do for Performance Management in AWS?
+Common Activities
+Horizontal Scaling
+Increase Pods
+Increase ECS Tasks
+Increase EC2 Instances
+
+Vertical Scaling
+Increase CPU
+Increase RAM
+
+Caching
+Redis
+ElastiCache
+Application Cache
+
+Database Optimization
+Indexes
+Query Optimization
+Connection Pooling
+
+Log Management
+Archive Logs
+Remove Old Logs
+
+Auto Scaling
+Traffic Based Scaling
+
+Interview Answer
+
+We improve performance by auto-scaling services, increasing pod counts, 
+optimizing queries, using Redis caching, increasing resources where required, and continuously monitoring CloudWatch metrics.
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+8. How are Objects Stored in S3? What Consistency Model Does It Follow?
+Storage
+
+Objects stored as:
+
+Bucket
+   ↓
+Object
+      ↓
+Key + Metadata + Data
+
+
+Example:
+
+customer-data-bucket
+          ↓
+customer1.pdf
+
+Consistency Model
+
+AWS S3 provides:
+
+Strong Read-After-Write Consistency
+
+
+Meaning:
+
+Write Object
+     ↓
+Immediately Read Latest Version
+
+
+No delay.
+
+Interview Answer
+
+S3 stores data as objects inside buckets and provides strong read-after-write consistency for PUT, DELETE, and UPDATE operations.
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+9. How is Health Check Performed in ECS?
+
+We generally have two levels.
+
+1. Container Health Check
+
+Inside container:
+
+/actuator/health
+
+
+Example:
+
+{
+   "status":"UP"
+}
+
+
+Container healthy.
+
+2. Load Balancer Health Check
+
+ALB periodically sends:
+
+GET /actuator/health
+
+
+If healthy:
+
+Traffic Continues
+
+
+If unhealthy:
+
+Traffic Removed
+Task Replaced
+
+Monitoring
+
+Use:
+
+CloudWatch
+Actuator
+ALB Health Status
+ECS Service Dashboard
+
+Interview Answer
+
+We use both container-level health checks and ALB service-level health checks. ECS automatically replaces unhealthy tasks and CloudWatch helps monitor service health.
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+10. How does Application Load Balancer distribute traffic?
+Flow
+Client
+   ↓
+ALB
+   ↓
+EC2-1
+EC2-2
+EC2-3
+
+Routing
+
+ALB distributes traffic across healthy targets.
+
+Supports
+Path-Based Routing
+Host-Based Routing
+Weighted Routing
+
+Example
+/api/users/*
+      ↓
+User Service
+
+/api/payments/*
+      ↓
+Payment Service
+
+Health Checks
+
+Only healthy instances receive traffic.
+
+Healthy -> Receive Requests
+
+Unhealthy -> Excluded
+
+Interview Answer
+
+ALB distributes requests across healthy targets using round-robin style load balancing and supports advanced routing such as path-based and host-based routing. 
+It continuously performs health checks and removes unhealthy instances from rotation.
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------
