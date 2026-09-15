@@ -3799,3 +3799,287 @@ ALB distributes requests across healthy targets using round-robin style load bal
 It continuously performs health checks and removes unhealthy instances from rotation.
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+############################################
+TOP 4 Interview Questions on Kubernetes
+############################################
+
+
+1. How to Scale Up/Down in Kubernetes?
+
+Kubernetes supports Horizontal Scaling and Vertical Scaling.
+
+Horizontal Scaling (Most Common)
+
+Increase or decrease the number of Pods.
+
+Example:
+
+Before
+
+Payment Service
+    ↓
+2 Pods
+
+After Scaling
+
+Payment Service
+    ↓
+6 Pods
+
+
+Kubernetes HPA (Horizontal Pod Autoscaler) monitors:
+
+CPU
+Memory
+Custom Metrics
+
+
+Example:
+
+CPU > 70%
+     ↓
+Create More Pods
+
+CPU < 30%
+     ↓
+Remove Extra Pods
+
+
+Command:
+
+kubectl scale deployment payment-service --replicas=5
+
+Vertical Scaling
+
+Increase resources.
+
+CPU : 2 → 4 Core
+RAM : 4GB → 8GB
+
+Interview Answer
+
+Kubernetes can scale horizontally by increasing pod replicas using HPA and vertically by increasing CPU and memory resources. In our project, we mainly used HPA based on CPU utilization.
+------------------------------------------------------------------------------------------------------------------
+2. How does Kubernetes manage Failovers?
+
+Kubernetes continuously monitors Pods and Nodes.
+
+Scenario 1: Pod Failure
+Pod-1 Crashes
+      ↓
+Kubernetes Detects Failure
+      ↓
+Creates New Pod Automatically
+
+
+Because Deployment always maintains desired replicas.
+
+Example:
+
+Desired Pods = 3
+
+Running = 2
+
+Kubernetes creates 1 more Pod
+
+Scenario 2: Node Failure
+Worker Node Down
+       ↓
+Pods Lost
+       ↓
+Scheduler Places Pods
+on Healthy Nodes
+
+Health Checks Used
+Liveness Probe
+Is application alive?
+
+Readiness Probe
+Can application serve traffic?
+
+
+If probe fails:
+
+Pod Restart
+OR
+Pod Removed from Load Balancer
+
+Interview Answer
+
+Kubernetes automatically handles failovers by monitoring application health. If a Pod or Node fails, Kubernetes creates replacement Pods and schedules them on healthy worker nodes.
+------------------------------------------------------------------------------------------------------------------
+3. How does Deployment work in Kubernetes?
+
+A Deployment is used to manage application Pods.
+
+Example:
+
+apiVersion: apps/v1
+kind: Deployment
+
+spec:
+  replicas: 3
+
+What Deployment Does
+Creates Pods
+Deployment
+      ↓
+ReplicaSet
+      ↓
+Pods
+
+Maintains Desired Count
+
+Example:
+
+Required = 3 Pods
+
+1 Pod Crashed
+
+
+Deployment automatically recreates:
+
+New Pod Created
+
+Rolling Updates
+
+When a new version is deployed:
+
+Version 1
+ ↓
+Version 2
+
+
+Deployment updates Pods gradually.
+
+Pod-1 Updated
+Pod-2 Updated
+Pod-3 Updated
+
+
+No downtime.
+
+Rollback
+
+If deployment fails:
+
+kubectl rollout undo deployment app
+
+
+Restore previous version.
+
+Interview Answer
+
+A Deployment manages ReplicaSets and Pods. It ensures the required number of Pods are running, supports rolling updates, 
+self-healing, and rollback capabilities.
+------------------------------------------------------------------------------------------------------------------
+4. What is a Service in Kubernetes?
+
+Pods are temporary.
+
+When Pod restarts:
+
+IP Changes
+
+
+Clients cannot rely on Pod IP.
+
+Service Solves This Problem
+
+A Service provides:
+
+Stable IP
+Stable DNS Name
+Load Balancing
+
+Example
+Client
+   ↓
+Service
+   ↓
+Pod-1
+Pod-2
+Pod-3
+
+
+Service distributes requests among available Pods.
+
+Types of Services
+ClusterIP (Default)
+
+Internal communication.
+
+Only Inside Kubernetes Cluster
+
+
+Example:
+
+User Service
+      ↓
+Payment Service
+
+NodePort
+
+Expose application externally.
+
+<node-ip>:30080
+
+LoadBalancer
+
+Creates cloud load balancer.
+
+AWS ALB/ELB
+      ↓
+Pods
+
+
+Most used in cloud environments.
+
+ExternalName
+
+Maps service to an external DNS.
+
+Interview Answer
+
+A Kubernetes Service provides a stable endpoint for accessing Pods. It performs service discovery and load balancing so that applications can communicate without knowing individual Pod IPs.
+
+Quick Revision
+Deployment
+    ↓
+Manages Pods
+
+ReplicaSet
+    ↓
+Maintains Pod Count
+
+Service
+    ↓
+Stable Access to Pods
+
+HPA
+    ↓
+Auto Scaling
+
+Liveness Probe
+    ↓
+Checks if Pod is Alive
+
+Readiness Probe
+    ↓
+Checks if Pod can Serve Traffic
+
+Failover
+    ↓
+Automatic Pod Recreation
+
+30-Second Interview Answer
+
+In Kubernetes, Deployments manage Pods and ensure the desired number of replicas are running. 
+Services provide stable access and load balancing to Pods. 
+HPA handles automatic scaling based on CPU or memory usage. 
+For failover, Kubernetes continuously monitors Pods and Nodes and 
+automatically recreates failed Pods or moves workloads to healthy nodes.
+
+
+=======================================================================================================================
