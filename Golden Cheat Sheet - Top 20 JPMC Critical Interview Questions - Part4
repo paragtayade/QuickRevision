@@ -2332,7 +2332,7 @@ Inorder traversal of BST
 always gives sorted output.
 
 
-#################### DETAIL EXPLANATION ####### SKIP IF TO BE REVISED FAST############################3
+#################### DETAIL EXPLANATION ####### SKIP IF TO BE REVISED FAST############################
 #####################################################################################################
 What is BST (Binary Search Tree)?
 
@@ -2490,7 +2490,7 @@ Interview Answer (30 Seconds)
 DFS traversal has three types: Preorder (Root-Left-Right), Inorder (Left-Root-Right), and Postorder (Left-Right-Root). 
 A key property is that Inorder traversal of a BST always gives elements in sorted order."
 
-############################################################################3
+############################################################################
 -------------------------------------------------------------------------------------------------------------------
 4. String Memory
 String a = "abc";
@@ -2707,3 +2707,706 @@ Java 17 Records provide an easy way to create immutable data classes with minima
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+#####################################################################################################
+
+MOST ASKED SPRING BOOT QUESTIONS
+
+#####################################################################################################
+
+
+Below are detailed interview answers (Spring Boot + Microservices + Banking Project level).
+
+1. What are Stereotype Annotations?
+
+Stereotype annotations tell Spring that a class should be managed as a Spring Bean and indicate its role in the application.
+
+Common Stereotype Annotations
+@Component
+@Service
+@Repository
+@Controller
+@RestController
+
+Purpose
+@Component
+    Generic Spring Bean
+
+@Service
+    Business Logic Layer
+
+@Repository
+    Data Access Layer
+
+@Controller
+    MVC Controller
+
+@RestController
+    REST API Controller
+
+Internal Working
+
+All stereotype annotations internally contain:
+
+@Component
+
+
+So Spring Component Scan detects them and creates beans in IOC Container.
+
+Interview Answer
+
+Stereotype annotations mark classes as Spring-managed beans and provide semantic meaning about their responsibility in the application architecture.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2. What happens if I use @Service on Repository and @Repository on Service?
+
+Example:
+
+@Service
+public class EmployeeRepository {}
+
+
+or
+
+@Repository
+public class EmployeeService {}
+
+Will it work?
+
+✅ Yes
+
+Spring still creates the bean because both annotations are derived from:
+
+@Component
+
+But why is it wrong?
+
+Because you lose architectural clarity.
+
+Also:
+
+@Repository
+
+
+provides exception translation.
+
+Example:
+
+SQLException
+
+
+becomes
+
+DataAccessException
+
+
+through Spring.
+
+Interview Answer
+
+It works technically because both are Component-based annotations, but it is not recommended because Repository provides exception translation and each annotation represents a specific application layer.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3. What does @PropertySource do?
+
+Used to load external property files.
+
+Example:
+
+@Configuration
+@PropertySource("classpath:custom.properties")
+public class AppConfig {
+}
+
+Why?
+
+Normally Spring loads:
+
+application.properties
+application.yml
+
+
+If you have extra files:
+
+db.properties
+security.properties
+custom.properties
+
+
+use:
+
+@PropertySource
+
+Interview Answer
+
+@PropertySource is used to load additional property files into Spring Environment besides application.properties.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+4. Difference Between @PathVariable and @RequestParam
+@PathVariable
+
+URL:
+
+/users/100
+
+
+Controller:
+
+@GetMapping("/users/{id}")
+public User getUser(
+        @PathVariable Long id)
+
+
+Output:
+
+100
+
+Typically Used For
+Resource Identifier
+
+@RequestParam
+
+URL:
+
+/users?id=100
+
+
+Controller:
+
+@GetMapping("/users")
+public User getUser(
+      @RequestParam Long id)
+
+Typically Used For
+Filtering
+Searching
+Pagination
+
+
+Example:
+
+/users?page=1&size=10
+
+Interview Answer
+
+PathVariable extracts data from the URL path, while RequestParam extracts data from query parameters.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+5. How can you resolve Bean Ambiguity?
+
+Problem:
+
+@Bean
+PaymentService paytm()
+
+@Bean
+PaymentService googlePay()
+
+
+Injection:
+
+@Autowired
+PaymentService paymentService;
+
+
+Spring throws:
+
+NoUniqueBeanDefinitionException
+
+Solution 1: @Qualifier
+@Autowired
+@Qualifier("paytm")
+private PaymentService service;
+
+Solution 2: @Primary
+@Bean
+@Primary
+PaymentService paytm()
+
+Solution 3: Inject All Beans
+@Autowired
+List<PaymentService> services;
+
+Interview Answer
+
+Bean ambiguity can be resolved using @Qualifier, @Primary, or by injecting a collection of matching beans.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+6. ControllerAdvice vs RestControllerAdvice
+ControllerAdvice
+
+Global exception handling for MVC.
+
+@ControllerAdvice
+
+
+Returns:
+
+ModelAndView
+
+
+Used for JSP/Thymeleaf.
+
+RestControllerAdvice
+@RestControllerAdvice
+
+
+Equivalent to:
+
+@ControllerAdvice
+@ResponseBody
+
+
+Returns:
+
+{
+   "message":"User Not Found"
+}
+
+Interview Answer
+
+ControllerAdvice is used for MVC applications returning views, whereas RestControllerAdvice is used in REST APIs and automatically serializes responses into JSON.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+7. Explain ACID Properties
+A - Atomicity
+All or Nothing
+
+
+Example:
+
+Debit Account
+Credit Account
+
+
+If credit fails:
+
+Rollback Debit
+
+C - Consistency
+
+Database remains valid before and after transaction.
+
+Example:
+
+Balance cannot become negative
+
+I - Isolation
+
+One transaction should not affect another.
+
+Example:
+
+Two users updating same account
+
+
+should not see inconsistent data.
+
+D - Durability
+
+Committed data survives system failure.
+
+Power Failure
+Restart
+Data Still Exists
+
+Interview Answer
+
+ACID properties guarantee reliable transaction processing through Atomicity, Consistency, Isolation, and Durability.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+8. What are Propagation Levels?
+
+Propagation defines how transactions behave when one transactional method calls another.
+
+REQUIRED (Default)
+@Transactional
+
+
+Join existing transaction or create new one.
+
+REQUIRES_NEW
+@Transactional(
+ propagation = Propagation.REQUIRES_NEW)
+
+
+Suspends parent transaction.
+
+Creates completely new transaction.
+
+SUPPORTS
+
+Uses transaction if available.
+
+Otherwise executes without transaction.
+
+MANDATORY
+
+Existing transaction required.
+
+Otherwise exception.
+
+NEVER
+
+Must execute without transaction.
+
+Exception if transaction exists.
+
+Banking Example
+Payment Transaction
+        ↓
+Audit Log
+
+
+Audit may use:
+
+REQUIRES_NEW
+
+
+So audit commits even if payment fails.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+9. What does @Transient do?
+@Transient
+private String fullName;
+
+
+JPA ignores this field.
+
+Example
+@Entity
+class User {
+
+   private String firstName;
+
+   private String lastName;
+
+   @Transient
+   private String fullName;
+}
+
+
+Database:
+
+first_name
+last_name
+
+
+No:
+
+full_name
+
+
+column.
+
+Interview Answer
+
+@Transient marks fields that should not be persisted to the database.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+10. MySQL in Dev and Oracle in Prod
+
+Use Spring Profiles.
+
+application-dev.properties
+application-prod.properties
+
+
+Dev:
+
+spring.datasource.url=mysql
+
+
+Prod:
+
+spring.datasource.url=oracle
+
+
+Run:
+
+-Dspring.profiles.active=dev
+
+
+or
+
+-Dspring.profiles.active=prod
+
+Interview Answer
+
+Spring Profiles allow environment-specific datasource configurations without code changes.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+11. My SpringBootApplication is in com.a.b but components are in com.x.y
+
+Spring scans only sub-packages by default.
+
+Solution:
+
+@SpringBootApplication
+@ComponentScan({
+      "com.a.b",
+      "com.x.y"
+})
+
+Interview Answer
+
+We can include external packages using @ComponentScan.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+12. How to Autowire Common Library Classes Without Component Scan?
+
+Use:
+
+@Configuration
+
+@Bean
+
+
+or
+
+@Import(CommonConfig.class)
+
+
+Example:
+
+@Configuration
+public class CommonConfig {
+
+    @Bean
+    public UtilityService utilityService() {
+        return new UtilityService();
+    }
+}
+
+Interview Answer
+
+Register the bean using @Bean or import the configuration using @Import.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+13. Recommended Exception Handling
+
+Use:
+
+@RestControllerAdvice
+
+@ExceptionHandler
+
+
+Example:
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ErrorResponse handle() {
+    }
+}
+
+Benefits
+Centralized
+Reusable
+Clean Controllers
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+14. Recommended DTO Validation
+
+DTO:
+
+public class UserRequest {
+
+    @NotBlank
+    private String name;
+
+    @Email
+    private String email;
+}
+
+
+Controller:
+
+@PostMapping
+public User create(
+      @Valid @RequestBody UserRequest req)
+
+Benefits
+Automatic Validation
+Cleaner Code
+Standard Errors
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+15. Save User Along With Multiple Addresses
+
+Relationship:
+
+One User
+Many Addresses
+
+
+User:
+
+@OneToMany(
+    mappedBy = "user",
+    cascade = CascadeType.ALL)
+private List<Address> addresses;
+
+
+Address:
+
+@ManyToOne
+@JoinColumn(name = "user_id")
+private User user;
+
+Why Cascade?
+CascadeType.ALL
+
+
+Automatically saves child addresses when user is saved.
+
+Interview Answer
+
+Use OneToMany and ManyToOne mapping with CascadeType.ALL for parent-child persistence.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+16. What is Factory Pattern?
+
+Factory creates objects without exposing creation logic.
+
+Example:
+
+Notification
+      ↓
+Email
+SMS
+Push
+
+
+Factory:
+
+Notification notification =
+      factory.getNotification(type);
+
+
+Spring Examples:
+
+BeanFactory
+ApplicationContext
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+17. What is Retry Pattern?
+
+Automatically retries temporary failures.
+
+Example:
+
+Service Timeout
+      ↓
+Retry
+      ↓
+Retry
+      ↓
+Success
+
+
+Spring Retry:
+
+@Retryable(maxAttempts = 3)
+
+
+Useful for:
+
+REST APIs
+Database Connections
+Kafka Consumers
+External Systems
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+18. How API Gateway Works?
+
+Flow:
+
+Client
+   ↓
+API Gateway
+   ↓
+Order Service
+
+Payment Service
+
+User Service
+
+
+Responsibilities:
+
+Routing
+Authentication
+Authorization
+Logging
+Rate Limiting
+Load Balancing
+
+
+Example Route:
+
+routes:
+  - id: user-service
+    uri: lb://USER-SERVICE
+    predicates:
+      - Path=/users/**
+
+
+Gateway decides destination service based on route configuration.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+19. Authentication & Authorization in Microservices
+
+Typical Banking Flow:
+
+Login
+ ↓
+JWT Generated
+ ↓
+API Gateway
+ ↓
+JWT Validation
+ ↓
+Microservice
+
+Authentication
+Who are you?
+
+
+JWT / OAuth2
+
+Authorization
+What can you access?
+
+ADMIN
+USER
+AUDITOR
+
+What We Usually Implement
+JWT Token
+Spring Security
+Role Based Access
+API Gateway Validation
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+20. What is Spring Boot Actuator?
+
+Actuator provides production monitoring endpoints.
+
+Dependency:
+
+spring-boot-starter-actuator
+
+Useful Endpoints
+/actuator/health
+
+/actuator/info
+
+/actuator/metrics
+
+/actuator/env
+
+/actuator/prometheus
+
+Uses
+Health Check
+Monitoring
+Readiness Probe
+Liveness Probe
+Metrics Collection
+Production Support
+
+Banking Project Usage
+Prometheus
+      ↓
+Actuator Metrics
+      ↓
+Grafana Dashboards
+
+Interview Answer
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Actuator provides production-ready monitoring, health checks, metrics, 
+environment information, and application diagnostics through REST endpoints.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
