@@ -1,7 +1,11 @@
-🚀SQL interview guides and cheat sheets
+==================================================
+SQL INTERVIEW GUIDE (1-20)
+==================================================
+
 Sample Tables
 
 Employee
+
 EmpId | Name  | DeptId | Salary
 ------+-------+--------+--------
 1     | John  | 10     | 50000
@@ -11,88 +15,123 @@ EmpId | Name  | DeptId | Salary
 5     | David | 30     | 90000
 
 Department
+
 DeptId | DeptName
 -------+----------
 10     | IT
 20     | HR
 30     | Finance
 
+==================================================
 1. Find All Employees
+==================================================
+
 Query
+
 SELECT *
 FROM Employee;
 
 Output
-EmpId | Name  | Salary
-------+-------+--------
-1     | John  | 50000
-2     | Mary  | 70000
-3     | Steve | 60000
-4     | Tom   | 80000
-5     | David | 90000
 
+1 John  10 50000
+2 Mary  10 70000
+3 Steve 20 60000
+4 Tom   20 80000
+5 David 30 90000
+
+Explanation
+
+SELECT * returns all columns.
+No filtering is applied.
+
+==================================================
 2. Find Employees With Salary > 60000
+==================================================
+
 Query
+
 SELECT Name, Salary
 FROM Employee
 WHERE Salary > 60000;
 
 Output
-Name  | Salary
-------+--------
-Mary  | 70000
-Tom   | 80000
-David | 90000
 
+Mary  70000
+Tom   80000
+David 90000
+
+Explanation
+
+WHERE filters rows before returning them.
+
+==================================================
 3. Find Distinct Departments
+==================================================
+
 Query
+
 SELECT DISTINCT DeptId
 FROM Employee;
 
 Output
+
 10
 20
 30
 
+Explanation
 
-💡 DISTINCT removes duplicate values.
+DISTINCT removes duplicate values.
 
+==================================================
 4. Count Employees Per Department
+==================================================
+
 Query
+
 SELECT DeptId,
        COUNT(*) AS EmpCount
 FROM Employee
 GROUP BY DeptId;
 
 Output
-DeptId | EmpCount
--------+----------
-10     | 2
-20     | 2
-30     | 1
 
+10  2
+20  2
+30  1
 
-💡 GROUP BY groups rows before applying aggregate functions.
+Explanation
 
+GROUP BY creates groups.
+COUNT(*) counts records in each group.
+
+==================================================
 5. Departments Having More Than 1 Employee
+==================================================
+
 Query
+
 SELECT DeptId,
-       COUNT(*)
+       COUNT(*) AS EmpCount
 FROM Employee
 GROUP BY DeptId
 HAVING COUNT(*) > 1;
 
 Output
-DeptId
-------
-10
-20
 
+10  2
+20  2
 
-💡 HAVING filters groups after aggregation.
+Explanation
 
+HAVING filters groups after aggregation.
+
+==================================================
 6. INNER JOIN Example
+==================================================
+
 Query
+
 SELECT e.Name,
        d.DeptName
 FROM Employee e
@@ -100,19 +139,23 @@ INNER JOIN Department d
 ON e.DeptId = d.DeptId;
 
 Output
-Name  | DeptName
-------+----------
-John  | IT
-Mary  | IT
-Steve | HR
-Tom   | HR
-David | Finance
 
+John   IT
+Mary   IT
+Steve  HR
+Tom    HR
+David  Finance
 
-💡 INNER JOIN returns only matching rows.
+Explanation
 
+INNER JOIN returns only matching rows.
+
+==================================================
 7. LEFT JOIN Example
+==================================================
+
 Query
+
 SELECT e.Name,
        d.DeptName
 FROM Employee e
@@ -120,126 +163,222 @@ LEFT JOIN Department d
 ON e.DeptId = d.DeptId;
 
 Output
-Name  | DeptName
-------+----------
-John  | IT
-Mary  | IT
-Steve | HR
-Tom   | HR
-David | Finance
 
+John   IT
+Mary   IT
+Steve  HR
+Tom    HR
+David  Finance
 
-💡 LEFT JOIN returns all rows from the left table.
+Explanation
 
+LEFT JOIN returns all rows from Employee.
+
+Example
+
+Employee : Alex DeptId=40
+
+Result
+
+Alex NULL
+
+==================================================
 8. Average Salary Per Department
+==================================================
+
 Query
+
 SELECT DeptId,
        AVG(Salary) AS AvgSalary
 FROM Employee
 GROUP BY DeptId;
 
 Output
-DeptId | AvgSalary
--------+----------
-10     | 60000
-20     | 70000
-30     | 90000
 
+10  60000
+20  70000
+30  90000
+
+Explanation
+
+Dept 10
+
+(50000 + 70000)/2
+= 60000
+
+Dept 20
+
+(60000 + 80000)/2
+= 70000
+
+Dept 30
+
+90000
+
+==================================================
 9. Employees Above Average Salary
+==================================================
+
+Company Average
+
+(50000+70000+60000+80000+90000)
+/5
+
+=70000
+
 Query
+
 SELECT Name
 FROM Employee
 WHERE Salary >
 (
-    SELECT AVG(Salary)
-    FROM Employee
+   SELECT AVG(Salary)
+   FROM Employee
 );
 
 Output
-Name
------
+
 Tom
 David
 
+Explanation
 
-💡 Example of a Subquery.
+Subquery calculates average salary.
+Employees above average are returned.
 
+==================================================
 10. Highest Salary
+==================================================
+
 Query
+
 SELECT MAX(Salary)
 FROM Employee;
 
 Output
+
 90000
 
+Explanation
+
+MAX() returns the highest value.
+
+==================================================
 11. Second Highest Salary
+==================================================
+
 Query
+
 SELECT MAX(Salary)
 FROM Employee
 WHERE Salary <
 (
-    SELECT MAX(Salary)
-    FROM Employee
+   SELECT MAX(Salary)
+   FROM Employee
 );
 
 Output
+
 80000
 
+Explanation
+
+Ignore highest salary (90000).
+Find highest among remaining rows.
+
+==================================================
 12. Third Highest Salary Using ROW_NUMBER
+==================================================
+
 Query
+
 WITH X AS
 (
-    SELECT Salary,
-           ROW_NUMBER() OVER(ORDER BY Salary DESC) rn
-    FROM Employee
+   SELECT Salary,
+          ROW_NUMBER()
+          OVER(ORDER BY Salary DESC) rn
+   FROM Employee
 )
 SELECT Salary
 FROM X
 WHERE rn = 3;
 
 Output
+
 70000
 
+Explanation
 
-💡 ROW_NUMBER() is a frequently asked interview topic.
+90000 -> 1
+80000 -> 2
+70000 -> 3
 
+Third highest salary = 70000
+
+==================================================
 13. ROW_NUMBER Example
+==================================================
+
 Query
+
 SELECT Name,
        Salary,
-       ROW_NUMBER() OVER(ORDER BY Salary DESC) rn
+       ROW_NUMBER()
+       OVER(ORDER BY Salary DESC) rn
 FROM Employee;
 
 Output
-Name  | Salary | rn
-------+--------+----
-David | 90000  | 1
-Tom   | 80000  | 2
-Mary  | 70000  | 3
-Steve | 60000  | 4
-John  | 50000  | 5
 
+David 90000 1
+Tom   80000 2
+Mary  70000 3
+Steve 60000 4
+John  50000 5
+
+Explanation
+
+ROW_NUMBER gives unique numbers.
+No duplicates are allowed.
+
+==================================================
 14. RANK Example
+==================================================
+
 Query
+
 SELECT Name,
        Salary,
-       RANK() OVER(ORDER BY Salary DESC) rnk
+       RANK()
+       OVER(ORDER BY Salary DESC) rnk
 FROM Employee;
 
 Output
-Name  | Salary | Rank
-------+--------+------
-David | 90000  | 1
-Tom   | 80000  | 2
-Mary  | 70000  | 3
-Steve | 60000  | 4
-John  | 50000  | 5
 
+David 90000 1
+Tom   80000 2
+Mary  70000 3
+Steve 60000 4
+John  50000 5
 
-💡 RANK() leaves gaps when ties occur.
+Explanation
 
+RANK assigns same rank to ties.
+
+Example
+
+David 90000 1
+Tom   80000 2
+Alex  80000 2
+Mary  70000 4
+
+Rank 3 is skipped.
+
+==================================================
 15. Running Total
+==================================================
+
 Query
+
 SELECT Name,
        Salary,
        SUM(Salary)
@@ -247,19 +386,23 @@ SELECT Name,
 FROM Employee;
 
 Output
-Name  | Salary | RunningTotal
-------+--------+--------------
-John  | 50000  | 50000
-Steve | 60000  | 110000
-Mary  | 70000  | 180000
-Tom   | 80000  | 260000
-David | 90000  | 350000
 
+John  50000  50000
+Steve 60000 110000
+Mary  70000 180000
+Tom   80000 260000
+David 90000 350000
 
-💡 Running totals are common window function questions.
+Explanation
 
+Running sum is maintained row by row.
+
+==================================================
 16. Department Average Using PARTITION BY
+==================================================
+
 Query
+
 SELECT Name,
        Salary,
        AVG(Salary)
@@ -267,19 +410,34 @@ SELECT Name,
 FROM Employee;
 
 Output
-Name  | Salary | DeptAvg
-------+--------+---------
-John  | 50000  | 60000
-Mary  | 70000  | 60000
-Steve | 60000  | 70000
-Tom   | 80000  | 70000
-David | 90000  | 90000
 
+John   50000 60000
+Mary   70000 60000
+Steve  60000 70000
+Tom    80000 70000
+David  90000 90000
 
-💡 PARTITION BY calculates group metrics while keeping detail rows.
+Explanation
 
-17. Duplicate Records
+Dept 10 Avg = 60000
+Dept 20 Avg = 70000
+Dept 30 Avg = 90000
+
+PARTITION BY creates groups without reducing rows.
+
+==================================================
+17. Find Duplicate Records
+==================================================
+
+Customer
+
+1 a@gmail.com
+2 b@gmail.com
+3 a@gmail.com
+4 c@gmail.com
+
 Query
+
 SELECT Email,
        COUNT(*)
 FROM Customer
@@ -287,96 +445,126 @@ GROUP BY Email
 HAVING COUNT(*) > 1;
 
 Output
-Duplicate Emails Found
 
+a@gmail.com 2
 
-💡 Very common production support interview question.
+Explanation
 
-18. UNION vs UNION ALL
-UNION
-SELECT Name FROM Employee
-UNION
-SELECT Name FROM Customer;
+GROUP BY forms email groups.
+HAVING finds duplicate emails.
 
-Output
-Duplicates Removed
+==================================================
+18. UNION
+==================================================
 
-UNION ALL
-SELECT Name FROM Employee
-UNION ALL
-SELECT Name FROM Customer;
+Employee Names
 
-Output
-Duplicates Retained
+John
+Mary
+Tom
 
-19. Find Employees Without Department
+Customer Names
+
+Mary
+David
+Tom
+
 Query
-SELECT e.*
-FROM Employee e
-LEFT JOIN Department d
-ON e.DeptId = d.DeptId
-WHERE d.DeptId IS NULL;
+
+SELECT Name FROM Employee
+UNION
+SELECT Name FROM Customer;
 
 Output
-Unmatched Employees
 
+John
+Mary
+Tom
+David
 
-💡 Useful for data-quality and support issues.
+Explanation
 
+UNION removes duplicates.
+
+==================================================
+19. UNION ALL
+==================================================
+
+Query
+
+SELECT Name FROM Employee
+UNION ALL
+SELECT Name FROM Customer;
+
+Output
+
+John
+Mary
+Tom
+Mary
+David
+Tom
+
+Explanation
+
+UNION ALL keeps duplicates.
+Faster than UNION.
+
+==================================================
 20. Top 3 Highest Salaries
+==================================================
+
 Query
+
 SELECT Salary
 FROM Employee
 ORDER BY Salary DESC
 FETCH FIRST 3 ROWS ONLY;
 
 Output
+
 90000
 80000
 70000
 
+Explanation
 
-💡 Modern SQL equivalent of TOP 3 / LIMIT 3.
+ORDER BY sorts salaries descending.
+FETCH FIRST 3 ROWS ONLY returns top 3 rows.
 
-Top 5 Banking Interview SQL Questions
-Q1. Second Highest Salary
-    MAX() + Subquery
+==================================================
+30-SECOND SQL REVISION
+==================================================
 
-Q2. Nth Highest Salary
-    ROW_NUMBER()
+1. SELECT *            -> All Rows
+2. WHERE               -> Filter Rows
+3. DISTINCT            -> Remove Duplicates
+4. GROUP BY            -> Create Groups
+5. HAVING              -> Filter Groups
+6. INNER JOIN          -> Matching Rows
+7. LEFT JOIN           -> All Left Rows
+8. AVG()               -> Average
+9. Subquery            -> Query Inside Query
+10. MAX()              -> Highest Value
+11. Second Highest     -> MAX + Subquery
+12. Nth Highest        -> ROW_NUMBER
+13. ROW_NUMBER         -> Unique Numbering
+14. RANK               -> Ranking With Gaps
+15. Running Total      -> SUM() OVER()
+16. PARTITION BY       -> Group Metrics
+17. Duplicate Records  -> GROUP BY + HAVING
+18. UNION              -> Remove Duplicates
+19. UNION ALL          -> Keep Duplicates
+20. Top N Records      -> ORDER BY + FETCH/LIMIT
 
-Q3. Duplicate Records
-    GROUP BY + HAVING COUNT(*) > 1
+==================================================
+TOP 5 BANKING INTERVIEW QUESTIONS
+==================================================
 
-Q4. Running Total
-    SUM() OVER()
+1. Second Highest Salary
+2. Nth Highest Salary
+3. Duplicate Records
+4. Running Total
+5. Department Wise Highest Salary
 
-Q5. Department Wise Highest Salary
-    RANK() OVER(PARTITION BY DeptId)
-
-30-Second SQL Revision
-COUNT(*)
-AVG()
-SUM()
-GROUP BY
-HAVING
-INNER JOIN
-LEFT JOIN
-RIGHT JOIN
-FULL JOIN
-UNION
-UNION ALL
-ROW_NUMBER()
-RANK()
-DENSE_RANK()
-PARTITION BY
-LAG()
-LEAD()
-CTE
-Subquery
-Nth Highest Salary
-Duplicate Records
-Running Total
-
-
-✅ For JPMC, RBC, MUFG, and other banking interviews, these SQL patterns cover approximately 80-90% of frequently asked SQL coding questions.
+These 20 patterns cover most SQL questions asked in JPMC, MUFG, RBC, Citi, Wells Fargo, BNY Mellon, Barclays, and other banking interviews.
