@@ -1,0 +1,1339 @@
+Below is the cleaned, well-structured, copy-paste-friendly text file format. HTML tags and encoded characters have been removed, while useful separator lines and diagrams have been retained.
+
+================================================================================
+DESIGNING ROBUST TOOL APIs - COMPLETE DETAILED EXPLANATION
+================================================================================
+
+
+THE CORE PROBLEM: WHY TOOL DESIGN MATTERS
+================================================================================
+
+Real-World Scenario:
+
+An agent is built to perform a task, but it fails.
+
+Your first assumption might be:
+
+"The agent's reasoning is broken."
+
+However, the real cause is often a tool-design problem rather than a
+reasoning problem.
+
+Common tool-design problems:
+
+1. Unclear schemas
+2. Inconsistent outputs
+3. Unhelpful error messages that leave the agent guessing
+
+
+KEY INSIGHT
+--------------------------------------------------------------------------------
+
+An agent is only as reliable as the tools it uses.
+
+Poorly designed tools can cause failures that appear to be reasoning
+failures but are actually integration failures.
+
+The agent may understand what to do, but the tool behaves unexpectedly.
+
+Reliable tool design is one of the main differences between production
+systems and prototypes.
+
+
+================================================================================
+PART 1: TOOL CONTRACTS - THE FOUNDATION
+================================================================================
+
+WHAT IS A TOOL CONTRACT?
+--------------------------------------------------------------------------------
+
+A tool contract is the interface specification that an agent uses to
+determine when and how to invoke a tool.
+
+A tool contract specifies:
+
+1. Purpose and Scope
+   - What the tool does
+
+2. Input Schema
+   - What input the tool accepts
+   - Required data types and formats
+
+3. Output Schema
+   - What output the tool returns
+   - Expected response structure
+
+4. Error Handling
+   - Possible errors
+   - Error classification
+   - Recovery behavior
+
+
+WHY TOOL CONTRACTS MATTER
+--------------------------------------------------------------------------------
+
+Without a clear contract, the agent must guess:
+
+- Is the customer ID a number or a string?
+- What format should the email follow?
+- What happens if the lookup fails?
+- Should the agent retry or stop?
+
+A clear contract removes guesswork and makes tool calls predictable and
+deterministic.
+
+
+================================================================================
+PART 2: INPUT SCHEMAS - PRECISION ELIMINATES AMBIGUITY
+================================================================================
+
+BAD SCHEMA - VAGUE
+--------------------------------------------------------------------------------
+
+Tool:
+Customer Lookup
+
+Input:
+Customer identifier containing some value
+
+
+Problems:
+
+- The agent doesn't know whether to send "ABC123" or "1234567890"
+- The agent doesn't know whether the input is a string or integer
+- The acceptable format is not defined
+- The agent may make random guesses that result in failures
+
+
+GOOD SCHEMA - PRECISE
+--------------------------------------------------------------------------------
+
+Tool:
+Customer Lookup
+
+Input:
+
+- customer_id
+  Type     : String
+  Format   : Exactly 10 digits
+  Required : Yes
+
+- email
+  Type     : String
+  Format   : Valid email format
+  Required : No
+
+
+Benefits:
+
+- The agent knows exactly what format to send
+- Input ambiguity is removed
+- Tool calls become deterministic
+- Validation errors become predictable
+
+
+KEY PRINCIPLE
+--------------------------------------------------------------------------------
+
+Define every input parameter using:
+
+1. Type
+   - String
+   - Integer
+   - Boolean
+   - Array
+   - Object
+
+2. Constraints
+   - Required pattern
+   - Minimum and maximum length
+   - Allowed values
+   - Numeric range
+
+3. Requirement
+   - Required
+   - Optional
+
+
+Example:
+
+Customer ID : Exactly 10 digits, required
+Email       : Valid email format, optional
+
+
+================================================================================
+PART 3: OUTPUT SCHEMAS - CONSISTENCY MAKES PARSING RELIABLE
+================================================================================
+
+THE PROBLEM: INCONSISTENT OUTPUTS
+--------------------------------------------------------------------------------
+
+Scenario 1: Tool returns a list
+
+{
+  "customers": [
+    {
+      "id": "1234567890",
+      "name": "Alice"
+    }
+  ]
+}
+
+
+Scenario 2: The same tool returns a single object
+
+{
+  "id": "1234567890",
+  "name": "Alice"
+}
+
+
+Problem:
+
+The agent cannot determine whether the response will be a list or an object.
+
+This makes parsing unreliable and can break downstream processing.
+
+
+THE SOLUTION: CONSISTENT OUTPUT STRUCTURES
+--------------------------------------------------------------------------------
+
+Always return the same response structure, even when the amount of data
+changes.
+
+Example:
+
+{
+  "success": true,
+  "data": [
+    {
+      "customer_id": "1234567890",
+      "name": "Alice",
+      "email": "alice@example.com"
+    }
+  ],
+  "error": null
+}
+
+
+KEY PRINCIPLE
+--------------------------------------------------------------------------------
+
+Consistent response structures with documented fields and data types make
+downstream agent logic stable and predictable.
+
+
+================================================================================
+PART 4: ERROR HANDLING - PRODUCTION VS. PROTOTYPE
+================================================================================
+
+Error handling is one of the main features that separates production tools
+from prototypes.
+
+
+THE CHALLENGE
+--------------------------------------------------------------------------------
+
+Different errors require different agent actions:
+
+- Temporary errors should be retried
+- Permanent errors should not be retried
+- Partial-success responses may allow processing to continue
+
+
+HTTP STATUS CODES AND AGENT BEHAVIOR
+--------------------------------------------------------------------------------
+
+200 - SUCCESS
+
+Meaning:
+Operation completed successfully.
+
+Agent Action:
+Proceed with the result.
+
+
+206 - PARTIAL SUCCESS
+
+Meaning:
+Only partial data was returned.
+
+Agent Action:
+Proceed with available data and report missing information.
+
+
+400 - BAD REQUEST
+
+Type:
+Non-retriable
+
+Meaning:
+The input format is invalid.
+
+Agent Action:
+Stop immediately and correct the input.
+
+
+404 - NOT FOUND
+
+Type:
+Non-retriable
+
+Meaning:
+The requested resource does not exist.
+
+Agent Action:
+Stop immediately or use a different identifier.
+
+
+429 - TOO MANY REQUESTS
+
+Type:
+Retriable
+
+Meaning:
+The rate limit was exceeded.
+
+Agent Action:
+Wait and retry using exponential backoff.
+
+
+504 - GATEWAY TIMEOUT
+
+Type:
+Retriable
+
+Meaning:
+The service did not respond within the expected time.
+
+Agent Action:
+Retry using exponential backoff.
+
+
+RETRIABLE VS. NON-RETRIABLE ERRORS
+--------------------------------------------------------------------------------
+
+Retriable Errors:
+
+- 429 - Too Many Requests
+- 504 - Gateway Timeout
+- Temporary network failures
+
+Action:
+Wait and retry.
+
+
+Non-Retriable Errors:
+
+- 400 - Bad Request
+- 404 - Not Found
+- Input validation failures
+
+Action:
+Stop immediately. Do not retry.
+
+
+WHY THIS MATTERS
+--------------------------------------------------------------------------------
+
+Retrying a 400 error repeatedly will not solve the problem because the
+input is invalid.
+
+Retrying a temporary 429 error after waiting may succeed because the
+service may become available again.
+
+
+================================================================================
+PART 5: RETRY LOGIC WITH EXPONENTIAL BACKOFF
+================================================================================
+
+THE PROBLEM: THUNDERING HERD
+--------------------------------------------------------------------------------
+
+If a failed request is retried immediately by many agents, the service can
+receive a large number of simultaneous retry requests.
+
+This increases system load and can cause additional failures.
+
+
+THE SOLUTION: EXPONENTIAL BACKOFF
+--------------------------------------------------------------------------------
+
+Increase the waiting period after each failed attempt.
+
+Example Backoff Schedule:
+
+Attempt 1:
+- Make immediate request
+- Request fails with 429
+
+Wait:
+- 1 second
+
+Attempt 2:
+- Retry request
+- Request fails with 504
+
+Wait:
+- 2 seconds
+
+Attempt 3:
+- Retry request
+- Request fails with 504
+
+Wait:
+- 4 seconds
+
+Attempt 4:
+- Retry request
+- Request succeeds
+
+Final Action:
+- Return successful result
+
+
+Flow:
+
+Attempt 1
+    |
+    +--> Failure
+           |
+           v
+       Wait 1 second
+           |
+           v
+       Attempt 2
+           |
+           +--> Failure
+                  |
+                  v
+              Wait 2 seconds
+                  |
+                  v
+              Attempt 3
+                  |
+                  +--> Failure
+                         |
+                         v
+                     Wait 4 seconds
+                         |
+                         v
+                     Attempt 4
+                         |
+                         v
+                       Success
+
+
+WHY EXPONENTIAL BACKOFF WORKS
+--------------------------------------------------------------------------------
+
+- First retry waits 1 second for quick recovery
+- Second retry waits 2 seconds
+- Third retry waits 4 seconds
+- Every retry gives the service more time to recover
+
+
+JITTER - OPTIONAL ENHANCEMENT
+--------------------------------------------------------------------------------
+
+Jitter adds a small random delay to prevent multiple agents from retrying
+at exactly the same time.
+
+Example:
+
+Retry 1:
+1 second + random 0-1 second
+Total wait: 1-2 seconds
+
+Retry 2:
+2 seconds + random 0-1 second
+Total wait: 2-3 seconds
+
+Retry 3:
+4 seconds + random 0-1 second
+Total wait: 4-5 seconds
+
+This reduces the risk of the thundering-herd problem.
+
+
+================================================================================
+PART 6: RATE LIMIT HANDLING
+================================================================================
+
+WHAT IS RATE LIMITING?
+--------------------------------------------------------------------------------
+
+Rate limiting occurs when a service receives too many requests within a
+specific period.
+
+Response:
+
+429 - Too Many Requests
+
+
+AGENT BEHAVIOR
+--------------------------------------------------------------------------------
+
+When the agent receives a 429 response:
+
+1. Wait
+   - Do not retry immediately
+
+2. Back Off
+   - Use delays such as 1, 2, and 4 seconds
+
+3. Retry
+   - Try the request again after waiting
+
+
+Example Scenario:
+
+Customer 1 returns a 429 response.
+
+Expected Behavior:
+The agent waits and retries using exponential backoff.
+
+
+================================================================================
+PART 7: PARTIAL-SUCCESS HANDLING
+================================================================================
+
+WHAT IS PARTIAL SUCCESS?
+--------------------------------------------------------------------------------
+
+A tool may complete part of an operation while some information remains
+unavailable.
+
+Examples:
+
+- Three data sources are queried, but one times out
+- Customer information is returned with some missing fields
+- A batch contains 100 items, but 5 items fail
+
+Response:
+
+206 - Partial Content
+
+
+AGENT BEHAVIOR
+--------------------------------------------------------------------------------
+
+When the agent receives a 206 response:
+
+1. Acknowledge
+   - Recognize that partial data is available
+
+2. Proceed
+   - Continue processing the available data
+
+3. Alert
+   - Inform downstream systems or users about missing data
+
+
+Example Scenario:
+
+Customer 4 returns partial customer data.
+
+Expected Behavior:
+Continue with available information and identify what is missing.
+
+
+================================================================================
+PART 8: TIMEOUT HANDLING
+================================================================================
+
+WHAT IS A TIMEOUT?
+--------------------------------------------------------------------------------
+
+A timeout occurs when a service does not respond within the configured
+time limit.
+
+Response:
+
+504 - Gateway Timeout
+
+
+AGENT BEHAVIOR
+--------------------------------------------------------------------------------
+
+When the agent receives a 504 response:
+
+1. Retry
+   - Use exponential backoff
+
+2. Enforce Maximum Retries
+   - Stop after the allowed number of attempts
+
+3. Fail Gracefully
+   - Return a timeout error if all retries fail
+
+
+Example Scenario:
+
+Customer 3 continues to return a 504 response.
+
+Expected Behavior:
+Retry using the configured backoff schedule and fail after the maximum
+attempt count.
+
+
+================================================================================
+PART 9: IDEMPOTENCY KEYS - PREVENTING DUPLICATES
+================================================================================
+
+THE PROBLEM: DUPLICATE OPERATIONS
+--------------------------------------------------------------------------------
+
+Example:
+
+Request 1:
+Create an account for alice@example.com
+
+Result:
+- Account is created
+- Response is lost because of a network timeout
+
+The agent retries the request.
+
+Request 2:
+Create an account for alice@example.com
+
+Possible Result:
+- A second account is created accidentally
+
+
+This is a critical problem for:
+
+- Financial transactions
+- Payment processing
+- Account creation
+- Orders
+- Other operations that should execute only once
+
+
+THE SOLUTION: IDEMPOTENCY KEYS
+--------------------------------------------------------------------------------
+
+Attach a unique identifier to the operation.
+
+Original Request:
+
+{
+  "idempotency_key": "op_abc123xyz",
+  "operation": "create_account",
+  "email": "alice@example.com"
+}
+
+
+Result:
+
+- Account is created
+- Response is lost because of a network timeout
+
+
+Retry Request:
+
+{
+  "idempotency_key": "op_abc123xyz",
+  "operation": "create_account",
+  "email": "alice@example.com"
+}
+
+
+Server Behavior:
+
+- Recognizes the previously processed idempotency key
+- Does not create another account
+- Returns the original operation result
+
+
+KEY PRINCIPLE
+--------------------------------------------------------------------------------
+
+If an operation is retried, it must not create duplicate records or repeat
+a completed transaction.
+
+Use:
+
+- Idempotency keys
+- Duplicate checks
+- Safe retry mechanisms
+
+
+================================================================================
+PART 10: N8N IMPLEMENTATION - BUILDING THE TOOL
+================================================================================
+
+WHAT IS N8N?
+--------------------------------------------------------------------------------
+
+N8N is a visual workflow automation platform.
+
+A workflow is created by connecting nodes. Each node performs a specific
+operation.
+
+
+STEP 1: CREATE A WORKFLOW
+--------------------------------------------------------------------------------
+
+1. Open N8N
+2. Select "Create Workflow"
+3. Open the blank workflow canvas
+
+
+STEP 2: ADD A WEBHOOK NODE
+--------------------------------------------------------------------------------
+
+Purpose:
+Receive incoming requests from Postman.
+
+Steps:
+
+1. Select the "+" button
+2. Search for "Webhook"
+3. Add the Webhook node to the canvas
+4. Review the generated Test URL and Production URL
+
+Configuration:
+
+- Copy the Test URL for Postman testing
+- Incoming requests enter the workflow through this URL
+
+
+STEP 3: ADD INPUT VALIDATION
+--------------------------------------------------------------------------------
+
+Purpose:
+Validate the customer ID and email.
+
+Steps:
+
+1. Select the "+" button
+2. Search for "Code"
+3. Add the Code node
+4. Connect it to the Webhook node
+
+Validation Rules:
+
+Customer ID:
+- Must contain exactly 10 digits
+
+Email:
+- Must use a valid email format
+
+Behavior:
+
+- Invalid input -> Return 400
+- Valid input   -> Continue processing
+
+
+STEP 4: ADD A CONDITION NODE
+--------------------------------------------------------------------------------
+
+Purpose:
+Route the request according to the customer ID or test scenario.
+
+Steps:
+
+1. Select the "+" button
+2. Search for "Condition"
+3. Add the Condition node
+4. Connect it to the Input Validation node
+
+
+Configured Test Scenarios:
+
+Customer 1 - 1111111111
+- Return 429
+- Rate-limit scenario
+
+Customer 2 - 2222222222
+- Retry
+- Eventually return 200
+
+Customer 3 - 3333333333
+- Retry
+- Eventually return 504
+
+Customer 4 - 4444444444
+- Return 206
+- Partial-data scenario
+
+Customer 5 - 5555555555
+- Return 404
+- Customer not found
+
+Customer 6 - ABC123
+- Return 400
+- Invalid customer ID
+
+Customer 7 - Invalid email
+- Return 400
+- Invalid email format
+
+
+STEP 5: ADD THE CRM DATABASE QUERY
+--------------------------------------------------------------------------------
+
+Purpose:
+Simulate or perform the customer database lookup.
+
+Steps:
+
+1. Select the "+" button
+2. Search for "HTTP Request" or the required database connector
+3. Add the node to the canvas
+4. Configure the customer lookup operation
+
+
+STEP 6: ADD RETRY LOGIC
+--------------------------------------------------------------------------------
+
+Purpose:
+Retry temporary failures using exponential backoff.
+
+Steps:
+
+1. Select the "+" button
+2. Search for "Code"
+3. Add another Code node
+4. Configure the retry conditions and attempt counter
+
+
+Retry Schedule:
+
+Attempt 1 : Immediate
+Attempt 2 : Wait 1 second
+Attempt 3 : Wait 2 seconds
+Attempt 4 : Wait 4 seconds
+
+
+Error Handling:
+
+429 or 504:
+- Retry using backoff
+
+400 or 404:
+- Fail immediately
+
+206:
+- Continue using available data
+
+
+STEP 7: ADD A WAIT NODE
+--------------------------------------------------------------------------------
+
+Purpose:
+Pause the workflow before the next retry.
+
+Steps:
+
+1. Select the "+" button
+2. Search for "Wait"
+3. Add the Wait node
+4. Configure the required delay
+5. Connect it to the retry flow
+
+
+STEP 8: EXECUTE THE WORKFLOW
+--------------------------------------------------------------------------------
+
+1. Select "Execute Workflow"
+2. Confirm that the workflow is waiting for a trigger
+3. Send a request to the webhook from Postman
+
+
+================================================================================
+PART 11: TESTING WITH POSTMAN
+================================================================================
+
+STEP 1: GET THE WEBHOOK URL
+--------------------------------------------------------------------------------
+
+1. Open the Webhook node in N8N
+2. Locate the Test URL and Production URL
+3. Copy the Test URL
+
+
+STEP 2: CONFIGURE POSTMAN
+--------------------------------------------------------------------------------
+
+1. Open Postman
+2. Create a POST request
+3. Paste the webhook Test URL
+4. Set the request body type to JSON
+5. Add a test-case payload
+
+
+TEST CASE 1: RATE LIMIT
+--------------------------------------------------------------------------------
+
+Request:
+
+{
+  "customer_id": "1111111111",
+  "email": "customer1@example.com"
+}
+
+Expected Response:
+429 - Too Many Requests
+
+Expected Agent Behavior:
+Wait and retry.
+
+
+TEST CASE 2: RETRY SUCCESS
+--------------------------------------------------------------------------------
+
+Request:
+
+{
+  "customer_id": "2222222222",
+  "email": "customer2@example.com"
+}
+
+Expected Response:
+200 - Success after retries
+
+Expected Agent Behavior:
+Retry after waiting and eventually succeed.
+
+
+TEST CASE 3: RETRY FAILURE
+--------------------------------------------------------------------------------
+
+Request:
+
+{
+  "customer_id": "3333333333",
+  "email": "customer3@example.com"
+}
+
+Expected Response:
+504 - Gateway Timeout after maximum retries
+
+Expected Agent Behavior:
+Stop after the maximum number of attempts.
+
+
+TEST CASE 4: PARTIAL DATA
+--------------------------------------------------------------------------------
+
+Request:
+
+{
+  "customer_id": "4444444444",
+  "email": "customer4@example.com"
+}
+
+Expected Response:
+206 - Partial Content
+
+Expected Agent Behavior:
+Proceed using available data and report missing information.
+
+
+TEST CASE 5: NOT FOUND
+--------------------------------------------------------------------------------
+
+Request:
+
+{
+  "customer_id": "5555555555",
+  "email": "customer5@example.com"
+}
+
+Expected Response:
+404 - Not Found
+
+Expected Agent Behavior:
+Fail immediately without retrying.
+
+
+TEST CASE 6: INVALID CUSTOMER ID
+--------------------------------------------------------------------------------
+
+Request:
+
+{
+  "customer_id": "ABC123",
+  "email": "customer6@example.com"
+}
+
+Expected Response:
+400 - Invalid customer ID
+
+Expected Agent Behavior:
+Fail immediately because input validation failed.
+
+
+TEST CASE 7: INVALID EMAIL
+--------------------------------------------------------------------------------
+
+Request:
+
+{
+  "customer_id": "7777777777",
+  "email": "invalid-email"
+}
+
+Expected Response:
+400 - Invalid email format
+
+Expected Agent Behavior:
+Fail immediately because input validation failed.
+
+
+RUNNING EACH TEST
+--------------------------------------------------------------------------------
+
+1. Paste a test-case JSON payload into Postman
+2. Select "Send"
+3. Observe the returned response
+4. Compare it with the expected result
+5. Repeat for every test case
+
+
+OBSERVING THE WORKFLOW
+--------------------------------------------------------------------------------
+
+The N8N execution view can display:
+
+- Successful node executions
+- Failed node executions
+- Execution logs
+- Retry attempts
+- Execution timestamps
+- Data passed between nodes
+
+
+================================================================================
+PART 12: COMPLETE N8N WORKFLOW
+================================================================================
+
+Webhook
+(Receive Request)
+       |
+       v
+Input Validation
+(Check Customer ID and Email)
+       |
+       +--> FAIL --> Return 400
+       |
+       +--> PASS
+              |
+              v
+       Condition Router
+              |
+              +--> Customer 1 --> 429 Rate Limit
+              |
+              +--> Customer 2 --> Retry --> 200 Success
+              |
+              +--> Customer 3 --> Retry --> 504 Failure
+              |
+              +--> Customer 4 --> 206 Partial Data
+              |
+              +--> Customer 5 --> 404 Not Found
+              |
+              +--> Customer 6 --> 400 Invalid ID
+              |
+              +--> Customer 7 --> 400 Invalid Email
+              |
+              v
+       Query CRM Database
+              |
+              v
+       Retry Decision
+              |
+              +--> 429 or 504 --> Wait --> Retry
+              |
+              +--> 400 or 404 --> Fail Immediately
+              |
+              +--> 206 ---------> Continue
+              |
+              +--> 200 ---------> Success
+                                      |
+                                      v
+                               Response Output
+
+
+================================================================================
+PART 13: KEY MECHANISMS
+================================================================================
+
+1. INPUT VALIDATION
+--------------------------------------------------------------------------------
+
+Validates:
+
+- Customer ID contains exactly 10 digits
+- Email uses an acceptable format
+
+Returns:
+
+- 400 when validation fails
+- Continues when validation succeeds
+
+Why It Matters:
+
+Catches invalid requests before they reach downstream services.
+
+
+2. EXPONENTIAL BACKOFF
+--------------------------------------------------------------------------------
+
+Schedule:
+
+- Attempt 1: Immediate
+- Attempt 2: Wait 1 second
+- Attempt 3: Wait 2 seconds
+- Attempt 4: Wait 4 seconds
+
+Stop Condition:
+
+- Maximum retry attempts reached
+
+Why It Matters:
+
+Reduces service pressure and allows temporary failures to recover.
+
+
+3. RATE-LIMIT HANDLING
+--------------------------------------------------------------------------------
+
+Response:
+
+429 - Too Many Requests
+
+Agent Behavior:
+
+- Wait
+- Apply backoff
+- Retry
+
+Why It Matters:
+
+Respects service limits and reduces overload.
+
+
+4. PARTIAL-SUCCESS HANDLING
+--------------------------------------------------------------------------------
+
+Response:
+
+206 - Partial Content
+
+Agent Behavior:
+
+- Continue with available data
+- Report missing data
+
+Why It Matters:
+
+Supports graceful degradation instead of complete failure.
+
+
+5. TIMEOUT HANDLING
+--------------------------------------------------------------------------------
+
+Response:
+
+504 - Gateway Timeout
+
+Agent Behavior:
+
+- Retry with backoff
+- Stop after maximum attempts
+- Return a controlled failure response
+
+Why It Matters:
+
+Prevents endless waiting and supports fallback processing.
+
+
+6. IDEMPOTENCY
+--------------------------------------------------------------------------------
+
+Mechanism:
+
+- Assign a unique key to each operation
+- Reuse the same key during retries
+
+Why It Matters:
+
+Prevents duplicate payments, accounts, orders, or records.
+
+
+================================================================================
+PART 14: KEY TAKEAWAYS
+================================================================================
+
+1. Clear tool contracts eliminate ambiguity.
+
+2. Input schemas must define:
+   - Data type
+   - Format
+   - Constraints
+   - Required or optional status
+
+3. Output schemas must remain consistent.
+
+4. Input validation catches errors early.
+
+5. Retriable and non-retriable errors must be handled differently.
+
+6. Use exponential backoff for temporary failures.
+
+7. Add jitter to reduce simultaneous retries.
+
+8. Use maximum retry limits to prevent infinite loops.
+
+9. Handle partial success instead of failing the entire workflow.
+
+10. Use idempotency keys to prevent duplicate operations.
+
+11. Test success and failure scenarios end to end.
+
+12. Production tools require validation, retry handling, monitoring,
+    logging, and predictable responses.
+
+
+================================================================================
+PART 15: WHAT'S NEXT?
+================================================================================
+
+The next topic is:
+
+TOOL ORCHESTRATION PATTERNS
+
+It covers:
+
+1. Sequential Orchestration
+2. Parallel Orchestration
+3. Conditional Orchestration
+4. Combining multiple tools into reliable workflows
+
+
+================================================================================
+QUICK REVISION
+================================================================================
+
+TOOL CONTRACT
+--------------------------------------------------------------------------------
+
+Purpose + Input Schema + Output Schema + Error Handling
+
+
+INPUT SCHEMA
+--------------------------------------------------------------------------------
+
+Type + Constraints + Required/Optional
+
+
+OUTPUT SCHEMA
+--------------------------------------------------------------------------------
+
+Use one consistent response structure.
+
+
+RETRIABLE ERRORS
+--------------------------------------------------------------------------------
+
+429 and 504
+
+Action:
+Retry with exponential backoff.
+
+
+NON-RETRIABLE ERRORS
+--------------------------------------------------------------------------------
+
+400 and 404
+
+Action:
+Stop immediately and fix the request.
+
+
+PARTIAL SUCCESS
+--------------------------------------------------------------------------------
+
+206
+
+Action:
+Continue with available data and report missing information.
+
+
+EXPONENTIAL BACKOFF
+--------------------------------------------------------------------------------
+
+Immediate -> 1 second -> 2 seconds -> 4 seconds
+
+
+IDEMPOTENCY
+--------------------------------------------------------------------------------
+
+Same operation + Same idempotency key = No duplicate operation
+
+
+COMPLETE FLOW
+--------------------------------------------------------------------------------
+
+Request
+   |
+   v
+Validate Input
+   |
+   v
+Execute Tool
+   |
+   v
+Inspect Response
+   |
+   +--> 200 ------> Success
+   |
+   +--> 206 ------> Continue with partial data
+   |
+   +--> 400/404 --> Stop
+   |
+   +--> 429/504 --> Wait and retry
+                         |
+                         v
+                    Maximum retries?
+                         |
+                 +-------+-------+
+                 |               |
+                No              Yes
+                 |               |
+                 v               v
+               Retry        Fail gracefully
+
+
+================================================================================
+FINAL FORMULA
+================================================================================
+
+Reliable Tool
+      =
+Clear Contract
+      +
+Precise Input Schema
+      +
+Consistent Output Schema
+      +
+Input Validation
+      +
+Correct Error Classification
+      +
+Exponential Backoff
+      +
+Idempotency
+      +
+Logging and Monitoring
+      +
+End-to-End Testing
+
+
+================================================================================
+END
+================================================================================
+
