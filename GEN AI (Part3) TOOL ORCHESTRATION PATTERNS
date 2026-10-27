@@ -1,634 +1,926 @@
 ============================================================
-TOOL ORCHESTRATION PATTERNS
+TOOL ORCHESTRATION PATTERNS - SIMPLE CONSOLIDATION
 ============================================================
-
-1. BIG PICTURE
-============================================================
-
-                    TOOL ORCHESTRATION
-                           │
-          ┌────────────────┼────────────────┐
-          │                │                │
-          ▼                ▼                ▼
-     SEQUENTIAL         PARALLEL        CONDITIONAL
-          │                │                │
-     A → B → C        ┌─ A ─┐          Condition?
-                       ├─ B ─┤           /      \
-                       ├─ C ─┤         Yes      No
-                       └─────┘           │        │
-                          │              ▼        ▼
-                          ▼            Path A   Path B
-                       MERGE
-
-
-Easy Memory Rule:
-
-Dependency?       → Sequential
-Independent?      → Parallel
-Decision needed?  → Conditional
 
 
 ============================================================
-2. SEQUENTIAL ORCHESTRATION
+THE BIG PICTURE
 ============================================================
 
-Use when the next tool depends on the output of the
-previous tool.
+Now you need to combine them efficiently.
 
-Request
-   │
-   ▼
-┌──────────────────────┐
-│ Validate Identity    │
-└──────────┬───────────┘
-           │
-           │ customer_id
-           ▼
-┌──────────────────────┐
-│ Create Account       │
-└──────────┬───────────┘
-           │
-           │ account_id
-           ▼
-┌──────────────────────┐
-│ Send Welcome Email   │
-└──────────┬───────────┘
-           │
-           ▼
-        Complete
+There are three ways to do this:
+
+
+1. Sequential
+   - One after another
+   - Like a recipe
+
+
+2. Parallel
+   - All at the same time
+   - Like a team
+
+
+3. Conditional
+   - Choose different paths
+   - Like a decision tree
 
 
 ============================================================
-3. DATA TRANSFORMATION BETWEEN TOOLS
+PATTERN 1: SEQUENTIAL ORCHESTRATION
 ============================================================
 
-Tool A Output:
+WHAT IT IS
+------------------------------------------------------------
 
-{
-  "user_id": "123",
-  "contact_email": "alice@example.com"
-}
+Tools run one after another.
 
-        │
-        ▼
-
-┌────────────────────────────┐
-│ Transformation / Mapping   │
-│                            │
-│ user_id → customer_id      │
-│ contact_email → email      │
-└────────────┬───────────────┘
-
-        │
-        ▼
-
-Tool B Input:
-
-{
-  "customer_id": "123",
-  "email": "alice@example.com"
-}
+Each tool's output becomes the next tool's input.
 
 
 ============================================================
-4. SEQUENTIAL ERROR HANDLING
+REAL EXAMPLE: CUSTOMER ONBOARDING
 ============================================================
 
-Tool A
-  │
-  ▼
-Success?
-  │
-  ├── NO ───────────────► Error Response
-  │
- YES
-  │
-  ▼
-Tool B
-  │
-  ▼
-Success?
-  │
-  ├── YES ──────────────► Tool C
-  │
-  └── NO
-       │
-       ▼
-   Error Type?
-       │
-       ├── Retriable
-       │      │
-       │      ▼
-       │  Wait / Backoff
-       │      │
-       │      └────────► Retry Tool B
-       │
-       └── Non-Retriable
-              │
-              ▼
-          Fail / Rollback
+Step 1: Validate customer
+
+Input:
+name, email, phone
+
+Output:
+verified = true
+
+        ↓
+
+Step 2: Create account
+
+Input:
+verified = true
+
+Output:
+account_id = "acc_123"
+
+        ↓
+
+Step 3: Send welcome email
+
+Input:
+account_id = "acc_123"
+
+Output:
+email_sent = true
 
 
-Temporary Failure
-      ↓
-Retry
+------------------------------------------------------------
+COMPLETE FLOW
+------------------------------------------------------------
 
-Permanent Failure
-      ↓
-Fail immediately
-
-Earlier operation created state
-      ↓
-Compensate / Rollback
+Validate Customer
+        ↓
+verified = true
+        ↓
+Create Account
+        ↓
+account_id = "acc_123"
+        ↓
+Send Welcome Email
+        ↓
+email_sent = true
 
 
 ============================================================
-5. PARALLEL ORCHESTRATION
+KEY RULE
 ============================================================
 
-Use when tools are independent.
+Each tool must know exactly what format the previous tool
+outputs.
 
-                 Query
-          "AI agent trends"
-                    │
-       ┌────────────┼────────────┬────────────┐
-       │            │            │            │
-       ▼            ▼            ▼            ▼
-   News API      Stocks       Analysts      Social
-      2s           2s            2s           2s
-       │            │            │            │
-       └────────────┴─────┬──────┴────────────┘
-                          │
-                          ▼
-                  ┌──────────────┐
-                  │ Aggregation  │
-                  └──────┬───────┘
+Otherwise, it breaks.
+
+
+============================================================
+PATTERN 2: PARALLEL ORCHESTRATION
+============================================================
+
+WHAT IT IS
+------------------------------------------------------------
+
+Multiple tools run at the same time (no waiting).
+
+
+============================================================
+REAL EXAMPLE: MARKET ANALYSIS
+============================================================
+
+Query:
+
+"AI agent trends"
+
+                    ↓
+
+┌─────────────────────────────────────────────┐
+│                                             │
+▼              ▼              ▼              ▼
+News API    Stock Prices    Analysts        Social
+  (2s)         (2s)          (2s)           (2s)
+│              │              │              │
+└──────────────┴──────────────┴──────────────┘
+                    ↓
+              Combine Results
+                    ↓
+                  Analyze
+
+
+============================================================
+WHY IT'S FASTER
+============================================================
+
+Sequential:
+
+2s + 2s + 2s + 2s
+
+= 8 seconds
+
+
+Parallel:
+
+All run together
+
+= 2 seconds
+
+
+Result:
+
+Parallel is 4x faster in this example.
+
+
+============================================================
+TWO IMPORTANT THINGS
+============================================================
+
+
+------------------------------------------------------------
+1. COMBINE RESULTS
+------------------------------------------------------------
+
+- You get 4 different outputs
+
+- Merge them into one format
+
+- Handle missing data gracefully
+
+
+Simple Flow:
+
+
+News API ─────────┐
+                  │
+Stock Prices ─────┤
+                  │
+Analysts ─────────┼────► Combine Results
+                  │
+Social ───────────┘
+
+
+------------------------------------------------------------
+2. HANDLE FAILURES
+------------------------------------------------------------
+
+If one source fails, do others continue?
+
+
+Answer:
+
+Yes!
+
+
+Use:
+
+"Continue on Error" setting
+
+
+============================================================
+PATTERN 3: CONDITIONAL ORCHESTRATION
+============================================================
+
+WHAT IT IS
+------------------------------------------------------------
+
+Route to different paths based on data quality or conditions.
+
+
+============================================================
+REAL EXAMPLE: DATA QUALITY ROUTING
+============================================================
+
+Check data quality:
+
+        ↓
+
+IF quality >= 0.8:
+
+    → Opportunity Analysis
+
+
+ELSE IF quality >= 0.5:
+
+    → Risk Analysis
+
+
+ELSE:
+
+    → Fallback Report
+
+
+------------------------------------------------------------
+SIMPLE FLOW
+------------------------------------------------------------
+
+                  Data Quality
+                       │
+          ┌────────────┼────────────┐
+          │            │            │
+          ▼            ▼            ▼
+       >= 0.8       >= 0.5        < 0.5
+          │            │            │
+          ▼            ▼            ▼
+    Opportunity       Risk       Fallback
+     Analysis       Analysis      Report
+
+
+============================================================
+KEY PRINCIPLE
+============================================================
+
+Make conditions clear and deterministic.
+
+
+GOOD:
+
+"IF quality_score >= 0.8"
+
+
+BAD:
+
+"IF data looks good"
+
+
+============================================================
+HOW TO BUILD IN N8N - SIMPLE STEPS
+============================================================
+
+
+============================================================
+STEP 1: CREATE WORKFLOW
+============================================================
+
+1. Open N8N
+
+2. Click:
+
+   "Create Workflow"
+
+3. Name it:
+
+   "Orchestration Demo"
+
+
+============================================================
+STEP 2: ADD SETUP NODE
+============================================================
+
+1. Click:
+
+   "+" button
+
+2. Search:
+
+   "Set"
+
+3. Create variable:
+
+   query = "AI agent trends"
+
+
+============================================================
+STEP 3: ADD PARALLEL BRANCHES
+============================================================
+
+1. Click:
+
+   "+" button
+
+2. Search:
+
+   "HTTP Request"
+
+3. Add 4 nodes:
+
+
+   1. News API
+
+   2. Stock Prices
+
+   3. Analyst Reports
+
+   4. Social Media
+
+
+4. Connect all 4 to the Setup node.
+
+   They run in parallel.
+
+
+------------------------------------------------------------
+PARALLEL FLOW
+------------------------------------------------------------
+
+                    Setup Query
+                         │
+        ┌────────────────┼────────────────┐
+        │                │                │
+        ▼                ▼                ▼
+     News API       Stock Prices      Analysts
+        │                │                │
+        │             Social              │
+        │                │                │
+        └────────────────┼────────────────┘
                          │
                          ▼
-                     Analysis
+                       Merge
 
 
 ============================================================
-6. SEQUENTIAL VS PARALLEL LATENCY
+STEP 4: COMBINE RESULTS
 ============================================================
 
-SEQUENTIAL:
+1. Click:
 
-Tool A → Tool B → Tool C → Tool D
+   "+" button
 
-2s       2s       2s       2s
+2. Search:
 
-Total ≈ 8 seconds
+   "Merge"
 
-
-PARALLEL:
-
-Tool A ────── 2s
-Tool B ────── 2s
-Tool C ────── 2s
-Tool D ────── 2s
-
-All execute simultaneously.
-
-Total ≈ 2 seconds
+3. Connect all 4 branches to it.
 
 
-============================================================
-7. PARALLEL PARTIAL FAILURE
-============================================================
+Flow:
 
-News API      → 200 ✓
-Stocks        → 404 ✗
-Analysts      → 200 ✓
-Social        → 200 ✓
 
-                 │
-                 ▼
-
-          ┌──────────────┐
-          │ Aggregation  │
-          └──────┬───────┘
-                 │
-                 ▼
-
-Available Sources = 3
-Failed Sources    = 1
-Quality Score     = 0.75
-is_partial        = true
-
-                 │
-                 ▼
-
-Continue processing with available information.
+News API ─────────┐
+                  │
+Stock Prices ─────┤
+                  ├────► Merge
+Analysts ─────────┤
+                  │
+Social Media ─────┘
 
 
 ============================================================
-8. PARALLEL RETRY
+STEP 5: FORMAT DATA
 ============================================================
 
-                   START
-                     │
-       ┌─────────────┼─────────────┐
-       │             │             │
-       ▼             ▼             ▼
-     News          Stocks        Social
-       │             │             │
-      504           200           200
-       │             │             │
-       ▼             ▼             ▼
-     Retry        Complete      Complete
-       │
-       ▼
-    Wait 1s
-       │
-       ▼
-   Attempt 2
-       │
-      504
-       │
-       ▼
-    Wait 2s
-       │
-       ▼
-   Attempt 3
-       │
-      200 ✓
-       │
-       ▼
-   Aggregation
+1. Click:
 
+   "+" button
 
-Important:
+2. Search:
 
-Only the failed branch retries.
+   "Code"
 
-Already successful branches do NOT need to execute again.
+3. Calculate:
+
+   quality_score
+
+Range:
+
+0.0 to 1.0
 
 
 ============================================================
-9. TIMEOUT PATTERN
+STEP 6: ROUTE BASED ON QUALITY
 ============================================================
 
-News API       → Timeout: 10s
-Stocks         → Timeout: 10s
-Analysts       → Timeout: 15s
-Social         → Timeout: 8s
+1. Click:
+
+   "+" button
+
+2. Search:
+
+   "Condition"
+
+3. Create 3 branches:
 
 
-Source Request
-      │
-      ▼
-Completed before timeout?
-      │
-   ┌──┴──┐
-   │     │
-  YES    NO
-   │     │
-   ▼     ▼
- Use   Timeout
- Data   Error
-         │
-         ▼
-   Retry / Cache /
-   Skip / Fallback
+High Quality:
+
+>= 0.8
 
 
-============================================================
-10. CACHE FALLBACK
-============================================================
+Medium Quality:
 
-             Call Primary Source
-                    │
-               ┌────┴────┐
-               │         │
-            Success    Failure
-               │         │
-               ▼         ▼
-           Fresh Data   Check Cache
-                          │
-                     ┌────┴────┐
-                     │         │
-                   Found     Missing
-                     │         │
-                     ▼         ▼
-                 Cached Data  Mark Failed
-                     │         │
-                     └────┬────┘
-                          │
-                          ▼
-                     Aggregation
+>= 0.5
 
 
-============================================================
-11. CIRCUIT BREAKER
-============================================================
+Low Quality:
 
-               ┌────────────┐
-               │   CLOSED   │
-               │ Calls OK   │
-               └─────┬──────┘
-                     │
-             Failure threshold
-                     │
-                     ▼
-               ┌────────────┐
-               │    OPEN    │
-               │ Stop calls │
-               └─────┬──────┘
-                     │
-              Recovery period
-                     │
-                     ▼
-               ┌────────────┐
-               │ HALF-OPEN  │
-               │ Test call  │
-               └─────┬──────┘
-                  ┌──┴──┐
-                  │     │
-               Success Failure
-                  │     │
-                  ▼     ▼
-               CLOSED  OPEN
+< 0.5
 
 
-Remember:
+------------------------------------------------------------
+ROUTING FLOW
+------------------------------------------------------------
 
-CLOSED    = Calls allowed
-OPEN      = Calls blocked
-HALF-OPEN = Test recovery
-
-
-============================================================
-12. CONDITIONAL ORCHESTRATION
-============================================================
-
-                 Aggregated Data
+                  quality_score
                        │
-                       ▼
-               Validate Data
-                       │
-                       ▼
-                Quality Score
-                       │
-       ┌───────────────┼────────────────┐
-       │               │                │
-       ▼               ▼                ▼
-    >= 0.8        0.5 to < 0.8        < 0.5
-       │               │                │
-       ▼               ▼                ▼
- Opportunity          Risk           Fallback
-  Analysis          Analysis          Report
+          ┌────────────┼────────────┐
+          │            │            │
+          ▼            ▼            ▼
+         High        Medium         Low
+       >= 0.8       >= 0.5        < 0.5
+          │            │            │
+          ▼            ▼            ▼
+    Opportunity       Risk       Fallback
+     Analysis       Analysis      Report
 
 
 ============================================================
-13. DETERMINISTIC CONDITIONS
+STEP 7: ADD OUTPUT NODES
 ============================================================
 
-GOOD CONDITIONS:
+1. Click:
 
-amount > 10000
+   "+" button
 
-quality_score >= 0.8
+2. Search:
 
-language != "English"
+   "Response"
 
-HTTP status == 429
+3. Add 3 response nodes:
 
-attempt_count < 4
+   - One for High Quality
+
+   - One for Medium Quality
+
+   - One for Low Quality
+
+
+============================================================
+STEP 8: EXECUTE
+============================================================
+
+1. Click:
+
+   "Execute Workflow"
+
+2. Watch it run!
+
+
+============================================================
+KEY SETTINGS IN N8N
+============================================================
+
+
+------------------------------------------------------------
+TIMEOUT
+------------------------------------------------------------
+
+- How long to wait before giving up
+
+- Set per node:
+
+  8s
+
+  10s
+
+  15s
+
+  etc.
+
+
+============================================================
+CONTINUE ON ERROR
+============================================================
+
+If this node fails, keep going?
+
+
+ON:
+
+Yes, continue
+
+
+OFF:
+
+No, stop everything
+
+
+============================================================
+COMPLETE WORKFLOW DIAGRAM - SIMPLE
+============================================================
+
+Setup Query
+
+     ↓
+
+┌──────┬──────┬──────┬──────┐
+│      │      │      │      │
+▼      ▼      ▼      ▼
+N      S      A      So
+
+N  = News
+S  = Stock
+A  = Analyst
+So = Social
+
+(All run together in parallel)
+
+│      │      │      │
+└──────┴──────┴──────┘
+
+           ↓
+
+         Merge
+
+           ↓
+
+         Format
+
+           ↓
+
+       Condition
+
+           ↓
+
+     ┌─────┼─────┐
+     │     │     │
+     ▼     ▼     ▼
+
+     H     M     L
+
+H = High Quality
+M = Medium Quality
+L = Low Quality
+
+     │     │     │
+     └─────┼─────┘
+
+           ↓
+
+         Output
+
+
+============================================================
+REAL-WORLD COMPARISON
+============================================================
+
+
+------------------------------------------------------------
+SEQUENTIAL - SLOW
+------------------------------------------------------------
+
+Tool A: 2 seconds
+
+Tool B: 2 seconds
+
+Tool C: 2 seconds
+
+Tool D: 2 seconds
+
+
+----------------------------
+
+Total:
+
+8 seconds
+
+
+============================================================
+PARALLEL - FAST
+============================================================
+
+Tool A: 2 seconds
+
+Tool B: 2 seconds  ← All run together
+
+Tool C: 2 seconds
+
+Tool D: 2 seconds
+
+
+----------------------------
+
+Total:
+
+2 seconds
+
+
+============================================================
+WHEN TO USE EACH PATTERN
+============================================================
+
+
+------------------------------------------------------------
+SEQUENTIAL
+------------------------------------------------------------
+
+When:
+
+Tools depend on each other
+
+
+Example:
+
+Validate
+   ↓
+Create
+   ↓
+Send Email
+
+
+============================================================
+PARALLEL
+============================================================
+
+When:
+
+Tools are independent
+
+
+Example:
+
+Query News
+    +
+Query Stocks
+    +
+Query Analysts
+
+
+============================================================
+CONDITIONAL
+============================================================
+
+When:
+
+Need different paths
+
+
+Example:
+
+Route by data quality
+
+
+============================================================
+COMMON MISTAKES TO AVOID
+============================================================
+
+
+------------------------------------------------------------
+MISTAKE 1: FORGETTING TO SET "CONTINUE ON ERROR"
+------------------------------------------------------------
+
+Result:
+
+One failure stops everything
+
+
+Fix:
+
+Turn it ON for parallel branches
+
+
+============================================================
+MISTAKE 2: NOT HANDLING PARTIAL DATA
+============================================================
+
+Result:
+
+Workflow crashes if one source fails
+
+
+Fix:
+
+Merge node should handle missing data
+
+
+============================================================
+MISTAKE 3: VAGUE CONDITIONS
+============================================================
+
+Result:
+
+Unpredictable routing
+
+
+Fix:
+
+Use clear numbers.
+
+
+Example:
+
+>= 0.8
+
+
+Instead of:
+
+"looks good"
+
+
+============================================================
+MISTAKE 4: NO TIMEOUT LIMITS
+============================================================
+
+Result:
+
+Workflow hangs forever
+
+
+Fix:
+
+Set timeout on each HTTP node
+
+
+============================================================
+QUICK CHECKLIST
+============================================================
+
+Sequential:
+
+Tools chain in order with clean data passing
 
 
 ------------------------------------------------------------
 
-AVOID VAGUE CONDITIONS:
+Parallel:
 
-"Customer looks suspicious"
-
-"Document seems important"
-
-"Transaction appears risky"
+Multiple tools run simultaneously
 
 
-============================================================
-14. QUALITY SCORE ROUTING
-============================================================
+------------------------------------------------------------
 
-With 4 equally weighted sources:
+Conditional:
 
-4 / 4 = 1.00 → Opportunity Analysis
-
-3 / 4 = 0.75 → Risk Analysis
-
-2 / 4 = 0.50 → Risk Analysis
-
-1 / 4 = 0.25 → Fallback Report
-
-0 / 4 = 0.00 → Fallback Report
+Route based on data quality or conditions
 
 
-Routing Rules:
+------------------------------------------------------------
 
-quality_score >= 0.80
-→ Opportunity Analysis
+Merge:
 
-quality_score >= 0.50 AND quality_score < 0.80
-→ Risk Analysis
-
-quality_score < 0.50
-→ Fallback Report
+Combine results from parallel branches
 
 
-============================================================
-15. ALL THREE PATTERNS COMBINED
-============================================================
+------------------------------------------------------------
 
-                     Request
-                        │
-                        ▼
-              ┌─────────────────┐
-              │   Setup Query   │
-              └────────┬────────┘
-                       │
-                       │
-                 SEQUENTIAL
-                       │
-                       ▼
-       ┌───────────────┼───────────────┬───────────────┐
-       │               │               │               │
-       ▼               ▼               ▼               ▼
-    News API        Stocks          Analysts         Social
-       │               │               │               │
-       │          PARALLEL EXECUTION                    │
-       │               │               │               │
-       └───────────────┴───────┬───────┴───────────────┘
-                               │
-                               ▼
-                        ┌──────────────┐
-                        │ Aggregation  │
-                        └──────┬───────┘
-                               │
-                               │
-                          SEQUENTIAL
-                               │
-                               ▼
-                        ┌──────────────┐
-                        │ Validation   │
-                        │ Quality      │
-                        │ Score        │
-                        └──────┬───────┘
-                               │
-                               │
-                         CONDITIONAL
-                               │
-                 ┌─────────────┼─────────────┐
-                 │             │             │
-                 ▼             ▼             ▼
-             score>=.8     .5<=score<.8    score<.5
-                 │             │             │
-                 ▼             ▼             ▼
-            Opportunity       Risk        Fallback
-             Analysis       Analysis       Report
-                 │             │             │
-                 └─────────────┼─────────────┘
-                               │
-                               ▼
-                        ┌──────────────┐
-                        │ Final Output │
-                        └──────────────┘
+Continue on Error:
+
+Allow partial failures
+
+
+------------------------------------------------------------
+
+Timeout:
+
+Prevent hanging
+
+
+------------------------------------------------------------
+
+Quality Score:
+
+Calculate to decide routing
+
+
+------------------------------------------------------------
+
+Fallback Paths:
+
+Define alternatives explicitly
 
 
 ============================================================
-16. PRODUCTION-STYLE RESILIENT FLOW
+WHAT YOU LEARNED
 ============================================================
-
-                        REQUEST
-                           │
-                           ▼
-                    Validate Input
-                           │
-                           ▼
-                      Setup Query
-                           │
-       ┌───────────────────┼───────────────────┐
-       │                   │                   │
-       ▼                   ▼                   ▼
-    Source A            Source B            Source C
-       │                   │                   │
-    Timeout             Timeout             Timeout
-       │                   │                   │
-       ▼                   ▼                   ▼
-    Success?            Success?            Success?
-     /    \              /    \              /    \
-   Yes     No          Yes     No          Yes     No
-    │       │           │       │           │       │
-    │    Retriable?     │    Retriable?     │    Retriable?
-    │     /    \        │     /    \        │     /    \
-    │   Yes     No      │   Yes     No      │   Yes     No
-    │    │       │      │    │       │      │    │       │
-    │  Retry   Cache    │  Retry   Cache    │  Retry   Cache
-    │    │       │      │    │       │      │    │       │
-    └────┴───────┴──────┴────┴───────┴──────┴────┴───────┘
-                           │
-                           ▼
-                      Aggregation
-                           │
-                           ▼
-                 Calculate Data Quality
-                           │
-               ┌───────────┼───────────┐
-               │           │           │
-               ▼           ▼           ▼
-             HIGH        MEDIUM        LOW
-               │           │           │
-               ▼           ▼           ▼
-         Opportunity       Risk      Fallback
-           Analysis      Analysis     Report
-               │           │           │
-               └───────────┼───────────┘
-                           │
-                           ▼
-                      Final Output
 
 
 ============================================================
-17. INTERVIEW-READY SUMMARY
+SEQUENTIAL ORCHESTRATION
 ============================================================
 
-Tool orchestration controls how multiple tools execute and
-exchange data.
+- Tools run one after another
 
-Sequential orchestration:
-Used when one tool depends on another.
+- Each tool's output → next tool's input
 
-Parallel orchestration:
-Used when operations are independent and can run simultaneously.
+- Example:
 
-Conditional orchestration:
-Used when execution needs deterministic routing based on
-status, validation, or data quality.
-
-For production resilience, combine them with:
-
-• Data contracts
-• Data transformations
-• Aggregation
-• Timeouts
-• Retry with exponential backoff
-• Partial failure handling
-• Cache fallback
-• Circuit breakers
-• Explicit fallback paths
-• Data-quality validation
+  Customer onboarding workflow
 
 
 ============================================================
-18. QUICK REVISION
+PARALLEL ORCHESTRATION
 ============================================================
 
-Sequential
-→ Dependency
+- Multiple tools run simultaneously
+
+- 3-4x faster than sequential
+
+- Requires:
+
+  Aggregation logic
+
+  +
+
+  Partial failure strategy
 
 
-Parallel
-→ Performance
+============================================================
+CONDITIONAL ORCHESTRATION
+============================================================
+
+- Route to different paths based on conditions
+
+- Example:
+
+  Route by data quality score
+
+- Requires:
+
+  Clear, deterministic conditions
 
 
-Conditional
-→ Decision making
+============================================================
+N8N IMPLEMENTATION
+============================================================
+
+- 8 simple steps to build complete workflow
+
+- Parallel branches run together
+
+- Merge combines results
+
+- Condition routes based on quality
 
 
-Transformation
-→ Fix contract mismatch
+============================================================
+8-STEP N8N QUICK REVISION
+============================================================
+
+1. Create Workflow
+
+        ↓
+
+2. Add Setup Node
+
+        ↓
+
+3. Add Parallel Branches
+
+        ↓
+
+4. Combine Results
+
+        ↓
+
+5. Format Data
+
+        ↓
+
+6. Route Based on Quality
+
+        ↓
+
+7. Add Output Nodes
+
+        ↓
+
+8. Execute
 
 
-Aggregation
-→ Combine parallel results
+============================================================
+NEXT VIDEO
+============================================================
+
+The next video covers:
+
+MULTI-AGENT PATTERNS
 
 
-Timeout
-→ Prevent indefinite waiting
+It explains how to scale beyond single workflows to
+coordinated agent networks.
 
 
-Retry
-→ Recover transient failures
+============================================================
+FOLLOW-UP QUESTIONS
+============================================================
 
+1. Quiz me on orchestration patterns
 
-Cache
-→ Provide fallback data
-
-
-Circuit Breaker
-→ Protect an unhealthy dependency
-
-
-Fallback
-→ Provide controlled degraded behavior
-
-
-Quality Score
-→ Deterministic routing
+2. Take notes on this lesson
 
 
 ============================================================
 END
 ============================================================
-
