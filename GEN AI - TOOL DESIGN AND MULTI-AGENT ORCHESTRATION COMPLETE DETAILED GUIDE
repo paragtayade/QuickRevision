@@ -1,1155 +1,348 @@
 ================================================================================
-TOOL DESIGN AND MULTI-AGENT ORCHESTRATION
-COMPLETE DETAILED GUIDE
+TOOL DESIGN AND MULTI-AGENT ORCHESTRATION - QUICK GUIDE
 ================================================================================
 
+CORE IDEA
+--------------------------------------------------------------------------------
 
-THE CORE PROBLEM: WHY SINGLE AGENTS FAIL
-================================================================================
+A single AI agent managing too many tools can become unreliable.
 
-Two years ago, a team built an "ultimate AI assistant" that could query
-databases, manage calendars, and handle dozens of tasks.
-
-On paper, it was spectacular.
-
-In production, it was a disaster.
-
-The agent got distracted, updated the wrong records, and sent half-finished
-reports to executives.
-
-The lesson:
-
-A single agent cannot reliably juggle dozens of tools.
-
-The cognitive load is simply too high for current models to handle with
-100% reliability.
-
-This module teaches you how to move from isolated tools to integrated agent
-networks that deliver true reliability in production environments.
+Better approach:
+- Design reliable tools
+- Use orchestration patterns
+- Split complex work across specialist agents
+- Add monitoring, quality gates, and failure handling
 
 
 ================================================================================
-1. DESIGNING ROBUST TOOL APIs - THE FOUNDATION
+1. ROBUST TOOL API DESIGN
 ================================================================================
 
-WHY TOOL DESIGN MATTERS
---------------------------------------------------------------------------------
+An agent is only as reliable as its tools.
 
-If your agent fails, don't assume it's a reasoning problem.
+Good Tool Contract:
+- Clear purpose
+- Precise input schema
+- Predictable output schema
+- Clear error handling
 
-Very often it's a tool problem:
+HTTP Errors:
+- 400 = Bad Request -> Don't retry
+- 404 = Not Found -> Don't retry
+- 429 = Rate Limit -> Retry with backoff
+- 504 = Timeout -> Retry
 
-1. Unclear schemas
-2. Inconsistent outputs
-3. Unhelpful error messages that leave the agent guessing
+Idempotency:
+- Prevents duplicate operations during retries
+- Critical for payments, transactions, and account creation
 
-An agent is only as reliable as the tools it uses.
-
-Poorly designed tools cause failures that appear to be reasoning failures
-but are actually integration failures.
-
-The agent understood what to do, but the tool behaved unexpectedly.
-
-
-CLEAR TOOL CONTRACTS
---------------------------------------------------------------------------------
-
-Robust tool design starts with a clear contract that specifies:
-
-1. What the tool does
-   - Its purpose
-
-2. What input it accepts
-   - Precise input schemas
-
-3. What outputs it produces
-   - Output schemas
-
-4. How errors are handled
-   - Error classification and recovery
-
-This contract becomes the interface specification that the agent relies on
-to decide when and how to invoke the tool.
-
-
-INPUT VALIDATION AND ERROR HANDLING
---------------------------------------------------------------------------------
-
-Input validation catches errors early with specific HTTP responses:
-
-400 - Bad Request
-      Invalid input format
-
-404 - Not Found
-      Resource doesn't exist
-
-429 - Too Many Requests
-      Rate limit exceeded
-
-504 - Gateway Timeout
-      Service unavailable
-
-
-Retriable vs. Non-Retriable Errors
---------------------------------------------------------------------------------
-
-Retriable Errors:
-- 429
-- 504
-- Timeouts
-
-Action:
-Use exponential backoff retry logic.
-
-
-Non-Retriable Errors:
-- 400
-- 404
-
-Action:
-Fail immediately. Don't retry.
-
-
-IDEMPOTENCY KEYS
---------------------------------------------------------------------------------
-
-Idempotency keys prevent duplicate operations during retries.
-
-An idempotency key ensures that if a request is retried, the same operation
-isn't executed twice.
-
-This is especially critical for operations such as:
-
-- Financial transactions
-- Account creation
-- Payment processing
-- Other state-changing operations
-
-
-TESTING IN PRODUCTION
---------------------------------------------------------------------------------
-
-Use tools like Postman and Neon to test end-to-end tool workflows before
-deploying agents that depend on them.
+Testing:
+- Test complete tool workflows before agent deployment
 
 
 ================================================================================
-2. TOOL ORCHESTRATION PATTERNS - COORDINATING MULTIPLE TOOLS
+2. TOOL ORCHESTRATION PATTERNS
 ================================================================================
 
-Once your tools are reliable, the next challenge is making them work
-together.
-
-Orchestration patterns are repeatable ways to combine tools into workflows
-that are:
-
-- Fast
-- Predictable
-- Resilient under failure
-
-
+1. SEQUENTIAL
 --------------------------------------------------------------------------------
-PATTERN 1: SEQUENTIAL ORCHESTRATION
---------------------------------------------------------------------------------
-
-Tools chain in a fixed order:
 
 Tool A -> Tool B -> Tool C
 
+Use when one step depends on the previous step.
 
-When to Use
+Example:
+Validate Identity -> Create Account -> Send Email
+
+
+2. PARALLEL
 --------------------------------------------------------------------------------
 
-Example 1: Customer Onboarding
+             +-> Tool A -+
+Input ------>+-> Tool B -+-> Aggregate -> Output
+             +-> Tool C -+
 
-Validate Identity
-    |
-    v
-Create Account
-    |
-    v
-Send Welcome Email
+Use when tasks are independent.
 
+Benefits:
+- Lower latency
+- Faster processing
 
-Example 2: Document Processing
-
-Extract Text
-    |
-    v
-Analyze Sentiment
-    |
-    v
-Generate Summary
+Handle:
+- Result aggregation
+- Partial failures
+- Retries
 
 
-Key Requirement:
-Clean data-passing conventions.
-
-Each tool must know exactly:
-
-- Where to read inputs
-- Where to write outputs
-
-
-Example Flow:
-
-Input
-  |
-  v
-Validation Tool
-  |
-  v
-Account Creation Tool
-  |
-  v
-Email Tool
-  |
-  v
-Output
-
-
---------------------------------------------------------------------------------
-PATTERN 2: PARALLEL ORCHESTRATION
+3. CONDITIONAL
 --------------------------------------------------------------------------------
 
-Multiple tools run simultaneously when they don't depend on each other.
+Input -> Validation
+          |
+     +----+----+
+     |    |    |
+     v    v    v
+   Path A Path B Fallback
+
+Use when workflow depends on business rules or validation.
 
 
-When to Use
+REAL-WORLD COMBINATION
 --------------------------------------------------------------------------------
 
-Example: Market Analysis
-
-Run these simultaneously:
-
-- Query stock prices
-- Query news feeds
-- Query analyst reports
-
-This can reduce latency compared with sequential execution.
-
-
-Example Flow:
-
-                     +--> Stock Price API -----+
-                     |                         |
-Input Query ---------+--> News Feed API -------+--> Aggregation --> Analysis --> Output
-                     |                         |
-                     +--> Analyst Reports -----+
-
-
-Challenges
---------------------------------------------------------------------------------
-
-1. Aggregation Logic
-
-   Combine results once all required responses return.
-
-
-2. Partial Failure Strategy
-
-   If one branch fails while two succeed, decide whether to:
-
-   - Retry the failed branch
-   - Proceed with partial results
-   - Stop the entire workflow
-
-
---------------------------------------------------------------------------------
-PATTERN 3: CONDITIONAL ORCHESTRATION
---------------------------------------------------------------------------------
-
-Route outputs based on validation checks using switch/case logic.
-
-
-When to Use
---------------------------------------------------------------------------------
-
-1. Decision Trees
-
-   Route to:
-   - Opportunity path
-   - Risk path
-   - Fallback path
-
-
-2. Quality Gates
-
-   Apply different handling based on data sufficiency.
-
-
-Key Components
---------------------------------------------------------------------------------
-
-1. Data validation checks to determine routing
-
-2. Switch/case constructs for explicit branching
-
-3. Fallback paths that generate alternative outputs when data is
-   insufficient
-
-
-Example Flow:
-
-Aggregated Data
+Parallel Collection
       |
       v
-Validation Check
+Sequential Processing
       |
-      +--> Opportunity Path
-      |
-      +--> Risk Path
-      |
-      +--> Fallback Path
-
-
---------------------------------------------------------------------------------
-REAL-WORLD INTEGRATION: PARALLEL + SEQUENTIAL + CONDITIONAL
---------------------------------------------------------------------------------
-
-In production workflows, all three patterns can be combined.
-
-Step 1: Parallel Data Collection
-        Query multiple sources simultaneously.
-
-Step 2: Sequential Processing
-        Aggregate Results -> Analyze -> Format
-
-Step 3: Conditional Routing
-        Direct the result to the appropriate output path.
+      v
+Conditional Routing
 
 
 ================================================================================
-3. MULTI-AGENT PATTERNS - SCALING BEYOND SINGLE AGENTS
+3. MULTI-AGENT PATTERNS
 ================================================================================
 
-
---------------------------------------------------------------------------------
-PATTERN 1: SPECIALIST AGENT ENSEMBLES
+PATTERN 1: SPECIALIST AGENT ENSEMBLE
 --------------------------------------------------------------------------------
 
-THE PROBLEM
+             +-> Financial Agent --+
+Input ------>+-> Risk Agent -------+-> Orchestrator -> Decision
+             +-> Compliance Agent -+
 
-A single generalist agent gives you a decent answer, but not necessarily
-a complete one.
-
-
-THE SOLUTION
-
-Bring in multiple specialist perspectives and synthesize them into a single
-coherent recommendation.
-
-
-Architecture:
-
-                        +--> Financial Agent -----+
-                        |                         |
-Input Scenario ---------+--> Risk Assessor -------+--> Orchestrator
-                        |                         |         |
-                        +--> Compliance Checker --+         v
-                                                   Decision Agent
-                                                        |
-                                                        v
-                                                 Recommendation
-
-
-KEY DESIGN PRINCIPLES
---------------------------------------------------------------------------------
-
-
-1. CLEAR SPECIALIST MANDATES
---------------------------------------------------------------------------------
-
-Each specialist needs:
-
-- A clear scope
-  What they evaluate
-
-- Defined evaluation criteria
-
-- Specific frameworks they apply
-
-
-Important:
-
-Too much overlap = Redundancy
-
-Too little coverage = Blind spots
-
-Map specialist coverage intentionally and ensure the ensemble is balanced.
-
-
-2. FLOW STATE VARIABLES
---------------------------------------------------------------------------------
-
-Capture and pass outputs reliably between agent stages.
-
-This ensures data flows cleanly from one specialist to the next.
-
-
-3. AGGREGATION AND SYNTHESIS
---------------------------------------------------------------------------------
-
-If you simply concatenate specialist outputs, you get a disjointed report.
-
-What you actually want is synthesis:
-
-- Identify agreements
-- Highlight disagreements
-- Weigh trade-offs
-- Produce a coherent overall assessment
-
-This synthesis can be handled by:
-
-- A dedicated aggregator agent
-  OR
-- The orchestrator itself
-
-
-4. DECISION AGENT
---------------------------------------------------------------------------------
-
-The Decision Agent translates synthesized insights into actionable
-recommendations with:
-
-- Confidence levels
-- Next steps
-- Clear reasoning
-
-
-WHY IT WORKS
---------------------------------------------------------------------------------
-
-Specialist ensembles can outperform single generalists on complex,
-multidimensional decisions.
-
-Each specialist contributes depth that the others don't have.
-
-
-Example: Business Expansion Analysis
---------------------------------------------------------------------------------
-
-Financial Agent:
-- Analyzes market size
-- Revenue potential
-- Profitability
-
-Risk Assessor:
-- Evaluates regulatory risks
-- Competitive threats
-- Execution risks
-
-Compliance Checker:
-- Ensures alignment with company policies and regulations
+Each specialist has:
+- Clear responsibility
+- Defined criteria
+- Specific expertise
 
 Orchestrator:
-- Synthesizes all three perspectives
+- Combines results
+- Identifies agreements/disagreements
+- Evaluates trade-offs
 
 Decision Agent:
-- Delivers final recommendation with confidence levels
+- Produces recommendation
+- Confidence level
+- Next steps
 
 
---------------------------------------------------------------------------------
 PATTERN 2: HIERARCHICAL ORCHESTRATION
 --------------------------------------------------------------------------------
 
-THE PROBLEM
+                Orchestrator
+                     |
+          +----------+----------+
+          |          |          |
+          v          v          v
+       Research   Analysis   Writing
+          |          |          |
+          +----------+----------+
+                     |
+                     v
+              Progress Monitor
+                     |
+              +------+------+
+              |             |
+              v             v
+         Aggregator     Failure Handler
 
-When your workflow grows beyond a handful of steps, a single master
-orchestrator can become the bottleneck.
+Layers:
 
+Strategy Layer:
+- Orchestrator plans and delegates
 
-THE SOLUTION
+Execution Layer:
+- Specialist agents perform tasks
 
-Scale coordination the same way real organizations scale work:
+Coordination Layer:
+- Monitor progress and quality
 
-Strategy at the top
-    |
-    v
-Coordination in the middle
-    |
-    v
-Execution at the edges
-
-
-Architecture:
-
-                      Orchestrator
-                    (Strategy Layer)
-                           |
-                           v
-              +------------+------------+
-              |            |            |
-              v            v            v
-          Research      Analysis      Writing
-           Agent         Agent         Agent
-              |            |            |
-              +------------+------------+
-                           |
-                           v
-                    Progress Monitor
-                 (Coordination Layer)
-                           |
-                 +---------+---------+
-                 |                   |
-                 v                   v
-          Result Aggregator    Failure Handler
+Best for:
+Large enterprise workflows with many coordinated tasks.
 
 
-HOW IT WORKS
---------------------------------------------------------------------------------
-
-
-1. ORCHESTRATOR - STRATEGY LAYER
---------------------------------------------------------------------------------
-
-Responsibilities:
-
-- Decomposes complex tasks into numbered task plans
-- Assigns tasks to specialist agents
-- Delegates authority and responsibility
-
-
-2. SPECIALIST AGENTS - EXECUTION LAYER
---------------------------------------------------------------------------------
-
-Research Agent:
-- Gathers information
-
-Analysis Agent:
-- Processes and analyzes data
-
-Writing Agent:
-- Produces final output
-
-Each agent has:
-- Domain-specific prompts
-- Status reporting
-
-
-3. PROGRESS MONITOR - COORDINATION LAYER
---------------------------------------------------------------------------------
-
-Responsibilities:
-
-- Evaluates all specialist outputs
-- Determines overall success or failure
-- Provides feedback to the orchestrator
-
-
-4. CONDITIONAL BRANCHING
---------------------------------------------------------------------------------
-
-Success Path:
-
-Progress Monitor
-      |
-      v
-Result Aggregator
-      |
-      v
-Final Output
-
-
-Failure Path:
-
-Progress Monitor
-      |
-      v
-Failure Handler
-      |
-      v
-Error Report
-
-
-KEY DESIGN DECISION: AUTHORITY DISTRIBUTION
---------------------------------------------------------------------------------
-
-More Autonomy - Lower Levels Decide Independently
-
-Advantages:
-+ Accelerates execution
-
-Disadvantages:
-- Increases risk of coordination failures
-
-
-More Supervision - Escalate for Approval
-
-Advantages:
-+ Improves alignment
-
-Disadvantages:
-- Increases latency and complexity
-
-
-WHY IT SCALES
---------------------------------------------------------------------------------
-
-This pattern mirrors organizational structure.
-
-A project manager doesn't directly supervise every contributor.
-They coordinate team leads who manage their teams.
-
-Each level focuses on the right concerns.
-
-
-Example: Investment Research Analysis
---------------------------------------------------------------------------------
-
-Orchestrator:
-"Analyze the EV market and compare Tesla, BYD, and Rivian."
-
-Research Agent:
-- Gathers market data
-- Competitor information
-- Regulatory landscape
-
-Analysis Agent:
-- Processes data
-- Identifies trends
-- Calculates metrics
-
-Writing Agent:
-- Produces polished research report
-
-Progress Monitor:
-- Validates that outputs meet quality standards
-
-Result Aggregator:
-- Combines outputs into final deliverable
-
-
---------------------------------------------------------------------------------
 PATTERN 3: RESEARCH -> CRITIQUE -> REFINE
 --------------------------------------------------------------------------------
 
-THE PROBLEM
-
-Trying to get perfect output from a single agent in one pass is a
-common trap.
-
-
-THE SOLUTION
-
-Split the job into roles:
-
-One agent gathers.
-One agent judges.
-One agent improves.
-
-Quality emerges through iteration.
-
-
-Architecture:
-
-Topic Input
-    |
-    v
 Research Agent
-(Gathers Information)
-    |
-    v
+      |
+      v
 Critic Agent
-(Evaluates Output)
-    |
-    v
+      |
+      v
 Quality Gate
-(Pass/Fail Check)
-    |
-    +--> PASS --> Write Final Report
-    |
-    +--> FAIL --> Refine Agent
-                     |
-                     v
-                Quality Gate
-                  (Retry)
-
-
-ROLE DEFINITIONS
---------------------------------------------------------------------------------
-
-
-1. RESEARCH AGENT
---------------------------------------------------------------------------------
-
-- Focuses purely on gathering information
-- Searches knowledge bases
-- Queries APIs
-- Compiles relevant data
-- Does NOT worry about presentation or quality assessment
-- Produces raw, comprehensive research output
-
-
-2. CRITIC AGENT
---------------------------------------------------------------------------------
-
-- Evaluates the research output
-- Checks for completeness, accuracy, and relevance
-- Identifies gaps and weaknesses
-- Does NOT fix the output
-- Only judges it
-
-
-3. REFINE AGENT
---------------------------------------------------------------------------------
-
-- Uses critic feedback to address gaps
-- Improves clarity and structure
-- Enhances presentation
-- Produces refined output for re-evaluation
-
-
-4. QUALITY GATE
---------------------------------------------------------------------------------
-
-- Checks critic verdict against pass/fail criteria
-- Controls iteration
-- Stops when quality is sufficient
-- Prevents infinite loops
-
-
-WHY IT WORKS
---------------------------------------------------------------------------------
-
-Splitting work into research, critique, and refine roles produces higher
-quality output than a single-agent approach.
-
-Quality gates control iteration by checking critic verdicts against
-pass/fail criteria.
-
-
-Example: Research Report on AI Trends
---------------------------------------------------------------------------------
+      |
+      +-> PASS -> Final Output
+      |
+      +-> FAIL -> Refine -> Re-evaluate
 
 Research Agent:
-Gathers latest papers, industry reports, and market data.
-
-        |
-        v
+- Collects information
 
 Critic Agent:
-Evaluates accuracy, relevance, and completeness.
+- Checks accuracy, completeness, relevance
 
-        |
-        v
+Refine Agent:
+- Fixes identified gaps
 
 Quality Gate:
-Checks whether all criteria are met.
-
-        |
-        +--> PASS --> Generate Final Report
-        |
-        +--> FAIL --> Refine Agent --> Re-evaluate
+- Controls pass/fail
+- Prevents endless iteration
 
 
 ================================================================================
-4. EDGE CASE HANDLING AND AGENT DRIFT PREVENTION
+4. EDGE CASES AND AGENT DRIFT
 ================================================================================
 
-THE CHALLENGE
---------------------------------------------------------------------------------
+Common Risks:
+- Agent drift
+- Unexpected inputs
+- Hallucinations
+- Tool failures
 
-Agents can behave unpredictably over time.
-
-Common problems include:
-
-1. Agent Drift
-   Behavior gradually diverges from intended goals.
-
-2. Edge Cases
-   Unusual inputs break the agent's logic.
-
-3. Hallucinations
-   Confident but false outputs.
-
-
-DETECTION AND PREVENTION STRATEGIES
---------------------------------------------------------------------------------
-
-
-1. IDENTIFY EDGE CASES BEFORE PRODUCTION
---------------------------------------------------------------------------------
-
-- Map scenarios that break agents
-- Test with adversarial inputs
-- Build detection mechanisms
-
-
-2. IMPLEMENT BEHAVIORAL MONITORING
---------------------------------------------------------------------------------
-
-- Track agent outputs over time
-- Detect deviations from baseline behavior
-- Alert when drift exceeds thresholds
-
-
-3. MAKE SYSTEMS AUDITABLE
---------------------------------------------------------------------------------
-
-- Use reasoning traces to explain decisions
-- Log all agent actions and outputs
-- Enable post-hoc analysis of failures
-
-
-4. REFINE GOAL SPECIFICATIONS
---------------------------------------------------------------------------------
-
-- Write precise, unambiguous goals
-- Include explicit constraints
-- Define success criteria clearly
+Prevention:
+- Test edge cases
+- Test adversarial inputs
+- Monitor agent behavior
+- Log actions and outputs
+- Define clear goals and constraints
+- Set measurable success criteria
 
 
 ================================================================================
-5. TRANSLATING ARCHITECTURE TO BUSINESS VALUE
+5. TRANSLATING AI ARCHITECTURE TO BUSINESS VALUE
 ================================================================================
 
-THE GAP
---------------------------------------------------------------------------------
+Don't explain only HOW the architecture works.
 
-Ever built a technically elegant agent system only to watch stakeholders
-reject it because they couldn't see the business payoff?
+Explain WHY it matters.
 
-In the real world, your architecture doesn't get funded simply because
-it's clever.
+Business Value:
+- Reduce cost
+- Reduce risk
+- Improve response time
+- Improve quality
+- Accelerate delivery
+- Create competitive advantage
 
-It gets funded because it:
-
-- Reduces cost
-- Lowers risk
-- Accelerates time to value
-- Creates a competitive edge
-
-
-HOW TO COMMUNICATE VALUE
---------------------------------------------------------------------------------
-
-
-1. FOCUS ON OUTCOMES, NOT MECHANISMS
---------------------------------------------------------------------------------
+Example:
 
 Technical:
-
-"We implemented constitutional AI with value alignment."
-
+"Multiple specialist agents run in parallel."
 
 Business:
-
-"The system will refuse actions that violate our ethics policies,
-protecting us from brand damage."
+"Independent analysis runs simultaneously, reducing response time."
 
 
-2. USE ANALOGIES
---------------------------------------------------------------------------------
+Useful Analogies:
 
-Multi-Agent Orchestration
-=
-Hiring a team of specialists instead of relying on one overloaded
-generalist.
-
+Multi-Agent System
+= Team of specialists
 
 Guardrails
-=
-Compliance checks in financial workflows.
+= Compliance checks
 
-
-Circuit Breakers
-=
-Emergency shutoffs in manufacturing.
-
-
-3. GROUND TECHNICAL CHOICES IN CONCRETE CONSEQUENCES
---------------------------------------------------------------------------------
-
-Leaders can evaluate business implications more easily when technology
-choices are expressed as measurable outcomes.
-
-Examples:
-
-"This reduces response time by 40%, improving customer satisfaction."
-
-"This prevents 95% of policy violations, reducing legal risk."
-
-"This cuts operational costs by $2M annually."
-
-
-4. ACKNOWLEDGE UNCERTAINTY
---------------------------------------------------------------------------------
-
-AI systems are inherently unpredictable.
-
-Architecture can reduce that unpredictability, but it cannot eliminate it.
-
-Position the design as:
-
-"Managing uncertainty to acceptable levels."
-
-Not:
-
-"Achieving perfection."
-
-Executives trust honest limitations more than confident promises that
-later fail.
-
-
-5. CONNECT TO STRATEGIC INITIATIVES
---------------------------------------------------------------------------------
-
-If leadership prioritizes CUSTOMER EXPERIENCE:
-
-- Emphasize improved response quality
-- Emphasize consistency
-
-
-If COST REDUCTION is the priority:
-
-- Quantify efficiency gains
-
-
-If INNOVATION LEADERSHIP is the goal:
-
-- Show competitive differentiation
+Circuit Breaker
+= Emergency shutdown mechanism
 
 
 ================================================================================
-6. ENTERPRISE-GRADE AI DESIGN PRINCIPLES
+6. ENTERPRISE-GRADE AI PRINCIPLES
 ================================================================================
-
-ARCHITECTURE-FIRST MINDSET
---------------------------------------------------------------------------------
-
-Building enterprise-grade AI is not just about writing code.
-
-It's about adopting an architecture-first mindset.
-
 
 RELIABILITY
-
-Design for:
 - Failure recovery
+- Retries
 - Graceful degradation
 
-
 SAFETY
-
-Build in:
-- Deterministic guardrails
+- Guardrails
 - Sandboxing
 - Circuit breakers
 
-
 EXPLAINABILITY
+- Logging
+- Auditing
+- Traceable decisions
 
-Ensure agents remain:
-- Controllable
-- Auditable
-
-
-IMPORTANT:
-
-These capabilities must be designed into the system from the very
-beginning, not patched on after a failure occurs.
+These should be designed from the beginning, not added after failures.
 
 
-THE COMPLETE ENTERPRISE AI STACK
---------------------------------------------------------------------------------
+================================================================================
+QUICK REVISION
+================================================================================
 
-This module builds on previous foundations:
+Sequential
+-> A -> B -> C
+-> Use when tasks depend on each other
 
-1. Theoretical Foundations
-   - BDI
-   - ReAct
-   - GOAP architectures
+Parallel
+-> A + B + C simultaneously
+-> Use for independent tasks
 
-2. Advanced RAG
-   - Enterprise-grade retrieval
-   - RAPTOR
-   - SLIDE
+Conditional
+-> IF condition -> Path A / Path B / Fallback
+-> Use for business rules
 
-3. Safety and Alignment
-   - Guardrails
-   - Sandboxing
-   - Circuit breakers
+Specialist Ensemble
+-> Multiple experts -> Orchestrator -> Decision
+-> Use for multidimensional problems
+
+Hierarchical
+-> Orchestrator -> Specialists -> Monitor -> Result
+-> Use for large workflows
+
+Research -> Critique -> Refine
+-> Research -> Review -> Improve -> Quality Gate
+-> Use when high-quality output is required
+
+
+================================================================================
+ENTERPRISE AI STACK
+================================================================================
+
+1. Agent Architecture
+   -> BDI / ReAct / GOAP
+
+2. Retrieval
+   -> RAG / RAPTOR / SLIDE
+
+3. Safety
+   -> Guardrails / Sandboxing / Circuit Breakers
 
 4. Orchestration
-   - Robust tool networks
-   - Multi-agent collaboration
+   -> Tools / Workflows / Multi-Agent Systems
 
 
 ================================================================================
-KEY TAKEAWAYS SUMMARY
+FINAL TAKEAWAY
 ================================================================================
 
-1. TOOL APIs
---------------------------------------------------------------------------------
-Key Insight:
-Clear contracts with precise schemas eliminate ambiguity for agents.
+Reliable Enterprise AI
+        =
+Reliable Tools
+        +
+Correct Orchestration
+        +
+Specialized Agents
+        +
+Quality Gates
+        +
+Failure Handling
+        +
+Monitoring
+        +
+Business Value
 
 
-2. SEQUENTIAL ORCHESTRATION
---------------------------------------------------------------------------------
-Key Insight:
-Tools execute in a fixed order.
+Think like an architect:
 
-Best suited for:
-Workflows with dependencies.
+Don't build one agent that does everything.
 
-
-3. PARALLEL ORCHESTRATION
---------------------------------------------------------------------------------
-Key Insight:
-Independent tools run simultaneously.
-
-Important Requirement:
-Aggregation and partial-failure logic.
-
-
-4. CONDITIONAL ORCHESTRATION
---------------------------------------------------------------------------------
-Key Insight:
-Route outputs based on validation checks and business logic.
-
-
-5. SPECIALIST ENSEMBLES
---------------------------------------------------------------------------------
-Key Insight:
-Multiple domain experts can provide deeper coverage for complex,
-multidimensional decisions than a single generalist.
-
-
-6. HIERARCHICAL ORCHESTRATION
---------------------------------------------------------------------------------
-Key Insight:
-Scale coordination by separating:
-
-Strategy -> Coordination -> Execution
-
-
-7. RESEARCH -> CRITIQUE -> REFINE
---------------------------------------------------------------------------------
-Key Insight:
-Quality emerges through controlled iteration and feedback loops.
-
-
-8. EDGE CASE HANDLING
---------------------------------------------------------------------------------
-Key Insight:
-Identify and prevent edge cases before they disrupt production.
-
-
-9. BUSINESS TRANSLATION
---------------------------------------------------------------------------------
-Key Insight:
-Ground technical choices in concrete business consequences.
+Build a controlled system where tools and specialized agents collaborate
+through clearly defined workflows.
 
 
 ================================================================================
-QUICK REVISION - ORCHESTRATION PATTERNS
-================================================================================
-
-SEQUENTIAL
-----------
-A -> B -> C
-
-Use when:
-Output from one step is required by the next step.
-
-
-PARALLEL
---------
-        +--> A --+
-Input --+--> B --+--> Aggregate
-        +--> C --+
-
-Use when:
-Tasks are independent and can run simultaneously.
-
-
-CONDITIONAL
------------
-Input -> Validate
-            |
-      +-----+-----+
-      |     |     |
-      v     v     v
-    Path A Path B Fallback
-
-Use when:
-The workflow depends on conditions or business rules.
-
-
-SPECIALIST ENSEMBLE
--------------------
-              +--> Specialist A --+
-Input --------+--> Specialist B --+--> Synthesis --> Decision
-              +--> Specialist C --+
-
-Use when:
-A problem requires multiple areas of expertise.
-
-
-HIERARCHICAL
-------------
-             Orchestrator
-                  |
-        +---------+---------+
-        |         |         |
-        v         v         v
-      Agent A   Agent B   Agent C
-        |         |         |
-        +---------+---------+
-                  |
-                  v
-             Monitoring
-                  |
-                  v
-               Result
-
-Use when:
-The workflow contains many agents or many coordinated tasks.
-
-
-RESEARCH -> CRITIQUE -> REFINE
--------------------------------
-
-Research
-   |
-   v
-Critique
-   |
-   v
-Quality Gate
-   |
-   +--> PASS --> Final Output
-   |
-   +--> FAIL --> Refine --> Re-evaluate
-
-Use when:
-Output quality needs iterative improvement.
-
-
-================================================================================
-YOUR NEXT STEPS
-================================================================================
-
-You are now equipped to:
-
-[1] Create agent-ready APIs with clear contracts
-
-[2] Orchestrate specialized agents to reduce cognitive load
-
-[3] Develop hierarchical delegation systems for enterprise workflows
-
-[4] Prevent behavioral drift and detect edge cases
-
-[5] Translate architecture into business value for stakeholders
-
-
-Start evaluating your current AI projects through the lens of an architect.
-
-Design systems that organizations can truly trust in production.
-
-
-================================================================================
-END OF GUIDE
+END
 ================================================================================
