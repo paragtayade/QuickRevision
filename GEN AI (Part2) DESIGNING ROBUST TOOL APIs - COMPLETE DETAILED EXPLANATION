@@ -1333,6 +1333,281 @@ Logging and Monitoring
 End-to-End Testing
 
 
+=============================EXTENDED DIAGRAMS EXPLANED====================
+
+Below is a clean, corrected, and compact text-format version of the n8n workflow. I removed duplicated diagrams, HTML tags, and inconsistent retry timing.
+
+1. Complete n8n Workflow
+┌───────────────┐
+│    Postman    │
+│  HTTP Client  │
+└───────┬───────┘
+        │ POST /webhook/abc123xyz
+        │ { customer_id, email }
+        ▼
+┌───────────────────────┐
+│ 1. Webhook            │
+│ Receive JSON request  │
+└───────────┬───────────┘
+            ▼
+┌───────────────────────┐
+│ 2. Input Validation   │
+│ Validate ID and email │
+└───────┬────────┬──────┘
+        │ Valid  │ Invalid
+        ▼        ▼
+┌──────────────┐  ┌────────────────────┐
+│ 3. Scenario  │  │ 7. Respond to      │
+│ Router       │  │ Webhook: HTTP 400  │
+└───────┬──────┘  └────────────────────┘
+        │
+        ▼
+┌───────────────────────┐
+│ 4. Query CRM          │
+│ HTTP Request / Mock   │
+└───────────┬───────────┘
+            │ HTTP status
+            ▼
+┌───────────────────────┐
+│ 5. Retry Decision     │
+│ Evaluate HTTP status  │
+└───────┬───────┬───────┘
+        │       │
+        │       ├── 400/404 ──────────────┐
+        │       │   Non-retriable         │
+        │       │                         │
+        │       └── 429/504               │
+        │           Retriable             │
+        │               │                 │
+        │               ▼                 │
+        │       ┌───────────────────┐     │
+        │       │ Attempts remain?  │     │
+        │       └──────┬──────┬─────┘     │
+        │              │ Yes  │ No        │
+        │              ▼      └───────────┤
+        │       ┌───────────────────┐     │
+        │       │ 6. Wait           │     │
+        │       │ 1s, 2s, or 4s     │     │
+        │       └─────────┬─────────┘     │
+        │                 │               │
+        │                 └── Retry CRM ──┘
+        │
+        │ 200/206
+        │ Success
+        ▼
+┌────────────────────────┐
+│ 7. Respond to Webhook  │◄──────── Errors
+│ Return final HTTP code │
+└───────────┬────────────┘
+            ▼
+┌────────────────┐
+│    Postman     │
+│ Gets response  │
+└────────────────┘
+
+2. Input Validation
+Incoming request
+       │
+       ▼
+Validate customer_id
+Pattern: ^[0-9]{10}$
+       │
+   ┌───┴───┐
+   │       │
+ Valid   Invalid
+   │       └──► HTTP 400: Invalid customer ID
+   ▼
+Validate email, if supplied
+       │
+   ┌───┴───┐
+   │       │
+ Valid   Invalid
+   │       └──► HTTP 400: Invalid email
+   ▼
+Continue to Scenario Router
+
+
+The supplied email expression is a practical format check, but it is not a complete implementation of the full RFC 5322 grammar.
+
+3. Scenario Router
+Customer ID     Scenario                    Final behavior
+-----------------------------------------------------------------
+1111111111      Rate limited                429, retry until limit
+2222222222      Temporary timeouts          504 → 504 → 200
+3333333333      Persistent timeouts         504 after final attempt
+4444444444      Partial customer data       206
+5555555555      Customer not found          404
+6666666666      Invalid-ID test case        400
+7777777777      Invalid-email test case     400
+Any other ID    Normal CRM lookup           200
+
+Important routing correction
+Validation errors should normally be detected before the router.
+
+Therefore:
+6666666666 is structurally a valid 10-digit ID.
+7777777777 does not itself make the email invalid.
+
+To test these scenarios:
+- Use an invalid ID such as "ABC123" for ID validation.
+- Supply an invalid email such as "user@domain" for email validation.
+
+4. Retry Decision Tree
+CRM response
+     │
+     ▼
+Check HTTP status
+     │
+     ├── 200 or 206
+     │      └──► Return success
+     │
+     ├── 400 or 404
+     │      └──► Return error immediately
+     │
+     └── 429 or 504
+            │
+            ▼
+      Attempts remaining?
+            │
+        ┌───┴───┐
+        │       │
+       Yes      No
+        │       └──► Return final error
+        ▼
+ Calculate backoff
+        │
+        ▼
+ Wait 1s / 2s / 4s
+        │
+        └──► Query CRM again
+
+5. Correct Retry Schedule
+
+Assumption: four total CRM attempts, consisting of the initial call plus three retries.
+
+Attempt 1: Call immediately
+    │ failure: 429/504
+    ▼
+Wait 1 second
+
+Attempt 2: Retry
+    │ failure: 429/504
+    ▼
+Wait 2 seconds
+
+Attempt 3: Retry
+    │ failure: 429/504
+    ▼
+Wait 4 seconds
+
+Attempt 4: Final retry
+    │
+    ├── 200/206 ──► Return success
+    └── 429/504 ──► Return final failure
+
+Total retries       : 3
+Total CRM attempts  : 4
+Total planned wait  : 1 + 2 + 4 = 7 seconds
+
+
+The CRM request duration must be added separately. Therefore, the earlier fixed “14 seconds” timeline is not reliable unless every mock request intentionally takes a specified amount of time.
+
+6. HTTP Handling Matrix
+Status   Meaning              Retry?   Workflow action
+---------------------------------------------------------------
+200      Success              No       Return complete data
+206      Partial content      No       Return available data
+400      Invalid request      No       Return validation error
+404      Customer not found   No       Return not-found error
+429      Rate limited         Yes      Honor Retry-After/backoff
+504      Gateway timeout      Yes      Apply exponential backoff
+
+
+For a 429 response, prefer the server-provided Retry-After value when available rather than always waiting only 1, 2, and 4 seconds.
+
+7. Retry-Success Example
+Postman
+   │
+   ▼
+Webhook
+   │
+   ▼
+Validation passed
+   │
+   ▼
+Router: customer_id = 2222222222
+   │
+   ▼
+CRM Attempt 1 → 504
+   │
+   ▼
+Wait 1 second
+   │
+   ▼
+CRM Attempt 2 → 504
+   │
+   ▼
+Wait 2 seconds
+   │
+   ▼
+CRM Attempt 3 → 200
+   │
+   ▼
+Return HTTP 200
+{
+  "status": 200,
+  "success": true,
+  "data": {
+    "customer_id": "2222222222",
+    "name": "John Doe",
+    "email": "john@example.com"
+  },
+  "retries_used": 2
+}
+
+8. Validation-Failure Example
+Postman sends customer_id = "ABC123"
+   │
+   ▼
+Webhook
+   │
+   ▼
+Validation fails
+   │
+   ▼
+CRM is not called
+   │
+   ▼
+Return HTTP 400
+{
+  "status": 400,
+  "success": false,
+  "error": "invalid_customer_id",
+  "message": "Customer ID must be exactly 10 digits"
+}
+
+9. Recommended n8n Node Names
+1. Customer Lookup Webhook
+2. Validate Request
+3. Select Test Scenario
+4. Query CRM
+5. Evaluate CRM Response
+6. Calculate Backoff
+7. Wait Before Retry
+8. Format Success Response
+9. Format Error Response
+10. Respond to Webhook
+
+Main corrections made
+Removed repeated diagrams and embedded HTML.
+Corrected the damaged 200/206 status branch.
+Standardized terminology to four attempts and three retries.
+Corrected the exponential-backoff timeline.
+Separated validation errors from customer-ID scenario routing.
+Added proper handling guidance for 429 Retry-After.
+Removed the card-like placeholder that appeared inside the retry diagram.
+
+
 ================================================================================
 END
 ================================================================================
