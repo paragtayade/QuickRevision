@@ -1,0 +1,634 @@
+============================================================
+TOOL ORCHESTRATION PATTERNS
+============================================================
+
+1. BIG PICTURE
+============================================================
+
+                    TOOL ORCHESTRATION
+                           │
+          ┌────────────────┼────────────────┐
+          │                │                │
+          ▼                ▼                ▼
+     SEQUENTIAL         PARALLEL        CONDITIONAL
+          │                │                │
+     A → B → C        ┌─ A ─┐          Condition?
+                       ├─ B ─┤           /      \
+                       ├─ C ─┤         Yes      No
+                       └─────┘           │        │
+                          │              ▼        ▼
+                          ▼            Path A   Path B
+                       MERGE
+
+
+Easy Memory Rule:
+
+Dependency?       → Sequential
+Independent?      → Parallel
+Decision needed?  → Conditional
+
+
+============================================================
+2. SEQUENTIAL ORCHESTRATION
+============================================================
+
+Use when the next tool depends on the output of the
+previous tool.
+
+Request
+   │
+   ▼
+┌──────────────────────┐
+│ Validate Identity    │
+└──────────┬───────────┘
+           │
+           │ customer_id
+           ▼
+┌──────────────────────┐
+│ Create Account       │
+└──────────┬───────────┘
+           │
+           │ account_id
+           ▼
+┌──────────────────────┐
+│ Send Welcome Email   │
+└──────────┬───────────┘
+           │
+           ▼
+        Complete
+
+
+============================================================
+3. DATA TRANSFORMATION BETWEEN TOOLS
+============================================================
+
+Tool A Output:
+
+{
+  "user_id": "123",
+  "contact_email": "alice@example.com"
+}
+
+        │
+        ▼
+
+┌────────────────────────────┐
+│ Transformation / Mapping   │
+│                            │
+│ user_id → customer_id      │
+│ contact_email → email      │
+└────────────┬───────────────┘
+
+        │
+        ▼
+
+Tool B Input:
+
+{
+  "customer_id": "123",
+  "email": "alice@example.com"
+}
+
+
+============================================================
+4. SEQUENTIAL ERROR HANDLING
+============================================================
+
+Tool A
+  │
+  ▼
+Success?
+  │
+  ├── NO ───────────────► Error Response
+  │
+ YES
+  │
+  ▼
+Tool B
+  │
+  ▼
+Success?
+  │
+  ├── YES ──────────────► Tool C
+  │
+  └── NO
+       │
+       ▼
+   Error Type?
+       │
+       ├── Retriable
+       │      │
+       │      ▼
+       │  Wait / Backoff
+       │      │
+       │      └────────► Retry Tool B
+       │
+       └── Non-Retriable
+              │
+              ▼
+          Fail / Rollback
+
+
+Temporary Failure
+      ↓
+Retry
+
+Permanent Failure
+      ↓
+Fail immediately
+
+Earlier operation created state
+      ↓
+Compensate / Rollback
+
+
+============================================================
+5. PARALLEL ORCHESTRATION
+============================================================
+
+Use when tools are independent.
+
+                 Query
+          "AI agent trends"
+                    │
+       ┌────────────┼────────────┬────────────┐
+       │            │            │            │
+       ▼            ▼            ▼            ▼
+   News API      Stocks       Analysts      Social
+      2s           2s            2s           2s
+       │            │            │            │
+       └────────────┴─────┬──────┴────────────┘
+                          │
+                          ▼
+                  ┌──────────────┐
+                  │ Aggregation  │
+                  └──────┬───────┘
+                         │
+                         ▼
+                     Analysis
+
+
+============================================================
+6. SEQUENTIAL VS PARALLEL LATENCY
+============================================================
+
+SEQUENTIAL:
+
+Tool A → Tool B → Tool C → Tool D
+
+2s       2s       2s       2s
+
+Total ≈ 8 seconds
+
+
+PARALLEL:
+
+Tool A ────── 2s
+Tool B ────── 2s
+Tool C ────── 2s
+Tool D ────── 2s
+
+All execute simultaneously.
+
+Total ≈ 2 seconds
+
+
+============================================================
+7. PARALLEL PARTIAL FAILURE
+============================================================
+
+News API      → 200 ✓
+Stocks        → 404 ✗
+Analysts      → 200 ✓
+Social        → 200 ✓
+
+                 │
+                 ▼
+
+          ┌──────────────┐
+          │ Aggregation  │
+          └──────┬───────┘
+                 │
+                 ▼
+
+Available Sources = 3
+Failed Sources    = 1
+Quality Score     = 0.75
+is_partial        = true
+
+                 │
+                 ▼
+
+Continue processing with available information.
+
+
+============================================================
+8. PARALLEL RETRY
+============================================================
+
+                   START
+                     │
+       ┌─────────────┼─────────────┐
+       │             │             │
+       ▼             ▼             ▼
+     News          Stocks        Social
+       │             │             │
+      504           200           200
+       │             │             │
+       ▼             ▼             ▼
+     Retry        Complete      Complete
+       │
+       ▼
+    Wait 1s
+       │
+       ▼
+   Attempt 2
+       │
+      504
+       │
+       ▼
+    Wait 2s
+       │
+       ▼
+   Attempt 3
+       │
+      200 ✓
+       │
+       ▼
+   Aggregation
+
+
+Important:
+
+Only the failed branch retries.
+
+Already successful branches do NOT need to execute again.
+
+
+============================================================
+9. TIMEOUT PATTERN
+============================================================
+
+News API       → Timeout: 10s
+Stocks         → Timeout: 10s
+Analysts       → Timeout: 15s
+Social         → Timeout: 8s
+
+
+Source Request
+      │
+      ▼
+Completed before timeout?
+      │
+   ┌──┴──┐
+   │     │
+  YES    NO
+   │     │
+   ▼     ▼
+ Use   Timeout
+ Data   Error
+         │
+         ▼
+   Retry / Cache /
+   Skip / Fallback
+
+
+============================================================
+10. CACHE FALLBACK
+============================================================
+
+             Call Primary Source
+                    │
+               ┌────┴────┐
+               │         │
+            Success    Failure
+               │         │
+               ▼         ▼
+           Fresh Data   Check Cache
+                          │
+                     ┌────┴────┐
+                     │         │
+                   Found     Missing
+                     │         │
+                     ▼         ▼
+                 Cached Data  Mark Failed
+                     │         │
+                     └────┬────┘
+                          │
+                          ▼
+                     Aggregation
+
+
+============================================================
+11. CIRCUIT BREAKER
+============================================================
+
+               ┌────────────┐
+               │   CLOSED   │
+               │ Calls OK   │
+               └─────┬──────┘
+                     │
+             Failure threshold
+                     │
+                     ▼
+               ┌────────────┐
+               │    OPEN    │
+               │ Stop calls │
+               └─────┬──────┘
+                     │
+              Recovery period
+                     │
+                     ▼
+               ┌────────────┐
+               │ HALF-OPEN  │
+               │ Test call  │
+               └─────┬──────┘
+                  ┌──┴──┐
+                  │     │
+               Success Failure
+                  │     │
+                  ▼     ▼
+               CLOSED  OPEN
+
+
+Remember:
+
+CLOSED    = Calls allowed
+OPEN      = Calls blocked
+HALF-OPEN = Test recovery
+
+
+============================================================
+12. CONDITIONAL ORCHESTRATION
+============================================================
+
+                 Aggregated Data
+                       │
+                       ▼
+               Validate Data
+                       │
+                       ▼
+                Quality Score
+                       │
+       ┌───────────────┼────────────────┐
+       │               │                │
+       ▼               ▼                ▼
+    >= 0.8        0.5 to < 0.8        < 0.5
+       │               │                │
+       ▼               ▼                ▼
+ Opportunity          Risk           Fallback
+  Analysis          Analysis          Report
+
+
+============================================================
+13. DETERMINISTIC CONDITIONS
+============================================================
+
+GOOD CONDITIONS:
+
+amount > 10000
+
+quality_score >= 0.8
+
+language != "English"
+
+HTTP status == 429
+
+attempt_count < 4
+
+
+------------------------------------------------------------
+
+AVOID VAGUE CONDITIONS:
+
+"Customer looks suspicious"
+
+"Document seems important"
+
+"Transaction appears risky"
+
+
+============================================================
+14. QUALITY SCORE ROUTING
+============================================================
+
+With 4 equally weighted sources:
+
+4 / 4 = 1.00 → Opportunity Analysis
+
+3 / 4 = 0.75 → Risk Analysis
+
+2 / 4 = 0.50 → Risk Analysis
+
+1 / 4 = 0.25 → Fallback Report
+
+0 / 4 = 0.00 → Fallback Report
+
+
+Routing Rules:
+
+quality_score >= 0.80
+→ Opportunity Analysis
+
+quality_score >= 0.50 AND quality_score < 0.80
+→ Risk Analysis
+
+quality_score < 0.50
+→ Fallback Report
+
+
+============================================================
+15. ALL THREE PATTERNS COMBINED
+============================================================
+
+                     Request
+                        │
+                        ▼
+              ┌─────────────────┐
+              │   Setup Query   │
+              └────────┬────────┘
+                       │
+                       │
+                 SEQUENTIAL
+                       │
+                       ▼
+       ┌───────────────┼───────────────┬───────────────┐
+       │               │               │               │
+       ▼               ▼               ▼               ▼
+    News API        Stocks          Analysts         Social
+       │               │               │               │
+       │          PARALLEL EXECUTION                    │
+       │               │               │               │
+       └───────────────┴───────┬───────┴───────────────┘
+                               │
+                               ▼
+                        ┌──────────────┐
+                        │ Aggregation  │
+                        └──────┬───────┘
+                               │
+                               │
+                          SEQUENTIAL
+                               │
+                               ▼
+                        ┌──────────────┐
+                        │ Validation   │
+                        │ Quality      │
+                        │ Score        │
+                        └──────┬───────┘
+                               │
+                               │
+                         CONDITIONAL
+                               │
+                 ┌─────────────┼─────────────┐
+                 │             │             │
+                 ▼             ▼             ▼
+             score>=.8     .5<=score<.8    score<.5
+                 │             │             │
+                 ▼             ▼             ▼
+            Opportunity       Risk        Fallback
+             Analysis       Analysis       Report
+                 │             │             │
+                 └─────────────┼─────────────┘
+                               │
+                               ▼
+                        ┌──────────────┐
+                        │ Final Output │
+                        └──────────────┘
+
+
+============================================================
+16. PRODUCTION-STYLE RESILIENT FLOW
+============================================================
+
+                        REQUEST
+                           │
+                           ▼
+                    Validate Input
+                           │
+                           ▼
+                      Setup Query
+                           │
+       ┌───────────────────┼───────────────────┐
+       │                   │                   │
+       ▼                   ▼                   ▼
+    Source A            Source B            Source C
+       │                   │                   │
+    Timeout             Timeout             Timeout
+       │                   │                   │
+       ▼                   ▼                   ▼
+    Success?            Success?            Success?
+     /    \              /    \              /    \
+   Yes     No          Yes     No          Yes     No
+    │       │           │       │           │       │
+    │    Retriable?     │    Retriable?     │    Retriable?
+    │     /    \        │     /    \        │     /    \
+    │   Yes     No      │   Yes     No      │   Yes     No
+    │    │       │      │    │       │      │    │       │
+    │  Retry   Cache    │  Retry   Cache    │  Retry   Cache
+    │    │       │      │    │       │      │    │       │
+    └────┴───────┴──────┴────┴───────┴──────┴────┴───────┘
+                           │
+                           ▼
+                      Aggregation
+                           │
+                           ▼
+                 Calculate Data Quality
+                           │
+               ┌───────────┼───────────┐
+               │           │           │
+               ▼           ▼           ▼
+             HIGH        MEDIUM        LOW
+               │           │           │
+               ▼           ▼           ▼
+         Opportunity       Risk      Fallback
+           Analysis      Analysis     Report
+               │           │           │
+               └───────────┼───────────┘
+                           │
+                           ▼
+                      Final Output
+
+
+============================================================
+17. INTERVIEW-READY SUMMARY
+============================================================
+
+Tool orchestration controls how multiple tools execute and
+exchange data.
+
+Sequential orchestration:
+Used when one tool depends on another.
+
+Parallel orchestration:
+Used when operations are independent and can run simultaneously.
+
+Conditional orchestration:
+Used when execution needs deterministic routing based on
+status, validation, or data quality.
+
+For production resilience, combine them with:
+
+• Data contracts
+• Data transformations
+• Aggregation
+• Timeouts
+• Retry with exponential backoff
+• Partial failure handling
+• Cache fallback
+• Circuit breakers
+• Explicit fallback paths
+• Data-quality validation
+
+
+============================================================
+18. QUICK REVISION
+============================================================
+
+Sequential
+→ Dependency
+
+
+Parallel
+→ Performance
+
+
+Conditional
+→ Decision making
+
+
+Transformation
+→ Fix contract mismatch
+
+
+Aggregation
+→ Combine parallel results
+
+
+Timeout
+→ Prevent indefinite waiting
+
+
+Retry
+→ Recover transient failures
+
+
+Cache
+→ Provide fallback data
+
+
+Circuit Breaker
+→ Protect an unhealthy dependency
+
+
+Fallback
+→ Provide controlled degraded behavior
+
+
+Quality Score
+→ Deterministic routing
+
+
+============================================================
+END
+============================================================
+
