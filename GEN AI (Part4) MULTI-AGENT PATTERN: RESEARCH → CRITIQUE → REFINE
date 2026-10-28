@@ -1,4 +1,3 @@
-
 ============================================================
 MULTI-AGENT PATTERN: RESEARCH → CRITIQUE → REFINE
 ============================================================
@@ -22,13 +21,10 @@ Final Output
 
 
 ============================================================
-PART 1: THE FUNDAMENTAL PROBLEM
+1. WHY USE MULTIPLE AGENTS?
 ============================================================
 
-WHY CAN A SINGLE AGENT STRUGGLE?
-------------------------------------------------------------
-
-A single agent may be asked to do all of these together:
+A single agent may need to:
 
 1. Gather information
 2. Evaluate information
@@ -36,920 +32,372 @@ A single agent may be asked to do all of these together:
 4. Fix problems
 5. Improve the final answer
 
+Different activities need different focus:
 
-Single Agent:
+Research  = BREADTH
+Critique  = QUALITY
+Refine    = IMPROVEMENT
 
-┌─────────────────────────────────────────┐
-│ Gather Information                     │
-│ Evaluate Quality                       │
-│ Find Problems                          │
-│ Fix Problems                           │
-│ Improve Output                         │
-│                                         │
-│ Everything handled by one agent        │
-└─────────────────────────────────────────┘
+Solution:
 
-
-The problem:
-
-Different activities need different focus.
-
-Gathering focuses on:
-
-BREADTH
-
-Evaluating focuses on:
-
-QUALITY
-
-Refining focuses on:
-
-IMPROVEMENT
+Divide the work between specialized agents.
 
 
 ============================================================
-SOLUTION: COGNITIVE SPECIALIZATION
+2. THREE MAIN AGENTS
 ============================================================
 
-Divide responsibilities between 3 agents.
-
-
 ------------------------------------------------------------
-1. RESEARCH AGENT
+RESEARCH AGENT
 ------------------------------------------------------------
 
-ONLY JOB:
-
-Gather information.
-
-It does NOT:
-
-- Evaluate
-- Judge
-- Fix
-- Rewrite
-
-
-------------------------------------------------------------
-2. CRITIQUE AGENT
-------------------------------------------------------------
-
-ONLY JOB:
-
-Evaluate quality.
-
-It does NOT:
-
-- Gather
-- Fix
-- Rewrite
-
-
-------------------------------------------------------------
-3. REFINE AGENT
-------------------------------------------------------------
-
-ONLY JOB:
-
-Improve the content based on feedback.
-
-It does NOT:
-
-- Re-evaluate
-- Judge
-- Start completely new research
-
-
-------------------------------------------------------------
-EASY MEMORY
-------------------------------------------------------------
-
-RESEARCH
-= Collect
-
-
-CRITIQUE
-= Check
-
-
-REFINE
-= Improve
-
-
-============================================================
-PART 2: RESEARCH AGENT
-============================================================
-
-MAIN RESPONSIBILITY:
-
+Purpose:
 Gather and organize information.
 
-
-============================================================
-WHAT THE RESEARCH AGENT DOES
-============================================================
-
-1. INFORMATION GATHERING
+Main Tasks:
 
 - Search knowledge bases
 - Query APIs
 - Retrieve documents
 - Compile data
-
-
-------------------------------------------------------------
-
-2. SOURCE MANAGEMENT
-
-- Track sources
-- Record citations
-- Note relevance scores
-- Maintain source diversity
-
-
-------------------------------------------------------------
-
-3. DATA ORGANIZATION
-
+- Track sources and citations
 - Categorize findings
-- Create hierarchies
-- Group related information
-- Maintain structure
+- Record possible information gaps
 
+Does NOT:
 
-============================================================
-WHAT THE RESEARCH AGENT DOES NOT DO
-============================================================
+- Evaluate quality
+- Judge the final answer
+- Fix problems
+- Rewrite content
 
-DOES NOT evaluate quality.
+Easy Memory:
 
-Example:
-
-"This source is unreliable."
-
-→ Not its job
+RESEARCH = COLLECT
 
 
 ------------------------------------------------------------
-
-DOES NOT judge relevance.
-
-Example:
-
-"This is not important."
-
-→ Not its job
-
-
+CRITIQUE AGENT
 ------------------------------------------------------------
 
-DOES NOT fix problems.
+Purpose:
+Evaluate the quality of the research/output.
 
-Example:
-
-"This section needs better wording."
-
-→ Not its job
-
-
-------------------------------------------------------------
-
-DOES NOT make improvements.
-
-Example:
-
-"Let me enhance this."
-
-→ Not its job
-
-
-------------------------------------------------------------
-
-DOES NOT loop back by itself.
-
-Example:
-
-"I need more information."
-
-→ Not its job to initiate another cycle
-
-
-============================================================
-WHY THIS MATTERS
-============================================================
-
-If research and evaluation are mixed together:
-
-- Gathering may stop too early
-- Useful information may be missed
-- Time may be wasted fixing instead of gathering
-- Output may become incomplete or biased
-
-
-============================================================
-RESEARCH EXAMPLE
-============================================================
-
-Input:
-
-"Research AI agent frameworks"
-
-
-Process:
-
-1. Search academic databases
-
-   → Found 23 papers on agent architectures
-
-
-2. Query industry reports
-
-   → Found 15 reports on production systems
-
-
-3. Search GitHub repositories
-
-   → Found 47 open-source frameworks
-
-
-4. Compile findings
-
-   → Organize into:
-
-      - Theory
-      - Practice
-      - Tools
-
-
-5. Record metadata
-
-   → Source
-   → Date
-   → Relevance score
-   → Key findings
-
-
-============================================================
-RESEARCH OUTPUT - SIMPLIFIED
-============================================================
-
-{
-  "topic": "AI agent frameworks",
-
-  "sources": [
-    {
-      "title": "Agent Architecture Patterns",
-      "type": "academic",
-      "date": "2024-01-15",
-      "relevance_score": 0.95,
-      "key_findings": "..."
-    },
-
-    {
-      "title": "Production Agent Systems",
-      "type": "industry_report",
-      "date": "2024-02-20",
-      "relevance_score": 0.87,
-      "key_findings": "..."
-    }
-  ],
-
-  "categories": {
-    "theoretical_foundations": "...",
-    "practical_implementations": "...",
-    "open_source_tools": "...",
-    "recent_developments": "..."
-  },
-
-  "total_sources": 85,
-
-  "data_points_collected": 247,
-
-  "coverage_estimate": 0.72,
-
-  "gaps": [
-    "Limited coverage of 2024 developments",
-    "Few practical implementation examples",
-    "Edge cases not well documented"
-  ]
-}
-
-
-IMPORTANT:
-
-Research Agent can RECORD gaps.
-
-But it does NOT fix them.
-
-
-============================================================
-PART 3: CRITIQUE AGENT
-============================================================
-
-MAIN RESPONSIBILITY:
-
-Evaluate the Research Agent's output.
-
-
-============================================================
-WHAT THE CRITIQUE AGENT DOES
-============================================================
-
-1. QUALITY ASSESSMENT
+Main Tasks:
 
 - Check completeness
 - Verify accuracy
-- Evaluate relevance
-- Assess structure
+- Check relevance
+- Check structure
+- Identify missing information
+- Detect duplication
+- Give specific feedback
+- Assign a quality score
+
+Does NOT:
+
+- Perform new research
+- Fix the content
+- Rewrite the answer
+
+Easy Memory:
+
+CRITIQUE = CHECK
 
 
 ------------------------------------------------------------
-
-2. GAP IDENTIFICATION
-
-Ask:
-
-- What is missing?
-- What is incomplete?
-- What needs clarification?
-- What is redundant?
-
-
+REFINE AGENT
 ------------------------------------------------------------
 
-3. FEEDBACK GENERATION
+Purpose:
+Improve the content based on Critique Agent feedback.
 
-Produce:
+Main Tasks:
 
-- Specific gaps
-- Severity
-- Priority
-- Actionable recommendations
+- Fill identified gaps
+- Expand incomplete sections
+- Add missing examples
+- Improve clarity
+- Improve organization
+- Improve explanations
+- Improve presentation
+
+Does NOT:
+
+- Make the final quality decision
+- Independently evaluate its own output
+- Start unrelated research
+
+Easy Memory:
+
+REFINE = IMPROVE
 
 
 ============================================================
-QUALITY DIMENSIONS
+3. SIMPLE RESPONSIBILITY MODEL
 ============================================================
 
-1. COMPLETENESS
+RESEARCH
+   ↓
+Collect information
 
-Weight = 40%
+CRITIQUE
+   ↓
+Check information
 
-Example Score = 0.70
+QUALITY GATE
+   ↓
+Decide what happens next
 
+REFINE
+   ↓
+Improve information
 
-Questions:
+CRITIQUE AGAIN
+   ↓
+Recheck quality
 
-- Are all aspects covered?
-- Is scope adequate?
-- Are there gaps?
-
-
-------------------------------------------------------------
-
-2. ACCURACY
-
-Weight = 30%
-
-Example Score = 0.85
-
-
-Questions:
-
-- Are facts correct?
-- Are citations valid?
-- Are claims supported?
-
-
-------------------------------------------------------------
-
-3. RELEVANCE
-
-Weight = 20%
-
-Example Score = 0.80
-
-
-Questions:
-
-- Is the content relevant?
-- Is unnecessary content present?
-- Is focus maintained?
-
-
-------------------------------------------------------------
-
-4. STRUCTURE
-
-Weight = 10%
-
-Example Score = 0.75
-
-
-Questions:
-
-- Is it organized?
-- Is it easy to follow?
-- Is hierarchy clear?
+OUTPUT
+   ↓
+Return final result
 
 
 ============================================================
-QUALITY SCORE CALCULATION
+4. RESEARCH AGENT EXAMPLE
 ============================================================
+
+Request:
+
+"Research AI agent frameworks"
+
+Research Agent:
+
+1. Search academic sources
+2. Search industry reports
+3. Search open-source repositories
+4. Organize findings into categories
+5. Record sources and metadata
+
+Example Categories:
+
+- Theoretical foundations
+- Practical implementations
+- Open-source tools
+- Recent developments
+
+Example Output:
+
+Topic:
+AI Agent Frameworks
+
+Sources:
+85
+
+Data Points:
+247
+
+Coverage:
+0.72
+
+Possible Gaps:
+
+- Limited recent developments
+- Few practical examples
+- Edge cases not well documented
+
+Important:
+
+Research Agent can RECORD potential gaps.
+
+It does not decide how serious they are or fix them.
+
+
+============================================================
+5. CRITIQUE AGENT
+============================================================
+
+The Critique Agent evaluates four main areas:
+
+1. Completeness
+2. Accuracy
+3. Relevance
+4. Structure
+
+
+------------------------------------------------------------
+QUALITY SCORE EXAMPLE
+------------------------------------------------------------
 
 Completeness:
+Score  = 0.70
+Weight = 40%
 
 0.70 × 0.40 = 0.280
 
 
 Accuracy:
+Score  = 0.85
+Weight = 30%
 
 0.85 × 0.30 = 0.255
 
 
 Relevance:
+Score  = 0.80
+Weight = 20%
 
 0.80 × 0.20 = 0.160
 
 
 Structure:
+Score  = 0.75
+Weight = 10%
 
 0.75 × 0.10 = 0.075
 
 
-Total:
+Total Quality Score:
 
 0.280
 + 0.255
 + 0.160
 + 0.075
-
+-------------
 = 0.770
 
+Overall Quality = 0.77
 
-Overall Quality Score:
-
-0.77
-
-
-Required Threshold:
-
-0.80
-
-
-Decision:
+Required Threshold = 0.80
 
 0.77 < 0.80
 
-→ REFINE
-
-
-============================================================
-WHAT THE CRITIQUE AGENT DOES NOT DO
-============================================================
-
-DOES NOT gather more information.
-
-DOES NOT fix problems.
-
-DOES NOT rewrite content.
-
-DOES NOT make final improvements.
-
-DOES NOT independently loop back to Research.
-
-
-Its job is simply:
-
-CHECK → SCORE → IDENTIFY GAPS → GIVE FEEDBACK
-
-
-============================================================
-CRITIQUE EXAMPLE
-============================================================
-
-Input:
-
-Research Agent output
-
-
-Process:
-
-1. Check Completeness
-
-Theoretical foundations
-→ Good
-
-Practical implementation
-→ Missing examples
-
-Recent developments
-→ Only covers 2023
-
-Edge cases
-→ Not covered
-
-
-------------------------------------------------------------
-
-2. Check Accuracy
-
-- Verify claims
-- Check citations
-- Validate dates
-- Validate facts
-
-
-------------------------------------------------------------
-
-3. Check Relevance
-
-- Check each section
-- Find unnecessary information
-- Find duplication
-
-
-------------------------------------------------------------
-
-4. Check Structure
-
-- Check hierarchy
-- Check organization
-- Check logical flow
-
-
-============================================================
-CRITIQUE OUTPUT - SIMPLIFIED
-============================================================
-
-{
-  "overall_quality_score": 0.77,
-
-  "dimension_scores": {
-    "completeness": 0.70,
-    "accuracy": 0.85,
-    "relevance": 0.80,
-    "structure": 0.75
-  },
-
-  "gaps": [
-    {
-      "gap": "Missing 2024 AI agent developments",
-      "severity": "high",
-      "priority": 1
-    },
-
-    {
-      "gap": "No practical implementation examples",
-      "severity": "high",
-      "priority": 2
-    },
-
-    {
-      "gap": "Edge cases not documented",
-      "severity": "medium",
-      "priority": 3
-    },
-
-    {
-      "gap": "Some sections could be clearer",
-      "severity": "low",
-      "priority": 4
-    }
-  ],
-
-  "strengths": [
-    "Excellent theoretical foundation",
-    "Well-organized structure",
-    "Good source diversity",
-    "Accurate citations"
-  ],
-
-  "recommendation": "REFINE",
-
-  "confidence": 0.88,
-
-  "estimated_effort_to_improve": "medium"
-}
-
-
-IMPORTANT:
-
-Critique Agent identifies problems.
-
-It does NOT fix them.
-
-
-============================================================
-PART 4: REFINE AGENT
-============================================================
-
-MAIN RESPONSIBILITY:
-
-Use the critique feedback to improve the content.
-
-
-============================================================
-WHAT THE REFINE AGENT DOES
-============================================================
-
-1. ADDRESS GAPS
-
-- Add missing information
-- Expand incomplete sections
-- Fill knowledge gaps
-- Complete coverage
-
-
-------------------------------------------------------------
-
-2. ENHANCE CONTENT
-
-- Improve clarity
-- Improve organization
-- Improve structure
-- Improve flow
-
-
-------------------------------------------------------------
-
-3. IMPROVE QUALITY
-
-- Add examples
-- Improve explanations
-- Strengthen arguments
-- Improve presentation
-
-
-============================================================
-WHAT THE REFINE AGENT DOES NOT DO
-============================================================
-
-DOES NOT start completely new research.
-
-DOES NOT re-evaluate its own quality.
-
-DOES NOT make the final quality judgment.
-
-DOES NOT independently loop back to Critique.
-
-DOES NOT change the core findings.
-
-
-============================================================
-REFINEMENT STRATEGY
-============================================================
-
-GAP 1:
-
-"Missing 2024 AI agent developments"
-
-
-Refine Agent:
-
-1. Use existing research
-
-2. Add available 2024 developments
-
-3. Integrate them into existing structure
-
-4. Maintain consistency
-
-5. Add citations
-
-
-------------------------------------------------------------
-
-GAP 2:
-
-"No practical implementation examples"
-
-
-Refine Agent:
-
-1. Use existing research
-
-2. Add 3-5 practical examples
-
-3. Explain application
-
-4. Include code snippets or diagrams
-
-5. Connect examples to theory
-
-
-------------------------------------------------------------
-
-GAP 3:
-
-"Edge cases not documented"
-
-
-Refine Agent:
-
-1. Use existing research
-
-2. Identify edge cases from theory
-
-3. Document the edge cases
-
-4. Explain implications
-
-5. Suggest handling strategies
-
-
-============================================================
-REFINE AGENT EXAMPLE
-============================================================
-
-Input:
-
-- Original Research
-- Critique Feedback
-
-
-Process:
-
-
-1. Fix missing developments
-
-   - Add 2024 developments
-   - Add recent framework releases
-   - Update timeline
-
-
-2. Fix missing examples
-
-   - Add 3 examples
-   - Include code snippets
-   - Explain examples
-
-
-3. Fix missing edge cases
-
-   - Add edge-case section
-   - Document 5 common cases
-   - Add handling strategies
-
-
-4. Improve clarity
-
-   - Rewrite unclear sections
-   - Improve transitions
-   - Improve organization
-
-
-============================================================
-REFINE OUTPUT - SIMPLIFIED
-============================================================
-
-{
-  "topic": "AI agent frameworks",
-
-  "sections": [
-
-    "Theoretical Foundations",
-
-    "Practical Implementations",
-
-    "2024 Developments",
-
-    "Edge Cases and Handling"
-  ],
-
-  "examples": [
-    "Simple Agent",
-    "Multi-Agent System",
-    "Production System"
-  ],
-
-  "new_frameworks": [
-    "Framework A",
-    "Framework B",
-    "Framework C"
-  ],
-
-  "edge_cases": [
-    "Agent timeout",
-    "Circular dependencies"
-  ],
-
-  "improvements_made": [
-    "Added 2024 AI agent developments",
-    "Included 3 practical implementation examples",
-    "Expanded edge cases section",
-    "Improved overall clarity",
-    "Enhanced structure and flow"
-  ],
-
-  "new_quality_estimate": 0.88,
-
-  "ready_for_review": true
-}
-
-
-============================================================
-PART 5: QUALITY GATE
-============================================================
-
-PURPOSE:
-
-Decide whether the current output is good enough or needs
-another refinement cycle.
-
-
-Simple Flow:
-
-Critique Agent
-      │
-      ▼
-quality_score
-      │
-      ▼
-Quality Gate
-      │
-   ┌──┴──┐
-   │     │
- PASS   REFINE
-   │     │
-   ▼     ▼
-Output  Refine Agent
-
-
-============================================================
-QUALITY GATE - CONDITION 1
-============================================================
-
-Check Quality Score.
-
-
-IF:
-
-quality_score >= 0.80
-
-
-THEN:
-
-PASS
-
-
-Meaning:
-
-Output is good enough.
-
-
-ELSE:
+Decision:
 
 REFINE
 
 
 ============================================================
-QUALITY GATE - CONDITION 2
+6. CRITIQUE OUTPUT EXAMPLE
 ============================================================
 
-Check iteration count.
+Overall Score:
+0.77
+
+Gaps:
+
+1. Missing recent AI agent developments
+   Severity = HIGH
+
+2. No practical implementation examples
+   Severity = HIGH
+
+3. Edge cases not documented
+   Severity = MEDIUM
+
+4. Some sections are unclear
+   Severity = LOW
+
+Strengths:
+
+- Good theoretical foundation
+- Good source diversity
+- Accurate citations
+- Organized structure
+
+Recommendation:
+
+REFINE
 
 
-IF:
+============================================================
+7. REFINE AGENT
+============================================================
 
-iteration_count >= max_iterations
+The Refine Agent receives:
+
+- Original Research
+- Critique Feedback
+
+Then fixes the identified problems.
 
 
 Example:
 
-max_iterations = 3
+Gap 1:
+Missing recent developments
+
+Action:
+Add available recent developments and integrate them
+into the existing structure.
 
 
-THEN:
+Gap 2:
+No practical examples
 
-STOP refining.
+Action:
+Add practical implementation examples.
 
-Return the best available result.
+
+Gap 3:
+Missing edge cases
+
+Action:
+Add common edge cases and handling strategies.
+
+
+Gap 4:
+Unclear sections
+
+Action:
+Improve wording, structure, and flow.
+
+
+Example Refined Output:
+
+Sections:
+
+- Theoretical Foundations
+- Practical Implementations
+- Recent Developments
+- Edge Cases and Handling
+
+Improvements:
+
+- Added missing developments
+- Added practical examples
+- Added edge cases
+- Improved clarity
+- Improved structure
 
 
 ============================================================
-QUALITY GATE - CONDITION 3
+8. QUALITY GATE
 ============================================================
 
-Check improvement.
+Purpose:
+
+Decide whether the output is good enough or needs
+another refinement cycle.
 
 
-IF:
+Basic Rule:
 
-quality improved enough
+IF quality_score >= 0.80
+    PASS
 
-→ Continue
+ELSE
+    REFINE
 
 
-IF:
+But also check:
 
-no meaningful improvement
-
-→ Stop
+1. Quality threshold
+2. Maximum iterations
+3. Improvement between iterations
 
 
 ============================================================
-COMPLETE QUALITY GATE LOGIC
+9. QUALITY GATE LOGIC
 ============================================================
 
                Quality Score
@@ -974,13 +422,12 @@ COMPLETE QUALITY GATE LOGIC
 
 
 ============================================================
-WHY QUALITY GATE IS IMPORTANT
+10. WHY QUALITY GATE IS IMPORTANT
 ============================================================
 
-PROBLEM 1: INFINITE LOOPS
-------------------------------------------------------------
+1. Prevent Infinite Loops
 
-Without Quality Gate:
+Without control:
 
 Refine
   ↓
@@ -989,178 +436,136 @@ Critique
 Refine
   ↓
 Critique
-  ↓
-Refine
   ↓
 ...
-
-Never stops.
-
 
 With Quality Gate:
 
 Refine
-   ↓
+  ↓
 Critique
-   ↓
+  ↓
 Quality Gate
-   ↓
-STOP
+  ↓
+STOP or CONTINUE
 
 
-============================================================
-PROBLEM 2: DIMINISHING RETURNS
-============================================================
+2. Avoid Diminishing Returns
+
+Example:
 
 Iteration 1:
-
 0.65 → 0.82
 
-Improvement:
+Improvement = +0.17
 
-+0.17
-
-
-------------------------------------------------------------
 
 Iteration 2:
-
 0.82 → 0.84
 
-Improvement:
+Improvement = +0.02
 
-+0.02
-
-
-------------------------------------------------------------
 
 Iteration 3:
-
 0.84 → 0.845
 
-Improvement:
-
-+0.005
+Improvement = +0.005
 
 
-At some point, further refinement gives very little benefit.
+When improvement becomes very small,
+further refinement may not be useful.
 
-Quality Gate stops unnecessary processing.
 
+3. Control Cost
 
-============================================================
-PROBLEM 3: COST CONTROL
-============================================================
+Every refinement cycle may require:
 
-Every iteration may require:
-
-- Critique Agent API call
-- Refine Agent API call
-- Processing time
-
+- Critique call
+- Refine call
+- Additional processing
 
 More Iterations
-      │
-      ▼
+      ↓
 Higher Cost
 
 
-Quality Gate helps prevent unnecessary iterations.
-
-
 ============================================================
-PART 6: ITERATION MANAGEMENT
+11. ITERATION MANAGEMENT
 ============================================================
 
-PURPOSE:
-
-Track refinement cycles.
-
-
-Iteration Manager stores:
-
-- max_iterations
-- current_iteration
-- quality_history
-- improvement_history
-
-
-============================================================
-ITERATION MANAGER - SIMPLIFIED LOGIC
-============================================================
+Example:
 
 max_iterations = 3
 
+Track:
 
-For every iteration:
+- Current iteration
+- Quality score
+- Previous quality score
+- Improvement
 
-1. Increase iteration counter
 
-2. Record quality score
+For each iteration:
 
-3. Compare with previous quality score
-
-4. Calculate improvement
-
-5. Check quality threshold
-
-6. Check max iterations
-
-7. Check minimum improvement
-
-8. Decide:
-
-   CONTINUE
-
-   or
-
-   STOP
+1. Record quality score
+2. Compare with previous score
+3. Calculate improvement
+4. Check threshold
+5. Check maximum iterations
+6. Check minimum improvement
+7. Continue or stop
 
 
 ============================================================
-STOP CONDITIONS
+12. STOP CONDITIONS
 ============================================================
 
-STOP when ANY of these happen:
+STOP when ANY condition is true:
 
 
-1. Quality is good enough
+Condition 1:
 
-   quality_score >= 0.80
+quality_score >= 0.80
 
 
 OR
 
 
-2. Maximum iterations reached
+Condition 2:
 
-   current_iteration >= 3
+current_iteration >= 3
 
 
 OR
 
 
-3. Improvement is too small
+Condition 3:
 
-   improvement < 0.01
+improvement < 0.01
+
+
+Easy Formula:
+
+Good Quality
+     OR
+Max Iterations
+     OR
+No Useful Improvement
+     ↓
+    STOP
 
 
 ============================================================
-ITERATION EXAMPLE 1
+13. ITERATION EXAMPLE
 ============================================================
 
 Iteration 1:
 
 Quality = 0.65
 
-Improvement = N/A
-
 0.65 < 0.80
 
 → CONTINUE
-
-
-        ↓
 
 
 Iteration 2:
@@ -1169,19 +574,18 @@ Quality = 0.82
 
 Improvement = +0.17
 
-
 0.82 >= 0.80
 
-→ STOP
+→ PASS
 
 
 Final:
 
-Output report
+Return Output
 
 
 ============================================================
-ITERATION EXAMPLE 2
+14. MAX-ITERATION EXAMPLE
 ============================================================
 
 Iteration 1:
@@ -1191,271 +595,147 @@ Quality = 0.65
 → CONTINUE
 
 
-        ↓
-
-
 Iteration 2:
 
 Quality = 0.72
-
 Improvement = +0.07
 
 → CONTINUE
 
 
-        ↓
-
-
 Iteration 3:
 
 Quality = 0.78
-
 Improvement = +0.06
 
-→ CONTINUE according to quality
+Quality is still below 0.80.
 
+But:
 
-        ↓
+current_iteration >= max_iterations
 
-
-Next maximum-iteration check stops further refinement.
+→ STOP
 
 Return:
 
-BEST-EFFORT REPORT
-
-
-NOTE:
-
-The original example describes an Iteration 4 score of 0.79,
-but when max_iterations = 3, the stop condition must be
-applied consistently to avoid an extra refinement cycle.
+BEST AVAILABLE OUTPUT
 
 
 ============================================================
-PART 7: ERROR HANDLING
+15. ERROR HANDLING
 ============================================================
 
-Three main failure scenarios.
-
-
-============================================================
+------------------------------------------------------------
 SCENARIO 1: RESEARCH AGENT FAILS
-============================================================
+------------------------------------------------------------
 
-Research Agent
-     │
-     ▼
-   FAIL
-     │
-     ▼
-Error Handler
-
-
-Actions:
-
-1. Log error
-
-2. Retry using different sources
-
-3. If retry fails:
-
-   Return empty research
-
-4. Send empty research to Critique
+Research fails
+      ↓
+Log error
+      ↓
+Retry research
+      ↓
+Still fails?
+      ↓
+Return empty/failed research
+      ↓
+Critique detects very low quality
+      ↓
+Return error
 
 
-        ↓
-
-
-Critique Agent detects:
-
-quality_score = 0.0
-
-
-Recommendation:
-
-FAIL
-
-
-        ↓
-
-
-Quality Gate
-
-        ↓
-
-Error Handler
-
-        ↓
-
-Return Error
-
-
-============================================================
+------------------------------------------------------------
 SCENARIO 2: CRITIQUE AGENT FAILS
-============================================================
+------------------------------------------------------------
 
-Critique Agent
-      │
-      ▼
-    FAIL
-      │
-      ▼
-Error Handler
-
-
-Actions:
-
-1. Log error
-
-2. Retry Critique Agent
-
-3. If retry fails:
-
-   Use default quality_score = 0.50
+Critique fails
+      ↓
+Retry critique
+      ↓
+Still fails?
+      ↓
+Use fallback score if the design permits it
+      ↓
+Continue carefully
+      ↓
+Return result with warning if critique remains unavailable
 
 
-        ↓
+Example fallback:
+
+quality_score = 0.50
 
 
-Quality Gate
-
-
-0.50 < 0.80
-
-
-        ↓
-
-
-Refine Agent
-
-
-        ↓
-
-
-Improve Research
-
-
-        ↓
-
-
-Retry Critique Agent
-
-
-If Critique still fails:
-
-Output with warning
-
-
-============================================================
+------------------------------------------------------------
 SCENARIO 3: REFINE AGENT FAILS
-============================================================
+------------------------------------------------------------
 
-Refine Agent
-     │
-     ▼
-   FAIL
-     │
-     ▼
-Error Handler
-
-
-Actions:
-
-1. Log error
-
-2. Retry refinement
-
-3. If retry fails:
-
-   Use original research
-
-
-        ↓
-
-
-Quality Gate re-evaluates original research.
-
-
-IF quality >= 0.80
-
-→ Output original
-
-
-IF quality < 0.80
-
-→ Return error
+Refine fails
+      ↓
+Retry refinement
+      ↓
+Still fails?
+      ↓
+Use original research
+      ↓
+Check existing quality
+      ↓
+Return original result or error
 
 
 ============================================================
-PART 8: ADVANCED FEATURES
+16. ADVANCED FEATURE: PARALLEL CRITIQUE
 ============================================================
 
+Instead of one Critique Agent, use specialized critics.
 
-============================================================
-FEATURE 1: PARALLEL CRITIQUE AGENTS
-============================================================
-
-Instead of one Critique Agent, use multiple specialized
-critics.
-
-
-                  Research Output
-                        │
-       ┌────────────────┼────────────────┐
-       │                │                │
-       ▼                ▼                ▼
-   Accuracy        Completeness      Relevance
-   Critic           Critic            Critic
-       │                │                │
-       │            Structure           │
-       │             Critic             │
-       │                │                │
-       └────────────────┼────────────────┘
-                        │
-                        ▼
-                   Merge Scores
-                        │
-                        ▼
-               Average Quality Score
+                 Research Output
+                       │
+       ┌───────────────┼───────────────┐
+       │               │               │
+       ▼               ▼               ▼
+   Accuracy       Completeness      Relevance
+    Critic           Critic           Critic
+                       │
+                       ▼
+                  Structure
+                    Critic
+                       │
+                       ▼
+                  Merge Scores
+                       │
+                       ▼
+               Final Quality Score
 
 
-Specializations:
+Example:
 
-Critique 1
-→ Accuracy
-
-Critique 2
-→ Completeness
-
-Critique 3
-→ Relevance
-
-Critique 4
-→ Structure
+Critic 1 = Accuracy
+Critic 2 = Completeness
+Critic 3 = Relevance
+Critic 4 = Structure
 
 
 ============================================================
-FEATURE 2: WEIGHTED REFINEMENT
+17. ADVANCED FEATURE: WEIGHTED REFINEMENT
 ============================================================
 
-Critique identifies:
+Fix the most important problems first.
 
-1. Missing 2024 developments
-   Severity = HIGH
+Example:
 
-2. No practical examples
-   Severity = HIGH
+HIGH:
+- Missing recent developments
+- Missing practical examples
 
-3. Edge cases missing
-   Severity = MEDIUM
+MEDIUM:
+- Missing edge cases
 
-4. Some sections unclear
-   Severity = LOW
+LOW:
+- Minor clarity problems
 
 
-Refine Agent priority:
+Priority:
 
 HIGH
  ↓
@@ -1464,633 +744,368 @@ MEDIUM
 LOW
 
 
-Process:
-
-1. Fix HIGH severity gaps first
-
-2. Fix MEDIUM severity gaps
-
-3. Fix LOW severity gaps
-
-4. Stop if time/cost limit is reached
+This helps use limited time and cost efficiently.
 
 
 ============================================================
-FEATURE 3: FEEDBACK LOOP OPTIMIZATION
+18. FEEDBACK LOOP OPTIMIZATION
 ============================================================
 
-Learn from previous refinements.
+Track which improvement strategies worked best.
 
+Example:
 
 Iteration 1:
 
-Gap:
+Problem:
 Missing examples
 
-Strategy:
-Add 3 examples
+Action:
+Add examples
 
 Improvement:
 +0.10
 
 
-------------------------------------------------------------
-
 Iteration 2:
 
-Gap:
+Problem:
 Unclear explanations
 
-Strategy:
-Rewrite sections
+Action:
+Rewrite unclear sections
 
 Improvement:
 +0.08
 
 
-------------------------------------------------------------
-
 Iteration 3:
 
-Gap:
+Problem:
 Missing edge cases
 
-Strategy:
+Action:
 Add edge-case section
 
 Improvement:
 +0.05
 
 
-The previous refinement results help guide later
-refinements.
+Previous results can help choose better refinement
+strategies in later iterations.
 
 
 ============================================================
-PART 9: COMPLETE WORKFLOW
+19. COMPLETE WORKFLOW
 ============================================================
 
-User Request:
-
-"Write research report on AI agents"
-
-
-                    │
-                    ▼
-
-          ┌─────────────────────┐
-          │ RESEARCH AGENT      │
-          │                     │
-          │ Gather information  │
-          │ Search sources      │
-          │ Compile findings    │
-          │ Identify gaps       │
-          └──────────┬──────────┘
-                     │
-                     ▼
-
-              Research Output
-
-              sources = 15
-              data_points = 47
-              completeness = 0.70
-
-                     │
-                     ▼
-
-          ┌─────────────────────┐
-          │ CRITIQUE AGENT      │
-          │                     │
-          │ Evaluate quality    │
-          │ Check completeness  │
-          │ Identify gaps       │
-          │ Score = 0.65        │
-          └──────────┬──────────┘
-                     │
-                     ▼
-
-              Critique Output
-
-              quality = 0.65
-
-              Gaps:
-
-              - Missing 2024 developments
-              - No examples
-              - Edge cases missing
-
-                     │
-                     ▼
-
-          ┌─────────────────────┐
-          │ QUALITY GATE        │
-          │                     │
-          │ 0.65 >= 0.80 ?      │
-          │                     │
-          │ NO                  │
-          │                     │
-          │ → REFINE            │
-          └──────────┬──────────┘
-
-                     │
-                     ▼
-
-          ┌─────────────────────┐
-          │ ITERATION COUNTER   │
-          │                     │
-          │ current = 1         │
-          │ max = 3             │
-          │                     │
-          │ Continue = YES      │
-          └──────────┬──────────┘
-
-                     │
-                     ▼
-
-          ┌─────────────────────┐
-          │ REFINE AGENT        │
-          │                     │
-          │ Address gaps        │
-          │ Add developments    │
-          │ Add examples        │
-          │ Improve structure   │
-          └──────────┬──────────┘
-
-                     │
-                     ▼
-
-              Refined Output
-
-              sources = 18
-              data_points = 62
-              completeness = 0.85
-              examples = 3
-
-                     │
-                     ▼
-
-          ┌─────────────────────┐
-          │ CRITIQUE AGENT      │
-          │                     │
-          │ Re-evaluate         │
-          │                     │
-          │ Score = 0.82        │
-          └──────────┬──────────┘
-
-                     │
-                     ▼
-
-          ┌─────────────────────┐
-          │ QUALITY GATE        │
-          │                     │
-          │ 0.82 >= 0.80 ?      │
-          │                     │
-          │ YES → PASS          │
-          └──────────┬──────────┘
-
-                     │
-                     ▼
-
-          ┌─────────────────────┐
-          │ FINAL OUTPUT        │
-          │                     │
-          │ Return Report       │
-          │ Quality = 0.82      │
-          │ Iterations = 2      │
-          └─────────────────────┘
-
-
-============================================================
-EASY COMPLETE FLOW
-============================================================
-
-RESEARCH
-   │
-   │ Collect information
-   ▼
-CRITIQUE
-   │
-   │ Check quality
-   ▼
+User Request
+     │
+     ▼
+RESEARCH AGENT
+     │
+     │ Gather information
+     │ Organize findings
+     ▼
+Research Output
+     │
+     ▼
+CRITIQUE AGENT
+     │
+     │ Check quality
+     │ Find gaps
+     │ Calculate score
+     ▼
+Quality Score
+     │
+     ▼
 QUALITY GATE
-   │
-   ├── Score >= 0.80
-   │        │
-   │        ▼
-   │      OUTPUT
-   │
-   └── Score < 0.80
-            │
-            ▼
-          REFINE
-            │
-            │ Improve
-            ▼
-         CRITIQUE
-            │
-            ▼
-       QUALITY GATE
-            │
-            ▼
-     Repeat if needed
-
-Maximum Iterations = 3
-
-
-============================================================
-PART 10: PERFORMANCE METRICS
-============================================================
-
-1. QUALITY IMPROVEMENT
-------------------------------------------------------------
-
-Initial Quality:
-
-0.65
-
-
-Final Quality:
-
-0.82
-
-
-Improvement:
-
-+0.17
-
-26% increase
+     │
+     ├── Score >= 0.80
+     │        │
+     │        ▼
+     │      OUTPUT
+     │
+     └── Score < 0.80
+              │
+              ▼
+          Check Limits
+              │
+              ├── Stop condition reached
+              │        │
+              │        ▼
+              │      OUTPUT
+              │
+              └── Continue
+                       │
+                       ▼
+                  REFINE AGENT
+                       │
+                       │ Fix gaps
+                       │ Improve content
+                       ▼
+                  CRITIQUE AGAIN
+                       │
+                       ▼
+                  QUALITY GATE
+                       │
+                       ▼
+                    Repeat
 
 
 ============================================================
-2. ITERATION EFFICIENCY
+20. WORKED EXAMPLE
 ============================================================
 
-Iterations Needed:
+Initial Research:
 
-2
+Quality = 0.65
 
+Critique finds:
 
-Maximum Iterations:
-
-3
-
-
-Reported Efficiency:
-
-2 / 3
-
-= 67%
-
-
-============================================================
-3. COST ANALYSIS
-============================================================
-
-Research Agent Calls:
-
-1
-
-
-Critique Agent Calls:
-
-2
-
-
-Refine Agent Calls:
-
-1
-
-
-Total API Calls:
-
-4
-
-
-Cost Per Improvement:
-
-$X / 0.17
-
-
-============================================================
-4. TIME ANALYSIS
-============================================================
-
-Example Total Time:
-
-45 seconds
-
-
-Research:
-
-15 seconds
-
-
-Critique:
-
-10 seconds
-
-
-Refine:
-
-15 seconds
+- Missing recent developments
+- No practical examples
+- Missing edge cases
 
 
 Quality Gate:
 
-5 seconds
+0.65 < 0.80
+
+→ REFINE
+
+
+Refine Agent:
+
+- Adds developments
+- Adds examples
+- Adds edge cases
+- Improves structure
+
+
+Critique Again:
+
+New Quality = 0.82
+
+
+Quality Gate:
+
+0.82 >= 0.80
+
+→ PASS
+
+
+Final Output:
+
+Quality = 0.82
+Status  = PASS
 
 
 ============================================================
-5. GAP RESOLUTION
+21. PERFORMANCE METRICS
 ============================================================
 
-Gaps Identified:
+Example:
 
-3
+Initial Quality:
+0.65
+
+Final Quality:
+0.82
+
+Improvement:
++0.17
 
 
-Gaps Addressed:
+Agent Calls:
 
-3
+Research = 1
+Critique = 2
+Refine   = 1
+
+Total = 4 calls
 
 
-Resolution Rate:
+Gap Resolution:
 
-100%
+Gaps Found      = 3
+Gaps Addressed  = 3
+
+Resolution Rate = 100%
 
 
 ============================================================
-PART 11: SINGLE AGENT VS RCR PATTERN
+22. SINGLE AGENT VS RCR
 ============================================================
 
 RCR = Research → Critique → Refine
 
 
-Metric                 Single Agent      RCR Pattern
-------------------------------------------------------------
-
-Output Quality         0.65              0.82 (+26%)
-
-Completeness           0.70              0.85 (+21%)
-
-Accuracy               0.80              0.88 (+10%)
-
-Time Required          15 seconds        45 seconds (+200%)
-
-Cost                   $0.10             $0.35 (+250%)
-
-Iterations             1                 2
-
-User Satisfaction      65%               92% (+42%)
-
-
-------------------------------------------------------------
-
 Single Agent:
 
-Best for:
-Quick results
+Advantages:
+- Faster
+- Cheaper
+- Simple
 
-Use case:
-Real-time
+Best For:
+- Simple tasks
+- Quick responses
+- Low-latency applications
 
-
-------------------------------------------------------------
 
 RCR Pattern:
 
-Best for:
-High-quality output
+Advantages:
+- Better quality control
+- Better completeness
+- Structured improvement
+- Clear separation of responsibilities
 
-Use case:
-Research and analysis
-
-
-============================================================
-MAIN TRADE-OFF
-============================================================
-
-Single Agent:
-
-FASTER + CHEAPER
-
-but potentially
-
-LOWER QUALITY
+Best For:
+- Research
+- Analysis
+- Important reports
+- High-quality outputs
 
 
-------------------------------------------------------------
+Main Trade-Off:
 
-Research → Critique → Refine:
+Single Agent
+    ↓
+Faster + Cheaper
+    ↓
+Potentially Lower Quality
 
-HIGHER QUALITY
 
-but
-
-MORE TIME + MORE COST
+RCR Pattern
+    ↓
+Better Quality Control
+    ↓
+More Processing + Higher Cost
 
 
 ============================================================
-PART 12: WHEN TO USE THIS PATTERN
+23. WHEN TO USE RCR
 ============================================================
 
 USE WHEN:
-------------------------------------------------------------
 
-✓ Quality is critical
-
-✓ You have time for iteration
-
-✓ You need comprehensive research
-
-✓ Output will be published/shared
-
-✓ Accuracy is important
-
-✓ Completeness matters
+- Quality is critical
+- Accuracy is important
+- Completeness matters
+- Research is complex
+- Output will be published or shared
+- Iterative improvement is useful
 
 
-============================================================
-DON'T USE WHEN
-============================================================
+DON'T USE WHEN:
 
-✗ You need instant results
-
-✗ Quality is less important
-
-✗ You have strict latency requirements
-
-✗ Task is simple and RCR would be overkill
-
-✗ Real-time application needs very fast responses
-
-✗ Cost is a critical constraint
+- Task is simple
+- Instant response is required
+- Latency must be very low
+- Cost is highly constrained
+- Additional refinement provides little value
 
 
 ============================================================
-PART 13: KEY TAKEAWAYS
+24. KEY RESPONSIBILITIES
 ============================================================
 
 RESEARCH AGENT
-------------------------------------------------------------
 
-Gather information without evaluating.
+Purpose:
+Gather information.
 
 Focus:
-
 BREADTH
 
+Memory:
+COLLECT
 
-============================================================
+
+------------------------------------------------------------
+
 CRITIQUE AGENT
-============================================================
 
-Evaluate quality without fixing.
+Purpose:
+Evaluate information.
 
 Focus:
+QUALITY
 
-JUDGMENT
+Memory:
+CHECK
 
 
-============================================================
+------------------------------------------------------------
+
+QUALITY GATE
+
+Purpose:
+Decide whether to stop or continue.
+
+Focus:
+DECISION
+
+Memory:
+DECIDE
+
+
+------------------------------------------------------------
+
 REFINE AGENT
-============================================================
 
-Improve content based on feedback without making the
-final judgment.
+Purpose:
+Improve based on feedback.
 
 Focus:
-
 ENHANCEMENT
 
-
-============================================================
-QUALITY GATE
-============================================================
-
-Controls the refinement loop.
-
-Prevents infinite iterations.
+Memory:
+IMPROVE
 
 
-============================================================
-ITERATION COUNTER
-============================================================
+------------------------------------------------------------
 
-Tracks refinement cycles.
+ITERATION MANAGER
 
-Stops when maximum iterations are reached.
+Purpose:
+Control refinement cycles.
 
+Tracks:
 
-============================================================
-QUALITY THRESHOLD
-============================================================
+- Iteration count
+- Quality history
+- Improvement history
 
-Example threshold:
-
-quality_score >= 0.80
-
-→ PASS
+Memory:
+CONTROL
 
 
 ============================================================
-IMPROVEMENT TRACKING
-============================================================
-
-Compare the new quality score with the previous score.
-
-If improvement becomes insignificant:
-
-→ STOP
-
-
-Example threshold used above:
-
-improvement < 0.01
-
-
-============================================================
-ERROR HANDLING
-============================================================
-
-Handles failures gracefully.
-
-Examples:
-
-Research fails
-→ Retry / Error path
-
-
-Critique fails
-→ Retry / Fallback score
-
-
-Refine fails
-→ Retry / Use original research
-
-
-============================================================
-HIGHER QUALITY OUTPUT
-============================================================
-
-Specialized roles can improve the final result.
-
-Example provided:
-
-0.65
-  ↓
-0.82
-
-Improvement:
-
-+0.17
-
-
-============================================================
-COST-QUALITY TRADE-OFF
-============================================================
-
-More refinement iterations can mean:
-
-Higher Quality
-
-BUT ALSO:
-
-Higher Cost
-
-More Processing
-
-Higher Latency
-
-
-============================================================
-EASY MEMORY TRICK
+25. EASY MEMORY TRICK
 ============================================================
 
 RESEARCH
    ↓
 COLLECT
 
-
 CRITIQUE
    ↓
 CHECK
-
 
 QUALITY GATE
    ↓
 DECIDE
 
-
 REFINE
    ↓
 IMPROVE
 
-
-ITERATION COUNTER
+CRITIQUE AGAIN
    ↓
-CONTROL
-
+RECHECK
 
 FINAL OUTPUT
    ↓
@@ -2098,53 +1113,56 @@ RETURN
 
 
 ============================================================
+26. INTERVIEW-READY EXPLANATION
+============================================================
+
+Research → Critique → Refine is a multi-agent pattern where
+different AI agents have specialized responsibilities.
+
+The Research Agent collects information.
+
+The Critique Agent evaluates the information and identifies
+quality gaps.
+
+The Quality Gate checks whether the quality meets the
+required threshold.
+
+If quality is below the threshold, the Refine Agent improves
+the content using the critique feedback.
+
+The result is then critiqued again.
+
+The loop stops when:
+
+- Required quality is achieved, OR
+- Maximum iterations are reached, OR
+- Further improvement becomes insignificant.
+
+
+============================================================
 ONE-LINE REVISION
 ============================================================
 
-RESEARCH → CRITIQUE → QUALITY GATE → REFINE → CRITIQUE → OUTPUT
+RESEARCH → CRITIQUE → QUALITY GATE → REFINE → RECHECK → OUTPUT
 
 
-Or even easier:
+Even Easier:
 
-
-COLLECT
-   ↓
-CHECK
-   ↓
-DECIDE
-   ↓
-IMPROVE
-   ↓
-CHECK AGAIN
-   ↓
-OUTPUT
+COLLECT → CHECK → DECIDE → IMPROVE → RECHECK → RETURN
 
 
 ============================================================
-PART 14: WHAT'S NEXT
+FINAL MEMORY
 ============================================================
 
-Next Video:
-
-SPECIALIST AGENT ENSEMBLES
-
-
-Purpose:
-
-Use multiple domain experts analyzing in parallel to make
-better decisions.
-
-
-============================================================
-FOLLOW-UP QUESTIONS
-============================================================
-
-1. Quiz me on Research → Critique → Refine pattern
-
-2. Take notes on this lesson
+Research = Collect
+Critique = Check
+Quality Gate = Decide
+Refine = Improve
+Iteration Manager = Control
+Final Output = Return
 
 
 ============================================================
 END
 ============================================================
-
