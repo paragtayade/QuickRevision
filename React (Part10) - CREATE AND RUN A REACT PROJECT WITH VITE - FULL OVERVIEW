@@ -1,0 +1,1371 @@
+
+================================================================================
+
+CREATE AND RUN A REACT PROJECT WITH VITE - FULL OVERVIEW
+
+================================================================================
+
+What You'll Learn
+
+This lesson explains how to create, run, understand, modify, build, and preview a React project using Vite.
+
+Topic                  | What You'll Learn
+-----------------------|----------------------------------------------
+Vite                   | What Vite is and why it is used
+Project Creation       | Create a React project using Vite
+Dependencies           | Install required npm packages
+Development Server     | Run the project locally
+Project Structure      | Understand important folders and files
+HMR                    | See code changes quickly during development
+Production Build       | Create optimized deployment files
+Production Preview     | Preview the production build locally
+Components             | Create and reuse React components
+State                   | Add interactivity using useState
+Troubleshooting        | Fix common development issues
+
+
+================================================================================
+
+WHY VITE INSTEAD OF CREATE REACT APP?
+
+================================================================================
+
+The lesson compares Vite with the older Create React App workflow.
+
+Create React App (CRA)         | Vite
+-------------------------------|--------------------------------
+Slower startup                 | Fast development-server startup
+Slower update workflow         | Fast Hot Module Replacement
+Heavier tooling                | Lightweight development tooling
+More legacy setup              | Modern development approach
+Older React setup              | Common modern React setup
+
+Main Idea
+VITE
+  ↓
+FAST DEVELOPMENT SERVER
+  +
+HMR
+  +
+MODERN MODULE TOOLING
+  +
+PRODUCTION BUILD
+
+
+================================================================================
+
+PART 2: WHAT IS VITE?
+
+================================================================================
+
+Vite Definition
+
+Vite, pronounced"veet", is a modern frontend build tool originally created by Evan You.
+
+It provides tooling for development and production builds.
+
+Key Features
+Feature                  | Purpose
+-------------------------|----------------------------------------------
+Fast Development Start   | Starts the development environment quickly
+HMR                      | Updates modules during development
+Production Build         | Generates optimized production assets
+ES Modules               | Uses modern JavaScript module concepts
+Framework Support        | Supports React, Vue and other technologies
+Configuration            | Provides useful defaults
+TypeScript               | Supports TypeScript-based projects
+
+
+================================================================================
+
+VITE VS CREATE REACT APP - LESSON COMPARISON
+
+================================================================================
+
+Feature        | Create React App      | Vite
+---------------|-----------------------|-------------------------
+Startup        | Slower                | Faster
+Hot Reload/HMR | Slower workflow       | Fast HMR
+Build Tooling  | Older CRA approach    | Modern Vite approach
+Configuration  | More CRA conventions  | Lightweight setup
+Development    | Traditional CRA flow  | Modern dev-server flow
+
+
+The exact speed, build size, and performance depend on the project, machine, dependencies, and Vite/CRA versions, so values such as "30-60 seconds vs 1-2 seconds" should be treated as lesson examples rather than guaranteed measurements.
+
+================================================================================
+
+PART 3: CREATING A REACT PROJECT WITH VITE
+
+================================================================================
+
+Step 1: Open Terminal
+Operating System | How to Open Terminal
+-----------------|----------------------------------------------
+Windows          | Windows Terminal, PowerShell or Command Prompt
+macOS            | Open Terminal
+Linux            | Open your terminal application
+
+
+================================================================================
+
+Step 2: Create React Project with Vite
+
+================================================================================
+
+Run:
+
+npm create vite@latest my-react-app -- --template react
+
+Command Breakdown
+Command Part                       | Purpose
+-----------------------------------|---------------------------------------
+npm create                         | Runs a project-creation package
+vite@latest                        | Uses the latest Vite create package
+my-react-app                       | Name of the project/folder
+--template react                   | Selects the React template
+
+
+Example:
+
+npm create vite@latest my-first-app -- --template react
+
+
+This creates a React/Vite project named:
+
+my-first-app
+
+
+================================================================================
+
+Step 3: Navigate to the Project
+
+================================================================================
+
+cd my-react-app
+
+
+Explanation:
+
+Part          | Meaning
+--------------|--------------------------------
+cd            | Change directory
+my-react-app  | Project folder name
+
+
+Example:
+
+cd my-first-app
+
+
+================================================================================
+
+Step 4: Install Dependencies
+
+================================================================================
+
+Run:
+
+npm install
+
+What Happens?
+npm install
+     ↓
+Reads package.json
+     ↓
+Resolves Dependencies
+     ↓
+Downloads Required Packages
+     ↓
+Creates/Populates node_modules
+     ↓
+Creates/Updates package-lock.json
+
+
+Packages normally include the dependencies and development dependencies defined by the generated project.
+
+These can include:
+
+React
+React DOM
+Vite
+React plugin for Vite
+Other template/tooling dependencies
+
+Installation time depends on factors such as internet speed, machine performance, npm cache, and package versions.
+
+================================================================================
+
+Step 5: Start the Development Server
+
+================================================================================
+
+Run:
+
+npm run dev
+
+What This Does
+Action                 | Description
+-----------------------|-------------------------------------------
+Runs Vite              | Executes the project's "dev" script
+Starts Dev Server      | Serves application locally
+Watches Files          | Detects source-code changes
+Enables HMR            | Applies development updates quickly
+Displays Local URL     | Shows where the app can be opened
+
+
+Example terminal output may look similar to:
+
+VITE v5.0.0  ready in 234 ms
+
+Local:   [Local Vite Development Server](http://localhost:5173/)
+press h to show help
+
+
+The exact Vite version, startup time, port, and available terminal shortcuts can differ.
+
+================================================================================
+
+Step 6: View Your App
+
+================================================================================
+
+After starting the development server:
+
+1. Development server starts
+        ↓
+2. Terminal displays the local URL
+        ↓
+3. Open the local URL in your browser
+        ↓
+4. React/Vite application appears
+        ↓
+5. Application is ready for development
+
+
+Depending on the Vite template/version, the starter interface may contain items such as:
+
+Vite logo
+React logo
+Starter heading
+Counter example
+Instructions for editing src/App.jsx
+
+================================================================================
+
+PART 4: PROJECT STRUCTURE
+
+================================================================================
+
+Typical Vite React Project
+my-react-app/
+│
+├── node_modules/         → Installed packages
+│
+├── public/               → Static/public files
+│
+├── src/                  → Application source code
+│   ├── App.jsx           → Main App component
+│   ├── App.css           → App-specific styles
+│   ├── main.jsx          → React entry point
+│   ├── index.css         → Global styles
+│   └── assets/           → Images/assets
+│
+├── index.html            → Main HTML document
+├── package.json          → Project metadata/dependencies/scripts
+├── package-lock.json     → Dependency lock file
+├── vite.config.js        → Vite configuration, when present
+└── .gitignore            → Git ignore rules
+
+Folder/File Summary
+File / Folder       | Purpose
+--------------------|-----------------------------------------------
+node_modules/       | Installed npm dependencies
+public/             | Public/static assets
+src/                | Main application source code
+src/App.jsx         | Main React component
+src/App.css         | Styles associated with App
+src/main.jsx        | React application entry point
+src/index.css       | Global CSS
+src/assets/         | Source-managed images/assets
+index.html          | HTML entry document
+package.json        | Scripts, dependencies and project metadata
+package-lock.json   | Locks resolved dependency versions
+vite.config.js      | Vite configuration
+.gitignore          | Files/directories Git should ignore
+
+
+================================================================================
+
+KEY FILE: index.html
+
+================================================================================
+
+Example:
+
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/vite.svg"
+    />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+
+    <title>Vite + React</title>
+  </head>
+
+  <body>
+
+    <div id="root"></div>
+
+    <script
+      type="module"
+      src="/src/main.jsx"
+    ></script>
+
+  </body>
+</html>
+
+Purpose
+Code / Element                | Purpose
+------------------------------|----------------------------------------
+<!doctype html>               | Declares HTML document type
+<meta charset="UTF-8">        | Character encoding
+viewport meta                 | Mobile/responsive viewport configuration
+<title>                       | Browser-tab/page title
+<div id="root">               | React application mount location
+/src/main.jsx                 | Application JavaScript entry module
+
+
+Important connection:
+
+index.html
+    ↓
+<div id="root">
+    ↓
+main.jsx
+    ↓
+React Mounts Application
+
+
+================================================================================
+
+KEY FILE: main.jsx
+
+================================================================================
+
+Example:
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+import App from './App.jsx';
+import './index.css';
+
+ReactDOM
+  .createRoot(document.getElementById('root'))
+  .render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+
+Code Explanation
+Code / Concept                  | Purpose
+--------------------------------|-----------------------------------------
+import React                    | Imports React where needed by setup/code
+react-dom/client                | Provides React DOM client APIs
+import App                      | Imports main App component
+import './index.css'            | Loads global CSS
+document.getElementById('root') | Gets the root HTML element
+ReactDOM.createRoot(...)        | Creates React root
+<App />                         | Renders App component
+React.StrictMode                | Enables additional development checks
+
+Flow
+index.html
+    ↓
+#root
+    ↓
+main.jsx
+    ↓
+createRoot()
+    ↓
+<App />
+    ↓
+React Application
+
+
+================================================================================
+
+KEY FILE: App.jsx
+
+================================================================================
+
+A starter template may look similar to:
+
+import { useState } from 'react';
+
+import reactLogo from './assets/react.svg';
+import viteLogo from '/vite.svg';
+
+import './App.css';
+
+export default function App() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    <>
+
+      <div>
+
+        <a
+          href="https://vitejs.dev"
+          target="_blank"
+        >
+          <img
+            src={viteLogo}
+            className="logo"
+            alt="Vite logo"
+          />
+        </a>
+
+        <a
+          href="https://react.dev"
+          target="_blank"
+        >
+          <img
+            src={reactLogo}
+            className="logo react"
+            alt="React logo"
+          />
+        </a>
+
+      </div>
+
+      <h1>Vite + React</h1>
+
+      <div className="card">
+
+        <button
+          onClick={() =>
+            setCount((count) => count + 1)
+          }
+        >
+          count is {count}
+        </button>
+
+        <p>
+          Edit <code>src/App.jsx</code>
+          and save to test HMR
+        </p>
+
+      </div>
+
+      <p className="read-the-docs">
+        Click on the Vite and React logos to learn more
+      </p>
+
+    </>
+  );
+}
+
+Code Explanation
+Code / Concept                         | Purpose
+---------------------------------------|---------------------------------------
+useState                               | Imports React state Hook
+useState(0)                            | Initializes count to 0
+count                                  | Current count value
+setCount                               | Updates count
+onClick                                | Handles button click
+setCount(count => count + 1)           | Increments count
+return (...)                           | Describes component UI using JSX
+reactLogo / viteLogo                   | Imported image assets
+App.css                                | Component/application styles
+
+Counter Flow
+count = 0
+   ↓
+USER CLICKS
+   ↓
+setCount(count => count + 1)
+   ↓
+STATE CHANGES
+   ↓
+COMPONENT RE-RENDERS
+   ↓
+UPDATED COUNT DISPLAYED
+
+
+================================================================================
+
+KEY FILE: package.json
+
+================================================================================
+
+Example from the lesson:
+
+{
+  "name": "my-react-app",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.0.8"
+  }
+}
+
+
+These version numbers are examples from the lesson and can differ in a newly generated project.
+
+Important Properties
+Property           | Purpose
+-------------------|-----------------------------------------------
+name               | Project/package name
+private            | Prevents accidental npm publication
+version            | Project/package version
+type                | Configures JavaScript module interpretation
+scripts.dev        | Runs Vite development server
+scripts.build      | Creates production build
+scripts.preview    | Previews production build
+dependencies       | Runtime/application dependencies
+devDependencies    | Development/build dependencies
+
+Script Mapping
+npm Command       | package.json Script | Result
+------------------|---------------------|----------------------------
+npm run dev       | vite                | Development server
+npm run build     | vite build          | Production build
+npm run preview   | vite preview        | Preview built application
+
+
+================================================================================
+
+KEY FILE: vite.config.js
+
+================================================================================
+
+Example:
+
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()]
+});
+
+Explanation
+Code / Setting                   | Purpose
+---------------------------------|----------------------------------------
+defineConfig                     | Defines Vite configuration
+@vitejs/plugin-react             | Provides React integration
+plugins: [react()]               | Enables the React plugin
+vite.config.js                   | Central Vite configuration file
+
+
+================================================================================
+
+PART 5: UNDERSTANDING HOW VITE WORKS
+
+================================================================================
+
+Development Flow
+YOU EDIT A FILE
+      ↓
+SAVE
+      ↓
+VITE DETECTS CHANGE
+      ↓
+HMR PROCESSES THE UPDATE
+      ↓
+BROWSER RECEIVES UPDATE
+      ↓
+UI REFLECTS THE CHANGE
+
+Why Development Feels Fast
+
+The important idea is:
+
+Vite provides a fast development server.
+It works with native ES modules during development.
+HMR can apply module updates quickly.
+Many code changes don't require a complete browser reload.
+
+================================================================================
+
+VITE BUILD PROCESS
+
+================================================================================
+
+Run:
+
+npm run build
+
+
+Simplified flow:
+
+npm run build
+     ↓
+VITE PRODUCTION BUILD
+     ↓
+PROCESS / OPTIMIZE APPLICATION ASSETS
+     ↓
+GENERATE OUTPUT
+     ↓
+dist/
+     ↓
+READY FOR DEPLOYMENT
+
+
+Typical production processing can include:
+
+Module bundling.
+Code transformation.
+Minification.
+CSS processing.
+Asset processing.
+Production optimization.
+
+================================================================================
+
+PART 6: COMMON COMMANDS
+
+================================================================================
+
+1. Start Development Server
+npm run dev
+
+Purpose
+------------------------------------------------
+Run the Vite development server
+Watch project files
+Enable development/HMR workflow
+Display development URL
+Report development errors
+
+
+Use while:
+
+Developing.
+Testing changes.
+Debugging locally.
+
+================================================================================
+
+2. Build for Production
+
+================================================================================
+
+npm run build
+
+Purpose
+------------------------------------------------
+Create production build
+Process and optimize application code/assets
+Generate deployable files
+Create dist/ output by default
+
+
+Example output structure:
+
+dist/
+├── index.html
+├── assets/
+│   ├── index-abc123.js
+│   └── index-def456.css
+└── ...
+
+
+Actual generated filenames and assets depend on the application and build.
+
+================================================================================
+
+3. Preview Production Build
+
+================================================================================
+
+npm run preview
+
+
+Purpose:
+
+Production Build
+     ↓
+npm run preview
+     ↓
+Serve Build Locally
+     ↓
+Open Preview URL
+     ↓
+Verify Built Application
+
+
+Typically used:
+
+After npm run build.
+Before deployment.
+To inspect the locally served production build.
+
+================================================================================
+
+VITE COMMANDS - QUICK TABLE
+
+================================================================================
+
+Command                                         | Purpose
+------------------------------------------------|-------------------------------
+npm create vite@latest my-app -- --template react | Create React/Vite project
+cd my-app                                       | Enter project directory
+npm install                                     | Install dependencies
+npm run dev                                     | Start development server
+npm run build                                   | Create production build
+npm run preview                                 | Preview production build
+code .                                          | Open current folder in VS Code
+
+
+================================================================================
+
+PART 7: MAKING YOUR FIRST CHANGES
+
+================================================================================
+
+Step 1: Open Project in VS Code
+
+From the project directory:
+
+code .
+
+
+This command opens the current directory in VS Code when the code CLI is installed/configured.
+
+================================================================================
+
+Step 2: Edit App.jsx
+
+================================================================================
+
+Original simplified component:
+
+export default function App() {
+
+  const [count, setCount] =
+    useState(0);
+
+  return (
+    <>
+
+      <h1>
+        Vite + React
+      </h1>
+
+      <button
+        onClick={() =>
+          setCount((count) => count + 1)
+        }
+      >
+        count is {count}
+      </button>
+
+    </>
+  );
+}
+
+
+Change it to:
+
+export default function App() {
+
+  const [count, setCount] =
+    useState(0);
+
+  return (
+    <>
+
+      <h1>
+        My First React App with Vite!
+      </h1>
+
+      <button
+        onClick={() =>
+          setCount((count) => count + 1)
+        }
+      >
+        You clicked {count} times
+      </button>
+
+    </>
+  );
+}
+
+What Changed?
+Element       | Before          | After
+--------------|-----------------|-----------------------------------
+Heading       | Vite + React    | My First React App with Vite!
+Button Text   | count is X      | You clicked X times
+Functionality | Counter         | Same counter functionality
+
+
+================================================================================
+
+Step 3: Save the File
+
+================================================================================
+
+Operating System | Shortcut
+-----------------|----------------
+Windows/Linux    | Ctrl+S
+macOS            | Cmd+S
+
+
+After saving:
+
+SAVE App.jsx
+    ↓
+VITE DETECTS CHANGE
+    ↓
+HMR APPLIES UPDATE
+    ↓
+BROWSER UI CHANGES
+
+
+No manual refresh is normally required for supported HMR updates.
+
+================================================================================
+
+PART 8: TROUBLESHOOTING
+
+================================================================================
+
+Issue 1: Port Already in Use
+
+Example problem:
+
+Port 5173 is already in use
+
+
+Possible cause:
+
+Another process is using the port.
+A previous development server may still be running.
+Solutions
+Option 1: Stop Current Dev Server
+
+In the terminal running it:
+
+Ctrl+C
+
+Option 2: Use Another Port
+npm run dev -- --port 3000
+
+Option 3: Find the Process
+
+Windows example:
+
+netstat -ano | findstr :5173
+
+
+macOS/Linux example:
+
+lsof -i :5173
+
+
+================================================================================
+
+Issue 2: Module Not Found
+
+================================================================================
+
+Example:
+
+Cannot find module 'react'
+
+
+Possible cause:
+
+Dependencies not installed
+          OR
+node_modules unavailable/incomplete
+
+
+Try:
+
+npm install
+
+
+This installs the dependencies defined by the project's package configuration.
+
+================================================================================
+
+Issue 3: Blank Page in Browser
+
+================================================================================
+
+Possible causes:
+
+Development server isn't running.
+Wrong URL/port.
+JavaScript/React error.
+
+Troubleshooting:
+
+Step | Action
+-----|----------------------------------------------
+1    | Check terminal for errors
+2    | Check the Local URL printed by Vite
+3    | Open browser developer console
+4    | Check JavaScript errors
+5    | Restart development server if necessary
+
+
+If Vite printed port 5173, the lesson example uses:
+
+Local Vite App
+
+But use the actual URL Vite reports because the port can change if the default is unavailable.
+
+================================================================================
+
+Issue 4: Changes Not Reflecting
+
+================================================================================
+
+Possible causes:
+
+Possible Cause              | Solution
+----------------------------|-------------------------------------
+File wasn't saved           | Save the file
+Dev server isn't running    | Run npm run dev
+Compilation/runtime error   | Check terminal/browser console
+Browser issue               | Refresh the page
+HMR issue                   | Restart development server
+
+
+A hard refresh from the original lesson:
+
+Windows/Linux → Ctrl+Shift+R
+
+
+================================================================================
+
+PART 9: NEXT STEPS AFTER SETUP
+
+================================================================================
+
+Step 1: Understand Project Structure
+
+Explore:
+
+src/
+App.jsx
+main.jsx
+index.css
+index.html
+package.json
+vite.config.js
+
+
+================================================================================
+
+Step 2: Modify App Component
+
+================================================================================
+
+Practice:
+
+Change heading text.
+Add new HTML/JSX elements.
+Modify button behavior.
+Practice JSX syntax.
+Add new components.
+
+================================================================================
+
+Step 3: Create New Components
+
+================================================================================
+
+Create:
+
+src/components/Button.jsx
+
+export default function Button({
+  label,
+  onClick
+}) {
+
+  return (
+    <button onClick={onClick}>
+      {label}
+    </button>
+  );
+}
+
+Use Button in App
+import Button from './components/Button';
+
+export default function App() {
+
+  return (
+    <>
+
+      <h1>My App</h1>
+
+      <Button
+        label="Click Me"
+        onClick={() => alert('Clicked!')}
+      />
+
+    </>
+  );
+}
+
+Component Flow
+App
+ ↓
+<Button />
+ ↓
+Props
+ ├── label
+ └── onClick
+ ↓
+Reusable Button UI
+
+
+================================================================================
+
+Step 4: Add Styling
+
+================================================================================
+
+Create:
+
+src/components/Button.css
+
+button {
+  padding: 10px 20px;
+  background-color: blue;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: darkblue;
+}
+
+
+Import the CSS:
+
+import './Button.css';
+
+export default function Button({
+  label,
+  onClick
+}) {
+
+  return (
+    <button onClick={onClick}>
+      {label}
+    </button>
+  );
+}
+
+Flow
+Button.jsx
+    +
+Button.css
+    ↓
+Reusable Styled Button
+
+
+================================================================================
+
+Step 5: Add State and Interactivity
+
+================================================================================
+
+import { useState } from 'react';
+
+export default function App() {
+
+  const [name, setName] =
+    useState('');
+
+  return (
+    <>
+
+      <h1>
+        Welcome, {name || 'Guest'}!
+      </h1>
+
+      <input
+        type="text"
+        value={name}
+        onChange={(e) =>
+          setName(e.target.value)
+        }
+        placeholder="Enter your name"
+      />
+
+    </>
+  );
+}
+
+Code Explanation
+Code / Concept             | Purpose
+---------------------------|---------------------------------------
+useState('')               | Creates name state
+name                       | Current input value
+setName                    | Updates name state
+value={name}               | Input value comes from React state
+onChange                   | Runs when user changes input
+e.target.value             | Current text entered by user
+setName(e.target.value)     | Stores entered text
+name || 'Guest'            | Shows Guest when name is empty
+
+Flow
+USER TYPES
+    ↓
+onChange
+    ↓
+e.target.value
+    ↓
+setName()
+    ↓
+STATE CHANGES
+    ↓
+COMPONENT RE-RENDERS
+    ↓
+Welcome, <name>!
+
+
+================================================================================
+
+PART 10: SUMMARY AND NEXT STEPS
+
+================================================================================
+
+What You've Learned
+Topic                    | What You've Learned
+-------------------------|---------------------------------------------
+Vite                     | Modern frontend development/build tool
+React Project            | Create React project using Vite
+npm install              | Install project dependencies
+npm run dev              | Start development server
+HMR                      | Update modules during development
+Project Structure        | Understand important project files
+index.html               | Contains application root and entry script
+main.jsx                 | React application's entry point
+App.jsx                  | Main application component
+package.json             | Scripts, dependencies and metadata
+vite.config.js           | Vite configuration
+npm run build            | Create production build
+dist/                    | Production output
+npm run preview          | Preview production build locally
+Components               | Create reusable UI pieces
+CSS                      | Style components
+useState                 | Add state/interactivity
+Troubleshooting          | Resolve common local-development issues
+
+
+================================================================================
+
+KEY TAKEAWAYS
+
+================================================================================
+
+No. | Key Takeaway
+----|------------------------------------------------------------------
+1   | Vite provides a fast modern React development workflow
+2   | Create project with npm create vite@latest ... --template react
+3   | npm install installs project dependencies
+4   | npm run dev starts the Vite development server
+5   | HMR provides quick development feedback
+6   | npm run build creates the production build
+7   | npm run preview previews the production build
+8   | main.jsx is the React entry point in this project structure
+9   | App.jsx contains the main App component
+10  | index.html contains the root element used to mount React
+
+
+================================================================================
+
+COMPLETE VITE WORKFLOW - QUICK REVISION
+
+================================================================================
+
+CREATE PROJECT
+     ↓
+npm create vite@latest my-app -- --template react
+     ↓
+ENTER PROJECT
+     ↓
+cd my-app
+     ↓
+INSTALL DEPENDENCIES
+     ↓
+npm install
+     ↓
+START DEV SERVER
+     ↓
+npm run dev
+     ↓
+EDIT App.jsx
+     ↓
+SAVE
+     ↓
+HMR
+     ↓
+VIEW CHANGES
+
+
+================================================================================
+
+DEVELOPMENT VS PRODUCTION
+
+================================================================================
+
+Development                     | Production
+--------------------------------|--------------------------------
+npm run dev                     | npm run build
+Used while coding               | Used before deployment
+Development server              | Generates deployable output
+HMR available                   | Optimized production assets
+Fast feedback                   | dist/ output
+Debug/development workflow      | Deployment workflow
+
+
+After building:
+
+npm run build
+     ↓
+dist/
+     ↓
+npm run preview
+     ↓
+LOCAL PRODUCTION-BUILD PREVIEW
+
+
+================================================================================
+
+INTERVIEW-READY QUICK TABLE
+
+================================================================================
+
+Question                      | Short Answer
+------------------------------|-------------------------------------------
+What is Vite?                 | Frontend development and build tool
+How do you create React app?  | npm create vite@latest ... --template react
+What does npm install do?     | Installs dependencies
+How do you run Vite locally?  | npm run dev
+What is HMR?                  | Hot Module Replacement
+What is main.jsx?             | React application entry point
+What is App.jsx?              | Main App component
+What is package.json?         | Project scripts/dependencies/metadata
+What is vite.config.js?       | Vite configuration
+How do you build production?  | npm run build
+Where is build output?        | dist/ by default
+How do you preview build?     | npm run preview
+
+
+================================================================================
+
+QUICK REFERENCE: VITE COMMANDS
+
+================================================================================
+
+Command                                           | Purpose
+--------------------------------------------------|--------------------------------
+npm create vite@latest my-app -- --template react | Create React project
+cd my-app                                         | Enter project folder
+npm install                                       | Install dependencies
+npm run dev                                       | Start development server
+npm run build                                     | Build for production
+npm run preview                                   | Preview production build
+code .                                            | Open current folder in VS Code
+
+
+================================================================================
+
+NEXT STEPS
+
+================================================================================
+
+Next Step             | Purpose
+----------------------|--------------------------------------------
+Create Vite Project   | Practice project setup
+Project Structure     | Understand files/folders
+JSX                   | Build UI using React syntax
+Components            | Create reusable UI pieces
+Props                 | Pass data into components
+CSS                   | Style React components
+useState              | Add component state
+Events                | Handle user interactions
+APIs                   | Fetch external/server data
+Build & Deploy        | Prepare application for production
+
+
+================================================================================
+
+QUICK START CHECKLIST
+
+================================================================================
+
+Status | Task
+-------|-----------------------------------------------------------
+[ ]    | Open terminal
+[ ]    | Run npm create vite@latest my-react-app -- --template react
+[ ]    | Run cd my-react-app
+[ ]    | Run npm install
+[ ]    | Run npm run dev
+[ ]    | Open the Local URL displayed by Vite
+[ ]    | Run code . to open VS Code, if CLI is configured
+[ ]    | Open src/App.jsx
+[ ]    | Edit the component
+[ ]    | Save the file
+[ ]    | Verify the change through HMR
+[ ]    | Create additional components
+[ ]    | Add CSS
+[ ]    | Practice state and events
+[ ]    | Run npm run build when ready to test a production build
+[ ]    | Run npm run preview to preview that build
+
+
+================================================================================
+
+FOLLOW-UP QUESTIONS
+
+================================================================================
+
+How do I create and organize multiple components in a Vite React project?
+
+What is the difference between development and production builds in Vite?
+
+================================================================================
+
