@@ -1,0 +1,1848 @@
+
+================================================================================
+DESTRUCTURING PROPS IN REACT
+================================================================================
+
+What You'll Learn
+
+This lesson covers destructuring Props, a clean and commonly used way to work with Props in React.
+
+Topic                    | What You'll Learn
+-------------------------|---------------------------------------------
+Destructuring            | What destructuring is and why it's useful
+Props Destructuring      | Extract values from the Props object
+Function Parameters      | Destructure directly in component parameters
+Default Values           | Provide fallback values for missing Props
+Renaming                 | Rename Props while destructuring
+Nested Objects           | Extract values from nested objects
+Arrays                   | Destructure values from arrays
+Rest Operator            | Capture remaining Props using ...rest
+Conditional Logic        | Use destructured values in conditions
+Best Practices           | Write cleaner, maintainable components
+Common Mistakes          | Avoid destructuring problems
+
+
+================================================================================
+
+WHY THIS LESSON MATTERS
+
+================================================================================
+
+Destructuring Props can make React components:
+
+Cleaner.
+Easier to read.
+Less repetitive.
+Easier to maintain.
+Clearer about which Props are being used.
+Easier to combine with default values.
+Easier to work with when components receive multiple Props.
+Easy Concept
+WITHOUT DESTRUCTURING
+
+props.title
+props.author
+props.price
+props.rating
+
+
+WITH DESTRUCTURING
+
+title
+author
+price
+rating
+
+
+================================================================================
+
+PART 2: WHAT IS DESTRUCTURING?
+
+================================================================================
+
+Destructuring Definition
+
+Destructuring is a JavaScript feature that extracts values from objects or arrays into variables.
+
+Feature             | Description
+--------------------|--------------------------------------------
+JavaScript Feature  | Introduced with ES6
+Objects             | Extract properties into variables
+Arrays              | Extract values based on position
+Functions           | Can destructure function parameters
+Defaults            | Can provide fallback values
+Renaming            | Object properties can be renamed
+Rest                 | Remaining values can be captured
+
+
+================================================================================
+
+SIMPLE DESTRUCTURING EXAMPLE - NON-REACT
+
+================================================================================
+
+Without Destructuring
+const person = {
+  name: 'Alice',
+  age: 25,
+  city: 'NYC'
+};
+
+const name = person.name;
+const age = person.age;
+const city = person.city;
+
+With Destructuring
+const person = {
+  name: 'Alice',
+  age: 25,
+  city: 'NYC'
+};
+
+const {
+  name,
+  age,
+  city
+} = person;
+
+Result
+Variable | Value
+---------|---------
+name     | Alice
+age      | 25
+city     | NYC
+
+
+This:
+
+const {
+  name,
+  age,
+  city
+} = person;
+
+
+extracts the three properties and creates three variables.
+
+Easy Memory
+OBJECT
+   ↓
+DESTRUCTURE
+   ↓
+INDIVIDUAL VARIABLES
+
+
+================================================================================
+
+ARRAY DESTRUCTURING
+
+================================================================================
+
+Destructuring also works with arrays.
+
+const colors = [
+  'Red',
+  'Green',
+  'Blue'
+];
+
+const [
+  firstColor,
+  secondColor,
+  thirdColor
+] = colors;
+
+
+Result:
+
+Variable      | Value
+--------------|--------
+firstColor    | Red
+secondColor   | Green
+thirdColor    | Blue
+
+
+Object destructuring works by property name, while array destructuring works by position.
+
+Object Destructuring       | Array Destructuring
+---------------------------|--------------------------
+Uses property names        | Uses array positions
+const { name } = person    | const [first] = colors
+Order usually doesn't matter| Position matters
+
+
+================================================================================
+
+PART 3: DESTRUCTURING PROPS IN REACT
+
+================================================================================
+
+Before: Without Destructuring
+export default function Book(props) {
+
+  return (
+    <div>
+
+      <h2>
+        {props.title}
+      </h2>
+
+      <p>
+        By {props.author}
+      </p>
+
+      <p>
+        Price: ${props.price}
+      </p>
+
+      <p>
+        Rating: {props.rating} / 5
+      </p>
+
+    </div>
+  );
+}
+
+Drawbacks
+Issue                    | Explanation
+-------------------------|-------------------------------------
+Repeated props.          | props. appears repeatedly
+More Verbose             | Adds visual clutter
+Prop Usage               | Less immediate at function signature
+Maintenance              | Can become noisy with many Props
+
+
+================================================================================
+
+After: With Destructuring
+
+================================================================================
+
+export default function Book({
+  title,
+  author,
+  price,
+  rating
+}) {
+
+  return (
+    <div>
+
+      <h2>
+        {title}
+      </h2>
+
+      <p>
+        By {author}
+      </p>
+
+      <p>
+        Price: ${price}
+      </p>
+
+      <p>
+        Rating: {rating} / 5
+      </p>
+
+    </div>
+  );
+}
+
+Benefits
+Without                       | With Destructuring
+------------------------------|--------------------------------
+props.title                   | title
+props.author                  | author
+props.price                   | price
+props.rating                  | rating
+Repeated props.               | Direct variable access
+More verbose                  | More concise
+
+
+================================================================================
+
+HOW DESTRUCTURING WORKS IN FUNCTION PARAMETERS
+
+================================================================================
+
+Step 1: Component Receives Props
+function Book(props) {
+
+  // Example:
+  // props = {
+  //   title: 'The Great Gatsby',
+  //   author: 'F. Scott Fitzgerald',
+  //   price: 12.99,
+  //   rating: 4.5
+  // }
+
+}
+
+Step 2: Destructure the Props Object
+function Book({
+  title,
+  author,
+  price,
+  rating
+}) {
+
+  // title  = 'The Great Gatsby'
+  // author = 'F. Scott Fitzgerald'
+  // price  = 12.99
+  // rating = 4.5
+
+}
+
+Step 3: Use Variables Directly
+return (
+  <h2>
+    {title}
+  </h2>
+);
+
+Complete Flow
+PARENT
+  ↓
+<Book
+  title="The Great Gatsby"
+  author="F. Scott Fitzgerald"
+  price={12.99}
+  rating={4.5}
+/>
+  ↓
+PROPS OBJECT
+  ↓
+DESTRUCTURING
+  ↓
+title
+author
+price
+rating
+  ↓
+JSX
+
+
+================================================================================
+
+PART 4: DESTRUCTURING PATTERNS
+
+================================================================================
+
+Pattern 1: Basic Destructuring
+Parent
+<Book
+  title="Book 1"
+  author="Author 1"
+  price={12.99}
+/>
+
+Child
+export default function Book({
+  title,
+  author,
+  price
+}) {
+
+  return (
+    <div>
+
+      <h2>{title}</h2>
+
+      <p>{author}</p>
+
+      <p>${price}</p>
+
+    </div>
+  );
+}
+
+Explanation
+Prop        | Local Variable
+------------|----------------
+title       | title
+author      | author
+price       | price
+
+
+================================================================================
+
+Pattern 2: Destructuring with Default Values
+
+================================================================================
+
+Parent
+<Book
+  title="Book 1"
+  author="Author 1"
+/>
+
+Child
+export default function Book({
+  title = 'Unknown Title',
+  author = 'Unknown Author',
+  price = 0,
+  rating = 0
+}) {
+
+  return (
+    <div>
+
+      <h2>{title}</h2>
+
+      <p>{author}</p>
+
+      <p>${price}</p>
+
+      <p>
+        Rating: {rating} / 5
+      </p>
+
+    </div>
+  );
+}
+
+Default Values
+Prop     | Default
+---------|----------------
+title    | Unknown Title
+author   | Unknown Author
+price    | 0
+rating   | 0
+
+
+Because the parent provides title and author but not price or rating:
+
+Book 1
+Author 1
+$0
+Rating: 0 / 5
+
+Important Default-Value Rule
+
+A destructuring default is used when the incoming value is undefined.
+
+const {
+  price = 0
+} = props;
+
+Incoming Value    | Result
+------------------|--------
+undefined         | 0
+12.99             | 12.99
+0                 | 0
+null              | null
+
+
+================================================================================
+
+Pattern 3: Renaming Destructured Variables
+
+================================================================================
+
+Parent
+<UserCard
+  userName="Alice"
+  userAge={25}
+  userCity="NYC"
+/>
+
+Child
+export default function UserCard({
+  userName: name,
+  userAge: age,
+  userCity: city
+}) {
+
+  return (
+    <div>
+
+      <h2>{name}</h2>
+
+      <p>
+        Age: {age}
+      </p>
+
+      <p>
+        City: {city}
+      </p>
+
+    </div>
+  );
+}
+
+Renaming Syntax
+Original Prop | Local Variable
+--------------|----------------
+userName      | name
+userAge       | age
+userCity      | city
+
+
+Syntax:
+
+{
+  originalName: newName
+}
+
+
+Example:
+
+{
+  userName: name
+}
+
+
+means:
+
+Read userName
+     ↓
+Create Local Variable
+     ↓
+name
+
+
+================================================================================
+
+Pattern 4: Destructuring Nested Objects
+
+================================================================================
+
+Parent
+<BookDetails
+  book={{
+    title: 'Book 1',
+    author: {
+      name: 'Alice',
+      country: 'USA'
+    }
+  }}
+/>
+
+Child
+export default function BookDetails({
+  book: {
+    title,
+    author: {
+      name,
+      country
+    }
+  }
+}) {
+
+  return (
+    <div>
+
+      <h2>{title}</h2>
+
+      <p>
+        By {name} from {country}
+      </p>
+
+    </div>
+  );
+}
+
+Structure
+book
+├── title
+│   └── Book 1
+│
+└── author
+    ├── name
+    │   └── Alice
+    └── country
+        └── USA
+
+
+Nested destructuring extracts:
+
+title
+name
+country
+
+
+================================================================================
+
+Pattern 5: Destructuring with Rest Operator
+
+================================================================================
+
+Parent
+<Button
+  label="Click"
+  onClick={fn}
+  disabled={false}
+  className="btn"
+/>
+
+Child
+export default function Button({
+  label,
+  onClick,
+  ...rest
+}) {
+
+  return (
+    <button
+      onClick={onClick}
+      {...rest}
+    >
+      {label}
+    </button>
+  );
+}
+
+What Happens?
+Prop          | Destination
+--------------|--------------------------
+label         | label variable
+onClick       | onClick variable
+disabled      | rest.disabled
+className     | rest.className
+
+
+Conceptually:
+
+rest = {
+  disabled: false,
+  className: 'btn'
+};
+
+
+Then:
+
+{...rest}
+
+
+spreads those remaining properties onto the <button>.
+
+Easy Memory
+SPECIFIC PROPS
+label
+onClick
+
+     +
+
+EVERYTHING ELSE
+...rest
+
+
+================================================================================
+
+Pattern 6: Destructuring with Conditional Logic
+
+================================================================================
+
+export default function Book({
+  title,
+  author,
+  price = 0,
+  inStock = true,
+  rating = 0
+}) {
+
+  return (
+    <div>
+
+      <h2>{title}</h2>
+
+      <p>
+        By {author}
+      </p>
+
+      <p>
+        Price: ${price}
+      </p>
+
+      <p>
+        {inStock
+          ? '✓ In Stock'
+          : '✗ Out of Stock'}
+      </p>
+
+      {rating > 4 && (
+        <p>
+          ⭐ Highly Rated
+        </p>
+      )}
+
+    </div>
+  );
+}
+
+Explanation
+Code / Value       | Purpose
+-------------------|----------------------------------
+price = 0          | Default price
+inStock = true     | Default availability
+rating = 0         | Default rating
+inStock ? A : B    | Conditional text
+rating > 4 && ...  | Conditional JSX
+
+
+================================================================================
+
+PART 5: PRACTICAL EXAMPLES
+
+================================================================================
+
+Example 1: Simple Component with Destructuring
+Parent
+export default function App() {
+
+  return (
+    <UserCard
+      name="Alice"
+      email="alice@example.com"
+      role="Developer"
+    />
+  );
+}
+
+Child
+function UserCard({
+  name,
+  email,
+  role
+}) {
+
+  return (
+    <div className="card">
+
+      <h3>{name}</h3>
+
+      <p>
+        Email: {email}
+      </p>
+
+      <p>
+        Role: {role}
+      </p>
+
+    </div>
+  );
+}
+
+Flow
+Props Object
+    ↓
+{name, email, role}
+    ↓
+Individual Variables
+    ↓
+JSX
+
+
+================================================================================
+
+Example 2: Destructuring with Default Values
+
+================================================================================
+
+Parent
+export default function App() {
+
+  return (
+    <>
+
+      <Product
+        name="Laptop"
+        price={999}
+      />
+
+      <Product
+        name="Mouse"
+      />
+
+    </>
+  );
+}
+
+Child
+function Product({
+  name = 'Unknown Product',
+  price = 0,
+  inStock = true,
+  rating = 0
+}) {
+
+  return (
+    <div className="product">
+
+      <h3>{name}</h3>
+
+      <p>
+        Price: ${price}
+      </p>
+
+      <p>
+        {inStock
+          ? 'Available'
+          : 'Sold Out'}
+      </p>
+
+      <p>
+        Rating: {rating} / 5
+      </p>
+
+    </div>
+  );
+}
+
+Results
+Product | Name   | Price | Stock     | Rating
+--------|--------|-------|-----------|---------
+1       | Laptop | $999  | Available | 0 / 5
+2       | Mouse  | $0    | Available | 0 / 5
+
+
+Missing Props use the configured default values.
+
+================================================================================
+
+Example 3: Destructuring with Event Handlers
+
+================================================================================
+
+Parent
+export default function App() {
+
+  const handleDelete = (id) => {
+    console.log(
+      'Deleting:',
+      id
+    );
+  };
+
+  return (
+    <TodoItem
+      id={1}
+      text="Learn React"
+      completed={false}
+      onDelete={handleDelete}
+    />
+  );
+}
+
+Child
+function TodoItem({
+  id,
+  text,
+  completed,
+  onDelete
+}) {
+
+  return (
+    <div className="todo">
+
+      <input
+        type="checkbox"
+        checked={completed}
+        readOnly
+      />
+
+      <span>{text}</span>
+
+      <button
+        onClick={() =>
+          onDelete(id)
+        }
+      >
+        Delete
+      </button>
+
+    </div>
+  );
+}
+
+Explanation
+Prop        | Purpose
+------------|-----------------------------------
+id          | Todo identifier
+text        | Todo text
+completed   | Checkbox state
+onDelete    | Parent-provided callback function
+
+
+The callback can be used directly without:
+
+props.onDelete
+
+
+because it has already been destructured.
+
+================================================================================
+
+Example 4: Destructuring Nested Props
+
+================================================================================
+
+Parent
+export default function App() {
+
+  const book = {
+    title: 'The Great Gatsby',
+
+    author: {
+      name: 'F. Scott Fitzgerald',
+      birth: 1896
+    },
+
+    stats: {
+      pages: 180,
+      rating: 4.5
+    }
+  };
+
+  return (
+    <BookCard book={book} />
+  );
+}
+
+Child
+function BookCard({
+  book: {
+    title,
+    author: {
+      name,
+      birth
+    },
+    stats: {
+      pages,
+      rating
+    }
+  }
+}) {
+
+  return (
+    <div>
+
+      <h2>{title}</h2>
+
+      <p>
+        By {name} (b. {birth})
+      </p>
+
+      <p>
+        {pages} pages,
+        Rating: {rating}/5
+      </p>
+
+    </div>
+  );
+}
+
+Values Extracted
+Path                | Variable | Value
+--------------------|----------|-----------------------
+book.title          | title    | The Great Gatsby
+book.author.name    | name     | F. Scott Fitzgerald
+book.author.birth   | birth    | 1896
+book.stats.pages    | pages    | 180
+book.stats.rating   | rating   | 4.5
+
+
+================================================================================
+
+Example 5: Destructuring with Rest Operator
+
+================================================================================
+
+Parent
+export default function App() {
+
+  return (
+    <Card
+      title="My Card"
+      description="Card description"
+      className="highlight"
+      id="card-1"
+      data-test="card"
+    />
+  );
+}
+
+Child
+function Card({
+  title,
+  description,
+  ...rest
+}) {
+
+  return (
+    <div {...rest}>
+
+      <h3>{title}</h3>
+
+      <p>
+        {description}
+      </p>
+
+    </div>
+  );
+}
+
+Result
+
+Specific Props:
+
+title
+description
+
+
+Remaining Props:
+
+className
+id
+data-test
+
+
+These are forwarded through:
+
+<div {...rest}>
+
+
+Practical note: Be deliberate when forwarding ...rest to a DOM element. Only valid/safe DOM properties should reach that element.
+
+================================================================================
+
+Example 6: Destructuring with Renaming
+
+================================================================================
+
+Parent
+export default function App() {
+
+  return (
+    <Profile
+      firstName="Alice"
+      lastName="Johnson"
+      userEmail="alice@example.com"
+      userRole="Admin"
+    />
+  );
+}
+
+Child
+function Profile({
+  firstName: first,
+  lastName: last,
+  userEmail: email,
+  userRole: role
+}) {
+
+  return (
+    <div>
+
+      <h2>
+        {first} {last}
+      </h2>
+
+      <p>
+        Email: {email}
+      </p>
+
+      <p>
+        Role: {role}
+      </p>
+
+    </div>
+  );
+}
+
+Renaming
+Incoming Prop  | Local Variable
+---------------|----------------
+firstName      | first
+lastName       | last
+userEmail      | email
+userRole       | role
+
+
+Syntax:
+
+propName: localVariableName
+
+
+================================================================================
+
+PART 6: BEST PRACTICES
+
+================================================================================
+
+Best Practice 1: Destructure When It Improves Readability
+
+Common approach:
+
+export default function Book({
+  title,
+  author,
+  price
+}) {
+
+  return (
+    <div>
+
+      <h2>{title}</h2>
+
+      <p>{author}</p>
+
+      <p>${price}</p>
+
+    </div>
+  );
+}
+
+
+Direct props access is also valid:
+
+export default function Book(props) {
+
+  return (
+    <div>
+
+      <h2>{props.title}</h2>
+
+      <p>{props.author}</p>
+
+      <p>${props.price}</p>
+
+    </div>
+  );
+}
+
+Comparison
+Destructuring                  | Direct props Access
+-------------------------------|----------------------------------
+Less repetition                | Keeps source object explicit
+Props visible in signature     | Useful when forwarding props
+Very common in React           | Also valid React
+Good with a few known props    | Can be convenient in some cases
+
+
+Destructuring is a common convention, but it is not mandatory.
+
+================================================================================
+
+Best Practice 2: Use Default Values Where Appropriate
+
+================================================================================
+
+export default function Button({
+  label = 'Click Me',
+  onClick = () => {},
+  disabled = false
+}) {
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {label}
+    </button>
+  );
+}
+
+
+This keeps default behavior close to the parameter declaration.
+
+Default Destructuring vs ||
+
+Destructuring default:
+
+label = 'Click Me'
+
+
+is used for undefined.
+
+Using:
+
+label || 'Click Me'
+
+
+also falls back for other falsy values such as:
+
+''
+0
+false
+
+
+This difference matters in some components.
+
+================================================================================
+
+Best Practice 3: Group Related Props
+
+================================================================================
+
+export default function UserCard({
+
+  // User information
+  name,
+  email,
+
+  // Display options
+  showEmail = true,
+  showRole = true,
+
+  // Event handlers
+  onEdit,
+  onDelete
+
+}) {
+
+  return (
+    <div>
+
+      <h3>{name}</h3>
+
+      {showEmail && (
+        <p>{email}</p>
+      )}
+
+      <button onClick={onEdit}>
+        Edit
+      </button>
+
+      <button onClick={onDelete}>
+        Delete
+      </button>
+
+    </div>
+  );
+}
+
+
+Benefits:
+
+Benefit
+--------------------------------
+Organized
+Easy to scan
+Clear responsibilities
+Better documentation
+
+
+showRole is included in the original example as a display option, although the sample JSX doesn't currently use it.
+
+================================================================================
+
+Best Practice 4: Document Component Inputs
+
+================================================================================
+
+/**
+ * Book Component
+ *
+ * @param {string} title
+ *   The book title
+ *
+ * @param {string} author
+ *   The author name
+ *
+ * @param {number} price
+ *   The book price
+ *
+ * @param {number} rating
+ *   The book rating (0-5)
+ */
+export default function Book({
+  title,
+  author,
+  price,
+  rating
+}) {
+
+  return (
+    <div>
+
+      <h2>{title}</h2>
+
+      <p>{author}</p>
+
+      <p>${price}</p>
+
+      <p>
+        Rating: {rating}/5
+      </p>
+
+    </div>
+  );
+}
+
+
+Documentation can help explain what the component expects.
+
+Larger projects may also use TypeScript or another type-checking/documentation approach to describe component inputs.
+
+================================================================================
+
+PART 7: COMMON MISTAKES
+
+================================================================================
+
+Mistake 1: Incorrect Function Parameters
+
+Wrong:
+
+export default function Book(
+  title,
+  author,
+  price
+) {
+
+  return (
+    <h2>{title}</h2>
+  );
+}
+
+
+React passes the component's Props as an object.
+
+Correct:
+
+export default function Book({
+  title,
+  author,
+  price
+}) {
+
+  return (
+    <h2>{title}</h2>
+  );
+}
+
+Easy Memory
+React gives:
+
+props = {
+  title,
+  author,
+  price
+}
+
+Therefore destructure:
+
+{ title, author, price }
+
+
+================================================================================
+
+Mistake 2: Mixing Destructured and Non-Destructured Props Incorrectly
+
+================================================================================
+
+Avoid:
+
+export default function Book(
+  { title, author },
+  props
+) {
+
+  return (
+    <div>
+
+      <h2>{title}</h2>
+
+      <p>
+        {props.author}
+      </p>
+
+    </div>
+  );
+}
+
+
+A normal function component receives one Props object as its primary component input.
+
+Use:
+
+export default function Book({
+  title,
+  author,
+  price
+}) {
+
+  return (
+    <div>
+
+      <h2>{title}</h2>
+
+      <p>{author}</p>
+
+      <p>${price}</p>
+
+    </div>
+  );
+}
+
+
+================================================================================
+
+Mistake 3: Trying to Modify a Destructured Prop
+
+================================================================================
+
+Avoid:
+
+export default function Book({
+  title,
+  author
+}) {
+
+  title = 'New Title';
+
+  return (
+    <h2>{title}</h2>
+  );
+}
+
+
+A component should treat its Props as immutable/read-only inputs.
+
+Use the received value:
+
+export default function Book({
+  title,
+  author
+}) {
+
+  return (
+    <h2>{title}</h2>
+  );
+}
+
+Important Clarification
+
+Destructuring itself creates local bindings, but it doesn't make mutating prop-derived data an acceptable React pattern.
+
+Think:
+
+PROPS
+  ↓
+INPUT
+  ↓
+READ
+  ↓
+DON'T MUTATE
+
+
+================================================================================
+
+Mistake 4: Destructuring Too Deeply
+
+================================================================================
+
+Harder to read:
+
+export default function BookCard({
+  book: {
+    details: {
+      info: {
+        title,
+        author
+      }
+    }
+  }
+}) {
+
+  return (
+    <h2>{title}</h2>
+  );
+}
+
+
+Cleaner:
+
+export default function BookCard({
+  book
+}) {
+
+  const {
+    title,
+    author
+  } = book.details.info;
+
+  return (
+    <h2>{title}</h2>
+  );
+}
+
+Why?
+Deep Parameter Destructuring | Local Destructuring
+-----------------------------|-------------------------------
+Harder to scan               | Easier to read
+Long function signature      | Cleaner signature
+More fragile looking         | Structure easier to follow
+
+
+================================================================================
+
+COMMON MISTAKES - QUICK TABLE
+
+================================================================================
+
+Mistake                 | Avoid                       | Better
+------------------------|-----------------------------|-----------------------------
+Wrong parameters        | Book(title, author)         | Book({ title, author })
+Repeated access         | props.title everywhere      | Destructure when useful
+Modify prop input       | Mutate prop-derived data    | Treat props as read-only
+Very deep destructuring | Huge nested signature       | Destructure inside function
+Blind ...rest spread    | Forward everything blindly  | Forward valid intended props
+
+
+================================================================================
+
+PART 8: WITH vs WITHOUT DESTRUCTURING
+
+================================================================================
+
+Without Destructuring
+export default function UserProfile(
+  props
+) {
+
+  return (
+    <div className={props.className}>
+
+      <h1>
+        {props.name}
+      </h1>
+
+      <p>
+        Email: {props.email}
+      </p>
+
+      <p>
+        Role: {props.role}
+      </p>
+
+      <button onClick={props.onEdit}>
+        Edit
+      </button>
+
+      <button onClick={props.onDelete}>
+        Delete
+      </button>
+
+    </div>
+  );
+}
+
+With Destructuring
+export default function UserProfile({
+  className,
+  name,
+  email,
+  role,
+  onEdit,
+  onDelete
+}) {
+
+  return (
+    <div className={className}>
+
+      <h1>{name}</h1>
+
+      <p>
+        Email: {email}
+      </p>
+
+      <p>
+        Role: {role}
+      </p>
+
+      <button onClick={onEdit}>
+        Edit
+      </button>
+
+      <button onClick={onDelete}>
+        Delete
+      </button>
+
+    </div>
+  );
+}
+
+Comparison
+Without Destructuring       | With Destructuring
+----------------------------|----------------------------------
+props.className             | className
+props.name                  | name
+props.email                 | email
+props.role                  | role
+props.onEdit                | onEdit
+props.onDelete              | onDelete
+More repeated syntax        | More concise
+Props object stays explicit | Used props visible in signature
+
+
+================================================================================
+
+PART 9: SUMMARY AND KEY TAKEAWAYS
+
+================================================================================
+
+What You've Learned
+Topic                  | What You've Learned
+-----------------------|----------------------------------------------
+Destructuring          | Extract values into variables
+Props                  | Props object can be destructured
+Function Parameters    | Destructure directly in component signature
+Default Values         | Provide fallback values
+Renaming               | Give extracted properties local names
+Nested Objects         | Extract nested values
+Arrays                 | Destructure values by position
+Rest Operator          | Capture remaining properties
+Prop Forwarding        | Spread selected remaining props
+Conditional Logic      | Use destructured values directly
+Read-Only Props        | Destructuring doesn't change prop semantics
+
+
+================================================================================
+
+KEY TAKEAWAYS
+
+================================================================================
+
+No. | Key Takeaway
+----|-------------------------------------------------------------------
+1   | Destructuring extracts values from objects or arrays
+2   | Props can be destructured directly in function parameters
+3   | It removes repetitive props. prefixes
+4   | Default values can handle undefined Props
+5   | Props can be renamed during destructuring
+6   | Nested objects can also be destructured
+7   | ...rest captures remaining properties
+8   | Deep destructuring should remain readable
+9   | Destructuring is common but not mandatory
+10  | Props should still be treated as read-only
+
+
+================================================================================
+
+DESTRUCTURING QUICK REFERENCE
+
+================================================================================
+
+Pattern      | Example                    | Use Case
+-------------|----------------------------|------------------------------
+Basic        | { title, author }          | Extract specific Props
+Defaults     | { title = 'Unknown' }      | Provide fallback
+Renaming     | { userName: name }         | Rename local variable
+Nested       | { book: { title } }        | Extract nested property
+Rest         | { title, ...rest }         | Capture remaining Props
+Array        | [first, second]            | Extract array items
+
+Important: Rest vs Spread
+
+The same ... syntax has related but different uses.
+
+Syntax                | Meaning
+----------------------|-----------------------------------
+{ title, ...rest }    | Rest: collect remaining properties
+<Component {...rest}> | Spread: pass properties onward
+
+
+Example:
+
+function Button({
+  label,
+  ...rest
+}) {
+
+  return (
+    <button {...rest}>
+      {label}
+    </button>
+  );
+}
+
+
+================================================================================
+
+BEFORE AND AFTER - QUICK REVISION
+
+================================================================================
+
+Before
+function Book(props) {
+
+  return (
+    <div>
+
+      <h2>{props.title}</h2>
+
+      <p>{props.author}</p>
+
+      <p>${props.price}</p>
+
+    </div>
+  );
+}
+
+After
+function Book({
+  title,
+  author,
+  price
+}) {
+
+  return (
+    <div>
+
+      <h2>{title}</h2>
+
+      <p>{author}</p>
+
+      <p>${price}</p>
+
+    </div>
+  );
+}
+
+Benefits
+Before             | After
+-------------------|--------------------------
+props.title        | title
+props.author       | author
+props.price        | price
+More repetition    | Less repetition
+Longer JSX         | Cleaner JSX
+
+
+================================================================================
+
+COMPLETE DESTRUCTURING FLOW
+
+================================================================================
+
+PARENT
+   ↓
+<Book
+  title="Book 1"
+  author="Author 1"
+  price={12.99}
+/>
+   ↓
+PROPS OBJECT
+   ↓
+{
+  title: 'Book 1',
+  author: 'Author 1',
+  price: 12.99
+}
+   ↓
+DESTRUCTURE
+   ↓
+{
+  title,
+  author,
+  price
+}
+   ↓
+LOCAL VARIABLES
+   ↓
+title
+author
+price
+   ↓
+USE DIRECTLY IN JSX
+
+
+================================================================================
+
+EASY MEMORY TRICK
+
+================================================================================
+
+Remember:
+
+PROPS OBJECT
+    ↓
+DESTRUCTURE
+    ↓
+DIRECT VARIABLES
+
+
+Examples:
+
+Basic
+{ title }
+
+Default
+{ title = 'Unknown' }
+
+Rename
+{ userName: name }
+
+Nested
+{ book: { title } }
+
+Rest
+{ title, ...rest }
+
+Array
+[first, second]
+
+
+================================================================================
+
+INTERVIEW-READY QUICK TABLE
+
+================================================================================
+
+Question                         | Short Answer
+---------------------------------|------------------------------------------
+What is destructuring?           | Extracting object/array values
+How do you destructure Props?    | function Book({ title, author }) {}
+Why destructure Props?           | Cleaner and less repetitive code
+How do you provide a default?    | { price = 0 }
+When is default used?            | When incoming value is undefined
+How do you rename a prop?        | { userName: name }
+Can nested objects be destructured?| Yes
+What does ...rest do?            | Collects remaining properties
+What does {...rest} do in JSX?   | Spreads properties onto an element
+Can arrays be destructured?      | Yes, by position
+Is destructuring mandatory?      | No
+Are destructured Props mutable?  | Treat Props as read-only
+
+
+================================================================================
+
+ONE-LINE INTERVIEW ANSWER
+
+================================================================================
+
+Props destructuring is JavaScript object destructuring applied to a component's Props object, allowing values such as { title, author, price } to be used directly instead of repeatedly writing props.title, props.author, and props.price. It also supports defaults, renaming, nested destructuring, and rest properties.
+
+================================================================================
+
+NEXT STEPS
+
+================================================================================
+
+Next Topic             | Purpose
+-----------------------|----------------------------------------------
+Default Props Values   | Handle optional input values
+Nested Destructuring   | Work with nested data
+Rest / Spread          | Build flexible reusable components
+Props Validation       | Validate component inputs where appropriate
+TypeScript Props       | Define typed component contracts
+State Destructuring    | Understand useState array destructuring
+Objects and Arrays     | Master JS destructuring patterns
+Reusable Components    | Apply destructuring in real components
+
+
+================================================================================
+
+FOLLOW-UP QUESTIONS
+
+================================================================================
+
+How do you provide default values for destructured Props?
+
+What is the rest operator ... and how do you use it with Props?
+
+================================================================================
