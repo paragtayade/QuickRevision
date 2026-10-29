@@ -1,0 +1,831 @@
+CREATE OUR FIRST COMPONENT IN REACT
+
+================================================================================
+
+PART 1: OVERVIEW OF THE LESSON
+
+================================================================================
+
+What You'll Learn
+
+This lesson covers how to create your first reusable React component.
+
+Topic                  | What You'll Learn
+-----------------------|--------------------------------------------
+React Component        | What a component is
+Component Types        | Functional vs class components
+Functional Component   | How to create a modern component
+Naming Conventions     | How components should be named
+Export / Import        | How to share components between files
+Component Usage        | How to use one component inside another
+File Structure         | How to organize component files
+Best Practices         | How to create maintainable components
+
+
+================================================================================
+
+WHY COMPONENTS MATTER
+
+================================================================================
+
+Components are the building blocks of React applications.
+
+They help you:
+
+Create reusable pieces of UI.
+Organize UI and related logic.
+Reuse code.
+Simplify maintenance.
+Divide large applications into smaller pieces.
+Scale applications more easily.
+Follow common professional React development practices.
+Easy Understanding
+REACT APPLICATION
+       ↓
+Made of Components
+       ↓
+Small Reusable UI Pieces
+       ↓
+Combined Together
+       ↓
+Complete Application
+
+
+================================================================================
+
+PART 2: UNDERSTANDING REACT COMPONENTS
+
+================================================================================
+
+What is a React Component?
+
+A React component is typically a JavaScript function that returns/describes UI using JSX.
+
+Component Feature       | Description
+------------------------|-------------------------------------------
+JavaScript Function     | Modern components are usually functions
+JSX                     | Describes the component's UI
+State                   | Component can use its own state
+Props                   | Component can receive data/input
+Logic                   | Component can contain UI-related logic
+Reusable                | Can be used multiple times
+Composable              | Components can contain other components
+
+Component Analogy - LEGO Blocks
+
+Think of components like LEGO blocks.
+
+LEGO                         | React
+-----------------------------|-------------------------------------
+Individual block             | Individual component
+Reusable block               | Reusable component
+Combine multiple blocks      | Combine multiple components
+Each block has a purpose     | Each component has a responsibility
+Complex LEGO structure       | Complete React application
+
+
+Easy memory:
+
+SMALL COMPONENTS
+      ↓
+COMBINED TOGETHER
+      ↓
+LARGER COMPONENTS
+      ↓
+COMPLETE APPLICATION
+
+
+================================================================================
+
+TYPES OF COMPONENTS
+
+================================================================================
+
+React applications can contain functional components and older class components.
+
+1. Functional Components - Modern Approach
+function MyComponent() {
+  return <h1>Hello World</h1>;
+}
+
+
+Characteristics:
+
+Feature             | Functional Component
+--------------------|--------------------------------
+Definition          | JavaScript function
+UI                  | Returns/describes JSX
+State               | Can use Hooks such as useState
+Modern React        | Commonly used
+Readability         | Usually concise
+
+2. Class Components - Older Style
+class MyComponent extends React.Component {
+  render() {
+    return <h1>Hello World</h1>;
+  }
+}
+
+
+Characteristics:
+
+Feature             | Class Component
+--------------------|---------------------------------
+Definition          | JavaScript class
+Base Class          | Extends React.Component
+UI                  | Returned from render()
+State               | Can use this.state
+Style               | Older React code style
+Support             | Still encountered in existing code
+
+Functional vs Class Components
+Feature         | Functional Component   | Class Component
+----------------|------------------------|-----------------------
+Structure       | JavaScript function    | JavaScript class
+JSX             | Returned directly      | Returned by render()
+State           | Hooks                  | this.state
+State Update    | Hook state setter      | this.setState()
+Modern Usage    | Common approach        | Older/legacy codebases
+Boilerplate     | Usually less           | Usually more
+
+Course Focus
+THIS COURSE
+     ↓
+FUNCTIONAL COMPONENTS
+     ↓
+HOOKS
+     ↓
+MODERN REACT STYLE
+
+
+================================================================================
+
+PART 3: CREATING YOUR FIRST COMPONENT
+
+================================================================================
+
+Step 1: Create the Component File
+Project Structure
+
+Before:
+
+src/
+├── App.jsx
+├── main.jsx
+└── App.css
+
+
+Create a components folder and Welcome.jsx:
+
+src/
+├── App.jsx
+├── main.jsx
+├── App.css
+│
+└── components/
+    └── Welcome.jsx
+
+Steps in VS Code
+Step | Action
+-----|--------------------------------------------
+1    | Open the project in VS Code
+2    | Right-click the src folder
+3    | Select "New Folder"
+4    | Name it components
+5    | Right-click the components folder
+6    | Select "New File"
+7    | Name the file Welcome.jsx
+
+
+Result:
+
+src/components/Welcome.jsx
+
+
+================================================================================
+
+Step 2: Write Your First Component
+
+================================================================================
+
+File:
+
+src/components/Welcome.jsx
+
+
+Code:
+
+export default function Welcome() {
+  return (
+    <div>
+      <h1>Welcome to React!</h1>
+      <p>This is my first component.</p>
+    </div>
+  );
+}
+
+Code Breakdown
+Code / Concept                    | Explanation
+----------------------------------|------------------------------------------
+function Welcome()                | Creates component named Welcome
+export default                    | Makes it available for default import
+return (...)                      | Returns/describes the component UI
+JSX                               | HTML-like syntax used inside React
+<div>                             | Container for component content
+<h1>                              | Displays heading
+<p>                               | Displays paragraph
+
+Easy Flow
+Welcome()
+    ↓
+return (...)
+    ↓
+JSX
+    ↓
+React Renders Component
+    ↓
+Browser Shows Content
+
+
+================================================================================
+
+Understanding export default
+
+================================================================================
+
+export default function Welcome() {
+  ...
+}
+
+
+export default makes Welcome the default export of the file.
+
+This allows another file to import it:
+
+import Welcome from './components/Welcome';
+
+
+Flow:
+
+Welcome.jsx
+     ↓
+export default Welcome
+     ↓
+App.jsx imports Welcome
+     ↓
+<Welcome />
+     ↓
+Component Rendered
+
+
+================================================================================
+
+Step 3: Import Component in App.jsx
+
+================================================================================
+
+Before - Without Welcome Component
+import './App.css';
+
+export default function App() {
+  return (
+    <div>
+      <h1>My App</h1>
+    </div>
+  );
+}
+
+After - With Welcome Component
+import './App.css';
+import Welcome from './components/Welcome';
+
+export default function App() {
+  return (
+    <div>
+
+      <h1>My App</h1>
+
+      <Welcome />
+
+    </div>
+  );
+}
+
+Important Changes
+Code                                  | Purpose
+--------------------------------------|--------------------------------------
+import Welcome from './components/Welcome' | Imports Welcome component
+./components/Welcome                  | Relative path to component file
+<Welcome />                           | Uses/renders Welcome component
+
+
+Depending on the project tooling, the .jsx extension can commonly be omitted in this import.
+
+Important Note
+
+The original example included:
+
+import { useState } from 'react';
+
+
+But useState was not actually used in this particular App component.
+
+Therefore, it can be removed until state is required.
+
+================================================================================
+
+Understanding <Welcome />
+
+================================================================================
+
+<Welcome />
+
+
+This tells React to use the Welcome component at that location.
+
+App Component
+     ↓
+<h1>My App</h1>
+     ↓
+<Welcome />
+     ↓
+Welcome Component Executes
+     ↓
+Returns JSX
+     ↓
+Welcome Content Appears
+
+
+<Welcome /> is self-closing because no child content is being placed between opening and closing tags.
+
+Equivalent syntax:
+
+<Welcome></Welcome>
+
+
+But the shorter form is:
+
+<Welcome />
+
+
+================================================================================
+
+Step 4: View Your Component
+
+================================================================================
+
+After making the changes:
+
+Step | What Happens
+-----|----------------------------------------------
+1    | Save Welcome.jsx and App.jsx
+2    | Vite detects the source changes
+3    | Development environment updates the app
+4    | Browser displays the updated UI
+
+
+Expected page:
+
+My App
+
+Welcome to React!
+
+This is my first component.
+
+Complete Flow
+Welcome.jsx
+     ↓
+Creates Welcome Component
+     ↓
+export default
+     ↓
+App.jsx
+     ↓
+import Welcome
+     ↓
+<Welcome />
+     ↓
+React Renders Welcome Component
+     ↓
+UI Appears
+
+
+================================================================================
+
+PART 4: COMPONENT NAMING CONVENTIONS
+
+================================================================================
+
+Rule 1: Use PascalCase
+
+================================================================================
+
+React component names should start with an uppercase letter.
+
+Correct
+function Welcome() {}
+
+function UserProfile() {}
+
+function TodoItem() {}
+
+Avoid
+function welcome() {}
+
+function user_profile() {}
+
+function todoitem() {}
+
+Why PascalCase?
+Example          | Meaning
+-----------------|---------------------------------
+<Welcome />      | React component
+<UserProfile />  | React component
+<TodoItem />     | React component
+<div>            | Built-in HTML element
+<button>         | Built-in HTML element
+
+
+React JSX uses capitalization to distinguish user-defined React components from lowercase built-in HTML elements.
+
+Easy memory:
+
+Uppercase / PascalCase
+→ React Component
+
+Lowercase
+→ HTML Element
+
+
+================================================================================
+
+Rule 2: Use Descriptive Names
+
+================================================================================
+
+Names should describe the component's responsibility.
+
+Good Names
+function UserCard() {}
+
+function NavigationBar() {}
+
+function LoginForm() {}
+
+Less Descriptive Names
+function Component() {}
+
+function Item() {}
+
+function Container() {}
+
+Why Use Descriptive Names?
+Benefit              | Explanation
+---------------------|-----------------------------------------
+Readability          | Purpose is immediately clearer
+Self-documentation   | Name explains intended responsibility
+Maintenance          | Easier to find and modify code
+Team Collaboration   | Other developers understand intent faster
+
+
+================================================================================
+
+Rule 3: Match File Name and Component Name
+
+================================================================================
+
+A common React project convention is to keep the component filename aligned with the component name.
+
+Recommended
+File                  | Component
+----------------------|-----------------------
+Welcome.jsx           | Welcome
+UserProfile.jsx       | UserProfile
+TodoItem.jsx          | TodoItem
+NavigationBar.jsx     | NavigationBar
+
+
+Example:
+
+// File: Welcome.jsx
+
+export default function Welcome() {
+  return <h1>Welcome</h1>;
+}
+
+
+Another example:
+
+// File: UserProfile.jsx
+
+export default function UserProfile() {
+  return <div>User Profile</div>;
+}
+
+Avoid Inconsistent Naming
+File          | Component       | Issue
+--------------|-----------------|-----------------------------
+welcome.jsx   | Welcome         | Inconsistent capitalization
+user.jsx      | UserProfile     | File doesn't describe component
+
+Why Match Them?
+Welcome.jsx
+    ↓
+Welcome
+
+UserProfile.jsx
+    ↓
+UserProfile
+
+
+Benefits:
+
+Easier file navigation.
+Easier searching.
+Clear component ownership.
+Better project organization.
+Easier team collaboration.
+
+================================================================================
+
+COMPLETE FIRST-COMPONENT EXAMPLE
+
+================================================================================
+
+Project Structure
+src/
+│
+├── components/
+│   └── Welcome.jsx
+│
+├── App.jsx
+├── App.css
+├── index.css
+└── main.jsx
+
+Welcome.jsx
+export default function Welcome() {
+  return (
+    <div>
+      <h1>Welcome to React!</h1>
+      <p>This is my first component.</p>
+    </div>
+  );
+}
+
+App.jsx
+import './App.css';
+import Welcome from './components/Welcome';
+
+export default function App() {
+  return (
+    <div>
+
+      <h1>My App</h1>
+
+      <Welcome />
+
+    </div>
+  );
+}
+
+main.jsx
+
+The existing Vite entry point renders App.
+
+Conceptually:
+
+main.jsx
+   ↓
+<App />
+   ↓
+App.jsx
+   ↓
+<Welcome />
+   ↓
+Welcome.jsx
+   ↓
+UI
+
+
+================================================================================
+
+FUNCTIONAL VS CLASS COMPONENTS - QUICK REVISION
+
+================================================================================
+
+Feature            | Functional               | Class
+-------------------|--------------------------|---------------------------
+Definition         | Function                 | Class
+Base Class         | Not required             | React.Component
+UI                 | Return JSX               | render() returns JSX
+State              | Hooks                    | this.state
+State Update       | Hook setters             | this.setState()
+Style              | Modern/common            | Older style
+Course Focus       | Yes                      | No
+
+
+================================================================================
+
+EXPORT → IMPORT → USE
+
+================================================================================
+
+This is the most important flow in this lesson.
+
+1. Export
+
+Inside Welcome.jsx:
+
+export default function Welcome() {
+  return <h1>Welcome!</h1>;
+}
+
+2. Import
+
+Inside App.jsx:
+
+import Welcome from './components/Welcome';
+
+3. Use
+
+Inside the JSX:
+
+<Welcome />
+
+Memory Trick
+CREATE
+  ↓
+EXPORT
+  ↓
+IMPORT
+  ↓
+USE
+  ↓
+RENDER
+
+
+================================================================================
+
+COMPONENT BEST PRACTICES
+
+================================================================================
+
+Based on the lesson's component model:
+
+Practice                    | Example / Reason
+----------------------------|--------------------------------------------
+Use PascalCase              | Welcome, UserProfile, TodoItem
+Use descriptive names       | LoginForm instead of Component
+Match file/component names  | UserProfile.jsx → UserProfile
+Keep components focused     | Give each component a clear responsibility
+Reuse common UI             | Use the same component where appropriate
+Organize component files    | Keep reusable components under components/
+Use props for input         | Pass information into reusable components
+Use state when needed       | Manage changing component data
+
+
+================================================================================
+
+COMPONENT RELATIONSHIP
+
+================================================================================
+
+A React application can be visualized as a component tree.
+
+App
+│
+├── Header
+│
+├── Welcome
+│
+├── MainContent
+│   ├── UserCard
+│   ├── TodoList
+│   │   ├── TodoItem
+│   │   └── TodoItem
+│   └── Button
+│
+└── Footer
+
+
+This allows a larger application to be built from smaller reusable pieces.
+
+================================================================================
+
+KEY CONCEPTS SUMMARY
+
+================================================================================
+
+Concept            | Meaning
+-------------------|----------------------------------------------
+Component          | Reusable piece of React UI
+Functional         | Function-based component
+Class              | Older class-based component style
+JSX                | Syntax used to describe UI
+Props              | Inputs passed into a component
+State              | Changing data managed by a component
+PascalCase         | Component naming convention
+export default     | Exports a default value/component
+import             | Brings exported component into another file
+<Welcome />        | Uses/renders a React component
+
+
+================================================================================
+
+QUICK REVISION
+
+================================================================================
+
+CREATE FILE
+Welcome.jsx
+     ↓
+CREATE COMPONENT
+function Welcome()
+     ↓
+RETURN JSX
+     ↓
+EXPORT COMPONENT
+export default
+     ↓
+IMPORT INTO App.jsx
+     ↓
+USE COMPONENT
+<Welcome />
+     ↓
+REACT RENDERS IT
+
+
+================================================================================
+
+INTERVIEW-READY QUICK TABLE
+
+================================================================================
+
+Question                         | Short Answer
+---------------------------------|--------------------------------------------
+What is a React component?       | Reusable piece of UI
+What is a functional component?  | Function that describes/returns React UI
+What is a class component?       | Class-based older React component style
+What does a component return?    | Usually JSX/React elements
+How should components be named?  | PascalCase
+What are props?                  | Inputs passed to components
+What is state?                   | Changing data used by a component
+What does export default do?     | Defines the module's default export
+How do you import Welcome?       | import Welcome from './components/Welcome'
+How do you use Welcome?          | <Welcome />
+Why use components?              | Reuse, organization and maintainability
+
+
+================================================================================
+
+ONE-LINE INTERVIEW ANSWER
+
+================================================================================
+
+A React component is a reusable unit of UI, commonly written as a PascalCase JavaScript function that returns JSX, can receive props and use state, and can be exported, imported, and composed with other components.
+
+================================================================================
+
+EASY MEMORY TRICK
+
+================================================================================
+
+COMPONENT = FUNCTION + JSX + OPTIONAL PROPS/STATE
+
+
+And for component usage:
+
+CREATE → EXPORT → IMPORT → USE → RENDER
+
+
+================================================================================
+
+FINAL PROJECT VIEW
+
+================================================================================
+
+src/
+│
+├── components/
+│   └── Welcome.jsx
+│
+├── App.jsx
+├── App.css
+├── index.css
+└── main.jsx
+
+
+main.jsx
+   ↓
+App.jsx
+   ↓
+<Welcome />
+   ↓
+Welcome.jsx
+   ↓
+Welcome to React!
+This is my first component.
+
+
+================================================================================
