@@ -1,0 +1,1716 @@
+
+================================================================================
+PROPS AND ONE-WAY DATA FLOW - OVERVIEW
+================================================================================
+
+What You'll Learn
+
+This lesson covers the fundamental React concept of one-way data flow and explains how Props support this pattern.
+
+Topic                  | What You'll Learn
+-----------------------|-----------------------------------------------
+One-Way Data Flow      | How React data flows in one direction
+Parent → Child         | How parents pass data to children
+Props                  | How components receive data
+Read-Only Props        | Why children should not modify props
+State Ownership        | Which component owns and updates data
+Callback Functions     | How children request parent updates
+Unidirectional Flow    | Why React uses predictable data movement
+Multi-Level Flow       | Pass data through component levels
+Props Drilling         | Passing props through intermediate components
+Context API            | Alternative for deeply shared data
+Best Practices         | Structure predictable component communication
+Common Mistakes        | Avoid mutation and data-flow problems
+
+
+================================================================================
+
+WHY THIS LESSON MATTERS
+
+================================================================================
+
+One-way data flow is fundamental to React because it makes application state easier to understand and trace.
+
+Benefits include:
+
+Predictable data movement.
+Easier debugging.
+Clear state ownership.
+Easier maintenance.
+Better scalability.
+Cleaner component composition.
+Easier testing.
+Reduced accidental data mutation.
+Easy Concept
+PARENT OWNS DATA
+       ↓
+PASSES DATA AS PROPS
+       ↓
+CHILD RECEIVES DATA
+       ↓
+CHILD DISPLAYS DATA
+
+
+When the child needs something changed:
+
+CHILD
+   ↓
+CALLS PARENT CALLBACK
+   ↓
+PARENT UPDATES STATE
+   ↓
+NEW PROPS FLOW DOWN
+   ↓
+CHILD RE-RENDERS
+
+
+================================================================================
+
+PART 2: UNDERSTANDING ONE-WAY DATA FLOW
+
+================================================================================
+
+What is One-Way Data Flow?
+
+One-way data flow means that application data flows downward from parent components to child components.
+
+Concept               | Meaning
+----------------------|----------------------------------------------
+Direction             | Parent → Child
+Data                  | Passed through props
+State Ownership       | State belongs to the component that owns it
+Props                 | Read-only input for receiving component
+State Update          | Performed by the component that owns state
+Child Interaction     | Child can call a callback passed by parent
+Updated Data          | Flows back down through new props
+
+Visual Representation
+PARENT COMPONENT
+(owns data/state)
+       ↓
+       ↓ Props
+       ↓
+CHILD COMPONENT
+(receives data)
+       ↓
+DISPLAYS DATA
+       ↓
+USER SEES UI
+
+
+================================================================================
+
+ONE-WAY DATA FLOW WITH USER INTERACTION
+
+================================================================================
+
+A child cannot directly modify its parent's state.
+
+Instead, the parent can provide a function.
+
+PARENT STATE
+     ↓
+DATA PASSED AS PROPS
+     ↓
+CHILD DISPLAYS DATA
+     ↓
+USER INTERACTS
+     ↓
+CHILD CALLS CALLBACK PROP
+     ↓
+PARENT CALLBACK RUNS
+     ↓
+PARENT UPDATES STATE
+     ↓
+NEW PROPS FLOW DOWN
+     ↓
+CHILD RE-RENDERS
+
+Important Distinction
+Data                | Direction
+--------------------|---------------------------------------
+State/values        | Parent → Child through props
+Event notification  | Child calls function provided by parent
+State update        | Parent performs the update
+New state value     | Parent → Child again through props
+
+
+So React remains one-way even when a child triggers a parent's state update.
+
+================================================================================
+
+ONE-WAY vs DIRECT TWO-WAY MUTATION
+
+================================================================================
+
+One-Way React Pattern           | Direct Two-Way Mutation
+--------------------------------|-------------------------------------
+Parent owns state               | Multiple components mutate data
+Props flow downward             | Data can change from many directions
+Child uses callback             | Child directly modifies parent data
+Clear update path               | Harder to identify update source
+Predictable ownership           | Ownership becomes unclear
+Easier to debug                 | Harder to trace
+
+
+Recommended pattern:
+
+Parent
+  ↓
+Props
+  ↓
+Child
+  ↓
+Callback
+  ↓
+Parent updates
+  ↓
+New Props
+
+
+================================================================================
+
+PART 3: HOW PROPS ENABLE ONE-WAY DATA FLOW
+
+================================================================================
+
+Props as the Data Channel
+
+Parent:
+
+function Parent() {
+
+  const data =
+    'Hello from Parent';
+
+  return (
+    <Child message={data} />
+  );
+}
+
+
+Child:
+
+function Child(props) {
+
+  return (
+    <h1>
+      {props.message}
+    </h1>
+  );
+}
+
+What Happens?
+Step | Action
+-----|----------------------------------------------------------
+1    | Parent owns/contains the data
+2    | Parent passes data to Child through props
+3    | Child receives props
+4    | Child reads props.message
+5    | Child renders the value
+6    | Child does not modify the received prop
+
+Flow
+Parent
+
+data = "Hello from Parent"
+        ↓
+message={data}
+        ↓
+Child
+        ↓
+props.message
+        ↓
+Hello from Parent
+
+
+================================================================================
+
+PROPS ARE READ-ONLY
+
+================================================================================
+
+A receiving component should treat props as read-only.
+
+Wrong
+function Child(props) {
+
+  props.message = 'New value';
+
+  return (
+    <h1>
+      {props.message}
+    </h1>
+  );
+}
+
+Correct
+function Child(props) {
+
+  return (
+    <h1>
+      {props.message}
+    </h1>
+  );
+}
+
+Why?
+Read-Only Props Help With
+--------------------------------
+Predictable data flow
+Clear state ownership
+Easier debugging
+Reduced accidental mutation
+Maintainable component design
+
+
+Easy memory:
+
+PROPS
+  ↓
+RECEIVE
+  ↓
+READ
+  ↓
+DON'T MUTATE
+
+
+================================================================================
+
+PART 4: THE COMPLETE DATA FLOW PATTERN
+
+================================================================================
+
+Step 1: Parent Stores Data
+import { useState } from 'react';
+import Child from './Child';
+
+export default function Parent() {
+
+  const [count, setCount] =
+    useState(0);
+
+  return (
+    <div>
+
+      <h1>
+        Parent Component
+      </h1>
+
+      <p>
+        Count: {count}
+      </p>
+
+      <Child count={count} />
+
+    </div>
+  );
+}
+
+Explanation
+Code                    | Purpose
+------------------------|----------------------------------------
+useState(0)             | Creates count state
+count                   | Current state value
+setCount                | State update function
+Parent                  | Owns the state
+count={count}           | Passes count to Child
+
+
+Flow:
+
+PARENT STATE
+count = 0
+    ↓
+<Child count={count} />
+    ↓
+CHILD RECEIVES count
+
+
+================================================================================
+
+Step 2: Child Receives Data
+
+================================================================================
+
+export default function Child(props) {
+
+  return (
+    <div>
+
+      <h1>
+        Child Component
+      </h1>
+
+      <p>
+        Received count: {props.count}
+      </p>
+
+    </div>
+  );
+}
+
+Explanation
+Code             | Purpose
+-----------------|--------------------------------
+props            | Contains values from parent
+props.count      | Reads count supplied by parent
+
+
+The child displays the value but doesn't own the parent's count state.
+
+================================================================================
+
+Step 3: Parent Passes an Update Function
+
+================================================================================
+
+import { useState } from 'react';
+import Child from './Child';
+
+export default function Parent() {
+
+  const [count, setCount] =
+    useState(0);
+
+  const incrementCount = () => {
+    setCount(count + 1);
+  };
+
+  return (
+    <div>
+
+      <h1>
+        Parent Component
+      </h1>
+
+      <p>
+        Count: {count}
+      </p>
+
+      <Child
+        count={count}
+        onIncrement={incrementCount}
+      />
+
+    </div>
+  );
+}
+
+Explanation
+Code                         | Purpose
+-----------------------------|---------------------------------------
+incrementCount()             | Parent-owned update logic
+setCount(count + 1)          | Updates parent's state
+count={count}                | Passes current data
+onIncrement={incrementCount} | Passes callback function
+
+
+================================================================================
+
+Step 4: Child Calls the Parent Function
+
+================================================================================
+
+export default function Child(props) {
+
+  return (
+    <div>
+
+      <h1>
+        Child Component
+      </h1>
+
+      <p>
+        Count: {props.count}
+      </p>
+
+      <button
+        onClick={props.onIncrement}
+      >
+        Increment
+      </button>
+
+    </div>
+  );
+}
+
+Flow
+USER CLICKS
+     ↓
+props.onIncrement()
+     ↓
+PARENT'S incrementCount()
+     ↓
+setCount(...)
+     ↓
+PARENT STATE CHANGES
+     ↓
+PARENT RE-RENDERS
+     ↓
+NEW count PROP
+     ↓
+CHILD RE-RENDERS
+
+
+================================================================================
+
+COMPLETE ONE-WAY DATA FLOW CYCLE
+
+================================================================================
+
+Step | Flow
+-----|-------------------------------------------------------
+1    | Parent state starts with count = 0
+2    | Parent passes count={0} to Child
+3    | Child displays Count: 0
+4    | User clicks Child's button
+5    | Child calls onIncrement()
+6    | Parent's incrementCount() executes
+7    | Parent updates count to 1
+8    | Parent renders Child with count={1}
+9    | Child receives the new count prop
+10   | Child displays Count: 1
+
+Easy Memory
+STATE
+  ↓
+PROPS
+  ↓
+CHILD
+  ↓
+EVENT
+  ↓
+CALLBACK
+  ↓
+PARENT STATE UPDATE
+  ↓
+NEW PROPS
+  ↓
+UPDATED UI
+
+
+================================================================================
+
+PART 5: PRACTICAL EXAMPLES
+
+================================================================================
+
+Example 1: Counter with One-Way Data Flow
+File: src/components/Counter.jsx
+import { useState } from 'react';
+
+import Display from './Display';
+import Button from './Button';
+
+export default function Counter() {
+
+  const [count, setCount] =
+    useState(0);
+
+  const handleIncrement = () => {
+    setCount(count + 1);
+  };
+
+  const handleDecrement = () => {
+    setCount(count - 1);
+  };
+
+  return (
+    <div className="counter">
+
+      <h1>Counter App</h1>
+
+      <Display count={count} />
+
+      <Button
+        label="Increment"
+        onClick={handleIncrement}
+      />
+
+      <Button
+        label="Decrement"
+        onClick={handleDecrement}
+      />
+
+    </div>
+  );
+}
+
+File: src/components/Display.jsx
+export default function Display({
+  count
+}) {
+
+  return (
+    <div className="display">
+
+      <h2>
+        Count: {count}
+      </h2>
+
+    </div>
+  );
+}
+
+File: src/components/Button.jsx
+export default function Button({
+  label,
+  onClick
+}) {
+
+  return (
+    <button onClick={onClick}>
+      {label}
+    </button>
+  );
+}
+
+What This Demonstrates
+Component  | Responsibility
+-----------|------------------------------------------------
+Counter    | Owns count state and update logic
+Display    | Receives and displays count
+Button     | Receives label and callback
+
+
+Complete flow:
+
+Counter State
+     ↓
+count
+     ↓
+Display
+
+
+Counter Function
+     ↓
+handleIncrement
+     ↓
+Button
+     ↓
+User Click
+     ↓
+handleIncrement()
+     ↓
+Counter State Changes
+     ↓
+New count Prop
+     ↓
+Display Updates
+
+
+================================================================================
+
+Example 2: Book List with One-Way Data Flow
+
+================================================================================
+
+File: src/App.jsx
+import { useState } from 'react';
+
+import BookList from './components/BookList';
+import AddBookForm from './components/AddBookForm';
+
+export default function App() {
+
+  const [books, setBooks] =
+    useState([
+      {
+        id: 1,
+        title: 'Book 1',
+        author: 'Author 1'
+      },
+      {
+        id: 2,
+        title: 'Book 2',
+        author: 'Author 2'
+      }
+    ]);
+
+  const addBook = (newBook) => {
+
+    setBooks([
+      ...books,
+      {
+        ...newBook,
+        id: Date.now()
+      }
+    ]);
+  };
+
+  const removeBook = (id) => {
+
+    setBooks(
+      books.filter(
+        book => book.id !== id
+      )
+    );
+  };
+
+  return (
+    <div>
+
+      <h1>Book Store</h1>
+
+      <AddBookForm
+        onAddBook={addBook}
+      />
+
+      <BookList
+        books={books}
+        onRemoveBook={removeBook}
+      />
+
+    </div>
+  );
+}
+
+State and Callback Ownership
+Data / Function       | Owner
+----------------------|---------------
+books                 | App
+setBooks              | App
+addBook()             | App
+removeBook()          | App
+
+File: src/components/BookList.jsx
+import BookItem from './BookItem';
+
+export default function BookList({
+  books,
+  onRemoveBook
+}) {
+
+  return (
+    <div className="book-list">
+
+      {books.map(book => (
+
+        <BookItem
+          key={book.id}
+          book={book}
+          onRemove={onRemoveBook}
+        />
+
+      ))}
+
+    </div>
+  );
+}
+
+File: src/components/BookItem.jsx
+export default function BookItem({
+  book,
+  onRemove
+}) {
+
+  return (
+    <div className="book-item">
+
+      <h3>{book.title}</h3>
+
+      <p>
+        By {book.author}
+      </p>
+
+      <button
+        onClick={() =>
+          onRemove(book.id)
+        }
+      >
+        Remove
+      </button>
+
+    </div>
+  );
+}
+
+File: src/components/AddBookForm.jsx
+import { useState } from 'react';
+
+export default function AddBookForm({
+  onAddBook
+}) {
+
+  const [title, setTitle] =
+    useState('');
+
+  const [author, setAuthor] =
+    useState('');
+
+  const handleSubmit = (e) => {
+
+    e.preventDefault();
+
+    onAddBook({
+      title,
+      author
+    });
+
+    setTitle('');
+    setAuthor('');
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+
+      <input
+        type="text"
+        value={title}
+        onChange={(e) =>
+          setTitle(e.target.value)
+        }
+        placeholder="Book title"
+      />
+
+      <input
+        type="text"
+        value={author}
+        onChange={(e) =>
+          setAuthor(e.target.value)
+        }
+        placeholder="Author name"
+      />
+
+      <button type="submit">
+        Add Book
+      </button>
+
+    </form>
+  );
+}
+
+What This Demonstrates
+Component     | Receives                        | Responsibility
+--------------|---------------------------------|---------------------------
+App           | -                               | Owns books state
+AddBookForm   | onAddBook                       | Collects new-book input
+BookList      | books, onRemoveBook             | Renders list
+BookItem      | book, onRemove                  | Displays/removes one book
+
+Add Book Flow
+USER ENTERS BOOK
+      ↓
+AddBookForm
+      ↓
+onAddBook({ title, author })
+      ↓
+App.addBook()
+      ↓
+setBooks(...)
+      ↓
+books STATE CHANGES
+      ↓
+NEW books PROP
+      ↓
+BookList RE-RENDERS
+
+Remove Book Flow
+USER CLICKS REMOVE
+      ↓
+BookItem
+      ↓
+onRemove(book.id)
+      ↓
+App.removeBook(id)
+      ↓
+books.filter(...)
+      ↓
+setBooks(...)
+      ↓
+UPDATED books
+      ↓
+BookList RE-RENDERS
+
+
+================================================================================
+
+Example 3: Multi-Level Data Flow
+
+================================================================================
+
+Grandparent
+function Grandparent() {
+
+  const [data, setData] =
+    useState('Hello');
+
+  return (
+    <Parent
+      data={data}
+      setData={setData}
+    />
+  );
+}
+
+Parent
+function Parent({
+  data,
+  setData
+}) {
+
+  return (
+    <Child
+      data={data}
+      setData={setData}
+    />
+  );
+}
+
+Child
+function Child({
+  data,
+  setData
+}) {
+
+  return (
+    <div>
+
+      <p>{data}</p>
+
+      <button
+        onClick={() =>
+          setData('Updated')
+        }
+      >
+        Update
+      </button>
+
+    </div>
+  );
+}
+
+Flow
+Grandparent State
+      ↓
+Parent Props
+      ↓
+Child Props
+      ↓
+"display Hello"
+
+
+User Click
+      ↓
+Child calls setData(...)
+      ↓
+Grandparent State Changes
+      ↓
+New data Prop
+      ↓
+Parent
+      ↓
+Child
+      ↓
+"display Updated"
+
+
+This shows data being passed through multiple component levels.
+
+================================================================================
+
+PART 6: WHY ONE-WAY DATA FLOW MATTERS
+
+================================================================================
+
+Benefit 1: Predictability
+
+You can trace:
+
+Question               | Answer
+-----------------------|--------------------------------
+Where data comes from? | Parent state/props
+Where data goes?       | Child components
+Who owns the state?    | State-owning component
+How is it updated?     | State owner's update function
+How child requests it? | Callback prop
+
+
+================================================================================
+
+Benefit 2: Easier Debugging
+
+================================================================================
+
+If a child displays unexpected data:
+
+CHECK CHILD PROPS
+      ↓
+CHECK PARENT DATA/STATE
+      ↓
+CHECK UPDATE CALLBACK
+      ↓
+CHECK STATE UPDATE
+
+
+The directional flow makes the source of data easier to trace.
+
+================================================================================
+
+Benefit 3: Clearer Dependencies
+
+================================================================================
+
+Preferred flow:
+
+Parent
+  ↓
+Child
+  ↓
+Grandchild
+
+
+Updates are requested through callbacks rather than children directly mutating parent-owned state.
+
+This gives data and state clear ownership.
+
+================================================================================
+
+Benefit 4: Easier Testing
+
+================================================================================
+
+A child receiving props can be tested conceptually as:
+
+GIVEN PROPS
+    ↓
+RENDER COMPONENT
+    ↓
+VERIFY OUTPUT
+
+
+Callback behavior:
+
+USER ACTION
+    ↓
+CALLBACK INVOKED
+    ↓
+VERIFY EXPECTED VALUE
+
+
+================================================================================
+
+PART 7: COMMON MISTAKES
+
+================================================================================
+
+Mistake 1: Trying to Modify Props
+
+Wrong:
+
+function Child(props) {
+
+  props.count = 5;
+
+  return (
+    <h1>
+      {props.count}
+    </h1>
+  );
+}
+
+
+Correct:
+
+function Child(props) {
+
+  return (
+    <h1>
+      {props.count}
+    </h1>
+  );
+}
+
+Rule
+PROPS = READ-ONLY INPUT
+
+
+================================================================================
+
+Mistake 2: Trying to Update Parent Data Directly
+
+================================================================================
+
+Wrong
+
+Parent:
+
+function Parent() {
+
+  const [count, setCount] =
+    useState(0);
+
+  return (
+    <Child count={count} />
+  );
+}
+
+
+Child:
+
+function Child(props) {
+
+  return (
+    <button
+      onClick={() => props.count++}
+    >
+      Increment
+    </button>
+  );
+}
+
+
+props.count++ attempts to mutate the received value. It does not correctly update the parent's React state.
+
+Correct
+
+Parent:
+
+function Parent() {
+
+  const [count, setCount] =
+    useState(0);
+
+  const increment = () => {
+    setCount(count + 1);
+  };
+
+  return (
+    <Child
+      count={count}
+      onIncrement={increment}
+    />
+  );
+}
+
+
+Child:
+
+function Child(props) {
+
+  return (
+    <button
+      onClick={props.onIncrement}
+    >
+      Increment
+    </button>
+  );
+}
+
+
+Flow:
+
+Child DOES NOT update count directly.
+
+Child
+ ↓
+onIncrement()
+ ↓
+Parent
+ ↓
+setCount()
+
+
+================================================================================
+
+Mistake 3: Excessive Props Drilling
+
+================================================================================
+
+Props Drilling Example
+function Grandparent() {
+
+  const [data, setData] =
+    useState('Hello');
+
+  return (
+    <Parent
+      data={data}
+      setData={setData}
+    />
+  );
+}
+
+function Parent(props) {
+
+  return (
+    <Child
+      data={props.data}
+      setData={props.setData}
+    />
+  );
+}
+
+function Child(props) {
+
+  return (
+    <h1>
+      {props.data}
+    </h1>
+  );
+}
+
+
+Here Parent receives the values primarily to pass them to Child.
+
+Context API - Advanced Alternative
+import {
+  createContext,
+  useContext,
+  useState
+} from 'react';
+
+const DataContext =
+  createContext();
+
+function Grandparent() {
+
+  const [data, setData] =
+    useState('Hello');
+
+  return (
+    <DataContext.Provider
+      value={{
+        data,
+        setData
+      }}
+    >
+
+      <Parent />
+
+    </DataContext.Provider>
+  );
+}
+
+function Child() {
+
+  const { data } =
+    useContext(DataContext);
+
+  return (
+    <h1>
+      {data}
+    </h1>
+  );
+}
+
+Concept
+Props Drilling
+
+Grandparent
+    ↓ props
+Parent
+    ↓ props
+Child
+
+
+Context
+
+Provider
+   ↓
+Shared Context Value
+   ↓
+Consumer Component
+
+
+Context is useful when data needs to be shared with components deeper in a tree and repeatedly forwarding props becomes undesirable.
+
+================================================================================
+
+Mistake 4: Modifying State Directly
+
+================================================================================
+
+Wrong:
+
+function Parent() {
+
+  const [books, setBooks] =
+    useState([...]);
+
+  const addBook = (book) => {
+
+    books.push(book);
+  };
+
+  return (
+    <BookList books={books} />
+  );
+}
+
+
+Correct:
+
+function Parent() {
+
+  const [books, setBooks] =
+    useState([...]);
+
+  const addBook = (book) => {
+
+    setBooks([
+      ...books,
+      book
+    ]);
+  };
+
+  return (
+    <BookList books={books} />
+  );
+}
+
+Difference
+Direct Mutation           | State Setter
+--------------------------|---------------------------------
+books.push(book)          | setBooks([...books, book])
+Mutates existing array    | Creates a new array
+Doesn't use React setter  | Uses React state update mechanism
+Avoid                     | Preferred
+
+
+================================================================================
+
+COMMON MISTAKES - QUICK TABLE
+
+================================================================================
+
+Mistake                 | Avoid                        | Better
+------------------------|------------------------------|--------------------------
+Modify prop             | props.count = 5              | Read props.count
+Increment received prop | props.count++                | Call callback prop
+Mutate state array      | books.push(book)             | setBooks([...books, book])
+Heavy props drilling    | Pass through many layers     | Consider Context when needed
+Unclear callback        | onClick={fn}                 | onDelete={handleDelete}
+
+
+================================================================================
+
+PART 8: BEST PRACTICES
+
+================================================================================
+
+Best Practice 1: Keep State at the Highest Needed Level
+
+If multiple sibling components need the same data, place the state in their closest common parent.
+
+Good
+function Parent() {
+
+  const [count, setCount] =
+    useState(0);
+
+  return (
+    <>
+
+      <Display count={count} />
+
+      <Button
+        onClick={() =>
+          setCount(count + 1)
+        }
+      />
+
+    </>
+  );
+}
+
+
+Both children work from the same source of truth.
+
+Avoid Separate Unsynchronized State
+function Parent() {
+
+  return (
+    <>
+      <Display />
+      <Button />
+    </>
+  );
+}
+
+function Display() {
+
+  const [count, setCount] =
+    useState(0);
+
+  return (
+    <h1>{count}</h1>
+  );
+}
+
+function Button() {
+
+  const [count, setCount] =
+    useState(0);
+
+  return (
+    <button
+      onClick={() =>
+        setCount(count + 1)
+      }
+    >
+      +
+    </button>
+  );
+}
+
+
+Here Display and Button own separate count states.
+
+Better Principle
+SHARED DATA
+    ↓
+CLOSEST COMMON PARENT
+    ↓
+PASS DOWN THROUGH PROPS
+
+
+This pattern is commonly called lifting state up.
+
+================================================================================
+
+Best Practice 2: Pass Intent-Specific Functions
+
+================================================================================
+
+Preferred:
+
+const handleIncrement = () => {
+  setCount(count + 1);
+};
+
+<Button
+  onClick={handleIncrement}
+/>
+
+
+Less encapsulated:
+
+<Button
+  onClick={setCount}
+/>
+
+Why?
+Intent-Specific Callback       | Raw State Setter
+-------------------------------|-----------------------------
+Describes intended operation   | Exposes state mechanism
+Parent controls update logic   | Child may need setter details
+Easier to modify later         | More implementation coupling
+
+
+================================================================================
+
+Best Practice 3: Use Descriptive Prop Names
+
+================================================================================
+
+Good:
+
+<Button
+  onClick={handleDelete}
+  label="Delete"
+/>
+
+<Form
+  onSubmit={handleFormSubmit}
+/>
+
+
+Avoid:
+
+<Button
+  onClick={fn}
+  label="btn"
+/>
+
+<Form
+  onSubmit={f}
+/>
+
+Generic Name  | Better Name
+--------------|-----------------
+fn            | handleDelete
+f             | handleFormSubmit
+btn           | Delete
+
+
+================================================================================
+
+Best Practice 4: Document Important Props
+
+================================================================================
+
+Example:
+
+/**
+ * Button Component
+ *
+ * @param {function} onClick
+ *   Function called when button is clicked
+ *
+ * @param {string} label
+ *   Text displayed on the button
+ */
+function Button({
+  onClick,
+  label
+}) {
+
+  return (
+    <button onClick={onClick}>
+      {label}
+    </button>
+  );
+}
+
+
+For larger JavaScript codebases, documentation or type systems such as TypeScript can make component contracts easier to understand and maintain.
+
+================================================================================
+
+PART 9: SUMMARY AND KEY TAKEAWAYS
+
+================================================================================
+
+What You've Learned
+Topic                  | What You've Learned
+-----------------------|-----------------------------------------------
+One-Way Data Flow      | Data flows from owner toward children
+Props                  | Carry data into components
+Read-Only Props        | Receiving components don't mutate props
+State Ownership        | State-owning component performs updates
+Callbacks              | Children request updates through functions
+Parent → Child         | Main data direction
+Child Interaction      | Calls callback provided through props
+Re-rendering           | Updated parent state creates new child props
+Multi-Level Flow       | Props can flow through several components
+Props Drilling         | Excessive forwarding can become inconvenient
+Context API            | Alternative for deeply shared values
+Lifting State Up       | Move shared state to common parent
+State Updates          | Use the React state setter
+
+
+================================================================================
+
+KEY TAKEAWAYS
+
+================================================================================
+
+No. | Key Takeaway
+----|------------------------------------------------------------------
+1   | React uses one-way/unidirectional data flow
+2   | Parent components pass values to children through props
+3   | Props should be treated as read-only
+4   | The component owning state should perform state updates
+5   | Parents can pass callback functions through props
+6   | Children call callbacks to request changes
+7   | Updated state produces new props for children
+8   | Shared state should usually live at a suitable common parent
+9   | Context can reduce excessive prop drilling when appropriate
+10  | Clear state ownership makes application behavior easier to trace
+
+
+================================================================================
+
+ONE-WAY DATA FLOW PATTERN
+
+================================================================================
+
+PARENT COMPONENT
+(owns state)
+      ↓
+      ├── DATA PROP
+      │      ↓
+      │    CHILD
+      │      ↓
+      │    READ / DISPLAY
+      │
+      └── CALLBACK PROP
+             ↓
+           CHILD
+             ↓
+        USER INTERACTION
+             ↓
+        CALL CALLBACK
+             ↓
+        PARENT HANDLER
+             ↓
+        UPDATE STATE
+             ↓
+        NEW PROPS
+             ↓
+        CHILD RE-RENDERS
+
+
+================================================================================
+
+DATA vs CALLBACK - QUICK REVISION
+
+================================================================================
+
+Data Prop                    | Callback Prop
+-----------------------------|----------------------------------
+Parent → Child               | Parent → Child
+Contains a value/object      | Contains a function
+Child reads it               | Child calls it
+Example: count={count}       | onIncrement={increment}
+Represents current data      | Represents requested action
+
+
+================================================================================
+
+PROPS vs STATE - QUICK REVISION
+
+================================================================================
+
+Props                         | State
+------------------------------|-----------------------------------
+Passed into component         | Owned by a component
+Read-only for receiver        | Updated through state setter
+Come from parent/source       | Created/managed by state owner
+Used to configure component   | Represents changing local/shared data
+
+
+================================================================================
+
+COMPLETE EXAMPLE FLOW
+
+================================================================================
+
+Parent
+
+const [count, setCount] = useState(0)
+
+        ↓
+
+<Child
+  count={count}
+  onIncrement={increment}
+/>
+
+        ↓
+
+Child receives
+
+count = 0
+onIncrement = function
+
+        ↓
+
+User Clicks
+
+        ↓
+
+onIncrement()
+
+        ↓
+
+Parent Handler
+
+        ↓
+
+setCount(1)
+
+        ↓
+
+Parent State = 1
+
+        ↓
+
+Child receives count = 1
+
+        ↓
+
+Updated UI
+
+
+================================================================================
+
+EASY MEMORY TRICK
+
+================================================================================
+
+Remember:
+
+DATA GOES DOWN
+EVENTS/CALLBACK REQUESTS GO UP
+
+
+More precisely:
+
+PARENT OWNS
+     ↓
+PROPS FLOW DOWN
+     ↓
+CHILD READS
+     ↓
+CHILD CALLS CALLBACK
+     ↓
+PARENT UPDATES
+     ↓
+NEW PROPS FLOW DOWN
+
+
+Or:
+
+STATE → PROPS → CHILD → EVENT → CALLBACK → STATE
+
+
+================================================================================
+
+INTERVIEW-READY QUICK TABLE
+
+================================================================================
+
+Question                        | Short Answer
+--------------------------------|------------------------------------------
+What is one-way data flow?      | Data flows from parent to child
+How is data passed to child?    | Through props
+Can child modify props?         | No, props are read-only
+Who should update state?        | Component that owns the state
+How can child request update?   | Call a callback passed by parent
+What happens after state update?| Parent renders with updated data
+What is props drilling?         | Passing props through intermediate levels
+How can deep sharing be handled?| Context is one possible option
+What is lifting state up?       | Move shared state to common ancestor
+Why is one-way flow useful?     | Clear ownership and traceable updates
+
+
+================================================================================
+
+ONE-LINE INTERVIEW ANSWER
+
+================================================================================
+
+React follows one-way data flow: a parent owns state and passes data down through props. Props are read-only, so when a child needs a change, it calls a callback supplied by the parent; the parent updates its state, and the new value flows back down as updated props.
+
+================================================================================
+
+NEXT STEPS
+
+================================================================================
+
+Next Topic             | Purpose
+-----------------------|---------------------------------------------
+Multi-Component Apps   | Practice parent-child communication
+Component Composition  | Combine components cleanly
+Lifting State Up       | Share state between sibling components
+Context API            | Share values deeper in component trees
+State Patterns         | Organize more complex state
+Reducer Pattern        | Handle structured state transitions
+State Management       | Learn broader application-state approaches
+Component Architecture | Build scalable React component trees
+
+
+================================================================================
+
+FOLLOW-UP QUESTIONS
+
+================================================================================
+
+How do you pass information from a child component to its parent using callback props?
+
+What is lifting state up, and when should you use it?
+
+================================================================================
