@@ -1,0 +1,1583 @@
+
+================================================================================
+WRITING JAVASCRIPT INSIDE JSX - BOOK COMPONENT
+================================================================================
+
+What You'll Learn
+
+This lesson explains how to use JavaScript expressions inside JSX to create dynamic React components.
+
+Topic                  | What You'll Learn
+-----------------------|---------------------------------------------
+Curly Braces { }       | Insert JavaScript expressions into JSX
+Variables              | Display dynamic variable values
+Math Expressions       | Perform calculations inside JSX
+Strings                | Combine text and values
+Functions              | Call functions from JSX
+Ternary Operator       | Perform conditional rendering
+map()                  | Render arrays/lists
+Book Component         | Apply concepts in a practical example
+Best Practices         | Keep JSX readable and maintainable
+Common Mistakes        | Avoid common JavaScript/JSX errors
+
+
+================================================================================
+
+WHY THIS LESSON MATTERS
+
+================================================================================
+
+JavaScript inside JSX makes React components dynamic.
+
+It allows you to:
+
+Display values from variables.
+Perform calculations.
+Call functions.
+Show different content based on conditions.
+Render lists.
+Make components reusable.
+Build interactive applications.
+Keep UI closely connected to application data.
+
+Easy concept:
+
+STATIC JSX
+   +
+JAVASCRIPT EXPRESSIONS
+   ↓
+DYNAMIC UI
+
+
+================================================================================
+
+PART 2: UNDERSTANDING CURLY BRACES IN JSX
+
+================================================================================
+
+What Do Curly Braces Mean?
+
+Inside JSX, curly braces:
+
+{ }
+
+
+mean:
+
+Evaluate this as a JavaScript expression.
+
+
+They let you move from JSX markup into JavaScript expressions.
+
+Simple Example
+
+Without curly braces:
+
+<h1>Hello name</h1>
+
+
+Output:
+
+Hello name
+
+
+With curly braces:
+
+const name = 'Alice';
+
+<h1>Hello {name}</h1>
+
+
+Output:
+
+Hello Alice
+
+
+================================================================================
+
+WHERE CAN YOU USE CURLY BRACES?
+
+================================================================================
+
+1. Inside JSX Content
+const title = 'My Book';
+
+<h1>{title}</h1>
+
+
+Output:
+
+My Book
+
+2. Inside JSX Properties
+const id = 'book-1';
+
+<div id={id}>
+  Book
+</div>
+
+3. Normal JavaScript Does Not Need JSX Braces
+const name = 'Alice';
+
+console.log(name);
+
+
+Here {} is unnecessary because this is normal JavaScript, not a JavaScript expression embedded inside JSX.
+
+Quick Understanding
+Location                 | Example
+-------------------------|---------------------------
+JSX Content              | <h1>{name}</h1>
+JSX Property             | <div id={id}>
+Event Handler            | onClick={handleClick}
+Normal JavaScript        | console.log(name)
+Literal JSX Text         | <h1>Hello name</h1>
+
+
+================================================================================
+
+PART 3: TYPES OF JAVASCRIPT EXPRESSIONS IN JSX
+
+================================================================================
+
+Type 1: Variables
+export default function BookComponent() {
+
+  const title = 'The Great Gatsby';
+  const author = 'F. Scott Fitzgerald';
+  const year = 1925;
+
+  return (
+    <div>
+
+      <h1>{title}</h1>
+
+      <p>
+        By {author}
+      </p>
+
+      <p>
+        Published in {year}
+      </p>
+
+    </div>
+  );
+}
+
+Explanation
+Variable   | Value                | JSX
+-----------|----------------------|-----------------------
+title      | The Great Gatsby     | {title}
+author     | F. Scott Fitzgerald  | {author}
+year       | 1925                 | {year}
+
+
+Output:
+
+The Great Gatsby
+By F. Scott Fitzgerald
+Published in 1925
+
+
+================================================================================
+
+Type 2: Mathematical Expressions
+
+================================================================================
+
+export default function Calculator() {
+
+  const price = 29.99;
+  const quantity = 3;
+  const tax = 0.1;
+
+  return (
+    <div>
+
+      <p>
+        Price per book: ${price}
+      </p>
+
+      <p>
+        Quantity: {quantity}
+      </p>
+
+      <p>
+        Subtotal: ${price * quantity}
+      </p>
+
+      <p>
+        Tax: ${price * quantity * tax}
+      </p>
+
+      <p>
+        Total: ${price * quantity * (1 + tax)}
+      </p>
+
+    </div>
+  );
+}
+
+Calculations
+Expression                   | Result
+-----------------------------|---------
+price                        | 29.99
+quantity                     | 3
+price * quantity             | 89.97
+price * quantity * tax       | 8.997
+price * quantity * (1 + tax) | 98.967
+
+
+Output:
+
+Price per book: $29.99
+Quantity: 3
+Subtotal: $89.97
+Tax: $8.997
+Total: $98.967
+
+
+For currency-display code, formatting to two decimal places is normally preferable, but the values above preserve the lesson's original calculation output.
+
+================================================================================
+
+Type 3: String Concatenation
+
+================================================================================
+
+export default function Greeting() {
+
+  const firstName = 'John';
+  const lastName = 'Doe';
+  const age = 30;
+
+  return (
+    <div>
+
+      <h1>
+        {firstName + ' ' + lastName}
+      </h1>
+
+      <p>
+        Age: {age + ' years old'}
+      </p>
+
+      <p>
+        In 10 years: {age + 10} years old
+      </p>
+
+    </div>
+  );
+}
+
+Explanation
+Expression                       | Result
+---------------------------------|----------------
+firstName + ' ' + lastName       | John Doe
+age + ' years old'               | 30 years old
+age + 10                         | 40
+
+
+Output:
+
+John Doe
+Age: 30 years old
+In 10 years: 40 years old
+
+
+================================================================================
+
+Type 4: Function Calls
+
+================================================================================
+
+export default function BookInfo() {
+
+  const getBookRating = () => {
+    return 4.5;
+  };
+
+  const formatPrice = (price) => {
+    return '$' + price.toFixed(2);
+  };
+
+  const price = 19.99;
+
+  return (
+    <div>
+
+      <p>
+        Rating: {getBookRating()} stars
+      </p>
+
+      <p>
+        Price: {formatPrice(price)}
+      </p>
+
+    </div>
+  );
+}
+
+Explanation
+Expression            | What Happens             | Result
+----------------------|--------------------------|---------
+getBookRating()       | Calls rating function    | 4.5
+formatPrice(price)    | Formats price            | $19.99
+
+
+Output:
+
+Rating: 4.5 stars
+Price: $19.99
+
+
+================================================================================
+
+Type 5: Ternary Operator - Conditional Rendering
+
+================================================================================
+
+Ternary syntax:
+
+condition ? valueIfTrue : valueIfFalse
+
+
+Example:
+
+export default function BookStatus() {
+
+  const isAvailable = true;
+  const stock = 5;
+
+  return (
+    <div>
+
+      <p>
+        Status:
+        {isAvailable
+          ? ' Available'
+          : ' Out of Stock'}
+      </p>
+
+      <p>
+        Stock:
+        {stock > 0
+          ? ' ' + stock + ' copies'
+          : ' No copies'}
+      </p>
+
+      <p>
+        Price:
+        {stock > 10
+          ? ' $15.99'
+          : ' $19.99'}
+      </p>
+
+    </div>
+  );
+}
+
+Conditions
+Condition       | True Result   | False Result
+----------------|---------------|----------------
+isAvailable     | Available     | Out of Stock
+stock > 0       | 5 copies      | No copies
+stock > 10      | $15.99        | $19.99
+
+
+With the current values:
+
+Status: Available
+Stock: 5 copies
+Price: $19.99
+
+
+================================================================================
+
+Type 6: Array Methods - map()
+
+================================================================================
+
+map() is commonly used to transform array data into JSX elements.
+
+export default function BookList() {
+
+  const books = [
+    {
+      id: 1,
+      title: 'The Great Gatsby'
+    },
+    {
+      id: 2,
+      title: '1984'
+    },
+    {
+      id: 3,
+      title: 'To Kill a Mockingbird'
+    }
+  ];
+
+  return (
+    <div>
+
+      <h1>Books</h1>
+
+      <ul>
+
+        {books.map(book => (
+
+          <li key={book.id}>
+            {book.title}
+          </li>
+
+        ))}
+
+      </ul>
+
+    </div>
+  );
+}
+
+Explanation
+Code                  | Purpose
+----------------------|--------------------------------------------
+books.map(...)        | Processes every book
+book                  | Current book object
+<li>                  | Creates list element
+key={book.id}         | Provides stable identity among siblings
+{book.title}          | Displays title
+
+
+Output:
+
+Books
+
+- The Great Gatsby
+- 1984
+- To Kill a Mockingbird
+
+
+================================================================================
+
+JAVASCRIPT EXPRESSIONS - QUICK REFERENCE
+
+================================================================================
+
+Type          | Example                    | Result/Purpose
+--------------|----------------------------|-------------------------
+Variable      | {name}                     | Current name value
+Math          | {2 + 2}                    | 4
+String        | {'Hello ' + name}          | Hello Alice
+Function      | {getName()}                | Function's return value
+Ternary       | {x ? 'Yes' : 'No'}         | Conditional value
+Object        | {book.title}               | Object property
+Map           | {items.map(...)}           | Render collection
+Boolean &&    | {available && <p>...</p>}  | Conditional element
+
+
+================================================================================
+
+PART 4: PRACTICAL BOOK COMPONENT
+
+================================================================================
+
+Example 1: Simple Book Component
+
+File:
+
+src/components/Book.jsx
+
+export default function Book() {
+
+  const title = 'The Great Gatsby';
+  const author = 'F. Scott Fitzgerald';
+  const year = 1925;
+  const pages = 180;
+  const rating = 4.5;
+
+  return (
+    <div className="book">
+
+      <h2>{title}</h2>
+
+      <p>
+        Author: {author}
+      </p>
+
+      <p>
+        Published: {year}
+      </p>
+
+      <p>
+        Pages: {pages}
+      </p>
+
+      <p>
+        Rating: {rating} / 5 stars
+      </p>
+
+    </div>
+  );
+}
+
+Data Used
+Property   | Value
+-----------|-----------------------
+Title      | The Great Gatsby
+Author     | F. Scott Fitzgerald
+Year       | 1925
+Pages      | 180
+Rating     | 4.5 / 5
+
+
+Output:
+
+The Great Gatsby
+Author: F. Scott Fitzgerald
+Published: 1925
+Pages: 180
+Rating: 4.5 / 5 stars
+
+
+================================================================================
+
+Example 2: Book Component with Conditional Logic
+
+================================================================================
+
+export default function Book() {
+
+  const title = 'The Great Gatsby';
+  const author = 'F. Scott Fitzgerald';
+  const price = 12.99;
+  const inStock = true;
+  const rating = 4.5;
+
+  return (
+    <div className="book">
+
+      <h2>{title}</h2>
+
+      <p>
+        By {author}
+      </p>
+
+      <p>
+        Price: ${price}
+      </p>
+
+      <p>
+        Status:
+        {inStock
+          ? ' In Stock'
+          : ' Out of Stock'}
+      </p>
+
+      <p>
+        Rating:
+        {rating >= 4
+          ? ' ⭐ Highly Rated'
+          : ' ⭐ Good'}
+      </p>
+
+      <button>
+        {inStock
+          ? 'Add to Cart'
+          : 'Notify Me'}
+      </button>
+
+    </div>
+  );
+}
+
+Conditional Logic
+Condition      | True              | False
+---------------|-------------------|----------------
+inStock        | In Stock          | Out of Stock
+rating >= 4    | ⭐ Highly Rated   | ⭐ Good
+inStock        | Add to Cart       | Notify Me
+
+
+Output:
+
+The Great Gatsby
+By F. Scott Fitzgerald
+
+Price: $12.99
+
+Status: In Stock
+
+Rating: ⭐ Highly Rated
+
+[Add to Cart]
+
+
+================================================================================
+
+Example 3: Book Component with Array of Books
+
+================================================================================
+
+File:
+
+src/components/BookList.jsx
+
+export default function BookList() {
+
+  const books = [
+    {
+      id: 1,
+      title: 'The Great Gatsby',
+      author: 'F. Scott Fitzgerald',
+      price: 12.99,
+      inStock: true
+    },
+    {
+      id: 2,
+      title: '1984',
+      author: 'George Orwell',
+      price: 14.99,
+      inStock: true
+    },
+    {
+      id: 3,
+      title: 'To Kill a Mockingbird',
+      author: 'Harper Lee',
+      price: 11.99,
+      inStock: false
+    }
+  ];
+
+  return (
+    <div>
+
+      <h1>Book Store</h1>
+
+      <div className="book-list">
+
+        {books.map(book => (
+
+          <div
+            key={book.id}
+            className="book-card"
+          >
+
+            <h3>{book.title}</h3>
+
+            <p>
+              By {book.author}
+            </p>
+
+            <p>
+              Price: ${book.price}
+            </p>
+
+            <p>
+              {book.inStock
+                ? 'In Stock'
+                : 'Out of Stock'}
+            </p>
+
+            <button>
+              {book.inStock
+                ? 'Buy Now'
+                : 'Notify Me'}
+            </button>
+
+          </div>
+
+        ))}
+
+      </div>
+
+    </div>
+  );
+}
+
+Book Data
+Book                   | Author                 | Price  | Stock        | Button
+-----------------------|------------------------|--------|--------------|----------
+The Great Gatsby       | F. Scott Fitzgerald    | $12.99 | In Stock     | Buy Now
+1984                   | George Orwell          | $14.99 | In Stock     | Buy Now
+To Kill a Mockingbird  | Harper Lee             | $11.99 | Out of Stock | Notify Me
+
+Important Code
+Code                         | Purpose
+-----------------------------|-----------------------------------------
+books.map(...)               | Creates one card for each book
+key={book.id}                | Gives each card stable identity
+{book.title}                 | Displays title
+{book.author}                | Displays author
+{book.price}                 | Displays price
+book.inStock ? A : B         | Displays status/button conditionally
+
+
+================================================================================
+
+Example 4: Advanced Book Component with Functions
+
+================================================================================
+
+export default function Book() {
+
+  const book = {
+    title: 'The Great Gatsby',
+    author: 'F. Scott Fitzgerald',
+    price: 12.99,
+    discount: 0.2,
+    pages: 180,
+    rating: 4.5
+  };
+
+  // Calculate discounted price
+  const getDiscountedPrice = () => {
+    return book.price * (1 - book.discount);
+  };
+
+  // Get discount percentage
+  const getDiscountPercentage = () => {
+    return book.discount * 100;
+  };
+
+  // Format price
+  const formatPrice = (price) => {
+    return '$' + price.toFixed(2);
+  };
+
+  return (
+    <div className="book">
+
+      <h2>{book.title}</h2>
+
+      <p>
+        By {book.author}
+      </p>
+
+      <p>
+        Original Price:
+        {formatPrice(book.price)}
+      </p>
+
+      <p>
+        Discount:
+        {getDiscountPercentage()}%
+      </p>
+
+      <p>
+        Sale Price:
+        {formatPrice(getDiscountedPrice())}
+      </p>
+
+      <p>
+        Pages: {book.pages}
+      </p>
+
+      <p>
+        Rating: {book.rating} / 5
+        {book.rating >= 4
+          ? ' ⭐ Highly Rated'
+          : ''}
+      </p>
+
+      <button>
+        Save
+        {' '}
+        {formatPrice(
+          book.price - getDiscountedPrice()
+        )}
+      </button>
+
+    </div>
+  );
+}
+
+Function Explanation
+Function                  | Purpose                         | Result
+--------------------------|---------------------------------|---------
+getDiscountedPrice()      | Calculate discounted price      | $10.39*
+getDiscountPercentage()   | Convert discount to percentage  | 20
+formatPrice(price)        | Format value to 2 decimals      | $12.99
+
+
+* 12.99 × 0.8 = 10.392, displayed as $10.39 by toFixed(2).
+
+Savings:
+
+$12.99 - $10.392 = $2.598
+                     ↓
+                 toFixed(2)
+                     ↓
+                   $2.60
+
+
+Output:
+
+The Great Gatsby
+By F. Scott Fitzgerald
+
+Original Price: $12.99
+
+Discount: 20%
+
+Sale Price: $10.39
+
+Pages: 180
+
+Rating: 4.5 / 5 ⭐ Highly Rated
+
+[Save $2.60]
+
+
+================================================================================
+
+PART 5: COMMON PATTERNS
+
+================================================================================
+
+Pattern 1: Displaying Object Properties
+export default function BookCard() {
+
+  const book = {
+    title: 'The Great Gatsby',
+    author: 'F. Scott Fitzgerald',
+    year: 1925
+  };
+
+  return (
+    <div>
+
+      <h2>
+        {book.title}
+      </h2>
+
+      <p>
+        By {book.author}
+      </p>
+
+      <p>
+        Published: {book.year}
+      </p>
+
+    </div>
+  );
+}
+
+Dot Notation
+Expression       | Value
+-----------------|----------------------
+book.title       | The Great Gatsby
+book.author      | F. Scott Fitzgerald
+book.year        | 1925
+
+
+================================================================================
+
+Pattern 2: Conditional Rendering with &&
+
+================================================================================
+
+export default function BookStatus() {
+
+  const isAvailable = true;
+
+  return (
+    <div>
+
+      {isAvailable && (
+        <p>
+          This book is available!
+        </p>
+      )}
+
+      {!isAvailable && (
+        <p>
+          This book is out of stock
+        </p>
+      )}
+
+    </div>
+  );
+}
+
+How && Works Here
+Condition             | Result
+----------------------|---------------------------------
+isAvailable = true    | Show "available"
+!isAvailable = true   | Show "out of stock"
+
+
+Easy memory:
+
+condition && JSX
+
+TRUE
+ ↓
+Render JSX
+
+FALSE
+ ↓
+Don't Render JSX
+
+
+================================================================================
+
+Pattern 3: Looping Through Arrays
+
+================================================================================
+
+export default function BookList() {
+
+  const books = [
+    'Book 1',
+    'Book 2',
+    'Book 3'
+  ];
+
+  return (
+    <ul>
+
+      {books.map((book, index) => (
+
+        <li key={index}>
+          {book}
+        </li>
+
+      ))}
+
+    </ul>
+  );
+}
+
+Explanation
+Code              | Purpose
+------------------|-------------------------------------
+books.map(...)    | Processes each array item
+book              | Current book value
+index             | Current array position
+<li>              | JSX generated for each book
+key={index}       | Key used in this simple example
+
+
+For lists that can be inserted, deleted, reordered, or otherwise change dynamically, a stable data ID is generally preferable to the array index.
+
+================================================================================
+
+Pattern 4: Inline Calculations
+
+================================================================================
+
+export default function BookPrice() {
+
+  const price = 19.99;
+  const quantity = 3;
+
+  return (
+    <div>
+
+      <p>
+        Price per book: ${price}
+      </p>
+
+      <p>
+        Quantity: {quantity}
+      </p>
+
+      <p>
+        Total: ${price * quantity}
+      </p>
+
+    </div>
+  );
+}
+
+Calculation
+Price     | $19.99
+Quantity  | 3
+----------|--------
+Total     | $59.97
+
+
+================================================================================
+
+COMMON JSX PATTERNS - QUICK TABLE
+
+================================================================================
+
+Pattern               | Example
+----------------------|---------------------------------------
+Variable              | {name}
+Object Property       | {book.title}
+Calculation           | {price * quantity}
+Function Call         | {formatPrice(price)}
+Ternary               | {stock ? 'Yes' : 'No'}
+Conditional &&        | {stock && <p>Available</p>}
+Array Rendering       | {books.map(...)}
+Dynamic Property      | className={isActive ? 'on' : 'off'}
+
+
+================================================================================
+
+PART 6: BEST PRACTICES
+
+================================================================================
+
+Best Practice 1: Keep Expressions Simple
+
+Good:
+
+{price * quantity}
+
+
+Harder to read:
+
+{price * quantity * tax * (1 + discount) - shipping + handling}
+
+
+Simple expressions are generally:
+
+Easier to read.
+Easier to debug.
+Easier to maintain.
+
+The main benefit here is readability and maintainability, rather than automatically better runtime performance.
+
+================================================================================
+
+Best Practice 2: Extract Complex Logic
+
+================================================================================
+
+Instead of placing large calculations directly in JSX:
+
+const getTotalPrice = () => {
+  return price * quantity * (1 + tax);
+};
+
+return (
+  <p>
+    Total: ${getTotalPrice()}
+  </p>
+);
+
+
+This separates the calculation from the rendered markup.
+
+Complex Logic
+     ↓
+Function / Variable
+     ↓
+Simple JSX
+
+
+Benefits:
+
+Benefit
+------------------------------
+Improved readability
+Easier testing
+Easier debugging
+Easier maintenance
+Potential reuse
+
+
+================================================================================
+
+Best Practice 3: Use Meaningful Variable Names
+
+================================================================================
+
+Good
+const bookTitle =
+  'The Great Gatsby';
+
+const authorName =
+  'F. Scott Fitzgerald';
+
+return (
+  <div>
+
+    <h1>{bookTitle}</h1>
+
+    <p>
+      By {authorName}
+    </p>
+
+  </div>
+);
+
+Avoid
+const t = 'The Great Gatsby';
+const a = 'F. Scott Fitzgerald';
+
+return (
+  <div>
+
+    <h1>{t}</h1>
+
+    <p>By {a}</p>
+
+  </div>
+);
+
+
+Comparison:
+
+Unclear   | Better Name
+----------|----------------
+t         | bookTitle
+a         | authorName
+
+
+Meaningful names make code easier to understand and maintain.
+
+================================================================================
+
+Best Practice 4: Use Stable Keys in Lists
+
+================================================================================
+
+Preferred when each object has a unique ID:
+
+{books.map(book => (
+
+  <li key={book.id}>
+    {book.title}
+  </li>
+
+))}
+
+
+Avoid relying on an array index when list order/content can change:
+
+{books.map((book, index) => (
+
+  <li key={index}>
+    {book.title}
+  </li>
+
+))}
+
+Why?
+Stable ID                  | Array Index
+---------------------------|----------------------------------
+Belongs to the data item   | Represents current position
+Stable after reordering    | Can change after reordering
+Better identity tracking   | Can cause incorrect identity reuse
+
+
+================================================================================
+
+PART 7: COMMON MISTAKES
+
+================================================================================
+
+Mistake 1: Forgetting Curly Braces
+
+Wrong:
+
+const name = 'Alice';
+
+<h1>Hello name</h1>
+
+
+Output:
+
+Hello name
+
+
+Correct:
+
+const name = 'Alice';
+
+<h1>Hello {name}</h1>
+
+
+Output:
+
+Hello Alice
+
+
+================================================================================
+
+Mistake 2: Using Statements Directly Inside JSX Expressions
+
+================================================================================
+
+JSX curly braces expect expressions.
+
+This is invalid:
+
+{
+  if (isAvailable) {
+    return 'Available';
+  }
+}
+
+
+Also invalid directly in JSX:
+
+{
+  for (let i = 0; i < 5; i++) {
+    console.log(i);
+  }
+}
+
+
+Use expressions instead.
+
+Ternary
+{
+  isAvailable
+    ? 'Available'
+    : 'Out of Stock'
+}
+
+map()
+{
+  [1, 2, 3, 4, 5].map(i => (
+    <li key={i}>
+      {i}
+    </li>
+  ))
+}
+
+Expression vs Statement
+Expression                     | Statement
+-------------------------------|------------------------------
+Produces a value               | Performs an action/control flow
+name                           | if (...)
+2 + 2                          | for (...)
+getPrice()                     | while (...)
+condition ? A : B              | switch (...)
+items.map(...)                 | variable declaration statement
+
+
+================================================================================
+
+Mistake 3: Missing key in Lists
+
+================================================================================
+
+Wrong:
+
+{books.map(book => (
+
+  <li>
+    {book.title}
+  </li>
+
+))}
+
+
+Correct:
+
+{books.map(book => (
+
+  <li key={book.id}>
+    {book.title}
+  </li>
+
+))}
+
+
+key helps React identify sibling elements across renders.
+
+================================================================================
+
+Mistake 4: Overly Complex JSX Expressions
+
+================================================================================
+
+Harder to read:
+
+{
+  books
+    .filter(b => b.price < 20)
+    .map(b => b.title)
+    .join(', ')
+}
+
+
+For more complex/reused logic, extract it:
+
+const getAffordableBooks = () => {
+
+  return books
+    .filter(b => b.price < 20)
+    .map(b => b.title);
+};
+
+
+JSX:
+
+{getAffordableBooks().join(', ')}
+
+
+Flow:
+
+COMPLEX LOGIC
+     ↓
+EXTRACT TO FUNCTION
+     ↓
+FUNCTION RETURNS VALUE
+     ↓
+JSX USES RESULT
+
+
+================================================================================
+
+COMMON MISTAKES - QUICK TABLE
+
+================================================================================
+
+Mistake                | Avoid                    | Better
+-----------------------|--------------------------|------------------------------
+Variable as text       | Hello name               | Hello {name}
+if inside JSX          | {if (...)}               | {x ? A : B}
+for inside JSX         | {for (...)}              | {items.map(...)}
+Missing list key       | <li>{item}</li>          | <li key={item.id}>
+Complex JSX logic      | Big chained expression   | Extract function/variable
+Unclear names          | x, y, t, a               | isAvailable, bookTitle
+Unstable list identity | key={index}              | key={book.id}, when available
+
+
+================================================================================
+
+PART 8: SUMMARY AND KEY TAKEAWAYS
+
+================================================================================
+
+What You've Learned
+Topic                     | What You've Learned
+--------------------------|---------------------------------------------
+Curly Braces              | Embed JavaScript expressions in JSX
+Variables                 | Display dynamic values
+Mathematics               | Perform calculations
+Strings                   | Combine text and values
+Functions                 | Call functions and render returned values
+Ternary                   | Choose between two values/UI branches
+&&                        | Conditionally render content
+map()                     | Transform arrays into JSX
+Objects                   | Access values using dot notation
+Book Components           | Apply expressions in realistic UI
+Keys                      | Identify sibling list items
+Readable JSX              | Keep rendering logic understandable
+Common Mistakes           | Avoid statements and missing keys
+
+
+================================================================================
+
+KEY TAKEAWAYS
+
+================================================================================
+
+No. | Key Takeaway
+----|-----------------------------------------------------------------
+1   | { } lets JSX evaluate a JavaScript expression
+2   | JSX curly braces accept expressions, not statements like if/for
+3   | {name} displays the current value of name
+4   | {getPrice()} calls a function and uses its returned value
+5   | {condition ? A : B} provides conditional output
+6   | condition && <Element /> can conditionally render an element
+7   | array.map(...) is commonly used for rendering collections
+8   | Stable keys help React identify sibling list items
+9   | Complex logic is often clearer outside JSX
+10  | Meaningful variable/function names improve maintainability
+
+
+================================================================================
+
+JAVASCRIPT IN JSX - QUICK REFERENCE
+
+================================================================================
+
+Type             | Example                         | Purpose / Output
+-----------------|---------------------------------|-------------------------
+Variable         | {name}                          | Value of name
+Math             | {2 + 2}                         | 4
+String           | {'Hello ' + name}               | Hello Alice
+Function         | {getName()}                     | Function return value
+Object Property  | {book.title}                    | Book title
+Ternary          | {x ? 'Yes' : 'No'}              | Yes or No
+Conditional      | {x && <p>Yes</p>}               | Element when x is truthy
+Map              | {arr.map(x => <li>{x}</li>)}    | Collection of elements
+Dynamic Class    | className={x ? 'on' : 'off'}    | Conditional CSS class
+
+Important Note About Arrays
+
+React can render arrays of renderable values/elements.
+
+For example:
+
+{[1, 2, 3]}
+
+
+can result in the values being rendered next to each other.
+
+For structured list UI, normally use:
+
+<ul>
+  {[1, 2, 3].map(number => (
+    <li key={number}>
+      {number}
+    </li>
+  ))}
+</ul>
+
+
+================================================================================
+
+BOOK COMPONENT - COMPLETE CONCEPT FLOW
+
+================================================================================
+
+BOOK DATA
+   ↓
+Variables / Object
+   ↓
+JavaScript Expressions
+   ↓
+{book.title}
+{book.price}
+{book.rating}
+   ↓
+Conditional Logic
+   ↓
+inStock ? A : B
+   ↓
+Function Calls
+   ↓
+formatPrice(...)
+   ↓
+Array Rendering
+   ↓
+books.map(...)
+   ↓
+DYNAMIC JSX
+   ↓
+REACT UI
+
+
+================================================================================
+
+TERNARY vs && - QUICK REVISION
+
+================================================================================
+
+Ternary                         | &&
+--------------------------------|------------------------------------
+Choose between two outputs      | Render something conditionally
+Has true and false branches     | Commonly used for one-sided rendering
+condition ? A : B               | condition && A
+
+
+Example:
+
+{inStock
+  ? 'In Stock'
+  : 'Out of Stock'}
+
+
+Use when both outcomes matter.
+
+Example:
+
+{inStock && (
+  <button>
+    Buy Now
+  </button>
+)}
+
+
+Use when content should appear only when the condition is truthy.
+
+================================================================================
+
+INTERVIEW-READY QUICK TABLE
+
+================================================================================
+
+Question                         | Short Answer
+---------------------------------|-------------------------------------------
+Why use { } in JSX?              | To evaluate JavaScript expressions
+Can variables be used in JSX?    | Yes, e.g. {name}
+Can functions be called in JSX?  | Yes, e.g. {getPrice()}
+Can if be written directly in {}?| No, use an expression/logic outside JSX
+How do you write conditionals?   | Ternary or && are common options
+How do you render arrays?        | Usually with map()
+Why is key required for lists?   | Helps React identify sibling items
+What key should you prefer?      | Stable unique ID from the data
+Can calculations be in JSX?      | Yes
+Should complex logic stay in JSX?| Usually better to extract it
+
+
+================================================================================
+
+EASY MEMORY TRICK
+
+================================================================================
+
+Remember JavaScript inside JSX as:
+
+{ }
+ ↓
+JAVASCRIPT EXPRESSION
+
+
+And:
+
+VALUE       → {name}
+
+OBJECT      → {book.title}
+
+MATH        → {price * quantity}
+
+FUNCTION    → {formatPrice(price)}
+
+CONDITION   → {x ? A : B}
+
+SHOW/HIDE   → {x && A}
+
+LIST        → {items.map(...)}
+
+EVENT       → onClick={handleClick}
+
+
+================================================================================
+
+ONE-LINE INTERVIEW ANSWER
+
+================================================================================
+
+In JSX, curly braces {} allow JavaScript expressions such as variables, calculations, function calls, ternary expressions, object properties, and map() calls to produce dynamic UI. Statements such as if and for are normally handled outside JSX or replaced with expressions.
+
+================================================================================
+
+NEXT STEPS
+
+================================================================================
+
+Next Topic              | Purpose
+------------------------|---------------------------------------------
+Props                   | Pass data into reusable components
+Conditional Rendering   | Build UI based on conditions
+Lists and Keys          | Render collections correctly
+State                   | Manage changing component data
+Events                  | Respond to user interactions
+Forms                   | Manage input values
+Reusable Components     | Build flexible component libraries
+Advanced JavaScript     | Use destructuring, spread, array methods
+Complex UI              | Combine data, state, props and JSX
+
+
+================================================================================
+
+FOLLOW-UP QUESTIONS
+
+================================================================================
+
+How do you pass book data to a component using props?
+
+What is the difference between && and the ternary operator for conditional rendering?
+
+================================================================================
