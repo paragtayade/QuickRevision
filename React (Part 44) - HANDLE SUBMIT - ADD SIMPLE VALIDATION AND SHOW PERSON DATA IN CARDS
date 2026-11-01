@@ -1,0 +1,3362 @@
+LESSON 8: HANDLE SUBMIT - ADD SIMPLE VALIDATION
+AND SHOW PERSON DATA IN CARDS
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on validating a form when it is submitted and displaying
+valid submitted data in card format.
+
+You will understand:
+
+• Creating an onSubmit handler
+
+• Using preventDefault()
+
+• Validating form values
+
+• Preventing invalid data from being processed
+
+• Managing field-level validation errors
+
+• Clearing errors while a user corrects a field
+
+• Creating a person object from form data
+
+• Adding submitted people to an array
+
+• Rendering person cards with map()
+
+• Clearing a form after successful submission
+
+• Displaying multiple submitted records
+
+• Deleting a person record
+
+• Building a complete form-to-display workflow
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+This pattern appears in many applications:
+
+• Registration Forms
+
+• Customer Records
+
+• Employee Directories
+
+• Contact Lists
+
+• Student Registration
+
+• Address Books
+
+• Account Applications
+
+• Profile Management
+
+
+The complete pattern is:
+
+FORM INPUT
+    ↓
+SUBMIT
+    ↓
+VALIDATE
+    ↓
++------------------------+
+|                        |
+INVALID                VALID
+|                        |
+↓                        ↓
+SHOW ERRORS          CREATE RECORD
+                         ↓
+                    ADD TO LIST
+                         ↓
+                    CLEAR FORM
+                         ↓
+                    RENDER CARD
+
+
+================================================================================
+PART 2: UNDERSTANDING FORM SUBMISSION AND VALIDATION
+================================================================================
+
+WHAT IS FORM SUBMISSION?
+--------------------------------------------------------------------------------
+
+Form submission begins when a user:
+
+• Clicks a submit button
+
+• Presses Enter in an appropriate form control
+
+• Triggers form submission programmatically
+
+
+In React:
+
+<form onSubmit={handleSubmit}>
+
+
+The submit handler receives an event:
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+  // Validation and processing
+}
+
+
+================================================================================
+WHAT IS FORM VALIDATION?
+================================================================================
+
+Form validation checks whether submitted values meet the application's
+requirements.
+
+Common validation categories:
+
+• Required value
+
+• Minimum/maximum length
+
+• Format
+
+• Numeric range
+
+• Matching fields
+
+• Allowed values
+
+• Business rules
+
+• Server-dependent rules
+
+
+================================================================================
+VALIDATION TYPES
+================================================================================
+
++----------------------+-----------------------------------------------+
+| VALIDATION TYPE      | EXAMPLE                                       |
++----------------------+-----------------------------------------------+
+| Required             | First name must not be empty                  |
+| Minimum Length       | Name must contain at least 2 characters       |
+| Maximum Length       | Name must not exceed 50 characters            |
+| Email Format         | Email should have an acceptable structure     |
+| Phone Rule           | Phone should contain enough digits            |
+| Number Range         | Age must be between allowed limits            |
+| Matching Fields      | Password and confirmation must match          |
+| Custom Rule          | Username must follow product rules            |
+| Async Rule           | Username must be checked with server          |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+COMPLETE SUBMISSION FLOW
+================================================================================
+
+User Completes Form
+        ↓
+User Submits
+        ↓
+onSubmit Event
+        ↓
+handleSubmit(event)
+        ↓
+event.preventDefault()
+        ↓
+validatePersonForm(formData)
+        ↓
++----------------------------+
+|                            |
+Errors Found               No Errors
+|                            |
+↓                            ↓
+setErrors(errors)        Create Person
+|                            |
+↓                            ↓
+Render Messages          Add to people
+                             |
+                             ↓
+                        Reset Form
+                             |
+                             ↓
+                        Render Cards
+
+
+================================================================================
+IMPORTANT VALIDATION PRINCIPLE
+================================================================================
+
+Validation should happen before submitted data is added to application state.
+
+WRONG FLOW:
+--------------------------------------------------------------------------------
+
+Submit
+  ↓
+Add Invalid Record
+  ↓
+Validate Later
+
+
+BETTER FLOW:
+--------------------------------------------------------------------------------
+
+Submit
+  ↓
+Validate
+  ↓
+Only Add Valid Record
+
+
+================================================================================
+PART 3: PERSON FORM WITH VALIDATION AND CARD DISPLAY
+================================================================================
+
+FILE STRUCTURE
+--------------------------------------------------------------------------------
+
+src/
+│
+├── components/
+│   ├── PersonFormWithCard.jsx
+│   ├── PersonCard.jsx
+│   └── PersonFormWithCard.css
+│
+└── utils/
+    └── personValidation.js
+
+
+================================================================================
+VALIDATION UTILITY
+================================================================================
+
+File:
+
+src/utils/personValidation.js
+
+
+export function validatePersonForm(
+  formData
+) {
+
+  const newErrors = {}
+
+
+  const firstName =
+    formData.firstName.trim()
+
+
+  const lastName =
+    formData.lastName.trim()
+
+
+  const email =
+    formData.email.trim()
+
+
+  const phone =
+    formData.phone.trim()
+
+
+  const phoneDigits =
+    phone.replace(/\D/g, '')
+
+
+  const numericAge =
+    Number(formData.age)
+
+
+  // ============================================
+  // FIRST NAME
+  // ============================================
+
+  if (!firstName) {
+
+    newErrors.firstName =
+      'First name is required'
+
+  } else if (
+    firstName.length < 2
+  ) {
+
+    newErrors.firstName =
+      'First name must contain at least 2 characters'
+
+  } else if (
+    firstName.length > 50
+  ) {
+
+    newErrors.firstName =
+      'First name must not exceed 50 characters'
+  }
+
+
+  // ============================================
+  // LAST NAME
+  // ============================================
+
+  if (!lastName) {
+
+    newErrors.lastName =
+      'Last name is required'
+
+  } else if (
+    lastName.length < 2
+  ) {
+
+    newErrors.lastName =
+      'Last name must contain at least 2 characters'
+
+  } else if (
+    lastName.length > 50
+  ) {
+
+    newErrors.lastName =
+      'Last name must not exceed 50 characters'
+  }
+
+
+  // ============================================
+  // EMAIL
+  // ============================================
+
+  if (!email) {
+
+    newErrors.email =
+      'Email is required'
+
+  } else if (
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+      email
+    )
+  ) {
+
+    newErrors.email =
+      'Enter a valid email address'
+
+  } else if (
+    email.length > 100
+  ) {
+
+    newErrors.email =
+      'Email must not exceed 100 characters'
+  }
+
+
+  // ============================================
+  // PHONE
+  // ============================================
+
+  if (!phone) {
+
+    newErrors.phone =
+      'Phone is required'
+
+  } else if (
+    phoneDigits.length < 10
+  ) {
+
+    newErrors.phone =
+      'Phone must contain at least 10 digits'
+
+  } else if (
+    phoneDigits.length > 15
+  ) {
+
+    newErrors.phone =
+      'Phone must not contain more than 15 digits'
+  }
+
+
+  // ============================================
+  // AGE
+  // ============================================
+
+  if (
+    formData.age === ''
+  ) {
+
+    newErrors.age =
+      'Age is required'
+
+  } else if (
+    !Number.isInteger(
+      numericAge
+    )
+  ) {
+
+    newErrors.age =
+      'Age must be a whole number'
+
+  } else if (
+    numericAge < 18
+  ) {
+
+    newErrors.age =
+      'Age must be at least 18'
+
+  } else if (
+    numericAge > 120
+  ) {
+
+    newErrors.age =
+      'Age must not exceed 120'
+  }
+
+
+  return newErrors
+}
+
+
+================================================================================
+VALIDATION RULES
+================================================================================
+
++------------+-------------------------------+------------------------------+
+| FIELD      | RULE                          | ERROR                        |
++------------+-------------------------------+------------------------------+
+| First Name | Required                      | First name is required       |
+|            | Minimum 2 characters          | At least 2 characters        |
+|            | Maximum 50 characters         | Must not exceed 50           |
+| Last Name  | Required                      | Last name is required        |
+|            | Minimum 2 characters          | At least 2 characters        |
+|            | Maximum 50 characters         | Must not exceed 50           |
+| Email      | Required                      | Email is required            |
+|            | Basic email structure         | Enter a valid email          |
+|            | Maximum 100 characters        | Must not exceed 100          |
+| Phone      | Required                      | Phone is required            |
+|            | Minimum 10 digits             | At least 10 digits           |
+|            | Maximum 15 digits             | No more than 15 digits       |
+| Age        | Required                      | Age is required              |
+|            | Whole number                  | Must be a whole number       |
+|            | Minimum 18                    | Must be at least 18          |
+|            | Maximum 120                   | Must not exceed 120          |
++------------+-------------------------------+------------------------------+
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+These are instructional validation rules.
+
+Real applications may require:
+
+• Different age policies
+
+• Country-aware phone validation
+
+• Product-specific name rules
+
+• More deliberate email handling
+
+• Backend validation
+
+• Duplicate-record checks
+
+
+Client-side validation improves user experience.
+
+It does NOT replace server-side validation.
+
+
+================================================================================
+PERSON CARD COMPONENT
+================================================================================
+
+File:
+
+src/components/PersonCard.jsx
+
+
+export default function PersonCard({
+  person,
+  onDelete
+}) {
+
+  return (
+    <article className="person-card">
+
+
+      {/* Header */}
+
+      <div className="card-header">
+
+        <h3 className="person-name">
+
+          {person.firstName}
+          {' '}
+          {person.lastName}
+
+        </h3>
+
+
+        <button
+          type="button"
+          onClick={() =>
+            onDelete(
+              person.id
+            )
+          }
+          className="btn-delete"
+          aria-label={
+            `Delete ${person.firstName} ${person.lastName}`
+          }
+          title="Delete this person"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      {/* Body */}
+
+      <div className="card-body">
+
+
+        <div className="card-item">
+
+          <span className="label">
+            Email:
+          </span>
+
+          <span className="value">
+            {person.email}
+          </span>
+
+        </div>
+
+
+        <div className="card-item">
+
+          <span className="label">
+            Phone:
+          </span>
+
+          <span className="value">
+            {person.phone}
+          </span>
+
+        </div>
+
+
+        <div className="card-item">
+
+          <span className="label">
+            Age:
+          </span>
+
+          <span className="value">
+
+            {person.age}
+            {' '}
+            years
+
+          </span>
+
+        </div>
+
+      </div>
+
+    </article>
+  )
+}
+
+
+================================================================================
+WHY CREATE PersonCard?
+================================================================================
+
+The parent component is responsible for:
+
+• Form state
+
+• Validation errors
+
+• People list
+
+• Submission
+
+• Deletion
+
+
+PersonCard is responsible for:
+
+• Presenting one person's data
+
+• Requesting deletion through a callback
+
+
+DATA FLOW:
+--------------------------------------------------------------------------------
+
+PersonFormWithCard
+      ↓
+person Prop
+      ↓
+PersonCard
+      ↓
+Display Data
+
+
+DELETE FLOW:
+--------------------------------------------------------------------------------
+
+PersonCard
+      ↓
+onDelete(person.id)
+      ↓
+Parent
+      ↓
+Update people State
+
+
+================================================================================
+MAIN COMPONENT
+================================================================================
+
+File:
+
+src/components/PersonFormWithCard.jsx
+
+
+import { useState } from 'react'
+
+import PersonCard
+  from './PersonCard'
+
+import {
+  validatePersonForm
+} from '../utils/personValidation'
+
+import './PersonFormWithCard.css'
+
+
+const INITIAL_FORM = {
+
+  firstName: '',
+
+  lastName: '',
+
+  email: '',
+
+  phone: '',
+
+  age: ''
+
+}
+
+
+export default function PersonFormWithCard() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [formData, setFormData] =
+    useState(INITIAL_FORM)
+
+
+  const [errors, setErrors] =
+    useState({})
+
+
+  const [people, setPeople] =
+    useState([])
+
+
+  const [
+    submissionMessage,
+    setSubmissionMessage
+  ] = useState('')
+
+
+  // ============================================
+  // INPUT CHANGE
+  // ============================================
+
+  const handleChange = (
+    event
+  ) => {
+
+    const {
+      name,
+      value
+    } = event.target
+
+
+    setFormData(previousData => ({
+
+      ...previousData,
+
+      value
+
+    }))
+
+
+    // Clear the old error for this field
+    // while the user is correcting it.
+
+    setErrors(previousErrors => {
+
+      if (
+        !previousErrors[name]
+      ) {
+
+        return previousErrors
+      }
+
+
+      return {
+
+        ...previousErrors,
+
+        ''
+
+      }
+    })
+
+
+    setSubmissionMessage('')
+  }
+
+
+  // ============================================
+  // SUBMIT
+  // ============================================
+
+  const handleSubmit = (
+    event
+  ) => {
+
+    event.preventDefault()
+
+
+    const validationErrors =
+      validatePersonForm(
+        formData
+      )
+
+
+    if (
+      Object.keys(
+        validationErrors
+      ).length > 0
+    ) {
+
+      setErrors(
+        validationErrors
+      )
+
+      setSubmissionMessage('')
+
+      return
+    }
+
+
+    // Normalize submitted values.
+
+    const newPerson = {
+
+      id:
+        crypto.randomUUID(),
+
+      firstName:
+        formData.firstName.trim(),
+
+      lastName:
+        formData.lastName.trim(),
+
+      email:
+        formData.email
+          .trim()
+          .toLowerCase(),
+
+      phone:
+        formData.phone.trim(),
+
+      age:
+        Number(formData.age)
+
+    }
+
+
+    setPeople(previousPeople => [
+
+      newPerson,
+
+      ...previousPeople
+
+    ])
+
+
+    setFormData(
+      INITIAL_FORM
+    )
+
+
+    setErrors({})
+
+
+    setSubmissionMessage(
+      'Person registered successfully.'
+    )
+  }
+
+
+  // ============================================
+  // DELETE
+  // ============================================
+
+  const handleDeletePerson = (
+    id
+  ) => {
+
+    setPeople(previousPeople =>
+
+      previousPeople.filter(
+        person =>
+          person.id !== id
+      )
+
+    )
+  }
+
+
+  // ============================================
+  // RESET
+  // ============================================
+
+  const handleReset = () => {
+
+    setFormData(
+      INITIAL_FORM
+    )
+
+    setErrors({})
+
+    setSubmissionMessage('')
+  }
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="person-form-container">
+
+      <h1>
+        Person Registration Form
+      </h1>
+
+
+      <p>
+        Fill in the form to register a person
+      </p>
+
+
+      {submissionMessage && (
+
+        <p
+          className="success-message"
+          role="status"
+        >
+          {submissionMessage}
+        </p>
+
+      )}
+
+
+      <div className="content-wrapper">
+
+
+        {/* ======================================
+            FORM
+            ====================================== */}
+
+        <section className="form-section">
+
+          <h2>
+            Person Details
+          </h2>
+
+
+          <form
+            onSubmit={handleSubmit}
+            onReset={handleReset}
+            className="form"
+            noValidate
+          >
+
+
+            {/* First Name */}
+
+            <div className="form-group">
+
+              <label htmlFor="firstName">
+                First Name:
+              </label>
+
+
+              <input
+                id="firstName"
+                type="text"
+                name="firstName"
+                value={
+                  formData.firstName
+                }
+                onChange={handleChange}
+                placeholder="Enter first name"
+                className={
+                  `form-input ${
+                    errors.firstName
+                      ? 'input-error'
+                      : ''
+                  }`
+                }
+                aria-invalid={
+                  Boolean(
+                    errors.firstName
+                  )
+                }
+                aria-describedby={
+                  errors.firstName
+                    ? 'firstName-error'
+                    : undefined
+                }
+              />
+
+
+              {errors.firstName && (
+
+                <p
+                  id="firstName-error"
+                  className="error-message"
+                >
+                  {errors.firstName}
+                </p>
+
+              )}
+
+            </div>
+
+
+            {/* Last Name */}
+
+            <div className="form-group">
+
+              <label htmlFor="lastName">
+                Last Name:
+              </label>
+
+
+              <input
+                id="lastName"
+                type="text"
+                name="lastName"
+                value={
+                  formData.lastName
+                }
+                onChange={handleChange}
+                placeholder="Enter last name"
+                className={
+                  `form-input ${
+                    errors.lastName
+                      ? 'input-error'
+                      : ''
+                  }`
+                }
+                aria-invalid={
+                  Boolean(
+                    errors.lastName
+                  )
+                }
+                aria-describedby={
+                  errors.lastName
+                    ? 'lastName-error'
+                    : undefined
+                }
+              />
+
+
+              {errors.lastName && (
+
+                <p
+                  id="lastName-error"
+                  className="error-message"
+                >
+                  {errors.lastName}
+                </p>
+
+              )}
+
+            </div>
+
+
+            {/* Email */}
+
+            <div className="form-group">
+
+              <label htmlFor="email">
+                Email:
+              </label>
+
+
+              <input
+                id="email"
+                type="email"
+                name="email"
+                value={
+                  formData.email
+                }
+                onChange={handleChange}
+                placeholder="Enter email"
+                className={
+                  `form-input ${
+                    errors.email
+                      ? 'input-error'
+                      : ''
+                  }`
+                }
+                aria-invalid={
+                  Boolean(
+                    errors.email
+                  )
+                }
+                aria-describedby={
+                  errors.email
+                    ? 'email-error'
+                    : undefined
+                }
+              />
+
+
+              {errors.email && (
+
+                <p
+                  id="email-error"
+                  className="error-message"
+                >
+                  {errors.email}
+                </p>
+
+              )}
+
+            </div>
+
+
+            {/* Phone */}
+
+            <div className="form-group">
+
+              <label htmlFor="phone">
+                Phone:
+              </label>
+
+
+              <input
+                id="phone"
+                type="tel"
+                name="phone"
+                value={
+                  formData.phone
+                }
+                onChange={handleChange}
+                placeholder="Enter phone number"
+                className={
+                  `form-input ${
+                    errors.phone
+                      ? 'input-error'
+                      : ''
+                  }`
+                }
+                aria-invalid={
+                  Boolean(
+                    errors.phone
+                  )
+                }
+                aria-describedby={
+                  errors.phone
+                    ? 'phone-error'
+                    : undefined
+                }
+              />
+
+
+              {errors.phone && (
+
+                <p
+                  id="phone-error"
+                  className="error-message"
+                >
+                  {errors.phone}
+                </p>
+
+              )}
+
+            </div>
+
+
+            {/* Age */}
+
+            <div className="form-group">
+
+              <label htmlFor="age">
+                Age:
+              </label>
+
+
+              <input
+                id="age"
+                type="number"
+                name="age"
+                value={
+                  formData.age
+                }
+                onChange={handleChange}
+                placeholder="Enter age"
+                min="18"
+                max="120"
+                step="1"
+                className={
+                  `form-input ${
+                    errors.age
+                      ? 'input-error'
+                      : ''
+                  }`
+                }
+                aria-invalid={
+                  Boolean(
+                    errors.age
+                  )
+                }
+                aria-describedby={
+                  errors.age
+                    ? 'age-error'
+                    : undefined
+                }
+              />
+
+
+              {errors.age && (
+
+                <p
+                  id="age-error"
+                  className="error-message"
+                >
+                  {errors.age}
+                </p>
+
+              )}
+
+            </div>
+
+
+            {/* Buttons */}
+
+            <div className="button-group">
+
+              <button
+                type="submit"
+                className="btn-submit"
+              >
+                Register Person
+              </button>
+
+
+              <button
+                type="reset"
+                className="btn-reset"
+              >
+                Clear Form
+              </button>
+
+            </div>
+
+          </form>
+
+        </section>
+
+
+        {/* ======================================
+            PERSON CARDS
+            ====================================== */}
+
+        <section className="cards-section">
+
+          <h2>
+
+            Registered People
+            {' '}
+            ({people.length})
+
+          </h2>
+
+
+          {people.length === 0 ? (
+
+            <p className="empty-message">
+
+              No people registered yet.
+              Fill in the form to add one.
+
+            </p>
+
+          ) : (
+
+            <div className="cards-grid">
+
+              {people.map(person => (
+
+                <PersonCard
+                  key={person.id}
+                  person={person}
+                  onDelete={
+                    handleDeletePerson
+                  }
+                />
+
+              ))}
+
+            </div>
+
+          )}
+
+        </section>
+
+      </div>
+
+
+      {/* Educational Debug Output */}
+
+      <details className="debug-section">
+
+        <summary>
+          View current form state
+        </summary>
+
+        <pre>
+          {JSON.stringify(
+            formData,
+            null,
+            2
+          )}
+        </pre>
+
+      </details>
+
+    </div>
+  )
+}
+
+
+================================================================================
+HANDLE CHANGE EXPLANATION
+================================================================================
+
+Input:
+
+name="email"
+
+
+User enters:
+
+John@Example.com
+
+
+Handler receives:
+
+name:
+'email'
+
+
+value:
+'John@Example.com'
+
+
+Update:
+
+setFormData(previous => ({
+
+  ...previous,
+
+  value
+
+}))
+
+
+Result:
+
+formData.email
+
+=
+'John@Example.com'
+
+
+================================================================================
+HANDLE SUBMIT EXPLANATION
+================================================================================
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+
+  const validationErrors =
+    validatePersonForm(
+      formData
+    )
+
+
+  if (
+    Object.keys(
+      validationErrors
+    ).length > 0
+  ) {
+
+    setErrors(
+      validationErrors
+    )
+
+    return
+  }
+
+
+  const newPerson = {
+
+    id:
+      crypto.randomUUID(),
+
+    firstName:
+      formData.firstName.trim(),
+
+    lastName:
+      formData.lastName.trim(),
+
+    email:
+      formData.email
+        .trim()
+        .toLowerCase(),
+
+    phone:
+      formData.phone.trim(),
+
+    age:
+      Number(formData.age)
+
+  }
+
+
+  setPeople(previous => [
+
+    newPerson,
+
+    ...previous
+
+  ])
+
+
+  setFormData(
+    INITIAL_FORM
+  )
+
+
+  setErrors({})
+}
+
+
+================================================================================
+WHY NORMALIZE SUBMITTED VALUES?
+================================================================================
+
+Suppose the user enters:
+
+firstName:
+
+"  John  "
+
+
+email:
+
+"John@Example.COM"
+
+
+The controlled form can preserve exactly what the user types while editing.
+
+At submission, normalized application data may become:
+
+firstName:
+
+"John"
+
+
+email:
+
+"john@example.com"
+
+
+This separates:
+
+EDITING STATE
+
+from:
+
+STORED APPLICATION RECORD
+
+
+================================================================================
+WHY AGE REMAINS A STRING DURING EDITING
+================================================================================
+
+For:
+
+<input type="number">
+
+
+event.target.value generally provides a string.
+
+Examples:
+
+"18"
+
+"42"
+
+""
+
+
+Keeping age as a string while editing supports the empty-input state:
+
+age:
+''
+
+
+After successful validation:
+
+age:
+Number(formData.age)
+
+
+So the person record stores a number.
+
+
+================================================================================
+WHY USE A FUNCTIONAL PEOPLE UPDATE?
+================================================================================
+
+The next people list depends on the existing list.
+
+Use:
+
+setPeople(previousPeople => [
+
+  newPerson,
+
+  ...previousPeople
+
+])
+
+
+This avoids depending on a possibly stale `people` value from the render that
+created the handler.
+
+
+================================================================================
+WHY USE crypto.randomUUID()?
+================================================================================
+
+Each card needs stable identity.
+
+Person object:
+
+{
+  id:
+    crypto.randomUUID(),
+
+  ...
+}
+
+
+Rendering:
+
+<PersonCard
+  key={person.id}
+/>
+
+
+The React key belongs where map() creates each list element/component.
+
+
+================================================================================
+DELETE FLOW
+================================================================================
+
+User Clicks Delete
+       ↓
+PersonCard
+       ↓
+onDelete(person.id)
+       ↓
+Parent Handler
+       ↓
+filter()
+       ↓
+New People Array
+       ↓
+React Renders Remaining Cards
+
+
+Handler:
+
+const handleDeletePerson = (
+  id
+) => {
+
+  setPeople(previousPeople =>
+
+    previousPeople.filter(
+      person =>
+        person.id !== id
+    )
+
+  )
+}
+
+
+================================================================================
+PART 4: DETAILED VALIDATION EXPLANATION
+================================================================================
+
+VALIDATION FUNCTION CONTRACT
+--------------------------------------------------------------------------------
+
+INPUT:
+
+formData
+
+
+OUTPUT:
+
+errors Object
+
+
+VALID DATA:
+--------------------------------------------------------------------------------
+
+{}
+
+
+INVALID DATA:
+--------------------------------------------------------------------------------
+
+{
+  firstName:
+    'First name is required',
+
+  email:
+    'Enter a valid email address'
+}
+
+
+================================================================================
+WHY RETURN AN ERRORS OBJECT?
+================================================================================
+
+The errors object supports:
+
+• Looking up an error by field name
+
+• Applying invalid styling
+
+• Connecting messages with fields
+
+• Deciding whether submission can continue
+
+
+Example:
+
+errors.email
+
+
+matches:
+
+formData.email
+
+
+and:
+
+name="email"
+
+
+================================================================================
+VALIDATION CHECK
+================================================================================
+
+const errors =
+  validatePersonForm(
+    formData
+  )
+
+
+const isValid =
+  Object.keys(
+    errors
+  ).length === 0
+
+
+If:
+
+isValid === true
+
+process the data.
+
+
+If:
+
+isValid === false
+
+display the errors.
+
+
+================================================================================
+TRIM BEFORE LENGTH CHECK
+================================================================================
+
+Less reliable:
+
+formData.firstName.length < 2
+
+
+User input:
+
+" A "
+
+
+Raw length:
+
+3
+
+
+Trimmed value:
+
+"A"
+
+
+Trimmed length:
+
+1
+
+
+Therefore validate:
+
+formData.firstName
+  .trim()
+  .length
+
+
+This checks meaningful content instead of surrounding whitespace.
+
+
+================================================================================
+PHONE VALIDATION
+================================================================================
+
+A basic teaching approach:
+
+const phoneDigits =
+  formData.phone
+    .replace(/\D/g, '')
+
+
+Then check digit count:
+
+phoneDigits.length
+
+
+This allows formatting characters such as:
+
+Spaces
+
+Hyphens
+
+Parentheses
+
+Plus signs
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Phone-number validation is country-specific.
+
+A production application should use rules appropriate to the supported
+countries and product requirements.
+
+
+================================================================================
+EMAIL VALIDATION
+================================================================================
+
+The lesson uses a basic structure check:
+
+/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+
+This is suitable as a simple client-side teaching rule.
+
+It is not proof that:
+
+• The address exists
+
+• The mailbox can receive email
+
+• The user owns the address
+
+
+Verification may require a backend confirmation workflow.
+
+
+================================================================================
+AGE VALIDATION
+================================================================================
+
+Form value:
+
+formData.age
+
+is a string during editing.
+
+
+Conversion:
+
+const numericAge =
+  Number(formData.age)
+
+
+Checks:
+
+• Empty?
+
+• Whole number?
+
+• At least 18?
+
+• Not above 120?
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+The age limits are example product rules.
+
+They are not universal rules for every form.
+
+
+================================================================================
+CLIENT AND SERVER VALIDATION
+================================================================================
+
+CLIENT VALIDATION:
+--------------------------------------------------------------------------------
+
+• Improves immediate user feedback
+
+• Prevents obviously invalid local processing
+
+• Helps users correct mistakes
+
+
+SERVER VALIDATION:
+--------------------------------------------------------------------------------
+
+• Enforces trusted business rules
+
+• Handles authoritative data checks
+
+• Protects backend operations
+
+• Must not trust client input automatically
+
+
+MEMORY:
+
+Client Validation
+      +
+Server Validation
+      =
+Reliable Workflow
+
+
+================================================================================
+PART 5: STYLING THE FORM AND CARDS
+================================================================================
+
+File:
+
+src/components/PersonFormWithCard.css
+
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+
+.person-form-container {
+
+  max-width: 1200px;
+
+  margin: 0 auto;
+
+  padding: 30px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #667eea 0%,
+      #764ba2 100%
+    );
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 10px 30px
+    rgba(0, 0, 0, 0.2);
+}
+
+
+.person-form-container > h1 {
+
+  color: white;
+
+  text-align: center;
+
+  margin-bottom: 10px;
+}
+
+
+.person-form-container > p {
+
+  color:
+    rgba(255, 255, 255, 0.9);
+
+  text-align: center;
+
+  margin-bottom: 30px;
+}
+
+
+/* ============================================
+   SUCCESS MESSAGE
+   ============================================ */
+
+.success-message {
+
+  background:
+    #e8f5e9;
+
+  color:
+    #1b5e20;
+
+  border-left:
+    4px solid #4caf50;
+
+  padding: 15px;
+
+  border-radius: 6px;
+
+  margin-bottom: 20px;
+}
+
+
+/* ============================================
+   CONTENT
+   ============================================ */
+
+.content-wrapper {
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(300px, 0.8fr)
+    minmax(0, 1.2fr);
+
+  gap: 30px;
+
+  align-items: start;
+}
+
+
+/* ============================================
+   SECTIONS
+   ============================================ */
+
+.form-section,
+.cards-section {
+
+  background: white;
+
+  padding: 30px;
+
+  border-radius: 8px;
+
+  box-shadow:
+    0 5px 15px
+    rgba(0, 0, 0, 0.1);
+}
+
+
+.form-section > h2,
+.cards-section > h2 {
+
+  color: #333;
+
+  margin-top: 0;
+
+  margin-bottom: 20px;
+}
+
+
+/* ============================================
+   FORM
+   ============================================ */
+
+.form {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 20px;
+}
+
+
+.form-group {
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.form-group label {
+
+  font-weight: 600;
+
+  color: #333;
+
+  margin-bottom: 8px;
+}
+
+
+.form-input {
+
+  padding:
+    12px 15px;
+
+  border:
+    2px solid #ddd;
+
+  border-radius: 6px;
+
+  font-size: 1rem;
+
+  font-family: inherit;
+
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    background-color 0.3s ease;
+}
+
+
+.form-input:focus {
+
+  outline: none;
+
+  border-color:
+    #667eea;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(102, 126, 234, 0.15);
+
+  background-color:
+    #f8f9ff;
+}
+
+
+/* ============================================
+   ERROR
+   ============================================ */
+
+.form-input.input-error {
+
+  border-color:
+    #f44336;
+
+  background-color:
+    #ffebee;
+}
+
+
+.error-message {
+
+  color:
+    #b71c1c;
+
+  font-size: 0.85rem;
+
+  margin:
+    5px 0 0;
+
+  font-weight: 500;
+}
+
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.button-group {
+
+  display: flex;
+
+  gap: 15px;
+
+  margin-top: 10px;
+}
+
+
+.btn-submit,
+.btn-reset {
+
+  flex: 1;
+
+  padding:
+    12px 20px;
+
+  border: none;
+
+  border-radius: 6px;
+
+  color: white;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  font-size: 1rem;
+}
+
+
+.btn-submit {
+
+  background:
+    #667eea;
+}
+
+
+.btn-submit:hover {
+
+  background:
+    #5568d3;
+}
+
+
+.btn-reset {
+
+  background:
+    #f44336;
+}
+
+
+.btn-reset:hover {
+
+  background:
+    #d32f2f;
+}
+
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.empty-message {
+
+  text-align: center;
+
+  color: #666;
+
+  padding:
+    40px 20px;
+}
+
+
+/* ============================================
+   CARDS GRID
+   ============================================ */
+
+.cards-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(
+        260px,
+        1fr
+      )
+    );
+
+  gap: 20px;
+}
+
+
+/* ============================================
+   PERSON CARD
+   ============================================ */
+
+.person-card {
+
+  background:
+    linear-gradient(
+      135deg,
+      #f5f7fa 0%,
+      #dce5f2 100%
+    );
+
+  border-radius: 8px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 4px 12px
+    rgba(0, 0, 0, 0.1);
+}
+
+
+.card-header {
+
+  background:
+    linear-gradient(
+      135deg,
+      #667eea 0%,
+      #764ba2 100%
+    );
+
+  color: white;
+
+  padding: 20px;
+
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  align-items: center;
+
+  gap: 15px;
+}
+
+
+.person-name {
+
+  margin: 0;
+
+  font-size: 1.2rem;
+
+  overflow-wrap: anywhere;
+}
+
+
+.btn-delete {
+
+  flex-shrink: 0;
+
+  background:
+    rgba(255, 255, 255, 0.2);
+
+  color: white;
+
+  border: none;
+
+  width: 34px;
+
+  height: 34px;
+
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  font-size: 1.2rem;
+}
+
+
+.btn-delete:hover {
+
+  background:
+    rgba(255, 255, 255, 0.4);
+}
+
+
+/* ============================================
+   CARD BODY
+   ============================================ */
+
+.card-body {
+
+  padding: 20px;
+}
+
+
+.card-item {
+
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  gap: 20px;
+
+  padding:
+    10px 0;
+
+  border-bottom:
+    1px solid
+    rgba(0, 0, 0, 0.1);
+}
+
+
+.card-item:last-child {
+
+  border-bottom: none;
+}
+
+
+.card-item .label {
+
+  font-weight: 600;
+
+  color: #333;
+}
+
+
+.card-item .value {
+
+  color: #555;
+
+  text-align: right;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* ============================================
+   DEBUG
+   ============================================ */
+
+.debug-section {
+
+  background:
+    #f5f5f5;
+
+  padding: 20px;
+
+  border-radius: 8px;
+
+  margin-top: 30px;
+}
+
+
+.debug-section summary {
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+
+.debug-section pre {
+
+  background:
+    #2d2d2d;
+
+  color:
+    #f8f8f2;
+
+  padding: 15px;
+
+  border-radius: 4px;
+
+  overflow-x: auto;
+}
+
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+
+  .content-wrapper {
+
+    grid-template-columns:
+      1fr;
+  }
+
+}
+
+
+@media (max-width: 768px) {
+
+  .person-form-container {
+
+    padding: 20px;
+  }
+
+
+  .form-section,
+  .cards-section {
+
+    padding: 20px;
+  }
+
+
+  .cards-grid {
+
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .button-group {
+
+    flex-direction:
+      column;
+  }
+
+
+  .card-item {
+
+    flex-direction:
+      column;
+
+    gap: 5px;
+  }
+
+
+  .card-item .value {
+
+    text-align: left;
+  }
+
+}
+
+
+================================================================================
+CSS SUMMARY
+================================================================================
+
++-------------------------+---------------------------------------------+
+| CLASS                   | PURPOSE                                     |
++-------------------------+---------------------------------------------+
+| .person-form-container  | Main application container                 |
+| .success-message        | Submission feedback                         |
+| .content-wrapper        | Form/cards page layout                      |
+| .form-section           | Form panel                                  |
+| .cards-section          | Cards panel                                 |
+| .form-group             | Field wrapper                               |
+| .form-input             | Input styling                               |
+| .input-error            | Invalid input appearance                    |
+| .error-message          | Field-specific error                        |
+| .button-group           | Submit/reset controls                       |
+| .cards-grid             | Responsive cards layout                     |
+| .person-card            | Individual person record                    |
+| .card-header            | Person name/delete action                   |
+| .card-body              | Person details                              |
+| .btn-delete             | Delete control                              |
+| .debug-section          | Educational state display                   |
++-------------------------+---------------------------------------------+
+
+
+================================================================================
+PART 6: FORM SUBMISSION WORKFLOW
+================================================================================
+
+COMPLETE WORKFLOW
+--------------------------------------------------------------------------------
+
+1. User enters data
+
+        ↓
+
+2. Controlled form state updates
+
+        ↓
+
+3. User submits form
+
+        ↓
+
+4. onSubmit executes
+
+        ↓
+
+5. preventDefault() prevents native submission
+
+        ↓
+
+6. validatePersonForm(formData) executes
+
+        ↓
+
+7. Does validation return errors?
+
+        ├── YES
+        │     ↓
+        │   setErrors(...)
+        │     ↓
+        │   Messages displayed
+        │     ↓
+        │   User corrects fields
+        │
+        └── NO
+              ↓
+            Normalize values
+              ↓
+            Create person object
+              ↓
+            Add person to people array
+              ↓
+            Clear form/errors
+              ↓
+            Show success feedback
+              ↓
+            Render new person card
+
+
+================================================================================
+SUBMISSION WORKFLOW TABLE
+================================================================================
+
++------+-----------------------------+----------------------------------+
+| STEP | ACTION                      | RESULT                           |
++------+-----------------------------+----------------------------------+
+| 1    | User enters data            | formData updates                 |
+| 2    | User submits                | onSubmit event fires             |
+| 3    | preventDefault()            | Native submit prevented          |
+| 4    | Validate                    | errors object created            |
+| 5A   | Invalid                     | Error messages displayed         |
+| 5B   | Valid                       | Person record created            |
+| 6    | Update array                | Person added immutably           |
+| 7    | Reset form                  | Fields become empty              |
+| 8    | Clear errors                | Validation messages removed      |
+| 9    | Render                      | Person card appears              |
+| 10   | Delete if requested         | Matching card removed            |
++------+-----------------------------+----------------------------------+
+
+
+================================================================================
+STATE RESPONSIBILITIES
+================================================================================
+
+formData:
+--------------------------------------------------------------------------------
+
+Current editable field values
+
+
+errors:
+--------------------------------------------------------------------------------
+
+Current field-specific validation messages
+
+
+people:
+--------------------------------------------------------------------------------
+
+Successfully submitted person records
+
+
+submissionMessage:
+--------------------------------------------------------------------------------
+
+Submission feedback shown to the user
+
+
+================================================================================
+FORM STATE VS STORED PERSON
+================================================================================
+
+formData:
+
+{
+  firstName:
+    ' John ',
+
+  age:
+    '35'
+}
+
+
+Stored person:
+
+{
+  id:
+    '...',
+
+  firstName:
+    'John',
+
+  age:
+    35
+}
+
+
+This is useful because:
+
+• Editing values may be strings
+
+• Submitted values may be normalized
+
+• Record data may use more suitable domain types
+
+
+================================================================================
+PART 7: TESTING FORM SUBMISSION
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] All fields render
+
+[ ] Labels are associated with fields
+
+[ ] Controlled fields update
+
+[ ] Submit handler executes
+
+[ ] Native submission is prevented
+
+[ ] Empty required values show errors
+
+[ ] Minimum name length works
+
+[ ] Email rule works
+
+[ ] Phone digit rule works
+
+[ ] Age range works
+
+[ ] Age is converted to a number after validation
+
+[ ] Invalid submission does not add a card
+
+[ ] Invalid submission preserves user values
+
+[ ] Valid submission adds one card
+
+[ ] Valid submission clears the form
+
+[ ] Valid submission clears errors
+
+[ ] Multiple people can be added
+
+[ ] People count updates
+
+[ ] Every person has a stable key
+
+[ ] Delete removes only the selected person
+
+[ ] Empty state returns after deleting all people
+
+[ ] Keyboard submission works
+
+[ ] Error messages are associated with controls
+
+[ ] Responsive layout works
+
+
+================================================================================
+SCENARIO 1: VALID SUBMISSION
+================================================================================
+
+INPUT:
+--------------------------------------------------------------------------------
+
+First Name:
+John
+
+
+Last Name:
+Smith
+
+
+Email:
+john@example.com
+
+
+Phone:
+9876543210
+
+
+Age:
+35
+
+
+EXPECTED:
+--------------------------------------------------------------------------------
+
+• No errors
+
+• New person object created
+
+• Age stored as number 35
+
+• Person card appears
+
+• People count increases
+
+• Form resets
+
+• Success message appears
+
+
+================================================================================
+SCENARIO 2: EMPTY FIRST NAME
+================================================================================
+
+INPUT:
+--------------------------------------------------------------------------------
+
+First Name:
+empty
+
+
+Other fields:
+valid
+
+
+EXPECTED:
+--------------------------------------------------------------------------------
+
+errors.firstName:
+
+'First name is required'
+
+
+AND:
+
+• No person card added
+
+• Other entered values remain
+
+• User can correct first name
+
+
+================================================================================
+SCENARIO 3: SHORT NAME
+================================================================================
+
+INPUT:
+
+First Name:
+J
+
+
+EXPECTED:
+
+'First name must contain at least 2 characters'
+
+
+The length check uses the trimmed value.
+
+
+================================================================================
+SCENARIO 4: INVALID EMAIL
+================================================================================
+
+INPUT:
+
+johnexample.com
+
+
+EXPECTED:
+
+'Enter a valid email address'
+
+
+No person card is created.
+
+
+================================================================================
+SCENARIO 5: INVALID PHONE
+================================================================================
+
+INPUT:
+
+12345
+
+
+phoneDigits:
+
+12345
+
+
+EXPECTED:
+
+'Phone must contain at least 10 digits'
+
+
+================================================================================
+SCENARIO 6: INVALID AGE
+================================================================================
+
+INPUT:
+
+17
+
+
+EXPECTED:
+
+'Age must be at least 18'
+
+
+Other examples:
+
+18:
+valid under lesson rule
+
+
+120:
+valid under lesson rule
+
+
+121:
+invalid
+
+
+================================================================================
+SCENARIO 7: MULTIPLE SUBMISSIONS
+================================================================================
+
+Submit:
+
+John Smith
+
+
+Then submit:
+
+Jane Brown
+
+
+Expected people array:
+
+[
+  Jane Brown,
+  John Smith
+]
+
+
+because new records are added to the beginning:
+
+[
+  newPerson,
+  ...previousPeople
+]
+
+
+================================================================================
+SCENARIO 8: DELETE PERSON
+================================================================================
+
+Before:
+
+[
+  Person A,
+  Person B,
+  Person C
+]
+
+
+Delete:
+
+Person B
+
+
+After:
+
+[
+  Person A,
+  Person C
+]
+
+
+The other records remain.
+
+
+================================================================================
+TESTING TABLE
+================================================================================
+
++-------------------------+---------------------------------------------+
+| SCENARIO                | EXPECTED                                    |
++-------------------------+---------------------------------------------+
+| Valid Submission        | Card added, form cleared                    |
+| Missing Required Field  | Error shown, no card                        |
+| Invalid Email           | Email error                                 |
+| Invalid Phone           | Phone error                                 |
+| Invalid Age             | Age error                                   |
+| Correct Field           | Old field error cleared/revalidated         |
+| Add Multiple People     | Multiple cards displayed                    |
+| Delete One Person       | Only matching card removed                  |
+| Reset Form              | Initial values restored                     |
+| No Page Navigation      | Custom React workflow continues             |
++-------------------------+---------------------------------------------+
+
+
+================================================================================
+AUTOMATED TEST EXAMPLE
+================================================================================
+
+Conceptual React Testing Library example:
+
+import {
+  render,
+  screen
+} from '@testing-library/react'
+
+import userEvent
+  from '@testing-library/user-event'
+
+import PersonFormWithCard
+  from './PersonFormWithCard'
+
+
+test(
+  'adds a person card after valid submission',
+
+  async () => {
+
+    const user =
+      userEvent.setup()
+
+
+    render(
+      <PersonFormWithCard />
+    )
+
+
+    await user.type(
+      screen.getByLabelText(
+        /first name/i
+      ),
+      'John'
+    )
+
+
+    await user.type(
+      screen.getByLabelText(
+        /last name/i
+      ),
+      'Smith'
+    )
+
+
+    await user.type(
+      screen.getByLabelText(
+        /email/i
+      ),
+      'john@example.com'
+    )
+
+
+    await user.type(
+      screen.getByLabelText(
+        /phone/i
+      ),
+      '9876543210'
+    )
+
+
+    await user.type(
+      screen.getByLabelText(
+        /age/i
+      ),
+      '35'
+    )
+
+
+    await user.click(
+      screen.getByRole(
+        'button',
+        {
+          name:
+            /register person/i
+        }
+      )
+    )
+
+
+    expect(
+      screen.getByText(
+        'John Smith'
+      )
+    ).toBeInTheDocument()
+  }
+)
+
+
+TESTING PRINCIPLE:
+--------------------------------------------------------------------------------
+
+Test from the user's perspective:
+
+Fill Form
+    ↓
+Submit
+    ↓
+Observe Error or Card
+
+
+Avoid depending too heavily on internal implementation details.
+
+
+================================================================================
+PART 8: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE LEARNED
+--------------------------------------------------------------------------------
+
+✓ Creating an onSubmit handler
+
+✓ Using preventDefault()
+
+✓ Validating multiple fields
+
+✓ Returning an errors object
+
+✓ Preventing invalid records
+
+✓ Displaying field-level errors
+
+✓ Clearing old errors
+
+✓ Trimming submitted strings
+
+✓ Converting age to a number
+
+✓ Creating a person record
+
+✓ Generating a stable ID
+
+✓ Adding records immutably
+
+✓ Rendering cards with map()
+
+✓ Creating a reusable PersonCard
+
+✓ Deleting records with filter()
+
+✓ Resetting controlled form state
+
+✓ Displaying success feedback
+
+✓ Distinguishing editable state from stored records
+
+✓ Understanding client-side vs server-side validation
+
+
+================================================================================
+CRITICAL SUBMISSION POINTS
+================================================================================
+
+1. PREVENT NATIVE SUBMISSION
+--------------------------------------------------------------------------------
+
+event.preventDefault()
+
+
+2. VALIDATE
+--------------------------------------------------------------------------------
+
+const validationErrors =
+  validatePersonForm(
+    formData
+  )
+
+
+3. STOP IF INVALID
+--------------------------------------------------------------------------------
+
+if (
+  Object.keys(
+    validationErrors
+  ).length > 0
+) {
+
+  setErrors(
+    validationErrors
+  )
+
+  return
+}
+
+
+4. NORMALIZE VALID DATA
+--------------------------------------------------------------------------------
+
+const newPerson = {
+
+  id:
+    crypto.randomUUID(),
+
+  firstName:
+    formData.firstName.trim(),
+
+  lastName:
+    formData.lastName.trim(),
+
+  email:
+    formData.email
+      .trim()
+      .toLowerCase(),
+
+  phone:
+    formData.phone.trim(),
+
+  age:
+    Number(formData.age)
+
+}
+
+
+5. ADD IMMUTABLY
+--------------------------------------------------------------------------------
+
+setPeople(previous => [
+
+  newPerson,
+
+  ...previous
+
+])
+
+
+6. RESET
+--------------------------------------------------------------------------------
+
+setFormData(
+  INITIAL_FORM
+)
+
+
+setErrors({})
+
+
+7. RENDER
+--------------------------------------------------------------------------------
+
+people.map(person => (
+
+  <PersonCard
+    key={person.id}
+    person={person}
+    onDelete={
+      handleDeletePerson
+    }
+  />
+
+))
+
+
+================================================================================
+FORM-TO-CARD PATTERN
+================================================================================
+
+FORM STATE
+    ↓
+SUBMIT
+    ↓
+VALIDATION
+    ↓
+NORMALIZATION
+    ↓
+PERSON OBJECT
+    ↓
+PEOPLE ARRAY
+    ↓
+map()
+    ↓
+PERSON CARDS
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++-------------------------+---------------------------------------------+
+| CONCEPT                 | REMEMBER                                    |
++-------------------------+---------------------------------------------+
+| formData                | Current editable values                     |
+| errors                  | Field validation messages                   |
+| people                  | Valid submitted records                     |
+| preventDefault          | Cancels native submit action                |
+| validatePersonForm      | Returns field-error object                  |
+| trim()                  | Removes surrounding whitespace              |
+| Number(age)             | Converts valid age string to number         |
+| crypto.randomUUID()     | Creates client-side record ID               |
+| Functional Setter       | Uses current previous array                 |
+| map()                   | Renders cards                               |
+| filter()                | Deletes matching record                     |
+| key                     | Stable list identity                        |
+| INITIAL_FORM            | Reusable default/reset values               |
+| PersonCard              | Displays one submitted record               |
++-------------------------+---------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - SUBMIT FLOW
+================================================================================
+
+handleSubmit(event)
+        ↓
+event.preventDefault()
+        ↓
+validatePersonForm(formData)
+        ↓
+Object.keys(errors).length
+        ↓
++-------------------------+
+|                         |
+Greater Than 0          Equal To 0
+|                         |
+↓                         ↓
+setErrors()             Create Person
+|                         |
+↓                         ↓
+Show Errors             setPeople()
+                          |
+                          ↓
+                       Reset Form
+                          |
+                          ↓
+                       Render Card
+
+
+================================================================================
+QUICK REVISION - ERROR FLOW
+================================================================================
+
+Invalid Field
+     ↓
+Validation Error
+     ↓
+errors.field
+     ↓
+input-error Class
+     ↓
+Error Message
+     ↓
+User Corrects Field
+     ↓
+Clear or Revalidate Error
+
+
+================================================================================
+QUICK REVISION - LIST FLOW
+================================================================================
+
+newPerson
+    ↓
+setPeople(previous => [
+  newPerson,
+  ...previous
+])
+    ↓
+New People Array
+    ↓
+people.map(...)
+    ↓
+Cards
+
+
+DELETE:
+
+Person ID
+    ↓
+filter()
+    ↓
+New People Array
+    ↓
+Card Removed
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+VALIDATE:
+
+formData
+   ↓
+validatePersonForm()
+   ↓
+errors
+
+
+INVALID:
+
+Errors Exist
+    ↓
+setErrors()
+    ↓
+Stop Submission Logic
+
+
+VALID:
+
+No Errors
+    ↓
+Normalize Data
+    ↓
+Create Record
+    ↓
+Add to Array
+
+
+DISPLAY:
+
+people
+  ↓
+map()
+  ↓
+PersonCard
+
+
+DELETE:
+
+person.id
+    ↓
+filter()
+    ↓
+Remaining People
+
+
+RESET:
+
+INITIAL_FORM
+     ↓
+setFormData()
+     ↓
+Empty Controlled Fields
+
+
+MOST IMPORTANT PATTERN:
+
+SUBMIT
+  ↓
+VALIDATE
+  ↓
+STOP IF INVALID
+  ↓
+NORMALIZE VALID DATA
+  ↓
+UPDATE STATE
+  ↓
+SHOW CARD
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Add edit/update functionality
+
+2. Detect duplicate email records
+
+3. Add loading/submitting state
+
+4. Submit records to an API
+
+5. Handle server validation errors
+
+6. Persist cards in a backend/database
+
+7. Add search and filtering
+
+8. Move form fields into reusable components
+
+9. Add focus management for the first invalid field
+
+10. Use useReducer when form/list transitions become complex
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The complete validated form-to-card workflow is:
+
+USER ENTERS DATA
+        ↓
+CONTROLLED FORM STATE
+        ↓
+onSubmit
+        ↓
+preventDefault()
+        ↓
+VALIDATION
+        ↓
++------------------------+
+|                        |
+INVALID                VALID
+|                        |
+SHOW ERRORS           CREATE RECORD
+                         |
+                         ↓
+                    UPDATE ARRAY
+                         |
+                         ↓
+                    CLEAR FORM
+                         |
+                         ↓
+                    RENDER CARD
+
+
+This pattern combines:
+
+FORM HANDLING
++
+VALIDATION
++
+IMMUTABLE STATE UPDATES
++
+DYNAMIC LIST RENDERING
++
+USER FEEDBACK
+
+
+================================================================================
+END OF LESSON 8
+HANDLE SUBMIT - ADD SIMPLE VALIDATION
+AND SHOW PERSON DATA IN CARDS
+================================================================================
