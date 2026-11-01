@@ -1,0 +1,3192 @@
+LESSON 5: ADDING FORM INPUT DATA INTO A STATE LIST
+AND SHOWING LIST ITEMS ON THE PAGE
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on capturing form input, adding the submitted data to
+an array in React state, and displaying that array on the page.
+
+You will understand:
+
+• Capturing form input
+
+• Handling form submission
+
+• Creating an item object
+
+• Adding items to a state array
+
+• Updating arrays immutably
+
+• Rendering dynamic lists with map()
+
+• Using stable keys
+
+• Clearing form inputs after successful submission
+
+• Displaying empty states
+
+• Adding, deleting, updating, and toggling list items
+
+• Calculating list statistics
+
+• Building Todo, Shopping List, and Notes applications
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+The form-to-list pattern appears in many applications:
+
+• Todo Lists
+
+• Shopping Lists
+
+• Notes
+
+• Comments
+
+• Tasks
+
+• Book Lists
+
+• Cart Items
+
+• Saved Searches
+
+• User-created Records
+
+
+It introduces several important React concepts:
+
+FORM STATE
+    ↓
+SUBMISSION
+    ↓
+ARRAY STATE
+    ↓
+IMMUTABLE UPDATE
+    ↓
+LIST RENDERING
+
+
+================================================================================
+PART 2: UNDERSTANDING FORM-TO-LIST
+================================================================================
+
+WHAT IS FORM-TO-LIST FUNCTIONALITY?
+--------------------------------------------------------------------------------
+
+Form-to-list functionality means:
+
+1. User enters data into a form
+
+2. React stores the current input
+
+3. User submits the form
+
+4. Application validates the input
+
+5. Application creates a new item
+
+6. New item is added to an array in state
+
+7. Form is cleared
+
+8. React renders the updated list
+
+
+================================================================================
+COMPLETE FLOW
+================================================================================
+
+User Types
+    ↓
+Controlled Input State
+    ↓
+Submit
+    ↓
+preventDefault()
+    ↓
+Validate
+    ↓
+Create Item Object
+    ↓
+setItems(...)
+    ↓
+Create New Array
+    ↓
+Clear Form
+    ↓
+React Renders
+    ↓
+items.map(...)
+    ↓
+Updated List Appears
+
+
+================================================================================
+WORKFLOW TABLE
+================================================================================
+
++------+--------------------------+--------------------------------------+
+| STEP | ACTION                   | RESULT                               |
++------+--------------------------+--------------------------------------+
+| 1    | Enter form data          | Input state changes                  |
+| 2    | Submit form              | onSubmit executes                    |
+| 3    | preventDefault()         | Native submission prevented          |
+| 4    | Validate                 | Invalid data rejected                |
+| 5    | Create object            | New list item created                |
+| 6    | Update array state       | New immutable array                  |
+| 7    | Clear form               | Inputs reset                         |
+| 8    | React renders            | Current state processed              |
+| 9    | map() array              | JSX produced for each item           |
+| 10   | Display                  | User sees updated list               |
++------+--------------------------+--------------------------------------+
+
+
+================================================================================
+IMPORTANT: STATE IS NOT PERMANENT STORAGE
+================================================================================
+
+React state keeps data while that component remains mounted in the current
+application session.
+
+It is NOT automatically persistent storage.
+
+Example:
+
+const [todos, setTodos] =
+  useState([])
+
+
+If the page/application reloads, this state normally starts again from:
+
+[]
+
+
+For persistence, the application would need another storage mechanism such as:
+
+• localStorage
+
+• IndexedDB
+
+• Backend/API
+
+• Database
+
+
+MEMORY:
+
+React State
+    =
+Current UI/Application Memory
+
+
+Database/localStorage
+    =
+Persistence Mechanism
+
+
+================================================================================
+PART 3: BUILDING A SIMPLE TODO APP
+================================================================================
+
+File:
+
+src/components/TodoApp.jsx
+
+
+import { useState } from 'react'
+import './TodoApp.css'
+
+
+export default function TodoApp() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [
+    inputValue,
+    setInputValue
+  ] = useState('')
+
+
+  const [todos, setTodos] =
+    useState([])
+
+
+  // ============================================
+  // INPUT CHANGE
+  // ============================================
+
+  const handleInputChange = (
+    event
+  ) => {
+
+    setInputValue(
+      event.target.value
+    )
+  }
+
+
+  // ============================================
+  // SUBMIT
+  // ============================================
+
+  const handleSubmit = (
+    event
+  ) => {
+
+    event.preventDefault()
+
+
+    const text =
+      inputValue.trim()
+
+
+    if (!text) {
+
+      alert(
+        'Please enter a todo item'
+      )
+
+      return
+    }
+
+
+    const newTodo = {
+
+      id:
+        crypto.randomUUID(),
+
+      text,
+
+      completed:
+        false,
+
+      createdAt:
+        new Date()
+
+    }
+
+
+    setTodos(previousTodos => [
+
+      ...previousTodos,
+
+      newTodo
+
+    ])
+
+
+    // Clear controlled input
+
+    setInputValue('')
+
+
+    console.log(
+      'Todo added:',
+      newTodo
+    )
+  }
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="todo-app-container">
+
+      <h1>
+        Todo App
+      </h1>
+
+
+      <p>
+        Add items to your todo list
+      </p>
+
+
+      {/* Form */}
+
+      <form
+        onSubmit={handleSubmit}
+        className="todo-form"
+      >
+
+        <div className="form-group">
+
+          <input
+            type="text"
+            value={inputValue}
+            onChange={
+              handleInputChange
+            }
+            placeholder="Enter a new todo..."
+            className="todo-input"
+            aria-label="New todo"
+          />
+
+
+          <button
+            type="submit"
+            className="btn-add"
+          >
+            Add Todo
+          </button>
+
+        </div>
+
+      </form>
+
+
+      {/* Count */}
+
+      <div className="todo-count">
+
+        <p>
+
+          Total todos:
+          {' '}
+
+          <strong>
+            {todos.length}
+          </strong>
+
+        </p>
+
+      </div>
+
+
+      {/* List */}
+
+      <div className="todo-list-section">
+
+        {todos.length === 0 ? (
+
+          <p className="empty-message">
+
+            No todos yet.
+            Add one to get started!
+
+          </p>
+
+        ) : (
+
+          <ul className="todo-list">
+
+            {todos.map(todo => (
+
+              <li
+                key={todo.id}
+                className="todo-item"
+              >
+
+                <span className="todo-text">
+
+                  {todo.text}
+
+                </span>
+
+
+                <span className="todo-time">
+
+                  {
+                    todo.createdAt
+                      .toLocaleTimeString()
+                  }
+
+                </span>
+
+              </li>
+
+            ))}
+
+          </ul>
+
+        )}
+
+      </div>
+
+
+      {/* Debug */}
+
+      <div className="debug-section">
+
+        <h3>
+          Current State:
+        </h3>
+
+        <pre>
+
+          {JSON.stringify(
+            todos,
+            null,
+            2
+          )}
+
+        </pre>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+================================================================================
+TODO STATE
+================================================================================
+
+INPUT STATE:
+--------------------------------------------------------------------------------
+
+inputValue
+
+Example:
+
+"Buy milk"
+
+
+LIST STATE:
+--------------------------------------------------------------------------------
+
+todos
+
+Example:
+
+[
+  {
+    id: '...',
+    text: 'Buy milk',
+    completed: false,
+    createdAt: Date
+  }
+]
+
+
+================================================================================
+ADDING TO AN ARRAY
+================================================================================
+
+DO NOT:
+--------------------------------------------------------------------------------
+
+todos.push(
+  newTodo
+)
+
+
+Instead create a new array:
+
+setTodos(previousTodos => [
+
+  ...previousTodos,
+
+  newTodo
+
+])
+
+
+Before:
+
+[
+  todo1,
+  todo2
+]
+
+
+After:
+
+[
+  todo1,
+  todo2,
+  newTodo
+]
+
+
+================================================================================
+WHY USE A FUNCTIONAL SETTER?
+================================================================================
+
+The new array depends on the existing array.
+
+Therefore:
+
+setTodos(previousTodos => [
+  ...previousTodos,
+  newTodo
+])
+
+
+is a strong update pattern.
+
+
+MEMORY:
+
+NEXT STATE DEPENDS ON PREVIOUS STATE
+            ↓
+USE FUNCTIONAL SETTER
+
+
+================================================================================
+WHY USE crypto.randomUUID()?
+================================================================================
+
+List items need stable identifiers.
+
+A generated UUID gives each newly created item its own identity.
+
+Example:
+
+{
+  id: crypto.randomUUID(),
+  text: 'Buy milk'
+}
+
+
+Then render:
+
+<li key={todo.id}>
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Date.now() is convenient for demos, but a timestamp is not a robust guarantee
+of uniqueness.
+
+In production applications, IDs often come from:
+
+• Backend/database identifiers
+
+• crypto.randomUUID()
+
+• Another intentional ID-generation strategy
+
+
+================================================================================
+TODO CODE SUMMARY
+================================================================================
+
++-----------------------------+-----------------------------------------+
+| CODE                        | PURPOSE                                 |
++-----------------------------+-----------------------------------------+
+| inputValue                  | Controlled input state                  |
+| todos                       | Array of todo objects                   |
+| handleInputChange           | Updates text input                     |
+| handleSubmit                | Validates and adds item                |
+| trim()                      | Removes surrounding whitespace         |
+| crypto.randomUUID()         | Creates client-side item ID            |
+| setTodos(prev => ...)       | Immutable array update                 |
+| setInputValue('')           | Clears form                            |
+| todos.length                | Number of todos                        |
+| todos.map(...)              | Renders list                           |
+| key={todo.id}               | Stable React item identity             |
++-----------------------------+-----------------------------------------+
+
+
+================================================================================
+PART 4: SHOPPING LIST WITH DELETE AND COMPLETE
+================================================================================
+
+This example adds:
+
+• Multiple form fields
+
+• Quantity
+
+• Purchased state
+
+• Toggle operation
+
+• Delete operation
+
+• Derived statistics
+
+
+================================================================================
+ShoppingListApp.jsx
+================================================================================
+
+import { useState } from 'react'
+import './ShoppingListApp.css'
+
+
+export default function ShoppingListApp() {
+
+  // ============================================
+  // FORM STATE
+  // ============================================
+
+  const [
+    itemName,
+    setItemName
+  ] = useState('')
+
+
+  const [
+    quantity,
+    setQuantity
+  ] = useState('1')
+
+
+  // ============================================
+  // LIST STATE
+  // ============================================
+
+  const [items, setItems] =
+    useState([])
+
+
+  // ============================================
+  // ADD
+  // ============================================
+
+  const handleSubmit = (
+    event
+  ) => {
+
+    event.preventDefault()
+
+
+    const name =
+      itemName.trim()
+
+
+    const numericQuantity =
+      Number(quantity)
+
+
+    if (!name) {
+
+      alert(
+        'Please enter an item name'
+      )
+
+      return
+    }
+
+
+    if (
+      !Number.isInteger(
+        numericQuantity
+      ) ||
+      numericQuantity < 1
+    ) {
+
+      alert(
+        'Quantity must be a positive whole number'
+      )
+
+      return
+    }
+
+
+    const newItem = {
+
+      id:
+        crypto.randomUUID(),
+
+      name,
+
+      quantity:
+        numericQuantity,
+
+      purchased:
+        false,
+
+      addedAt:
+        new Date()
+
+    }
+
+
+    setItems(previousItems => [
+
+      ...previousItems,
+
+      newItem
+
+    ])
+
+
+    setItemName('')
+
+    setQuantity('1')
+  }
+
+
+  // ============================================
+  // DELETE
+  // ============================================
+
+  const handleDelete = (
+    id
+  ) => {
+
+    setItems(previousItems =>
+
+      previousItems.filter(
+        item =>
+          item.id !== id
+      )
+
+    )
+  }
+
+
+  // ============================================
+  // TOGGLE PURCHASED
+  // ============================================
+
+  const handleTogglePurchased = (
+    id
+  ) => {
+
+    setItems(previousItems =>
+
+      previousItems.map(item =>
+
+        item.id === id
+          ? {
+              ...item,
+              purchased:
+                !item.purchased
+            }
+          : item
+
+      )
+
+    )
+  }
+
+
+  // ============================================
+  // DERIVED STATISTICS
+  // ============================================
+
+  const purchasedCount =
+    items.filter(
+      item =>
+        item.purchased
+    ).length
+
+
+  const remainingCount =
+    items.length -
+    purchasedCount
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="shopping-list-container">
+
+      <h1>
+        Shopping List
+      </h1>
+
+
+      {/* Form */}
+
+      <form
+        onSubmit={handleSubmit}
+        className="shopping-form"
+      >
+
+        <div className="form-group">
+
+          <input
+            type="text"
+            value={itemName}
+            onChange={(event) =>
+              setItemName(
+                event.target.value
+              )
+            }
+            placeholder="Item name"
+            className="form-input"
+            aria-label="Item name"
+          />
+
+
+          <input
+            type="number"
+            value={quantity}
+            onChange={(event) =>
+              setQuantity(
+                event.target.value
+              )
+            }
+            min="1"
+            step="1"
+            className="form-input quantity-input"
+            aria-label="Quantity"
+          />
+
+
+          <button
+            type="submit"
+            className="btn-add"
+          >
+            Add Item
+          </button>
+
+        </div>
+
+      </form>
+
+
+      {/* Statistics */}
+
+      <div className="stats">
+
+        <p>
+          Total:
+          {' '}
+          <strong>
+            {items.length}
+          </strong>
+        </p>
+
+
+        <p>
+          Purchased:
+          {' '}
+          <strong>
+            {purchasedCount}
+          </strong>
+        </p>
+
+
+        <p>
+          Remaining:
+          {' '}
+          <strong>
+            {remainingCount}
+          </strong>
+        </p>
+
+      </div>
+
+
+      {/* List */}
+
+      <div className="shopping-list-section">
+
+        {items.length === 0 ? (
+
+          <p className="empty-message">
+
+            Your shopping list is empty.
+
+          </p>
+
+        ) : (
+
+          <ul className="shopping-list">
+
+            {items.map(item => (
+
+              <li
+                key={item.id}
+                className={
+                  `shopping-item ${
+                    item.purchased
+                      ? 'purchased'
+                      : ''
+                  }`
+                }
+              >
+
+                <div className="item-content">
+
+                  <input
+                    type="checkbox"
+                    checked={
+                      item.purchased
+                    }
+                    onChange={() =>
+                      handleTogglePurchased(
+                        item.id
+                      )
+                    }
+                    aria-label={
+                      `Mark ${item.name} as ${
+                        item.purchased
+                          ? 'not purchased'
+                          : 'purchased'
+                      }`
+                    }
+                  />
+
+
+                  <span className="item-name">
+
+                    {item.name}
+
+                  </span>
+
+
+                  <span className="item-quantity">
+
+                    ×{item.quantity}
+
+                  </span>
+
+                </div>
+
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleDelete(
+                      item.id
+                    )
+                  }
+                  className="btn-delete"
+                >
+                  Delete
+                </button>
+
+              </li>
+
+            ))}
+
+          </ul>
+
+        )}
+
+      </div>
+
+    </div>
+  )
+}
+
+
+================================================================================
+ARRAY OPERATIONS
+================================================================================
+
+ADD:
+--------------------------------------------------------------------------------
+
+setItems(previous => [
+
+  ...previous,
+
+  newItem
+
+])
+
+
+DELETE:
+--------------------------------------------------------------------------------
+
+setItems(previous =>
+
+  previous.filter(
+    item =>
+      item.id !== id
+  )
+
+)
+
+
+UPDATE / TOGGLE:
+--------------------------------------------------------------------------------
+
+setItems(previous =>
+
+  previous.map(item =>
+
+    item.id === id
+      ? {
+          ...item,
+          purchased:
+            !item.purchased
+        }
+      : item
+
+  )
+
+)
+
+
+MEMORY:
+--------------------------------------------------------------------------------
+
+ADD
+ ↓
+Spread
+
+
+DELETE
+ ↓
+filter()
+
+
+UPDATE
+ ↓
+map()
+
+
+================================================================================
+PART 5: NOTES APP - ADD, EDIT, DELETE
+================================================================================
+
+This example demonstrates basic CRUD-like client-side list operations:
+
+CREATE
+READ
+UPDATE
+DELETE
+
+
+================================================================================
+NotesApp.jsx
+================================================================================
+
+import { useState } from 'react'
+import './NotesApp.css'
+
+
+export default function NotesApp() {
+
+  // ============================================
+  // FORM STATE
+  // ============================================
+
+  const [
+    noteTitle,
+    setNoteTitle
+  ] = useState('')
+
+
+  const [
+    noteContent,
+    setNoteContent
+  ] = useState('')
+
+
+  // ============================================
+  // LIST STATE
+  // ============================================
+
+  const [notes, setNotes] =
+    useState([])
+
+
+  // ============================================
+  // EDIT STATE
+  // ============================================
+
+  const [
+    editingId,
+    setEditingId
+  ] = useState(null)
+
+
+  // ============================================
+  // SUBMIT
+  // ============================================
+
+  const handleSubmit = (
+    event
+  ) => {
+
+    event.preventDefault()
+
+
+    const title =
+      noteTitle.trim()
+
+
+    const content =
+      noteContent.trim()
+
+
+    if (
+      !title ||
+      !content
+    ) {
+
+      alert(
+        'Please fill in both title and content'
+      )
+
+      return
+    }
+
+
+    if (editingId !== null) {
+
+      // UPDATE
+
+      setNotes(previousNotes =>
+
+        previousNotes.map(note =>
+
+          note.id === editingId
+            ? {
+                ...note,
+                title,
+                content,
+                updatedAt:
+                  new Date()
+              }
+            : note
+
+        )
+
+      )
+
+
+      setEditingId(null)
+
+    } else {
+
+      // CREATE
+
+      const now =
+        new Date()
+
+
+      const newNote = {
+
+        id:
+          crypto.randomUUID(),
+
+        title,
+
+        content,
+
+        createdAt:
+          now,
+
+        updatedAt:
+          now
+
+      }
+
+
+      setNotes(previousNotes => [
+
+        newNote,
+
+        ...previousNotes
+
+      ])
+    }
+
+
+    clearForm()
+  }
+
+
+  // ============================================
+  // DELETE
+  // ============================================
+
+  const handleDelete = (
+    id
+  ) => {
+
+    setNotes(previousNotes =>
+
+      previousNotes.filter(
+        note =>
+          note.id !== id
+      )
+
+    )
+
+
+    // If deleting note currently being edited,
+    // leave edit mode as well.
+
+    if (editingId === id) {
+
+      clearForm()
+
+      setEditingId(null)
+    }
+  }
+
+
+  // ============================================
+  // EDIT
+  // ============================================
+
+  const handleEdit = (
+    note
+  ) => {
+
+    setNoteTitle(
+      note.title
+    )
+
+    setNoteContent(
+      note.content
+    )
+
+    setEditingId(
+      note.id
+    )
+  }
+
+
+  // ============================================
+  // CANCEL
+  // ============================================
+
+  const handleCancelEdit = () => {
+
+    clearForm()
+
+    setEditingId(null)
+  }
+
+
+  // ============================================
+  // HELPER
+  // ============================================
+
+  function clearForm() {
+
+    setNoteTitle('')
+
+    setNoteContent('')
+  }
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="notes-app-container">
+
+      <h1>
+        Notes App
+      </h1>
+
+
+      {/* Form */}
+
+      <form
+        onSubmit={handleSubmit}
+        className="notes-form"
+      >
+
+        <div className="form-group">
+
+          <label htmlFor="note-title">
+            Title
+          </label>
+
+          <input
+            id="note-title"
+            type="text"
+            value={noteTitle}
+            onChange={(event) =>
+              setNoteTitle(
+                event.target.value
+              )
+            }
+            placeholder="Note title"
+            className="form-input"
+          />
+
+        </div>
+
+
+        <div className="form-group">
+
+          <label htmlFor="note-content">
+            Content
+          </label>
+
+          <textarea
+            id="note-content"
+            value={noteContent}
+            onChange={(event) =>
+              setNoteContent(
+                event.target.value
+              )
+            }
+            placeholder="Note content"
+            rows={4}
+            className="form-textarea"
+          />
+
+        </div>
+
+
+        <div className="button-group">
+
+          <button
+            type="submit"
+            className="btn-submit"
+          >
+
+            {editingId !== null
+              ? 'Update Note'
+              : 'Add Note'}
+
+          </button>
+
+
+          {editingId !== null && (
+
+            <button
+              type="button"
+              onClick={
+                handleCancelEdit
+              }
+              className="btn-cancel"
+            >
+              Cancel
+            </button>
+
+          )}
+
+        </div>
+
+      </form>
+
+
+      {/* Count */}
+
+      <div className="notes-count">
+
+        <p>
+
+          Total notes:
+          {' '}
+
+          <strong>
+            {notes.length}
+          </strong>
+
+        </p>
+
+      </div>
+
+
+      {/* Notes */}
+
+      <div className="notes-list-section">
+
+        {notes.length === 0 ? (
+
+          <p className="empty-message">
+
+            No notes yet.
+            Create one to get started!
+
+          </p>
+
+        ) : (
+
+          <div className="notes-grid">
+
+            {notes.map(note => (
+
+              <article
+                key={note.id}
+                className="note-card"
+              >
+
+                <h3 className="note-title">
+
+                  {note.title}
+
+                </h3>
+
+
+                <p className="note-content">
+
+                  {note.content}
+
+                </p>
+
+
+                <p className="note-date">
+
+                  Created:
+                  {' '}
+
+                  {
+                    note.createdAt
+                      .toLocaleDateString()
+                  }
+
+                </p>
+
+
+                <div className="note-actions">
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleEdit(note)
+                    }
+                    className="btn-edit"
+                  >
+                    Edit
+                  </button>
+
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleDelete(
+                        note.id
+                      )
+                    }
+                    className="btn-delete"
+                  >
+                    Delete
+                  </button>
+
+                </div>
+
+              </article>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </div>
+
+    </div>
+  )
+}
+
+
+================================================================================
+IMPORTANT EDITING CHECK
+================================================================================
+
+Avoid relying on:
+
+if (editingId)
+
+
+because IDs could theoretically contain a falsy value such as:
+
+0
+
+
+Prefer:
+
+if (editingId !== null)
+
+
+This clearly expresses:
+
+null
+=
+not editing
+
+
+anything else
+=
+editing that item
+
+
+================================================================================
+CRUD MAPPING
+================================================================================
+
++----------------------+-----------------------------------------------+
+| OPERATION            | REACT ARRAY PATTERN                           |
++----------------------+-----------------------------------------------+
+| Create               | [...previous, newItem]                        |
+| Read                 | map() / render                                |
+| Update               | map() + object spread                         |
+| Delete               | filter()                                      |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+PART 6: FORM-TO-LIST PATTERNS
+================================================================================
+
+PATTERN 1: SIMPLE ADD
+================================================================================
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+
+  const newItem = {
+
+    id:
+      crypto.randomUUID(),
+
+    text:
+      inputValue
+
+  }
+
+
+  setItems(previous => [
+
+    ...previous,
+
+    newItem
+
+  ])
+
+
+  setInputValue('')
+}
+
+
+================================================================================
+PATTERN 2: ADD WITH VALIDATION
+================================================================================
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+
+  const text =
+    inputValue.trim()
+
+
+  if (!text) {
+
+    return
+  }
+
+
+  const newItem = {
+
+    id:
+      crypto.randomUUID(),
+
+    text
+
+  }
+
+
+  setItems(previous => [
+
+    ...previous,
+
+    newItem
+
+  ])
+
+
+  setInputValue('')
+}
+
+
+================================================================================
+PATTERN 3: ADD WITH TIMESTAMP
+================================================================================
+
+const newItem = {
+
+  id:
+    crypto.randomUUID(),
+
+  text:
+    inputValue.trim(),
+
+  createdAt:
+    new Date()
+
+}
+
+
+================================================================================
+PATTERN 4: MULTIPLE FIELDS
+================================================================================
+
+const newItem = {
+
+  id:
+    crypto.randomUUID(),
+
+  name:
+    itemName.trim(),
+
+  quantity:
+    Number(quantity),
+
+  price:
+    Number(price)
+
+}
+
+
+================================================================================
+PATTERN 5: DELETE
+================================================================================
+
+const handleDelete = (
+  id
+) => {
+
+  setItems(previousItems =>
+
+    previousItems.filter(
+      item =>
+        item.id !== id
+    )
+
+  )
+}
+
+
+================================================================================
+PATTERN 6: EDIT / UPDATE
+================================================================================
+
+const handleUpdate = (
+  id,
+  text
+) => {
+
+  setItems(previousItems =>
+
+    previousItems.map(item =>
+
+      item.id === id
+        ? {
+            ...item,
+            text
+          }
+        : item
+
+    )
+
+  )
+}
+
+
+================================================================================
+PATTERN 7: TOGGLE STATUS
+================================================================================
+
+const handleToggle = (
+  id
+) => {
+
+  setItems(previousItems =>
+
+    previousItems.map(item =>
+
+      item.id === id
+        ? {
+            ...item,
+            completed:
+              !item.completed
+          }
+        : item
+
+    )
+
+  )
+}
+
+
+================================================================================
+PATTERNS TABLE
+================================================================================
+
++-----------------------+----------------------------------------------+
+| PATTERN               | USE CASE                                     |
++-----------------------+----------------------------------------------+
+| Add                   | Insert new item                              |
+| Add + Validation      | Reject invalid input                         |
+| Add + Timestamp       | Record item creation time                    |
+| Multiple Fields       | Create richer objects                        |
+| Delete                | Remove item                                  |
+| Edit                  | Modify existing item                         |
+| Toggle                | Change boolean status                        |
+| Sort                  | Change presentation/order                    |
+| Filter                | Show matching subset                         |
+| Search                | Find matching items                          |
++-----------------------+----------------------------------------------+
+
+
+================================================================================
+PART 7: STYLING FORM-TO-LIST APPS
+================================================================================
+
+File:
+
+src/components/TodoApp.css
+
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+
+.todo-app-container {
+  max-width: 600px;
+
+  margin: 0 auto;
+
+  padding: 30px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #667eea 0%,
+      #764ba2 100%
+    );
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 10px 30px
+    rgba(0, 0, 0, 0.2);
+}
+
+
+.todo-app-container h1 {
+  color: white;
+
+  text-align: center;
+
+  margin-bottom: 10px;
+}
+
+
+.todo-app-container > p {
+  color:
+    rgba(255, 255, 255, 0.9);
+
+  text-align: center;
+
+  margin-bottom: 30px;
+}
+
+
+/* ============================================
+   FORM
+   ============================================ */
+
+.todo-form {
+  background: white;
+
+  padding: 20px;
+
+  border-radius: 8px;
+
+  margin-bottom: 20px;
+}
+
+
+.form-group {
+  display: flex;
+
+  gap: 10px;
+}
+
+
+.todo-input {
+  flex: 1;
+
+  padding:
+    12px 15px;
+
+  border:
+    2px solid #ddd;
+
+  border-radius: 6px;
+
+  font-size: 1rem;
+
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+
+.todo-input:focus {
+  outline: none;
+
+  border-color:
+    #667eea;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(102, 126, 234, 0.15);
+}
+
+
+.btn-add {
+  padding:
+    12px 20px;
+
+  background:
+    #667eea;
+
+  color: white;
+
+  border: none;
+
+  border-radius: 6px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+
+.btn-add:hover {
+  background:
+    #5568d3;
+}
+
+
+/* ============================================
+   COUNT
+   ============================================ */
+
+.todo-count {
+  background:
+    rgba(255, 255, 255, 0.2);
+
+  color: white;
+
+  padding: 15px;
+
+  border-radius: 6px;
+
+  text-align: center;
+
+  margin-bottom: 20px;
+}
+
+
+/* ============================================
+   LIST
+   ============================================ */
+
+.todo-list-section {
+  background: white;
+
+  border-radius: 8px;
+
+  padding: 20px;
+}
+
+
+.empty-message {
+  text-align: center;
+
+  color: #666;
+
+  padding:
+    40px 20px;
+
+  font-size: 1.1rem;
+}
+
+
+.todo-list {
+  list-style: none;
+
+  padding: 0;
+
+  margin: 0;
+}
+
+
+.todo-item {
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 15px;
+
+  border-bottom:
+    1px solid #eee;
+
+  animation:
+    slideIn
+    0.3s
+    ease;
+}
+
+
+.todo-item:last-child {
+  border-bottom: none;
+}
+
+
+.todo-text {
+  flex: 1;
+
+  color: #333;
+
+  font-weight: 500;
+
+  overflow-wrap: anywhere;
+}
+
+
+.todo-time {
+  color: #666;
+
+  font-size: 0.85rem;
+}
+
+
+/* ============================================
+   DEBUG
+   ============================================ */
+
+.debug-section {
+  background:
+    #f5f5f5;
+
+  padding: 20px;
+
+  border-radius: 8px;
+
+  margin-top: 20px;
+}
+
+
+.debug-section pre {
+  background:
+    #2d2d2d;
+
+  color:
+    #f8f8f2;
+
+  padding: 15px;
+
+  border-radius: 4px;
+
+  overflow-x: auto;
+
+  font-size: 0.85rem;
+}
+
+
+/* ============================================
+   ANIMATION
+   ============================================ */
+
+@keyframes slideIn {
+
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(-10px);
+  }
+
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0);
+  }
+
+}
+
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+
+  .todo-app-container {
+    padding: 20px;
+  }
+
+
+  .form-group {
+    flex-direction: column;
+  }
+
+
+  .btn-add {
+    width: 100%;
+  }
+
+}
+
+
+================================================================================
+CSS SUMMARY
+================================================================================
+
++-------------------------+--------------------------------------------+
+| CLASS                   | PURPOSE                                    |
++-------------------------+--------------------------------------------+
+| .todo-app-container     | Main application container                 |
+| .todo-form              | Add-item form                              |
+| .todo-input             | Controlled text input                      |
+| .btn-add                | Submit button                              |
+| .todo-count             | List count display                        |
+| .todo-list-section      | List wrapper                               |
+| .empty-message          | Empty state                                |
+| .todo-list              | List container                             |
+| .todo-item              | Individual item                            |
+| .todo-text              | Todo content                               |
+| .todo-time              | Creation time                              |
+| .debug-section          | State debugging                            |
+| slideIn                 | New-item animation                         |
++-------------------------+--------------------------------------------+
+
+
+================================================================================
+PART 8: TESTING FORM-TO-LIST FUNCTIONALITY
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Form renders
+
+[ ] Input accepts text
+
+[ ] Submit handler runs
+
+[ ] Native submission is prevented
+
+[ ] Blank input is rejected
+
+[ ] Valid item appears
+
+[ ] Input clears after successful add
+
+[ ] Existing items remain
+
+[ ] Multiple items can be added
+
+[ ] Empty state displays correctly
+
+[ ] Count reflects array length
+
+[ ] Every rendered item uses a stable key
+
+[ ] Delete removes correct item
+
+[ ] Toggle updates correct item
+
+[ ] Edit updates correct item
+
+[ ] Derived statistics remain correct
+
+[ ] Layout remains usable on small screen
+
+
+================================================================================
+SCENARIO 1: ADD ONE ITEM
+================================================================================
+
+INPUT:
+
+Buy milk
+
+
+ACTION:
+
+Add Todo
+
+
+EXPECTED:
+--------------------------------------------------------------------------------
+
+todos:
+
+[
+  {
+    id: "...",
+    text: "Buy milk",
+    completed: false,
+    createdAt: ...
+  }
+]
+
+
+UI:
+
+• Buy milk appears
+
+• Total = 1
+
+• Input becomes empty
+
+
+================================================================================
+SCENARIO 2: ADD MULTIPLE ITEMS
+================================================================================
+
+Add:
+
+Buy milk
+
+Buy bread
+
+Buy eggs
+
+
+EXPECTED:
+--------------------------------------------------------------------------------
+
+todos.length
+
+=
+3
+
+
+All three items render.
+
+
+================================================================================
+SCENARIO 3: EMPTY INPUT
+================================================================================
+
+Input:
+
+"   "
+
+
+After:
+
+trim()
+
+
+Result:
+
+""
+
+
+Expected:
+
+• New item is NOT created
+
+• Existing list remains unchanged
+
+• User receives validation feedback
+
+
+================================================================================
+SCENARIO 4: DELETE
+================================================================================
+
+Before:
+
+[
+  Milk,
+  Bread,
+  Eggs
+]
+
+
+Delete Bread
+
+
+filter():
+
+item.id !== breadId
+
+
+After:
+
+[
+  Milk,
+  Eggs
+]
+
+
+================================================================================
+SCENARIO 5: TOGGLE STATUS
+================================================================================
+
+Before:
+
+{
+  text:
+    'Buy milk',
+
+  completed:
+    false
+}
+
+
+Toggle
+
+
+After:
+
+{
+  text:
+    'Buy milk',
+
+  completed:
+    true
+}
+
+
+================================================================================
+TESTING TABLE
+================================================================================
+
++----------------------+-----------------------------------------------+
+| SCENARIO             | EXPECTED                                      |
++----------------------+-----------------------------------------------+
+| Add Item             | Item appears                                  |
+| Add Multiple         | All previous items retained                   |
+| Empty Input          | Rejected                                      |
+| Clear Form           | Input resets after valid add                  |
+| Delete               | Matching item removed                         |
+| Toggle               | Matching status changes                       |
+| Edit                 | Matching data updates                         |
+| Count                | Matches array length                          |
+| Empty State          | Appears when array empty                      |
+| Stable Keys          | Item IDs used                                 |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+PART 9: ADVANCED FORM-TO-LIST FEATURES
+================================================================================
+
+FEATURE 1: SORTING
+================================================================================
+
+If you only need a sorted VIEW, you often don't need to mutate/rewrite the
+original items array.
+
+
+Example:
+
+const sortedItems = [
+
+  ...items
+
+].sort((a, b) =>
+
+  a.name.localeCompare(
+    b.name
+  )
+
+)
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Array.prototype.sort() mutates the array it is called on.
+
+Therefore don't do:
+
+items.sort(...)
+
+
+on React state directly.
+
+Copy first:
+
+[...items].sort(...)
+
+
+================================================================================
+FEATURE 2: FILTERING
+================================================================================
+
+Suppose:
+
+const [filter, setFilter] =
+  useState('all')
+
+
+Derive what should be displayed:
+
+const visibleItems =
+  filter === 'all'
+    ? items
+    : items.filter(
+        item =>
+          item.category ===
+          filter
+      )
+
+
+You usually do NOT need a separate:
+
+filteredItems
+
+state if it can be calculated from:
+
+items + filter
+
+
+================================================================================
+FEATURE 3: SEARCH
+================================================================================
+
+const [query, setQuery] =
+  useState('')
+
+
+const visibleItems =
+  items.filter(item =>
+
+    item.text
+      .toLowerCase()
+      .includes(
+        query
+          .trim()
+          .toLowerCase()
+      )
+
+  )
+
+
+Again:
+
+SEARCH RESULTS ARE DERIVED DATA.
+
+
+Store:
+
+items
++
+query
+
+
+Derive:
+
+visibleItems
+
+
+================================================================================
+FEATURE 4: BULK DELETE
+================================================================================
+
+const handleDeleteAll = () => {
+
+  setItems([])
+}
+
+
+A production application may add an intentional confirmation UI before a
+destructive bulk action.
+
+
+================================================================================
+FEATURE 5: SELECT ALL
+================================================================================
+
+const handleSelectAll = () => {
+
+  setItems(previousItems =>
+
+    previousItems.map(item => ({
+
+      ...item,
+
+      selected:
+        true
+
+    }))
+
+  )
+}
+
+
+================================================================================
+FEATURE 6: LOCAL STORAGE
+================================================================================
+
+An important challenge with persisted items is:
+
+Date objects do not remain Date objects after JSON serialization.
+
+
+Example before saving:
+
+createdAt:
+new Date()
+
+
+After:
+
+JSON.stringify(...)
+
+and:
+
+JSON.parse(...)
+
+
+createdAt becomes a string.
+
+
+Therefore this can fail after reloading persisted data:
+
+item.createdAt
+  .toLocaleTimeString()
+
+
+because the parsed value is no longer a Date object.
+
+
+ONE APPROACH:
+--------------------------------------------------------------------------------
+
+Store an ISO string intentionally:
+
+createdAt:
+new Date().toISOString()
+
+
+When displaying:
+
+new Date(
+  item.createdAt
+).toLocaleTimeString()
+
+
+================================================================================
+LOCAL STORAGE - SAFER INITIALIZATION PATTERN
+================================================================================
+
+const [items, setItems] =
+  useState(() => {
+
+    const saved =
+      localStorage.getItem(
+        'items'
+      )
+
+
+    if (!saved) {
+
+      return []
+    }
+
+
+    try {
+
+      return JSON.parse(saved)
+
+    } catch {
+
+      return []
+    }
+  })
+
+
+useEffect(() => {
+
+  localStorage.setItem(
+    'items',
+    JSON.stringify(items)
+  )
+
+}, [items])
+
+
+================================================================================
+IMPORTANT LOCAL STORAGE NOTE
+================================================================================
+
+This keeps data in the user's browser.
+
+It is not equivalent to:
+
+• Backend persistence
+
+• Multi-device synchronization
+
+• Shared application storage
+
+• A database
+
+
+================================================================================
+FEATURE 7: EXPORT
+================================================================================
+
+A client-side JSON export conceptually involves:
+
+items
+  ↓
+JSON.stringify()
+  ↓
+Blob
+  ↓
+Temporary Object URL
+  ↓
+Download
+
+
+If an object URL is created:
+
+const url =
+  URL.createObjectURL(blob)
+
+
+clean it up afterward:
+
+URL.revokeObjectURL(url)
+
+
+This avoids leaving unnecessary temporary object URLs allocated.
+
+
+================================================================================
+ADVANCED FEATURES TABLE
+================================================================================
+
++----------------------+-----------------------------------------------+
+| FEATURE              | PURPOSE                                       |
++----------------------+-----------------------------------------------+
+| Sorting              | Display items in desired order                |
+| Filtering            | Display matching category/status              |
+| Search               | Display text matches                          |
+| Bulk Operations      | Change many items                             |
+| Export               | Produce downloadable representation          |
+| localStorage         | Browser-local persistence                     |
+| Undo/Redo            | Navigate state history                        |
+| Drag and Drop        | Reorder list                                  |
+| Categories           | Organize items                                |
+| Tags                 | Attach labels/metadata                        |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+PART 10: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE LEARNED
+--------------------------------------------------------------------------------
+
+✓ Capturing form input
+
+✓ Handling form submission
+
+✓ Using preventDefault()
+
+✓ Validating input
+
+✓ Creating an item object
+
+✓ Generating a stable item ID
+
+✓ Adding to an array immutably
+
+✓ Using functional array state updates
+
+✓ Clearing the form
+
+✓ Rendering lists with map()
+
+✓ Using key correctly
+
+✓ Displaying empty states
+
+✓ Calculating list counts
+
+✓ Deleting with filter()
+
+✓ Updating with map()
+
+✓ Toggling boolean properties
+
+✓ Editing existing items
+
+✓ Building simple CRUD-style interfaces
+
+✓ Deriving filter/search results
+
+✓ Avoiding direct sort mutation
+
+✓ Understanding persistence vs React state
+
+
+================================================================================
+CRITICAL FORM-TO-LIST POINTS
+================================================================================
+
+1. FORM STATE
+--------------------------------------------------------------------------------
+
+const [inputValue, setInputValue] =
+  useState('')
+
+
+2. LIST STATE
+--------------------------------------------------------------------------------
+
+const [items, setItems] =
+  useState([])
+
+
+3. SUBMIT
+--------------------------------------------------------------------------------
+
+event.preventDefault()
+
+
+4. VALIDATE
+--------------------------------------------------------------------------------
+
+const text =
+  inputValue.trim()
+
+
+if (!text) {
+
+  return
+}
+
+
+5. CREATE ITEM
+--------------------------------------------------------------------------------
+
+const newItem = {
+
+  id:
+    crypto.randomUUID(),
+
+  text
+
+}
+
+
+6. ADD IMMUTABLY
+--------------------------------------------------------------------------------
+
+setItems(previous => [
+
+  ...previous,
+
+  newItem
+
+])
+
+
+7. CLEAR FORM
+--------------------------------------------------------------------------------
+
+setInputValue('')
+
+
+8. RENDER
+--------------------------------------------------------------------------------
+
+items.map(item => (
+
+  <li key={item.id}>
+
+    {item.text}
+
+  </li>
+
+))
+
+
+================================================================================
+ARRAY UPDATE CHEAT SHEET
+================================================================================
+
+ADD:
+--------------------------------------------------------------------------------
+
+setItems(previous => [
+
+  ...previous,
+
+  newItem
+
+])
+
+
+DELETE:
+--------------------------------------------------------------------------------
+
+setItems(previous =>
+
+  previous.filter(
+    item =>
+      item.id !== id
+  )
+
+)
+
+
+UPDATE:
+--------------------------------------------------------------------------------
+
+setItems(previous =>
+
+  previous.map(item =>
+
+    item.id === id
+      ? {
+          ...item,
+          property:
+            newValue
+        }
+      : item
+
+  )
+
+)
+
+
+TOGGLE:
+--------------------------------------------------------------------------------
+
+setItems(previous =>
+
+  previous.map(item =>
+
+    item.id === id
+      ? {
+          ...item,
+          completed:
+            !item.completed
+        }
+      : item
+
+  )
+
+)
+
+
+CLEAR:
+--------------------------------------------------------------------------------
+
+setItems([])
+
+
+================================================================================
+FORM-TO-LIST COMPLETE PATTERN
+================================================================================
+
+const [
+  inputValue,
+  setInputValue
+] = useState('')
+
+
+const [items, setItems] =
+  useState([])
+
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+
+  const text =
+    inputValue.trim()
+
+
+  if (!text) {
+
+    return
+  }
+
+
+  const newItem = {
+
+    id:
+      crypto.randomUUID(),
+
+    text
+
+  }
+
+
+  setItems(previousItems => [
+
+    ...previousItems,
+
+    newItem
+
+  ])
+
+
+  setInputValue('')
+}
+
+
+return (
+  <>
+
+    <form onSubmit={handleSubmit}>
+
+      <input
+        value={inputValue}
+        onChange={(event) =>
+          setInputValue(
+            event.target.value
+          )
+        }
+      />
+
+
+      <button type="submit">
+
+        Add
+
+      </button>
+
+    </form>
+
+
+    {items.length === 0 ? (
+
+      <p>
+        No items yet
+      </p>
+
+    ) : (
+
+      <ul>
+
+        {items.map(item => (
+
+          <li key={item.id}>
+
+            {item.text}
+
+          </li>
+
+        ))}
+
+      </ul>
+
+    )}
+
+  </>
+)
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++------------------------+----------------------------------------------+
+| CONCEPT                | REMEMBER                                     |
++------------------------+----------------------------------------------+
+| Form State             | Current user input                           |
+| List State             | Array of submitted records                   |
+| preventDefault         | Stops native submit action                   |
+| trim()                 | Removes surrounding whitespace              |
+| New Item               | Object created from validated input          |
+| crypto.randomUUID()    | Client-side ID option                        |
+| Functional Setter      | Uses latest previous array                   |
+| Spread                 | Add/copy array/object immutably              |
+| map()                  | Render/update list items                     |
+| filter()               | Remove/filter items                         |
+| key                    | Stable identity for rendered item            |
+| Empty State            | UI when array has zero items                 |
+| Derived State          | Calculate rather than duplicate              |
+| localStorage           | Browser-local persistence                    |
++------------------------+----------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - FORM TO LIST
+================================================================================
+
+FORM:
+--------------------------------------------------------------------------------
+
+User Input
+    ↓
+Controlled State
+
+
+SUBMIT:
+--------------------------------------------------------------------------------
+
+Submit
+  ↓
+preventDefault()
+  ↓
+Validation
+
+
+CREATE:
+--------------------------------------------------------------------------------
+
+Input Data
+   ↓
+Item Object
+   ↓
+Stable ID
+
+
+UPDATE:
+--------------------------------------------------------------------------------
+
+Previous Array
+     ↓
+New Array
+     ↓
+setItems()
+
+
+RENDER:
+--------------------------------------------------------------------------------
+
+items
+  ↓
+map()
+  ↓
+JSX Items
+  ↓
+Page
+
+
+================================================================================
+QUICK REVISION - CRUD
+================================================================================
+
+CREATE:
+
+Add Object
+   ↓
+Spread
+
+
+READ:
+
+items
+ ↓
+map()
+
+
+UPDATE:
+
+items
+ ↓
+map()
+ ↓
+Replace Matching Item
+
+
+DELETE:
+
+items
+ ↓
+filter()
+ ↓
+Remove Matching Item
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+ADD:
+
+Form
+ ↓
+Validate
+ ↓
+Create Object
+ ↓
+setItems(prev => [
+  ...prev,
+  newItem
+])
+
+
+DELETE:
+
+setItems(prev =>
+  prev.filter(...)
+)
+
+
+UPDATE:
+
+setItems(prev =>
+  prev.map(...)
+)
+
+
+DISPLAY:
+
+items.map(
+  item => JSX
+)
+
+
+EMPTY STATE:
+
+items.length === 0
+      ↓
+Show Empty Message
+
+
+SEARCH:
+
+items + query
+     ↓
+filter()
+     ↓
+visibleItems
+
+
+PERSISTENCE:
+
+React State
+    ↓
+Current Application State
+
+
+localStorage / API / Database
+    ↓
+Persistence
+
+
+MOST IMPORTANT PATTERN:
+
+FORM INPUT
+    ↓
+VALIDATE
+    ↓
+CREATE ITEM
+    ↓
+IMMUTABLY UPDATE ARRAY STATE
+    ↓
+RENDER WITH map()
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Build a complete Todo application
+
+2. Add completion/toggle functionality
+
+3. Add delete operations
+
+4. Add edit/update functionality
+
+5. Add search without duplicating derived state
+
+6. Add filtering
+
+7. Add sorting safely
+
+8. Persist data appropriately
+
+9. Move list items into reusable components
+
+10. Learn useReducer when list transitions become complex
+
+11. Connect lists to backend APIs/databases
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The central form-to-list pattern is:
+
+USER INPUT
+    ↓
+CONTROLLED FORM STATE
+    ↓
+FORM SUBMIT
+    ↓
+VALIDATION
+    ↓
+CREATE ITEM OBJECT
+    ↓
+IMMUTABLE ARRAY UPDATE
+    ↓
+REACT RENDER
+    ↓
+map()
+    ↓
+UPDATED LIST
+
+
+For adding:
+
+setItems(previous => [
+  ...previous,
+  newItem
+])
+
+
+For deleting:
+
+setItems(previous =>
+  previous.filter(...)
+)
+
+
+For updating:
+
+setItems(previous =>
+  previous.map(...)
+)
+
+
+This pattern forms the foundation for:
+
+TODOS
++
+SHOPPING LISTS
++
+NOTES
++
+CARTS
++
+TASKS
++
+MANY CRUD-STYLE REACT INTERFACES
+
+
+================================================================================
+END OF LESSON 5
+ADDING FORM INPUT DATA INTO A STATE LIST
+AND SHOWING LIST ITEMS ON THE PAGE
+================================================================================
