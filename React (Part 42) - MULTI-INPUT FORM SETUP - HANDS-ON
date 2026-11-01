@@ -1,0 +1,3407 @@
+LESSON 6: MULTI-INPUT FORM SETUP - HANDS-ON
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on building and managing React forms containing multiple
+input fields.
+
+You will understand:
+
+• Setting up multiple form inputs
+
+• Managing related fields in one state object
+
+• Creating a reusable onChange handler
+
+• Using computed property names
+
+• Handling different input types
+
+• Handling text, email, phone, number, select, textarea, radio, and checkbox
+
+• Submitting multiple form fields together
+
+• Resetting multiple fields
+
+• Validating multiple inputs
+
+• Managing field-specific errors
+
+• Displaying current form data
+
+• Organizing larger forms into sections
+
+• Creating scalable form patterns
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+Most real applications use more than one form field.
+
+Examples:
+
+• Registration Forms
+
+• Login/Profile Forms
+
+• Contact Forms
+
+• Checkout Forms
+
+• Search/Filter Forms
+
+• Employee Forms
+
+• Banking Forms
+
+• Application Forms
+
+
+A good multi-input pattern reduces repetitive code.
+
+Instead of:
+
+Field 1 → Handler 1
+Field 2 → Handler 2
+Field 3 → Handler 3
+
+
+we can often use:
+
+Multiple Fields
+      ↓
+One State Object
+      ↓
+One Generic Handler
+
+
+================================================================================
+PART 2: UNDERSTANDING MULTI-INPUT FORMS
+================================================================================
+
+WHAT IS A MULTI-INPUT FORM?
+--------------------------------------------------------------------------------
+
+A multi-input form contains multiple related controls.
+
+Example:
+
+First Name
+
+Last Name
+
+Email
+
+Phone
+
+Country
+
+Message
+
+Subscribe
+
+
+A common React structure is:
+
+formData
+   │
+   ├── firstName
+   ├── lastName
+   ├── email
+   ├── phone
+   ├── country
+   ├── message
+   └── subscribe
+
+
+================================================================================
+CORE PATTERN
+================================================================================
+
+STATE:
+
+const [formData, setFormData] =
+  useState({
+
+    firstName: '',
+
+    lastName: '',
+
+    email: '',
+
+    phone: ''
+
+  })
+
+
+INPUT:
+
+<input
+  name="firstName"
+  value={formData.firstName}
+  onChange={handleChange}
+/>
+
+
+GENERIC HANDLER:
+
+const handleChange = (event) => {
+
+  const {
+    name,
+    value
+  } = event.target
+
+
+  setFormData(previousData => ({
+
+    ...previousData,
+
+    [name]: value
+
+  }))
+}
+
+
+================================================================================
+WHY THE name ATTRIBUTE MATTERS
+================================================================================
+
+Input:
+
+name="firstName"
+
+
+State:
+
+formData.firstName
+
+
+Input:
+
+name="email"
+
+
+State:
+
+formData.email
+
+
+Therefore:
+
+[name]: value
+
+
+dynamically updates the matching property.
+
+
+Example:
+
+name:
+
+"email"
+
+
+value:
+
+"john@example.com"
+
+
+Then:
+
+[name]: value
+
+
+becomes conceptually:
+
+email:
+'john@example.com'
+
+
+================================================================================
+MULTI-INPUT VS SEPARATE STATE
+================================================================================
+
+SEPARATE STATE CAN BE VALID:
+--------------------------------------------------------------------------------
+
+const [firstName, setFirstName] =
+  useState('')
+
+
+const [lastName, setLastName] =
+  useState('')
+
+
+const [email, setEmail] =
+  useState('')
+
+
+OBJECT STATE CAN ALSO BE VALID:
+--------------------------------------------------------------------------------
+
+const [formData, setFormData] =
+  useState({
+
+    firstName: '',
+
+    lastName: '',
+
+    email: ''
+
+  })
+
+
+================================================================================
+WHEN OBJECT STATE IS CONVENIENT
+================================================================================
+
+An object is useful when:
+
+• The fields belong to the same form
+
+• Many controls use similar update logic
+
+• The entire object is validated/submitted together
+
+• You want one generic handler
+
+• Resetting everything together is convenient
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+There is no rule that every multi-input React form MUST use one state object.
+
+Choose the state structure that best matches the form's behavior.
+
+
+================================================================================
+MULTI-INPUT FORM CHARACTERISTICS
+================================================================================
+
++------------------------+---------------------------------------------+
+| CONCEPT                | PURPOSE                                     |
++------------------------+---------------------------------------------+
+| formData               | Related form values                         |
+| name                   | Identifies state property                   |
+| value                  | Controlled text-like value                  |
+| checked                | Controlled checkbox/radio state             |
+| handleChange           | Shared change handler                       |
+| [name]                 | Computed property name                      |
+| Spread                 | Preserves other form fields                 |
+| Validation             | Checks submitted/current values             |
+| errors                 | Field-specific error messages               |
+| Reset                  | Restores initial form state                 |
++------------------------+---------------------------------------------+
+
+
+================================================================================
+PART 3: BASIC MULTI-INPUT FORM SETUP
+================================================================================
+
+File:
+
+src/components/MultiInputForm.jsx
+
+
+import { useState } from 'react'
+import './MultiInputForm.css'
+
+
+const INITIAL_FORM = {
+
+  firstName: '',
+
+  lastName: '',
+
+  email: '',
+
+  phone: ''
+
+}
+
+
+export default function MultiInputForm() {
+
+  // ====================
+  // STATE
+  // ============================================
+
+  const [formData, setFormData] =
+    useState(INITIAL_FORM)
+
+
+  // ============================================
+  // CHANGE HANDLER
+  // ============================================
+
+  const handleChange = (event) => {
+
+    const {
+      name,
+      value
+    } = event.target
+
+
+    setFormData(previousData => ({
+
+      ...previousData,
+
+      value
+
+    }))
+
+
+    console.log(
+      `${name}: ${value}`
+    )
+  }
+
+
+  // ============================================
+  // SUBMIT
+  // ============================================
+
+  const handleSubmit = (event) => {
+
+    event.preventDefault()
+
+
+    console.log(
+      'Form submitted:',
+      formData
+    )
+  }
+
+
+  // ============================================
+  // RESET
+  // ============================================
+
+  const handleReset = () => {
+
+    setFormData(
+      INITIAL_FORM
+    )
+  }
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="multi-input-container">
+
+      <h1>
+        Multi-Input Form Setup
+      </h1>
+
+
+      <p>
+        Learn how to manage multiple form inputs
+      </p>
+
+
+      <form
+        onSubmit={handleSubmit}
+        onReset={handleReset}
+        className="form"
+      >
+
+
+        {/* First Name */}
+
+        <div className="form-group">
+
+          <label htmlFor="firstName">
+            First Name:
+          </label>
+
+
+          <input
+            id="firstName"
+            type="text"
+            name="firstName"
+            value={
+              formData.firstName
+            }
+            onChange={handleChange}
+            placeholder="Enter first name"
+            className="form-input"
+          />
+
+        </div>
+
+
+        {/* Last Name */}
+
+        <div className="form-group">
+
+          <label htmlFor="lastName">
+            Last Name:
+          </label>
+
+
+          <input
+            id="lastName"
+            type="text"
+            name="lastName"
+            value={
+              formData.lastName
+            }
+            onChange={handleChange}
+            placeholder="Enter last name"
+            className="form-input"
+          />
+
+        </div>
+
+
+        {/* Email */}
+
+        <div className="form-group">
+
+          <label htmlFor="email">
+            Email:
+          </label>
+
+
+          <input
+            id="email"
+            type="email"
+            name="email"
+            value={
+              formData.email
+            }
+            onChange={handleChange}
+            placeholder="Enter email"
+            className="form-input"
+          />
+
+        </div>
+
+
+        {/* Phone */}
+
+        <div className="form-group">
+
+          <label htmlFor="phone">
+            Phone:
+          </label>
+
+
+          <input
+            id="phone"
+            type="tel"
+            name="phone"
+            value={
+              formData.phone
+            }
+            onChange={handleChange}
+            placeholder="Enter phone number"
+            className="form-input"
+          />
+
+        </div>
+
+
+        {/* Buttons */}
+
+        <div className="button-group">
+
+          <button
+            type="submit"
+            className="btn-submit"
+          >
+            Submit
+          </button>
+
+
+          <button
+            type="reset"
+            className="btn-reset"
+          >
+            Clear
+          </button>
+
+        </div>
+
+      </form>
+
+
+      {/* Current Values */}
+
+      <div className="display-section">
+
+        <h3>
+          Current Form Data:
+        </h3>
+
+
+        <div className="data-display">
+
+          <p>
+            <strong>First Name:</strong>
+            {' '}
+            {formData.firstName ||
+              '(empty)'}
+          </p>
+
+
+          <p>
+            <strong>Last Name:</strong>
+            {' '}
+            {formData.lastName ||
+              '(empty)'}
+          </p>
+
+
+          <p>
+            <strong>Email:</strong>
+            {' '}
+            {formData.email ||
+              '(empty)'}
+          </p>
+
+
+          <p>
+            <strong>Phone:</strong>
+            {' '}
+            {formData.phone ||
+              '(empty)'}
+          </p>
+
+        </div>
+
+      </div>
+
+
+      {/* Debug */}
+
+      <div className="debug-section">
+
+        <h3>
+          Form Data as JSON:
+        </h3>
+
+
+        <pre>
+          {JSON.stringify(
+            formData,
+            null,
+            2
+          )}
+        </pre>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+================================================================================
+HOW ONE HANDLER UPDATES MULTIPLE FIELDS
+================================================================================
+
+USER CHANGES:
+
+First Name
+
+
+event.target:
+
+{
+  name:
+    'firstName',
+
+  value:
+    'John'
+}
+
+
+GENERIC HANDLER:
+
+setFormData(previous => ({
+
+  ...previous,
+
+  value
+
+}))
+
+
+RESULT:
+
+{
+  firstName:
+    'John',
+
+  lastName:
+    '',
+
+  email:
+    '',
+
+  phone:
+    ''
+}
+
+
+================================================================================
+ANOTHER FIELD
+================================================================================
+
+User enters:
+
+john@example.com
+
+
+Input:
+
+name="email"
+
+
+Therefore:
+
+value
+
+
+becomes:
+
+email:
+'john@example.com'
+
+
+Final state:
+
+{
+  firstName:
+    'John',
+
+  lastName:
+    '',
+
+  email:
+    'john@example.com',
+
+  phone:
+    ''
+}
+
+
+================================================================================
+BASIC FORM TABLE
+================================================================================
+
++----------------------------+------------------------------------------+
+| CODE                       | PURPOSE                                  |
++----------------------------+------------------------------------------+
+| INITIAL_FORM               | Reusable initial state                  |
+| formData                   | Current field values                    |
+| setFormData                | Requests state update                   |
+| name                       | Matches object property                 |
+| value                      | Current input value                     |
+| [name]                     | Dynamic property                        |
+| ...previousData            | Preserve remaining fields              |
+| preventDefault()           | Prevent native submit                  |
+| onReset                    | Restore initial controlled state        |
++----------------------------+------------------------------------------+
+
+
+================================================================================
+IMPORTANT RESET PATTERN
+================================================================================
+
+Instead of:
+
+<button
+  type="reset"
+  onClick={handleReset}
+>
+
+
+prefer handling the reset at the form level:
+
+<form
+  onReset={handleReset}
+>
+
+
+with:
+
+<button type="reset">
+  Clear
+</button>
+
+
+For controlled React fields, the reset handler should restore React state.
+
+There is normally no need to call:
+
+event.preventDefault()
+
+just to reset controlled fields.
+
+
+================================================================================
+PART 4: MULTIPLE INPUT TYPES
+================================================================================
+
+Now extend the form to include:
+
+• Text
+
+• Email
+
+• Number
+
+• Select
+
+• Radio
+
+• Textarea
+
+• Checkbox
+
+
+================================================================================
+INITIAL STATE
+================================================================================
+
+const INITIAL_FORM = {
+
+  firstName: '',
+
+  lastName: '',
+
+  email: '',
+
+  country: '',
+
+  message: '',
+
+  subscribe: false,
+
+  choice: '',
+
+  age: ''
+
+}
+
+
+================================================================================
+GENERIC HANDLER FOR MIXED INPUT TYPES
+================================================================================
+
+const handleChange = (
+  event
+) => {
+
+  const {
+    name,
+    value,
+    type,
+    checked
+  } = event.target
+
+
+  const nextValue =
+    type === 'checkbox'
+      ? checked
+      : value
+
+
+  setFormData(previousData => ({
+
+    ...previousData,
+
+    nextValue
+
+  }))
+}
+
+
+================================================================================
+WHY CHECKBOX NEEDS SPECIAL HANDLING
+================================================================================
+
+TEXT INPUT:
+
+event.target.value
+
+
+SELECT:
+
+event.target.value
+
+
+TEXTAREA:
+
+event.target.value
+
+
+RADIO:
+
+event.target.value
+
+
+CHECKBOX:
+
+event.target.checked
+
+
+Therefore:
+
+const nextValue =
+  type === 'checkbox'
+    ? checked
+    : value
+
+
+================================================================================
+AdvancedMultiInputForm.jsx
+================================================================================
+
+import { useState } from 'react'
+import './AdvancedMultiInputForm.css'
+
+
+const INITIAL_FORM = {
+
+  firstName: '',
+
+  lastName: '',
+
+  email: '',
+
+  age: '',
+
+  country: '',
+
+  choice: '',
+
+  message: '',
+
+  subscribe: false
+
+}
+
+
+export default function AdvancedMultiInputForm() {
+
+  const [formData, setFormData] =
+    useState(INITIAL_FORM)
+
+
+  const handleChange = (
+    event
+  ) => {
+
+    const {
+      name,
+      value,
+      type,
+      checked
+    } = event.target
+
+
+    const nextValue =
+      type === 'checkbox'
+        ? checked
+        : value
+
+
+    setFormData(previousData => ({
+
+      ...previousData,
+
+      nextValue
+
+    }))
+  }
+
+
+  const handleSubmit = (
+    event
+  ) => {
+
+    event.preventDefault()
+
+
+    console.log(
+      'Form submitted:',
+      formData
+    )
+  }
+
+
+  const handleReset = () => {
+
+    setFormData(
+      INITIAL_FORM
+    )
+  }
+
+
+  return (
+    <div className="advanced-form-container">
+
+      <h1>
+        Advanced Multi-Input Form
+      </h1>
+
+
+      <p>
+        Form with different input types
+      </p>
+
+
+      <form
+        onSubmit={handleSubmit}
+        onReset={handleReset}
+        className="form"
+      >
+
+
+        {/* ======================================
+            PERSONAL INFORMATION
+            ====================================== */}
+
+        <section className="form-section">
+
+          <h2>
+            Personal Information
+          </h2>
+
+
+          <div className="form-group">
+
+            <label htmlFor="firstName">
+              First Name:
+            </label>
+
+            <input
+              id="firstName"
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              className="form-input"
+            />
+
+          </div>
+
+
+          <div className="form-group">
+
+            <label htmlFor="lastName">
+              Last Name:
+            </label>
+
+            <input
+              id="lastName"
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              className="form-input"
+            />
+
+          </div>
+
+
+          <div className="form-group">
+
+            <label htmlFor="email">
+              Email:
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="form-input"
+            />
+
+          </div>
+
+
+          <div className="form-group">
+
+            <label htmlFor="age">
+              Age:
+            </label>
+
+            <input
+              id="age"
+              type="number"
+              name="age"
+              value={formData.age}
+              onChange={handleChange}
+              min="0"
+              max="120"
+              className="form-input"
+            />
+
+          </div>
+
+        </section>
+
+
+        {/* ======================================
+            LOCATION
+            ====================================== */}
+
+        <section className="form-section">
+
+          <h2>
+            Location
+          </h2>
+
+
+          <div className="form-group">
+
+            <label htmlFor="country">
+              Country:
+            </label>
+
+            <select
+              id="country"
+              name="country"
+              value={formData.country}
+              onChange={handleChange}
+              className="form-select"
+            >
+
+              <option value="">
+                Select a country
+              </option>
+
+              <option value="usa">
+                United States
+              </option>
+
+              <option value="uk">
+                United Kingdom
+              </option>
+
+              <option value="canada">
+                Canada
+              </option>
+
+              <option value="australia">
+                Australia
+              </option>
+
+              <option value="india">
+                India
+              </option>
+
+            </select>
+
+          </div>
+
+        </section>
+
+
+        {/* ======================================
+            RADIO GROUP
+            ====================================== */}
+
+        <fieldset className="form-section">
+
+          <legend>
+            Choose an option
+          </legend>
+
+
+          <div className="radio-group">
+
+            <label className="radio-option">
+
+              <input
+                type="radio"
+                name="choice"
+                value="option-a"
+                checked={
+                  formData.choice ===
+                  'option-a'
+                }
+                onChange={handleChange}
+              />
+
+              Option A
+
+            </label>
+
+
+            <label className="radio-option">
+
+              <input
+                type="radio"
+                name="choice"
+                value="option-b"
+                checked={
+                  formData.choice ===
+                  'option-b'
+                }
+                onChange={handleChange}
+              />
+
+              Option B
+
+            </label>
+
+
+            <label className="radio-option">
+
+              <input
+                type="radio"
+                name="choice"
+                value="option-c"
+                checked={
+                  formData.choice ===
+                  'option-c'
+                }
+                onChange={handleChange}
+              />
+
+              Option C
+
+            </label>
+
+          </div>
+
+        </fieldset>
+
+
+        {/* ======================================
+            MESSAGE
+            ====================================== */}
+
+        <section className="form-section">
+
+          <h2>
+            Message
+          </h2>
+
+
+          <div className="form-group">
+
+            <label htmlFor="message">
+              Message:
+            </label>
+
+            <textarea
+              id="message"
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
+              rows={4}
+              className="form-textarea"
+            />
+
+          </div>
+
+        </section>
+
+
+        {/* ======================================
+            CHECKBOX
+            ====================================== */}
+
+        <div className="form-section">
+
+          <div className="checkbox-group">
+
+            <input
+              id="subscribe"
+              type="checkbox"
+              name="subscribe"
+              checked={
+                formData.subscribe
+              }
+              onChange={handleChange}
+            />
+
+
+            <label htmlFor="subscribe">
+
+              Subscribe to newsletter
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        {/* Buttons */}
+
+        <div className="button-group">
+
+          <button
+            type="submit"
+            className="btn-submit"
+          >
+            Submit
+          </button>
+
+
+          <button
+            type="reset"
+            className="btn-reset"
+          >
+            Clear
+          </button>
+
+        </div>
+
+      </form>
+
+
+      {/* Display */}
+
+      <div className="display-section">
+
+        <h3>
+          Current Form Data:
+        </h3>
+
+        <pre>
+          {JSON.stringify(
+            formData,
+            null,
+            2
+          )}
+        </pre>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+================================================================================
+IMPORTANT: NUMBER INPUT
+================================================================================
+
+This field:
+
+<input
+  type="number"
+  name="age"
+/>
+
+
+still normally supplies:
+
+event.target.value
+
+
+as a STRING.
+
+
+Example:
+
+User enters:
+
+35
+
+
+event.target.value:
+
+"35"
+
+
+If the application requires a number, convert deliberately.
+
+
+Example:
+
+const nextValue =
+
+  type === 'checkbox'
+    ? checked
+
+    : type === 'number'
+      ? (
+          value === ''
+            ? ''
+            : Number(value)
+        )
+
+      : value
+
+
+Whether conversion belongs in the generic handler or at submission depends
+on your desired form-state model.
+
+
+================================================================================
+INPUT TYPES TABLE
+================================================================================
+
++----------------------+----------------------+------------------------------+
+| INPUT                | CONTROL PROP         | EVENT DATA                   |
++----------------------+----------------------+------------------------------+
+| Text                 | value                | target.value                 |
+| Email                | value                | target.value                 |
+| Phone                | value                | target.value                 |
+| Number               | value                | target.value (usually string)|
+| Select               | value                | target.value                 |
+| Textarea             | value                | target.value                 |
+| Radio                | checked              | target.value                 |
+| Checkbox             | checked              | target.checked               |
++----------------------+----------------------+------------------------------+
+
+
+================================================================================
+PART 5: MULTI-INPUT FORM WITH VALIDATION
+================================================================================
+
+A larger form usually needs:
+
+FORM DATA
+    +
+ERROR STATE
+    +
+VALIDATION
+    +
+SUBMISSION STATE
+
+
+================================================================================
+INITIAL FORM
+================================================================================
+
+const INITIAL_FORM = {
+
+  firstName: '',
+
+  lastName: '',
+
+  email: '',
+
+  phone: '',
+
+  password: '',
+
+  confirmPassword: '',
+
+  country: '',
+
+  agreeTerms: false
+
+}
+
+
+================================================================================
+STATE
+================================================================================
+
+const [formData, setFormData] =
+  useState(INITIAL_FORM)
+
+
+const [errors, setErrors] =
+  useState({})
+
+
+const [submitted, setSubmitted] =
+  useState(false)
+
+
+================================================================================
+VALIDATION FUNCTION
+================================================================================
+
+const validateForm = () => {
+
+  const newErrors = {}
+
+
+  // First Name
+
+  if (
+    !formData.firstName.trim()
+  ) {
+
+    newErrors.firstName =
+      'First name is required'
+  }
+
+
+  // Last Name
+
+  if (
+    !formData.lastName.trim()
+  ) {
+
+    newErrors.lastName =
+      'Last name is required'
+  }
+
+
+  // Email
+
+  if (
+    !formData.email.trim()
+  ) {
+
+    newErrors.email =
+      'Email is required'
+
+  } else if (
+    !formData.email.includes('@')
+  ) {
+
+    newErrors.email =
+      'Enter a valid email address'
+  }
+
+
+  // Phone
+
+  const phoneDigits =
+    formData.phone
+      .replace(/\D/g, '')
+
+
+  if (
+    !formData.phone.trim()
+  ) {
+
+    newErrors.phone =
+      'Phone is required'
+
+  } else if (
+    phoneDigits.length < 10
+  ) {
+
+    newErrors.phone =
+      'Enter at least 10 digits'
+  }
+
+
+  // Password
+
+  if (!formData.password) {
+
+    newErrors.password =
+      'Password is required'
+
+  } else if (
+    formData.password.length < 8
+  ) {
+
+    newErrors.password =
+      'Password must be at least 8 characters'
+  }
+
+
+  // Confirmation
+
+  if (
+    !formData.confirmPassword
+  ) {
+
+    newErrors.confirmPassword =
+      'Confirm your password'
+
+  } else if (
+    formData.password !==
+    formData.confirmPassword
+  ) {
+
+    newErrors.confirmPassword =
+      'Passwords do not match'
+  }
+
+
+  // Country
+
+  if (!formData.country) {
+
+    newErrors.country =
+      'Country is required'
+  }
+
+
+  // Terms
+
+  if (!formData.agreeTerms) {
+
+    newErrors.agreeTerms =
+      'You must agree before continuing'
+  }
+
+
+  return newErrors
+}
+
+
+================================================================================
+IMPORTANT VALIDATION NOTE
+================================================================================
+
+The validation above is instructional.
+
+For a real application:
+
+• Email rules may require more deliberate validation
+
+• Phone formats differ internationally
+
+• Password requirements should follow the actual product/security policy
+
+• Client-side validation must not replace server-side validation for
+  security-sensitive data
+
+
+================================================================================
+GENERIC CHANGE HANDLER + ERROR CLEARING
+================================================================================
+
+const handleChange = (
+  event
+) => {
+
+  const {
+    name,
+    value,
+    type,
+    checked
+  } = event.target
+
+
+  const nextValue =
+    type === 'checkbox'
+      ? checked
+      : value
+
+
+  setFormData(previousData => ({
+
+    ...previousData,
+
+    nextValue
+
+  }))
+
+
+  setErrors(previousErrors => {
+
+    if (
+      !previousErrors[name]
+    ) {
+
+      return previousErrors
+    }
+
+
+    return {
+
+      ...previousErrors,
+
+      ''
+
+    }
+  })
+}
+
+
+================================================================================
+SUBMISSION
+================================================================================
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+
+  const validationErrors =
+    validateForm()
+
+
+  if (
+    Object.keys(
+      validationErrors
+    ).length > 0
+  ) {
+
+    setErrors(
+      validationErrors
+    )
+
+    setSubmitted(false)
+
+    return
+  }
+
+
+  setErrors({})
+
+
+  console.log(
+    'Valid form submitted'
+  )
+
+
+  /*
+   * Avoid logging passwords or other
+   * sensitive form values.
+   */
+
+
+  setSubmitted(true)
+}
+
+
+================================================================================
+RESET
+================================================================================
+
+const handleReset = () => {
+
+  setFormData(
+    INITIAL_FORM
+  )
+
+  setErrors({})
+
+  setSubmitted(false)
+}
+
+
+Use:
+
+<form
+  onSubmit={handleSubmit}
+  onReset={handleReset}
+>
+
+
+and:
+
+<button type="reset">
+  Clear
+</button>
+
+
+================================================================================
+FIELD ERROR EXAMPLE
+================================================================================
+
+<div className="form-group">
+
+  <label htmlFor="firstName">
+    First Name:
+  </label>
+
+
+  <input
+    id="firstName"
+    type="text"
+    name="firstName"
+    value={
+      formData.firstName
+    }
+    onChange={handleChange}
+    className={
+      `form-input ${
+        errors.firstName
+          ? 'input-error'
+          : ''
+      }`
+    }
+    aria-invalid={
+      Boolean(
+        errors.firstName
+      )
+    }
+    aria-describedby={
+      errors.firstName
+        ? 'firstName-error'
+        : undefined
+    }
+  />
+
+
+  {errors.firstName && (
+
+    <p
+      id="firstName-error"
+      className="error-message"
+    >
+      {errors.firstName}
+    </p>
+
+  )}
+
+</div>
+
+
+================================================================================
+CHECKBOX ERROR EXAMPLE
+================================================================================
+
+<div className="form-group">
+
+  <div className="checkbox-group">
+
+    <input
+      id="agreeTerms"
+      type="checkbox"
+      name="agreeTerms"
+      checked={
+        formData.agreeTerms
+      }
+      onChange={handleChange}
+      aria-invalid={
+        Boolean(
+          errors.agreeTerms
+        )
+      }
+      aria-describedby={
+        errors.agreeTerms
+          ? 'terms-error'
+          : undefined
+      }
+    />
+
+
+    <label htmlFor="agreeTerms">
+
+      I agree to continue
+
+    </label>
+
+  </div>
+
+
+  {errors.agreeTerms && (
+
+    <p
+      id="terms-error"
+      className="error-message"
+    >
+      {errors.agreeTerms}
+    </p>
+
+  )}
+
+</div>
+
+
+================================================================================
+VALIDATION FLOW
+================================================================================
+
+Submit
+  ↓
+preventDefault()
+  ↓
+validateForm()
+  ↓
++---------------------------+
+|                           |
+Errors                    Valid
+|                           |
+↓                           ↓
+setErrors()              setErrors({})
+|                           |
+↓                           ↓
+Render Errors            Process Form
+                            |
+                            ↓
+                       Success State
+
+
+================================================================================
+ERROR CLEARING BEHAVIOR
+================================================================================
+
+Suppose:
+
+errors.email
+
+=
+'Email is required'
+
+
+User starts editing email:
+
+handleChange()
+
+
+Then:
+
+errors.email
+
+can be cleared.
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Clearing an error when typing does NOT necessarily mean the new value is valid.
+
+It only means:
+
+"Remove the old message while the user is correcting the field."
+
+
+Another valid UX approach is:
+
+REVALIDATE THAT FIELD ON CHANGE/BLUR.
+
+
+================================================================================
+PART 6: MULTI-INPUT FORM PATTERNS
+================================================================================
+
+PATTERN 1: BASIC OBJECT STATE
+================================================================================
+
+const [formData, setFormData] =
+  useState({
+
+    field1: '',
+
+    field2: '',
+
+    field3: ''
+
+  })
+
+
+const handleChange = (
+  event
+) => {
+
+  const {
+    name,
+    value
+  } = event.target
+
+
+  setFormData(previous => ({
+
+    ...previous,
+
+    value
+
+  }))
+}
+
+
+================================================================================
+PATTERN 2: MIXED INPUT TYPES
+================================================================================
+
+const handleChange = (
+  event
+) => {
+
+  const {
+    name,
+    value,
+    type,
+    checked
+  } = event.target
+
+
+  const nextValue =
+    type === 'checkbox'
+      ? checked
+      : value
+
+
+  setFormData(previous => ({
+
+    ...previous,
+
+    nextValue
+
+  }))
+}
+
+
+================================================================================
+PATTERN 3: FORM + ERRORS
+================================================================================
+
+const [formData, setFormData] =
+  useState(INITIAL_FORM)
+
+
+const [errors, setErrors] =
+  useState({})
+
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+
+  const nextErrors =
+    validateForm()
+
+
+  if (
+    Object.keys(
+      nextErrors
+    ).length > 0
+  ) {
+
+    setErrors(
+      nextErrors
+    )
+
+    return
+  }
+
+
+  setErrors({})
+
+
+  // Submit valid data
+}
+
+
+================================================================================
+PATTERN 4: NESTED SECTIONS
+================================================================================
+
+State:
+
+const [formData, setFormData] =
+  useState({
+
+    personal: {
+
+      firstName: '',
+
+      lastName: ''
+
+    },
+
+
+    contact: {
+
+      email: '',
+
+      phone: ''
+
+    }
+
+  })
+
+
+Input name:
+
+name="personal.firstName"
+
+
+Handler:
+
+const handleChange = (
+  event
+) => {
+
+  const {
+    name,
+    value
+  } = event.target
+
+
+  const [
+    section,
+    field
+  ] = name.split('.')
+
+
+  setFormData(previous => ({
+
+    ...previous,
+
+
+    {
+
+      ...previous[section],
+
+      value
+
+    }
+
+  }))
+}
+
+
+================================================================================
+NESTED UPDATE FLOW
+================================================================================
+
+name:
+
+personal.firstName
+
+
+        ↓
+
+
+split('.')
+
+
+        ↓
+
+
+section:
+
+personal
+
+
+field:
+
+firstName
+
+
+        ↓
+
+
+Copy Parent Object
+
+
+        ↓
+
+
+Copy personal Object
+
+
+        ↓
+
+
+Update firstName
+
+
+================================================================================
+PATTERN 5: DYNAMIC FIELDS
+================================================================================
+
+const [fields, setFields] =
+  useState([
+
+    {
+      id:
+        crypto.randomUUID(),
+
+      value:
+        ''
+    }
+
+  ])
+
+
+ADD FIELD:
+--------------------------------------------------------------------------------
+
+const handleAddField = () => {
+
+  setFields(previous => [
+
+    ...previous,
+
+    {
+      id:
+        crypto.randomUUID(),
+
+      value:
+        ''
+    }
+
+  ])
+}
+
+
+REMOVE FIELD:
+--------------------------------------------------------------------------------
+
+const handleRemoveField = (
+  id
+) => {
+
+  setFields(previous =>
+
+    previous.filter(
+      field =>
+        field.id !== id
+    )
+
+  )
+}
+
+
+UPDATE FIELD:
+--------------------------------------------------------------------------------
+
+const handleFieldChange = (
+  id,
+  value
+) => {
+
+  setFields(previous =>
+
+    previous.map(field =>
+
+      field.id === id
+        ? {
+            ...field,
+            value
+          }
+        : field
+
+    )
+
+  )
+}
+
+
+================================================================================
+PATTERN 6: CONDITIONAL FIELDS
+================================================================================
+
+const [formData, setFormData] =
+  useState({
+
+    accountType:
+      'individual',
+
+    companyName:
+      ''
+
+  })
+
+
+JSX:
+
+{formData.accountType ===
+  'company' && (
+
+  <input
+    name="companyName"
+    value={
+      formData.companyName
+    }
+    onChange={
+      handleChange
+    }
+  />
+
+)}
+
+
+================================================================================
+CONDITIONAL FIELD DESIGN QUESTION
+================================================================================
+
+If the field becomes hidden, decide intentionally whether its value should:
+
+A. Remain in state
+
+or
+
+B. Be cleared
+
+
+Example:
+
+If account type changes from:
+
+company
+
+to:
+
+individual
+
+
+Should:
+
+companyName
+
+remain?
+
+
+There is no universal answer.
+
+It depends on the product requirement.
+
+
+================================================================================
+PATTERNS TABLE
+================================================================================
+
++----------------------+-----------------------------------------------+
+| PATTERN              | USE CASE                                      |
++----------------------+-----------------------------------------------+
+| Basic Object         | Several related fields                         |
+| Mixed Types          | Text + checkbox + select etc.                 |
+| Validation           | Field-specific rules/errors                    |
+| Nested Sections      | Structured domain data                         |
+| Dynamic Fields       | Variable number of controls                    |
+| Conditional Fields   | Show/hide based on state                       |
+| Array of Objects     | Addresses/items/contacts                       |
+| Dependencies         | One field drives another                       |
+| Async Validation     | Server-dependent checks                        |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+WHEN FORMS BECOME MORE COMPLEX
+================================================================================
+
+For a small/medium form:
+
+useState
++
+generic handler
+
+may be enough.
+
+
+When transitions become complicated:
+
+useReducer
+
+can help structure state transitions.
+
+
+When validation/field registration becomes extensive, applications may also
+choose form libraries.
+
+The right approach depends on actual form complexity.
+
+
+================================================================================
+PART 7: STYLING MULTI-INPUT FORMS
+================================================================================
+
+File:
+
+src/components/AdvancedMultiInputForm.css
+
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+
+.advanced-form-container {
+
+  max-width: 700px;
+
+  margin: 0 auto;
+
+  padding: 30px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #667eea 0%,
+      #764ba2 100%
+    );
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 10px 30px
+    rgba(0, 0, 0, 0.2);
+}
+
+
+.advanced-form-container h1 {
+
+  color: white;
+
+  text-align: center;
+
+  margin-bottom: 10px;
+}
+
+
+.advanced-form-container > p {
+
+  color:
+    rgba(255, 255, 255, 0.9);
+
+  text-align: center;
+
+  margin-bottom: 30px;
+}
+
+
+/* ============================================
+   FORM
+   ============================================ */
+
+.form {
+
+  background: white;
+
+  padding: 30px;
+
+  border-radius: 8px;
+
+  box-shadow:
+    0 5px 15px
+    rgba(0, 0, 0, 0.1);
+}
+
+
+/* ============================================
+   FORM SECTION
+   ============================================ */
+
+.form-section {
+
+  margin-bottom: 30px;
+
+  padding-bottom: 20px;
+
+  border-bottom:
+    1px solid #eee;
+}
+
+
+.form-section:last-of-type {
+
+  border-bottom: none;
+}
+
+
+.form-section h2 {
+
+  color: #333;
+
+  font-size: 1.1rem;
+
+  margin-bottom: 15px;
+
+  font-weight: 600;
+}
+
+
+/* ============================================
+   FORM GROUP
+   ============================================ */
+
+.form-group {
+
+  margin-bottom: 20px;
+}
+
+
+.form-group label {
+
+  display: block;
+
+  font-weight: 600;
+
+  color: #333;
+
+  margin-bottom: 8px;
+}
+
+
+/* ============================================
+   FORM CONTROLS
+   ============================================ */
+
+.form-input,
+.form-select,
+.form-textarea {
+
+  width: 100%;
+
+  padding:
+    12px 15px;
+
+  border:
+    2px solid #ddd;
+
+  border-radius: 6px;
+
+  font-size: 1rem;
+
+  font-family: inherit;
+
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    background-color 0.3s ease;
+}
+
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+
+  outline: none;
+
+  border-color:
+    #667eea;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(102, 126, 234, 0.15);
+
+  background-color:
+    #f8f9ff;
+}
+
+
+/* ============================================
+   ERROR
+   ============================================ */
+
+.form-input.input-error,
+.form-select.input-error,
+.form-textarea.input-error {
+
+  border-color:
+    #f44336;
+
+  background-color:
+    #ffebee;
+}
+
+
+.error-message {
+
+  color:
+    #b71c1c;
+
+  font-size: 0.85rem;
+
+  margin-top: 5px;
+
+  font-weight: 500;
+}
+
+
+/* ============================================
+   RADIO
+   ============================================ */
+
+.radio-group {
+
+  display: flex;
+
+  gap: 20px;
+
+  margin-top: 10px;
+}
+
+
+.radio-option {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+
+.radio-option input {
+
+  cursor: pointer;
+
+  width: 18px;
+
+  height: 18px;
+}
+
+
+/* ============================================
+   CHECKBOX
+   ============================================ */
+
+.checkbox-group {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+
+.checkbox-group input {
+
+  cursor: pointer;
+
+  width: 18px;
+
+  height: 18px;
+}
+
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.button-group {
+
+  display: flex;
+
+  gap: 15px;
+
+  margin-top: 30px;
+}
+
+
+.btn-submit,
+.btn-reset {
+
+  flex: 1;
+
+  padding:
+    12px 20px;
+
+  border: none;
+
+  border-radius: 6px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  font-size: 1rem;
+}
+
+
+.btn-submit {
+
+  background:
+    #667eea;
+
+  color: white;
+}
+
+
+.btn-submit:hover {
+
+  background:
+    #5568d3;
+}
+
+
+.btn-reset {
+
+  background:
+    #f44336;
+
+  color: white;
+}
+
+
+.btn-reset:hover {
+
+  background:
+    #d32f2f;
+}
+
+
+/* ============================================
+   DISPLAY
+   ============================================ */
+
+.display-section {
+
+  background:
+    #f5f5f5;
+
+  padding: 20px;
+
+  border-radius: 8px;
+
+  margin-top: 30px;
+}
+
+
+.data-display {
+
+  background: white;
+
+  padding: 15px;
+
+  border-radius: 6px;
+}
+
+
+/* ============================================
+   DEBUG
+   ============================================ */
+
+.debug-section {
+
+  background:
+    #2d2d2d;
+
+  color:
+    #f8f8f2;
+
+  padding: 20px;
+
+  border-radius: 8px;
+
+  margin-top: 20px;
+}
+
+
+.debug-section pre {
+
+  margin: 0;
+
+  overflow-x: auto;
+
+  font-size: 0.85rem;
+}
+
+
+/* ============================================
+   INFO
+   ============================================ */
+
+.info-box {
+
+  background:
+    #e8f5e9;
+
+  border-left:
+    4px solid #4caf50;
+
+  padding: 20px;
+
+  border-radius: 6px;
+
+  margin-top: 20px;
+}
+
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+
+  .advanced-form-container {
+
+    padding: 20px;
+  }
+
+
+  .form {
+
+    padding: 20px;
+  }
+
+
+  .radio-group {
+
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
+
+  .button-group {
+
+    flex-direction: column;
+  }
+
+
+  .btn-submit,
+  .btn-reset {
+
+    width: 100%;
+  }
+
+}
+
+
+================================================================================
+CSS SUMMARY
+================================================================================
+
++-------------------------+---------------------------------------------+
+| CLASS                   | PURPOSE                                     |
++-------------------------+---------------------------------------------+
+| .advanced-form-container| Main container                              |
+| .form                   | Form card                                   |
+| .form-section           | Logical form section                        |
+| .form-group             | Label/control group                         |
+| .form-input             | Text-like controls                          |
+| .form-select            | Dropdown                                    |
+| .form-textarea          | Textarea                                    |
+| .input-error            | Invalid control appearance                  |
+| .error-message          | Validation error                            |
+| .radio-group            | Radio options                               |
+| .checkbox-group         | Checkbox + label                            |
+| .button-group           | Submit/reset actions                        |
+| .display-section        | Current form values                         |
+| .debug-section          | Debug state                                 |
+| .info-box               | Educational information                     |
++-------------------------+---------------------------------------------+
+
+
+================================================================================
+PART 8: TESTING MULTI-INPUT FORMS
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] All controls render
+
+[ ] Text fields update independently
+
+[ ] Updating one field preserves other fields
+
+[ ] Email field updates
+
+[ ] Phone field updates
+
+[ ] Number field updates
+
+[ ] Select updates
+
+[ ] Radio selection updates
+
+[ ] Checkbox updates boolean state
+
+[ ] Textarea updates
+
+[ ] Current form data is accurate
+
+[ ] Validation errors display
+
+[ ] Error styling displays
+
+[ ] Errors clear/revalidate according to chosen UX
+
+[ ] Submit prevents default navigation when custom handling is used
+
+[ ] Reset restores INITIAL_FORM
+
+[ ] Labels are associated correctly
+
+[ ] Radio options are grouped semantically
+
+[ ] Keyboard navigation works
+
+[ ] Responsive layout works
+
+
+================================================================================
+SCENARIO 1: FILL MULTIPLE FIELDS
+================================================================================
+
+Input:
+
+First Name:
+John
+
+
+Last Name:
+Smith
+
+
+Email:
+john@example.com
+
+
+Country:
+Canada
+
+
+Subscribe:
+true
+
+
+Expected state:
+
+{
+  firstName:
+    'John',
+
+  lastName:
+    'Smith',
+
+  email:
+    'john@example.com',
+
+  country:
+    'canada',
+
+  subscribe:
+    true,
+
+  ...
+}
+
+
+================================================================================
+SCENARIO 2: VERIFY FIELD INDEPENDENCE
+================================================================================
+
+Initial:
+
+{
+  firstName:
+    'John',
+
+  lastName:
+    'Smith'
+}
+
+
+Change lastName:
+
+Smith
+  ↓
+Brown
+
+
+Expected:
+
+{
+  firstName:
+    'John',
+
+  lastName:
+    'Brown'
+}
+
+
+NOT:
+
+{
+  lastName:
+    'Brown'
+}
+
+
+This verifies:
+
+...previousData
+
+
+is preserving the other properties.
+
+
+================================================================================
+SCENARIO 3: VALIDATION
+================================================================================
+
+Submit invalid form.
+
+
+Expected:
+
+• Native submission prevented
+
+• Validation executes
+
+• Errors object populated
+
+• Matching messages displayed
+
+• Valid existing user values remain
+
+
+================================================================================
+SCENARIO 4: ERROR CORRECTION
+================================================================================
+
+Error:
+
+Email is required
+
+
+User starts entering email.
+
+
+Depending on chosen UX:
+
+OPTION A:
+
+Clear previous error immediately
+
+
+OPTION B:
+
+Revalidate field while typing
+
+
+OPTION C:
+
+Revalidate when user leaves field
+
+
+All are possible designs.
+
+
+================================================================================
+SCENARIO 5: RESET
+================================================================================
+
+Before:
+
+{
+  firstName:
+    'John',
+
+  email:
+    'john@example.com',
+
+  agreeTerms:
+    true
+}
+
+
+Reset
+
+
+After:
+
+INITIAL_FORM
+
+
+Errors:
+
+{}
+
+
+================================================================================
+TEST TABLE
+================================================================================
+
++--------------------------+--------------------------------------------+
+| SCENARIO                 | EXPECTED                                   |
++--------------------------+--------------------------------------------+
+| Text Input               | String field updates                       |
+| Select                   | Selected value updates                     |
+| Radio                    | One matching option selected               |
+| Checkbox                 | Boolean updates                            |
+| Number                   | String or converted number per design      |
+| Validation               | Invalid fields get errors                  |
+| Error Correction         | Error policy works                         |
+| Reset                    | Initial state restored                     |
+| Submit                   | Valid data processed                       |
+| Keyboard                 | Form usable without mouse                  |
++--------------------------+--------------------------------------------+
+
+
+================================================================================
+PART 9: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE LEARNED
+--------------------------------------------------------------------------------
+
+✓ Setting up multiple controlled inputs
+
+✓ Using a state object
+
+✓ Using one change handler
+
+✓ Reading name/value/type/checked
+
+✓ Computed property names
+
+✓ Functional state updates
+
+✓ Handling checkboxes differently
+
+✓ Handling radio groups
+
+✓ Handling selects
+
+✓ Handling textareas
+
+✓ Understanding number-input strings
+
+✓ Resetting controlled forms
+
+✓ Validating multiple fields
+
+✓ Managing error state
+
+✓ Clearing/revalidating errors
+
+✓ Nested form data
+
+✓ Dynamic form fields
+
+✓ Conditional fields
+
+✓ Accessibility-related form structure
+
+
+================================================================================
+CRITICAL MULTI-INPUT POINTS
+================================================================================
+
+STATE:
+--------------------------------------------------------------------------------
+
+const [formData, setFormData] =
+  useState(INITIAL_FORM)
+
+
+GENERIC HANDLER:
+--------------------------------------------------------------------------------
+
+const handleChange = (
+  event
+) => {
+
+  const {
+    name,
+    value,
+    type,
+    checked
+  } = event.target
+
+
+  const nextValue =
+    type === 'checkbox'
+      ? checked
+      : value
+
+
+  setFormData(previous => ({
+
+    ...previous,
+
+    nextValue
+
+  }))
+}
+
+
+TEXT:
+--------------------------------------------------------------------------------
+
+name="firstName"
+
+value={formData.firstName}
+
+
+CHECKBOX:
+--------------------------------------------------------------------------------
+
+name="subscribe"
+
+checked={formData.subscribe}
+
+
+RADIO:
+--------------------------------------------------------------------------------
+
+name="choice"
+
+value="option-a"
+
+checked={
+  formData.choice ===
+  'option-a'
+}
+
+
+SUBMIT:
+--------------------------------------------------------------------------------
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+  // Validate/process
+}
+
+
+RESET:
+--------------------------------------------------------------------------------
+
+<form
+  onReset={handleReset}
+>
+
+
+const handleReset = () => {
+
+  setFormData(
+    INITIAL_FORM
+  )
+
+  setErrors({})
+}
+
+
+================================================================================
+MULTI-INPUT FORM FLOW
+================================================================================
+
+CONTROL
+   ↓
+User Changes Value
+   ↓
+onChange
+   ↓
+event.target
+   ↓
+name / value / checked
+   ↓
+Generic Handler
+   ↓
+setFormData(previous => ...)
+   ↓
+React Processes Update
+   ↓
+Form Renders Current State
+
+
+================================================================================
+VALIDATED FORM FLOW
+================================================================================
+
+User Completes Fields
+        ↓
+Submit
+        ↓
+preventDefault()
+        ↓
+validateForm()
+        ↓
++---------------------------+
+|                           |
+Errors                    Valid
+|                           |
+↓                           ↓
+setErrors()             Process Data
+|                           |
+↓                           ↓
+Render Errors           Success State
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++------------------------+----------------------------------------------+
+| CONCEPT                | REMEMBER                                     |
++------------------------+----------------------------------------------+
+| INITIAL_FORM           | Reusable initial values                       |
+| formData               | Current form values                           |
+| errors                 | Validation messages                           |
+| name                   | Maps control to object property               |
+| value                  | Text-like control value                       |
+| checked                | Checkbox/radio checked state                  |
+| [name]                 | Computed property                             |
+| Spread                 | Preserve other object properties              |
+| Functional Setter      | Build next state from previous state          |
+| preventDefault         | Prevent native submit action                  |
+| onReset                | Controlled reset handling                     |
+| fieldset / legend      | Related-control grouping                      |
++------------------------+----------------------------------------------+
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+MULTIPLE TEXT INPUTS:
+
+State Object
+    ↓
+name Attribute
+    ↓
+One Handler
+    ↓
+value
+
+
+MIXED CONTROLS:
+
+Is Checkbox?
+   │
+   ├── YES
+   │     ↓
+   │   checked
+   │
+   └── NO
+         ↓
+       value
+
+
+OBJECT UPDATE:
+
+Previous State
+     ↓
+Spread
+     ↓
+Update One Property
+     ↓
+Next State
+
+
+VALIDATION:
+
+Form Data
+    ↓
+validateForm()
+    ↓
+Errors Object
+    ↓
+Render Errors
+
+
+RESET:
+
+INITIAL_FORM
+     ↓
+setFormData()
+     ↓
+All Controlled Fields Reset
+
+
+NESTED STATE:
+
+Section
+  ↓
+Copy Parent
+  ↓
+Copy Section
+  ↓
+Update Field
+
+
+MOST IMPORTANT PATTERN:
+
+MULTIPLE RELATED FIELDS
+        ↓
+STATE OBJECT
+        ↓
+name ATTRIBUTE
+        ↓
+GENERIC onChange HANDLER
+        ↓
+IMMUTABLE STATE UPDATE
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Add more validation rules
+
+2. Validate individual fields on blur/change
+
+3. Add async submission
+
+4. Add server-side error handling
+
+5. Add loading/submitting state
+
+6. Build reusable field components
+
+7. Build dynamic field arrays
+
+8. Work with nested form structures
+
+9. Learn useReducer for complex form transitions
+
+10. Explore form libraries when form complexity requires them
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The most reusable multi-input pattern is:
+
+const handleChange = (
+  event
+) => {
+
+  const {
+    name,
+    value,
+    type,
+    checked
+  } = event.target
+
+
+  const nextValue =
+    type === 'checkbox'
+      ? checked
+      : value
+
+
+  setFormData(previous => ({
+
+    ...previous,
+
+    nextValue
+
+  }))
+}
+
+
+The important connection is:
+
+INPUT name
+     ↓
+MATCHES
+     ↓
+STATE PROPERTY
+
+
+Example:
+
+name="email"
+
+        ↓
+
+formData.email
+
+
+This allows many related controls to share one update mechanism while
+remaining predictable and easy to maintain.
+
+
+================================================================================
+END OF LESSON 6
+MULTI-INPUT FORM SETUP - HANDS-ON
+================================================================================
