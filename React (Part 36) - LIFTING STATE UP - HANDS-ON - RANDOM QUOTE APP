@@ -1,0 +1,2554 @@
+LESSON 14: LIFTING STATE UP - HANDS-ON - RANDOM QUOTE APP
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson applies the shared-state / "Lifting State Up" pattern to the
+Random Quote App.
+
+You will understand:
+
+• Refactoring the Quote App around a shared state owner
+
+• Keeping shared quote state in the App component
+
+• Extracting presentation and action components
+
+• Passing state and handlers through props
+
+• Coordinating multiple state variables
+
+• Enabling communication between components
+
+• Restructuring the component hierarchy
+
+• Applying the lifting-state pattern in practice
+
+• Testing the refactored application
+
+• Comparing before and after implementations
+
+• Building a more scalable Quote App architecture
+
+
+WHY THIS HANDS-ON LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+Hands-on refactoring is useful because:
+
+• Reinforces Theory
+  - Applies shared-state concepts to an existing application
+
+• Builds Practical Experience
+  - Demonstrates how component responsibilities can be separated
+
+• Shows Real Refactoring
+  - Starts with working code and restructures it
+
+• Improves Problem-Solving
+  - Helps identify state owners and component responsibilities
+
+• Improves Code Organization
+  - Separates state, presentation, actions, and layout
+
+• Improves Maintainability
+  - Changes become easier to locate
+
+• Supports Scalability
+  - New components/features can be added more cleanly
+
+• Improves Testing
+  - Smaller components can be tested independently
+
+• Prepares for Advanced Patterns
+  - Provides a foundation for Context and useReducer
+
+
+================================================================================
+IMPORTANT CONCEPTUAL NOTE
+================================================================================
+
+The starting Random Quote App ALREADY stores:
+
+• quote
+• loading
+• error
+• color
+
+inside App.
+
+QuoteCard receives those values through props.
+
+Therefore, state is already located at the common parent level.
+
+So this lesson is not literally:
+
+"Move state from QuoteCard to App."
+
+Instead, the practical refactoring is:
+
+BEFORE:
+
+App
+ ├── Shared State
+ ├── Business Logic
+ ├── Effects
+ ├── Layout
+ ├── Buttons
+ └── QuoteCard
+
+
+AFTER:
+
+App
+ ├── Shared State
+ ├── Business Logic
+ ├── Effects
+ │
+ └── Child Components
+      ├── QuoteContainer
+      ├── QuoteDisplay
+      └── QuoteActions
+
+
+The architectural principle remains the same:
+
+SHARED STATE STAYS IN THE COMMON OWNER,
+WHILE SPECIALIZED UI RESPONSIBILITIES MOVE INTO CHILD COMPONENTS.
+
+
+================================================================================
+PART 2: UNDERSTANDING THE CURRENT STRUCTURE
+================================================================================
+
+CURRENT COMPONENT TREE
+--------------------------------------------------------------------------------
+
+App
+│
+├── quote State
+├── loading State
+├── error State
+├── color State
+│
+├── getNewQuote()
+├── tweetQuote()
+│
+├── Keyboard Effect
+├── Initial Fetch Effect
+│
+├── Header JSX
+├── QuoteCard
+├── Buttons JSX
+└── Footer JSX
+
+
+CURRENT STATE OWNERSHIP
+--------------------------------------------------------------------------------
+
++----------------+-----------------------------------------------------+
+| COMPONENT      | RESPONSIBILITY                                      |
++----------------+-----------------------------------------------------+
+| App            | Owns quote state                                   |
+| App            | Owns loading state                                 |
+| App            | Owns error state                                   |
+| App            | Owns color state                                   |
+| App            | Owns handlers                                      |
+| App            | Owns effects                                       |
+| App            | Contains much of page composition                   |
+| QuoteCard      | Receives data through props                         |
+| QuoteCard      | Displays loading/error/quote UI                     |
+| Buttons        | Currently inline inside App                         |
++----------------+-----------------------------------------------------+
+
+
+CURRENT App.jsx - SIMPLIFIED
+--------------------------------------------------------------------------------
+
+import {
+  useEffect,
+  useState
+} from 'react'
+
+import QuoteCard
+  from './components/QuoteCard'
+
+import {
+  fetchRandomQuote
+} from './utils/quoteApi'
+
+
+export default function App() {
+
+  const [quote, setQuote] =
+    useState({
+      text:
+        'The only way to do great work is to love what you do.',
+      author:
+        'Steve Jobs'
+    })
+
+
+  const [loading, setLoading] =
+    useState(false)
+
+
+  const [error, setError] =
+    useState(null)
+
+
+  const [color, setColor] =
+    useState('#667eea')
+
+
+  // Handlers...
+
+  // Effects...
+
+  return (
+    <div>
+
+      {/* Header */}
+
+      <QuoteCard
+        quote={quote}
+        loading={loading}
+        error={error}
+        color={color}
+      />
+
+      {/* Buttons */}
+
+      {/* Footer */}
+
+    </div>
+  )
+}
+
+
+CHALLENGES WITH THE CURRENT STRUCTURE
+--------------------------------------------------------------------------------
+
+The application works, but App has several responsibilities:
+
+• Owns state
+
+• Handles API interaction
+
+• Handles sharing
+
+• Handles keyboard events
+
+• Manages initial loading
+
+• Defines page layout
+
+• Defines action buttons
+
+• Coordinates QuoteCard
+
+
+This can make App harder to scan as more features are added.
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+QuoteCard being presentational is NOT a problem.
+
+In fact, a component that:
+
+INPUT:
+Props
+
+OUTPUT:
+UI
+
+can be a very useful design.
+
+The main opportunity here is better separation of the surrounding UI.
+
+
+================================================================================
+PART 3: REFACTORING PLAN
+================================================================================
+
+STEP 1: IDENTIFY COMPONENTS
+--------------------------------------------------------------------------------
+
+Create:
+
+1. QuoteContainer
+
+   Responsibility:
+   • Page/layout container
+   • Dynamic background
+
+
+2. QuoteDisplay
+
+   Responsibility:
+   • Loading UI
+   • Error UI
+   • Quote UI
+   • Author UI
+
+
+3. QuoteActions
+
+   Responsibility:
+   • New Quote button
+   • Tweet button
+
+
+4. App
+
+   Responsibility:
+   • Shared state
+   • API-related handler
+   • Share handler
+   • Effects
+   • Component coordination
+
+
+================================================================================
+STEP 2: DETERMINE STATE OWNERSHIP
+================================================================================
+
+Which components need quote?
+
+QuoteDisplay
+Tweet action
+
+
+Which components need loading?
+
+QuoteDisplay
+QuoteActions
+
+
+Which components need color?
+
+QuoteContainer
+QuoteDisplay
+
+
+Therefore:
+
+App
+ ↓
+Nearest common owner
+ ↓
+Keep shared state in App
+
+
+================================================================================
+STATE OWNERSHIP TABLE
+================================================================================
+
++----------------+-------------------------------+----------------------------+
+| STATE          | CONSUMERS                     | OWNER                      |
++----------------+-------------------------------+----------------------------+
+| quote          | QuoteDisplay, tweet handler   | App                        |
+| loading        | QuoteDisplay, QuoteActions    | App                        |
+| error          | QuoteDisplay                  | App                        |
+| color          | Container, QuoteDisplay       | App                        |
++----------------+-------------------------------+----------------------------+
+
+
+================================================================================
+STEP 3: PLAN PROP FLOW
+================================================================================
+
+App
+│
+├── QuoteContainer
+│   └── color
+│
+├── QuoteDisplay
+│   ├── quote
+│   ├── loading
+│   ├── error
+│   └── color
+│
+└── QuoteActions
+    ├── loading
+    ├── onNewQuote
+    └── onTweet
+
+
+================================================================================
+REFACTORING PLAN
+================================================================================
+
++-------------------+--------------------------------------------------+
+| COMPONENT         | RESPONSIBILITY                                   |
++-------------------+--------------------------------------------------+
+| App               | Shared state                                    |
+|                   | Handlers                                        |
+|                   | Effects                                         |
+|                   | Composition                                     |
+| QuoteContainer    | App background/layout                           |
+| QuoteDisplay      | Quote/loading/error presentation                |
+| QuoteActions      | Action buttons                                  |
++-------------------+--------------------------------------------------+
+
+
+================================================================================
+PART 4: REFACTORED COMPONENT STRUCTURE
+================================================================================
+
+STEP 1: CREATE QuoteDisplay
+================================================================================
+
+File:
+
+src/components/QuoteDisplay.jsx
+
+
+export default function QuoteDisplay({
+  quote,
+  loading,
+  error,
+  color
+}) {
+
+  return (
+    <div className="quote-display-container">
+
+
+      {/* Error */}
+
+      {error && (
+
+        <div
+          className="alert alert-danger"
+          role="alert"
+        >
+
+          <i className="bi bi-exclamation-circle me-2"></i>
+
+          <strong>
+            Error:
+          </strong>
+
+          {' '}
+
+          {error}
+
+        </div>
+
+      )}
+
+
+      {/* Loading */}
+
+      {loading && (
+
+        <div className="d-flex flex-column align-items-center justify-content-center py-5">
+
+          <div
+            className="spinner-border text-white mb-3"
+            role="status"
+          >
+
+            <span className="visually-hidden">
+              Loading...
+            </span>
+
+          </div>
+
+
+          <p className="text-white fw-bold">
+
+            Fetching a new quote...
+
+          </p>
+
+        </div>
+
+      )}
+
+
+      {/* Quote */}
+
+      {!loading && !error && (
+
+        <div
+          className="card shadow-lg border-0"
+          style={{
+            borderLeft:
+              `5px solid ${color}`
+          }}
+        >
+
+          <div className="card-body p-5">
+
+
+            {/* Opening Quote */}
+
+            <div
+              className="display-1 mb-3"
+              style={{
+                color
+              }}
+            >
+              "
+            </div>
+
+
+            {/* Quote Text */}
+
+            <p className="card-text fs-5 lh-lg mb-4 text-dark">
+
+              {quote.text}
+
+            </p>
+
+
+            {/* Closing Quote */}
+
+            <div
+              className="display-1 text-end mb-3"
+              style={{
+                color
+              }}
+            >
+              "
+            </div>
+
+          </div>
+
+
+          {/* Author */}
+
+          <div className="card-footer bg-light border-top">
+
+            <p className="card-text text-end mb-0">
+
+              <strong
+                style={{
+                  color
+                }}
+              >
+
+                — {quote.author}
+
+              </strong>
+
+            </p>
+
+          </div>
+
+        </div>
+
+      )}
+
+    </div>
+  )
+}
+
+
+QuoteDisplay RESPONSIBILITY
+--------------------------------------------------------------------------------
+
+INPUT:
+
+quote
+loading
+error
+color
+
+
+        ↓
+
+
+QuoteDisplay
+
+
+        ↓
+
+
+OUTPUT:
+
+Error UI
+
+or
+
+Loading UI
+
+or
+
+Quote UI
+
+
+================================================================================
+QuoteDisplay EXPLANATION
+================================================================================
+
++------------------------------+-----------------------------------------+
+| CODE / CONCEPT               | PURPOSE                                 |
++------------------------------+-----------------------------------------+
+| quote                        | Current quote                            |
+| loading                      | Determines loading UI                    |
+| error                        | Determines error UI                      |
+| color                        | Dynamic visual accent                    |
+| error && ...                 | Conditional error rendering             |
+| loading && ...               | Conditional loading rendering           |
+| !loading && !error           | Shows quote when ready                  |
+| style={{ color }}            | Dynamic state-driven color              |
+| quote.text                   | Displays quote                          |
+| quote.author                 | Displays author                         |
++------------------------------+-----------------------------------------+
+
+
+================================================================================
+STEP 2: CREATE QuoteActions
+================================================================================
+
+File:
+
+src/components/QuoteActions.jsx
+
+
+export default function QuoteActions({
+  onNewQuote,
+  onTweet,
+  loading
+}) {
+
+  return (
+    <div className="quote-actions-container">
+
+      <div className="d-flex gap-3 justify-content-center flex-wrap">
+
+
+        {/* New Quote */}
+
+        <button
+          onClick={onNewQuote}
+          disabled={loading}
+          className="btn btn-light btn-lg fw-bold"
+          title="Click or press spacebar for a new quote"
+        >
+
+          {loading ? (
+
+            <>
+
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              >
+              </span>
+
+              Loading...
+
+            </>
+
+          ) : (
+
+            <>
+
+              <i className="bi bi-arrow-repeat me-2"></i>
+
+              New Quote
+
+            </>
+
+          )}
+
+        </button>
+
+
+        {/* Tweet */}
+
+        <button
+          onClick={onTweet}
+          disabled={loading}
+          className="btn btn-info btn-lg fw-bold text-white"
+          title="Share this quote"
+        >
+
+          <i className="bi bi-twitter me-2"></i>
+
+          Tweet
+
+        </button>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+QuoteActions RESPONSIBILITY
+--------------------------------------------------------------------------------
+
+INPUT:
+
+onNewQuote
+onTweet
+loading
+
+
+        ↓
+
+
+QuoteActions
+
+
+        ↓
+
+
+USER ACTIONS:
+
+New Quote
+Tweet
+
+
+        ↓
+
+
+CALLBACKS TO App
+
+
+================================================================================
+QuoteActions EXPLANATION
+================================================================================
+
++----------------------------+------------------------------------------+
+| CODE / CONCEPT             | PURPOSE                                  |
++----------------------------+------------------------------------------+
+| onNewQuote                 | Parent callback for new quote            |
+| onTweet                    | Parent callback for sharing              |
+| loading                    | Controls action availability             |
+| onClick={onNewQuote}       | Requests quote update                    |
+| disabled={loading}         | Prevents action during request           |
+| loading ? ...              | Displays progress state                  |
+| onClick={onTweet}          | Requests sharing action                  |
++----------------------------+------------------------------------------+
+
+
+================================================================================
+STEP 3: CREATE QuoteContainer
+================================================================================
+
+File:
+
+src/components/QuoteContainer.jsx
+
+
+export default function QuoteContainer({
+  color,
+  children
+}) {
+
+  return (
+    <div
+      className="min-vh-100 d-flex align-items-center justify-content-center py-5"
+      style={{
+        background:
+          `linear-gradient(
+            135deg,
+            ${color} 0%,
+            ${color}cc 100%
+          )`
+      }}
+    >
+
+      <div className="container">
+
+        {children}
+
+      </div>
+
+    </div>
+  )
+}
+
+
+QuoteContainer RESPONSIBILITY
+--------------------------------------------------------------------------------
+
+INPUT:
+
+color
+children
+
+
+        ↓
+
+
+QuoteContainer
+
+
+        ↓
+
+
+OUTPUT:
+
+Page Layout
++
+Dynamic Background
++
+Rendered Children
+
+
+================================================================================
+QuoteContainer EXPLANATION
+================================================================================
+
++----------------------+------------------------------------------------+
+| CONCEPT              | PURPOSE                                        |
++----------------------+------------------------------------------------+
+| color                | Dynamic background color                       |
+| children             | Nested JSX provided by App                     |
+| style.background     | Creates dynamic gradient                       |
+| container            | Bootstrap page wrapper                         |
+| {children}           | Component composition pattern                  |
++----------------------+------------------------------------------------+
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+children is not state.
+
+children is a prop containing nested React content.
+
+
+================================================================================
+PART 5: COMPLETE REFACTORED App.jsx
+================================================================================
+
+File:
+
+src/App.jsx
+
+
+import {
+  useCallback,
+  useEffect,
+  useState
+} from 'react'
+
+import QuoteContainer
+  from './components/QuoteContainer'
+
+import QuoteDisplay
+  from './components/QuoteDisplay'
+
+import QuoteActions
+  from './components/QuoteActions'
+
+import {
+  fetchRandomQuote
+} from './utils/quoteApi'
+
+import './App.css'
+
+
+const COLORS = [
+
+  '#667eea',
+
+  '#764ba2',
+
+  '#f093fb',
+
+  '#4facfe',
+
+  '#00f2fe',
+
+  '#43e97b',
+
+  '#fa709a',
+
+  '#fee140',
+
+  '#30cfd0',
+
+  '#330867'
+
+]
+
+
+const getRandomColor = () => {
+
+  const randomIndex =
+    Math.floor(
+      Math.random() *
+      COLORS.length
+    )
+
+
+  return COLORS[randomIndex]
+}
+
+
+export default function App() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [quote, setQuote] =
+    useState({
+
+      text:
+        'The only way to do great work is to love what you do.',
+
+      author:
+        'Steve Jobs'
+
+    })
+
+
+  const [loading, setLoading] =
+    useState(false)
+
+
+  const [error, setError] =
+    useState(null)
+
+
+  const [color, setColor] =
+    useState(COLORS[0])
+
+
+  // ============================================
+  // HANDLERS
+  // ============================================
+
+  const handleGetNewQuote =
+    useCallback(async () => {
+
+      setLoading(true)
+
+      setError(null)
+
+
+      try {
+
+        const newQuote =
+          await fetchRandomQuote()
+
+
+        setQuote(newQuote)
+
+
+        setColor(
+          getRandomColor()
+        )
+
+
+        console.log(
+          'Quote fetched successfully:',
+          newQuote
+        )
+
+      } catch (err) {
+
+        setError(
+          'Failed to fetch quote. Please try again.'
+        )
+
+
+        console.error(
+          'Error fetching quote:',
+          err
+        )
+
+      } finally {
+
+        setLoading(false)
+
+      }
+
+    }, [])
+
+
+  const handleTweetQuote = () => {
+
+    const tweetText =
+      `"${quote.text}" — ${quote.author}`
+
+
+    const twitterUrl =
+      `https://twitter.com/intent/tweet?text=${
+        encodeURIComponent(tweetText)
+      }`
+
+
+    window.open(
+      twitterUrl,
+      '_blank',
+      'width=550,height=420'
+    )
+  }
+
+
+  // ============================================
+  // EFFECTS
+  // ============================================
+
+  useEffect(() => {
+
+    const handleKeyPress = (e) => {
+
+      if (
+        e.code === 'Space' &&
+        !loading
+      ) {
+
+        const tagName =
+          e.target.tagName
+
+
+        if (
+          tagName === 'INPUT' ||
+          tagName === 'TEXTAREA' ||
+          tagName === 'SELECT'
+        ) {
+
+          return
+        }
+
+
+        e.preventDefault()
+
+
+        handleGetNewQuote()
+      }
+    }
+
+
+    window.addEventListener(
+      'keydown',
+      handleKeyPress
+    )
+
+
+    return () => {
+
+      window.removeEventListener(
+        'keydown',
+        handleKeyPress
+      )
+
+    }
+
+  }, [
+    handleGetNewQuote,
+    loading
+  ])
+
+
+  useEffect(() => {
+
+    handleGetNewQuote()
+
+  }, [handleGetNewQuote])
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <QuoteContainer
+      color={color}
+    >
+
+
+      {/* Header */}
+
+      <header className="text-center mb-5">
+
+        <h1 className="display-4 fw-bold text-white mb-3">
+
+          Random Quote Generator
+
+        </h1>
+
+
+        <p className="lead text-white-50">
+
+          Press spacebar or click button
+          for a new quote
+
+        </p>
+
+      </header>
+
+
+      {/* Quote Display */}
+
+      <div className="row justify-content-center mb-5">
+
+        <div className="col-12 col-lg-8">
+
+          <QuoteDisplay
+            quote={quote}
+            loading={loading}
+            error={error}
+            color={color}
+          />
+
+        </div>
+
+      </div>
+
+
+      {/* Actions */}
+
+      <div className="row justify-content-center">
+
+        <div className="col-12 col-lg-8">
+
+          <QuoteActions
+            onNewQuote={
+              handleGetNewQuote
+            }
+            onTweet={
+              handleTweetQuote
+            }
+            loading={loading}
+          />
+
+        </div>
+
+      </div>
+
+
+      {/* Footer */}
+
+      <footer className="text-center mt-5">
+
+        <p className="text-white-50">
+
+          Random Quote App
+
+        </p>
+
+      </footer>
+
+
+    </QuoteContainer>
+  )
+}
+
+
+================================================================================
+REFACTORED App RESPONSIBILITIES
+================================================================================
+
++----------------------+-----------------------------------------------+
+| SECTION              | RESPONSIBILITY                                |
++----------------------+-----------------------------------------------+
+| COLORS               | Static color palette                          |
+| quote State          | Current quote                                 |
+| loading State        | Request status                                |
+| error State          | Request failure                              |
+| color State          | Current theme color                           |
+| handleGetNewQuote    | Quote-fetch/update workflow                   |
+| handleTweetQuote     | Share current quote                           |
+| Keyboard Effect      | Spacebar action                               |
+| Initial Effect       | Initial quote request                         |
+| Render               | Compose child components                      |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+IMPORTANT STATE OWNERSHIP REASONING
+================================================================================
+
+WHY DOES quote STAY IN App?
+--------------------------------------------------------------------------------
+
+Because:
+
+QuoteDisplay needs quote
+
+AND
+
+handleTweetQuote needs quote
+
+
+Therefore App is a suitable common owner.
+
+
+WHY DOES loading STAY IN App?
+--------------------------------------------------------------------------------
+
+Because:
+
+QuoteDisplay needs loading
+
+AND
+
+QuoteActions needs loading
+
+
+Therefore loading is shared.
+
+
+WHY DOES color STAY IN App?
+--------------------------------------------------------------------------------
+
+Because:
+
+QuoteContainer needs color
+
+AND
+
+QuoteDisplay needs color
+
+
+Therefore color is shared.
+
+
+WHY DOES error STAY IN App?
+--------------------------------------------------------------------------------
+
+Because the quote-fetching process is controlled by App and QuoteDisplay
+needs to render the resulting error.
+
+
+================================================================================
+PART 6: COMPONENT HIERARCHY
+================================================================================
+
+BEFORE
+--------------------------------------------------------------------------------
+
+App
+│
+├── State
+│   ├── quote
+│   ├── loading
+│   ├── error
+│   └── color
+│
+├── Handlers
+│   ├── getNewQuote
+│   └── tweetQuote
+│
+├── Effects
+│   ├── Keyboard
+│   └── Initial Load
+│
+├── Header JSX
+├── QuoteCard
+├── Buttons JSX
+└── Footer JSX
+
+
+================================================================================
+AFTER
+================================================================================
+
+App
+│
+├── Shared State
+│   ├── quote
+│   ├── loading
+│   ├── error
+│   └── color
+│
+├── Application Logic
+│   ├── handleGetNewQuote
+│   └── handleTweetQuote
+│
+├── Effects
+│   ├── Keyboard
+│   └── Initial Load
+│
+└── QuoteContainer
+    │
+    ├── Header
+    │
+    ├── QuoteDisplay
+    │   ├── Loading UI
+    │   ├── Error UI
+    │   └── Quote UI
+    │
+    ├── QuoteActions
+    │   ├── New Quote
+    │   └── Tweet
+    │
+    └── Footer
+
+
+================================================================================
+BEFORE VS AFTER
+================================================================================
+
++--------------------------+----------------------+-----------------------------+
+| AREA                     | BEFORE               | AFTER                       |
++--------------------------+----------------------+-----------------------------+
+| Shared state owner       | App                  | App                         |
+| Quote presentation       | QuoteCard            | QuoteDisplay                |
+| Buttons                  | Inline in App         | QuoteActions                |
+| Background/layout        | Inline in App         | QuoteContainer              |
+| State ownership          | Centralized          | Centralized                 |
+| Responsibilities         | More mixed            | More separated              |
+| Component composition    | Limited               | Clearer                     |
+| Independent UI testing   | Less granular         | More granular               |
+| Extensibility            | Adequate              | Improved organization       |
++--------------------------+----------------------+-----------------------------+
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Do not judge architecture by line count alone.
+
+A 100-line component is not automatically better than a 150-line component.
+
+The useful questions are:
+
+• Does each component have a clear responsibility?
+
+• Is state owned in the right place?
+
+• Is duplication reduced?
+
+• Is the component API understandable?
+
+• Can behavior be tested and modified safely?
+
+
+================================================================================
+PART 7: DATA FLOW IN THE REFACTORED APP
+================================================================================
+
+COMPLETE DATA FLOW
+--------------------------------------------------------------------------------
+
+                         App
+                          │
+           owns application state
+                          │
+             +------------+------------+
+             |            |            |
+             ↓            ↓            ↓
+      QuoteContainer QuoteDisplay QuoteActions
+             |            |            |
+          color      quote/loading    callbacks
+                        error/color     loading
+             |            |            |
+             ↓            ↓            ↓
+        Background      Quote UI     User Actions
+                                      |
+                                      ↓
+                              onNewQuote()
+                                      |
+                                      ↓
+                                     App
+                                      |
+                                      ↓
+                            handleGetNewQuote()
+                                      |
+                                      ↓
+                              fetchRandomQuote()
+                                      |
+                                      ↓
+                               State Updates
+                                      |
+                 +--------------------+------------------+
+                 |                    |                  |
+                 ↓                    ↓                  ↓
+              quote                 color             loading
+                 |                    |                  |
+                 +--------------------+------------------+
+                                      ↓
+                               React Renders
+                                      ↓
+                                Updated UI
+
+
+================================================================================
+STEP-BY-STEP: NEW QUOTE
+================================================================================
+
+1. User clicks:
+
+   New Quote
+
+
+2. QuoteActions executes:
+
+   onNewQuote()
+
+
+3. App's:
+
+   handleGetNewQuote()
+
+   executes
+
+
+4. App requests:
+
+   setLoading(true)
+
+
+5. QuoteDisplay receives:
+
+   loading = true
+
+
+6. QuoteActions receives:
+
+   loading = true
+
+
+7. UI shows loading state and disables appropriate actions
+
+
+8. API request finishes
+
+
+9. App requests state updates:
+
+   setQuote(newQuote)
+
+   setColor(newColor)
+
+   setLoading(false)
+
+
+10. React processes the updates
+
+
+11. Children receive current props
+
+
+12. QuoteDisplay shows the quote
+
+
+13. QuoteContainer shows the current background
+
+
+14. QuoteActions becomes usable again
+
+
+================================================================================
+DATA FLOW TABLE
+================================================================================
+
++------+--------------------+------------------------------------------+
+| STEP | COMPONENT          | ACTION                                   |
++------+--------------------+------------------------------------------+
+| 1    | QuoteActions       | User clicks New Quote                    |
+| 2    | QuoteActions       | Calls onNewQuote                         |
+| 3    | App                | Runs handleGetNewQuote                   |
+| 4    | App                | Sets loading                             |
+| 5    | App                | Calls quote API utility                  |
+| 6    | App                | Updates quote/color                      |
+| 7    | App                | Finishes loading                         |
+| 8    | QuoteDisplay       | Receives latest presentation props       |
+| 9    | QuoteContainer     | Receives latest color                    |
+| 10   | QuoteActions       | Receives latest loading value            |
+| 11   | React              | Renders resulting UI                     |
++------+--------------------+------------------------------------------+
+
+
+================================================================================
+TWEET/SHARE DATA FLOW
+================================================================================
+
+Quote State
+    ↓
+App
+    ↓
+handleTweetQuote()
+    ↓
+Create Text
+    ↓
+encodeURIComponent()
+    ↓
+Sharing URL
+    ↓
+window.open()
+
+
+Why is the share handler in App?
+
+Because App owns the current quote used by the action.
+
+
+================================================================================
+PART 8: COMPARING BEFORE AND AFTER
+================================================================================
+
+BEFORE REFACTORING
+--------------------------------------------------------------------------------
+
+App.jsx
+│
+├── Imports
+├── State
+├── Color Logic
+├── API Handler
+├── Sharing Handler
+├── Effects
+├── Header
+├── Quote Display
+├── Buttons
+└── Footer
+
+
+Characteristics:
+
+• Working application
+
+• Shared state already correctly located in App
+
+• Several UI responsibilities mixed inside App
+
+• Action markup lives directly in App
+
+• Layout/background lives directly in App
+
+
+================================================================================
+AFTER REFACTORING
+================================================================================
+
+App.jsx
+│
+├── State
+├── Application Logic
+├── Effects
+└── Component Composition
+
+
+QuoteContainer.jsx
+│
+└── Layout + background
+
+
+QuoteDisplay.jsx
+│
+├── Quote
+├── Loading
+└── Error
+
+
+QuoteActions.jsx
+│
+├── New Quote
+└── Tweet
+
+
+Characteristics:
+
+• State stays centralized
+
+• Presentation responsibilities are clearer
+
+• Actions have their own component
+
+• Layout wrapper has its own component
+
+• Child component interfaces are explicit
+
+
+================================================================================
+COMPARISON TABLE
+================================================================================
+
++------------------------+--------------------------+---------------------------+
+| AREA                   | BEFORE                   | AFTER                     |
++------------------------+--------------------------+---------------------------+
+| State ownership        | App                      | App                       |
+| State duplication      | None                     | None                      |
+| Main component duties  | State + many UI details  | State + coordination      |
+| Quote UI               | QuoteCard                | QuoteDisplay              |
+| Actions                | Inline                   | QuoteActions              |
+| Layout wrapper         | Inline                   | QuoteContainer            |
+| Component APIs         | Limited                  | Explicit props/callbacks  |
+| Test granularity       | Lower                    | Higher                    |
+| Reuse potential        | Lower                    | Higher for extracted UI   |
+| Organization           | More centralized         | More modular              |
++------------------------+--------------------------+---------------------------+
+
+
+================================================================================
+PART 9: TESTING THE REFACTORED APP
+================================================================================
+
+MANUAL TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Initial quote loads
+
+[ ] New Quote button works
+
+[ ] Quote text displays
+
+[ ] Author displays
+
+[ ] Loading spinner displays
+
+[ ] Buttons respond correctly during loading
+
+[ ] Theme color updates through the quote workflow
+
+[ ] Dynamic background renders
+
+[ ] Quote accent color renders
+
+[ ] Error/fallback strategy behaves correctly
+
+[ ] Share button uses current quote
+
+[ ] Keyboard shortcut works
+
+[ ] Spacebar doesn't interfere with form controls
+
+[ ] No duplicate requests while loading
+
+[ ] Layout works on smaller screens
+
+[ ] Browser console checked
+
+
+================================================================================
+SCENARIO 1: INITIAL LOAD
+================================================================================
+
+STEPS:
+
+1. Open App
+
+2. App mounts
+
+3. Initial effect calls handleGetNewQuote()
+
+4. Quote request is processed
+
+
+EXPECTED:
+
+• Loading behavior appears as designed
+
+• Current quote eventually displays
+
+• Current theme color displays
+
+• App remains usable
+
+
+================================================================================
+SCENARIO 2: NEW QUOTE BUTTON
+================================================================================
+
+STEPS:
+
+1. Click New Quote
+
+2. QuoteActions calls onNewQuote
+
+3. App performs the request
+
+4. UI receives new props
+
+
+EXPECTED:
+
+• Loading state appears
+
+• New Quote action is disabled during request
+
+• Quote updates after success/fallback
+
+• Theme color selection occurs
+
+• Loading ends
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+A random-color selector can choose the same color twice.
+
+Therefore, automated tests should not assume every request MUST visually
+produce a different color unless the implementation explicitly prevents
+repetition.
+
+
+================================================================================
+SCENARIO 3: SHARE QUOTE
+================================================================================
+
+STEPS:
+
+1. Current quote is displayed
+
+2. Click Tweet
+
+3. QuoteActions calls onTweet
+
+4. App builds the sharing text
+
+
+EXPECTED:
+
+• Sharing URL contains encoded quote text
+
+• Author is included in sharing text
+
+• Sharing window is requested
+
+
+================================================================================
+SCENARIO 4: KEYBOARD SHORTCUT
+================================================================================
+
+STEPS:
+
+1. Press Spacebar
+
+2. Keyboard handler runs
+
+3. handleGetNewQuote is called
+
+
+EXPECTED:
+
+• Request begins when appropriate
+
+• Default page scrolling is prevented for the handled shortcut
+
+• Loading behavior matches the button flow
+
+• Quote update uses the same application logic
+
+
+================================================================================
+COMPONENT TESTING STRATEGY
+================================================================================
+
+QuoteDisplay can be tested with props:
+
+CASE 1:
+
+loading = true
+
+Expected:
+
+Spinner / loading text
+
+
+CASE 2:
+
+error = 'Failed'
+
+Expected:
+
+Error message
+
+
+CASE 3:
+
+loading = false
+error = null
+
+Expected:
+
+Quote + author
+
+
+QuoteActions can be tested with props:
+
+CASE 1:
+
+loading = false
+
+Expected:
+
+Buttons enabled
+
+
+CASE 2:
+
+loading = true
+
+Expected:
+
+Configured buttons disabled
+
+
+CASE 3:
+
+Click New Quote
+
+Expected:
+
+onNewQuote callback called
+
+
+QuoteContainer can be tested with:
+
+color = '#667eea'
+
+Expected:
+
+Background uses supplied color
+
+
+================================================================================
+TESTING SCENARIOS TABLE
+================================================================================
+
++----------------------+-----------------------------------------------+
+| SCENARIO             | EXPECTED                                      |
++----------------------+-----------------------------------------------+
+| Initial load         | Quote workflow executes                       |
+| New Quote            | New quote workflow executes                   |
+| Loading              | Loading UI + disabled actions                 |
+| Error                | Configured error/fallback behavior            |
+| Sharing              | Current quote supplied to share action        |
+| Spacebar             | Same new-quote workflow                       |
+| Dynamic color        | Current color applied                         |
+| Responsive layout    | Layout remains usable                         |
+| Component props      | Child renders based on supplied props         |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+PART 10: BENEFITS OF THE REFACTORING
+================================================================================
+
+BENEFIT 1: SEPARATION OF CONCERNS
+--------------------------------------------------------------------------------
+
+App:
+State + application coordination
+
+
+QuoteDisplay:
+Presentation
+
+
+QuoteActions:
+User actions
+
+
+QuoteContainer:
+Layout/background
+
+
+================================================================================
+BENEFIT 2: IMPROVED TESTABILITY
+================================================================================
+
+Instead of testing one large component for every UI condition:
+
+QuoteDisplay
+    ↓
+Test presentation states
+
+
+QuoteActions
+    ↓
+Test action callbacks
+
+
+QuoteContainer
+    ↓
+Test layout/theme input
+
+
+App
+    ↓
+Test state/application integration
+
+
+================================================================================
+BENEFIT 3: MAINTAINABILITY
+================================================================================
+
+Need to change button markup?
+
+QuoteActions.jsx
+
+
+Need to change quote visual presentation?
+
+QuoteDisplay.jsx
+
+
+Need to change page background?
+
+QuoteContainer.jsx
+
+
+Need to change API/state coordination?
+
+App.jsx
+
+
+================================================================================
+BENEFIT 4: REUSE POTENTIAL
+================================================================================
+
+The extracted components MAY become reusable when their props/behavior are
+general enough.
+
+For example:
+
+QuoteDisplay
+
+could potentially be rendered by another page that provides:
+
+• quote
+• loading
+• error
+• color
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Extracting a component does not automatically make it reusable.
+
+Reusability depends on whether its interface is sufficiently generic and
+appropriate for another use case.
+
+
+================================================================================
+BENEFIT 5: CLEARER CODE
+================================================================================
+
+App becomes more declarative:
+
+<QuoteContainer>
+
+  <Header />
+
+  <QuoteDisplay />
+
+  <QuoteActions />
+
+  <Footer />
+
+</QuoteContainer>
+
+
+This makes the application structure easier to scan.
+
+
+================================================================================
+BENEFIT 6: DEBUGGING
+================================================================================
+
+Problem with state?
+
+Check:
+
+App
+
+
+Problem with quote rendering?
+
+Check:
+
+QuoteDisplay
+
+
+Problem with buttons?
+
+Check:
+
+QuoteActions
+
+
+Problem with background?
+
+Check:
+
+QuoteContainer
+
+
+================================================================================
+BENEFIT 7: SCALABILITY
+================================================================================
+
+Possible future additions:
+
+• FavoriteQuoteButton
+
+• CopyQuoteButton
+
+• QuoteHistory
+
+• ThemeSelector
+
+• CategorySelector
+
+• SavedQuotes
+
+
+Because shared quote state has a known owner, future components can be
+connected deliberately.
+
+
+================================================================================
+BENEFITS SUMMARY
+================================================================================
+
++-------------------------+---------------------------------------------+
+| BENEFIT                 | IMPACT                                      |
++-------------------------+---------------------------------------------+
+| Separation              | Clear responsibilities                      |
+| Testability             | Smaller pieces can be tested                |
+| Maintainability         | Changes localized                           |
+| Reuse Potential         | Extracted APIs can be reused               |
+| Code Clarity            | Component tree easier to read               |
+| Debugging               | Responsibilities easier to trace            |
+| Scalability             | New components easier to integrate          |
++-------------------------+---------------------------------------------+
+
+
+IMPORTANT PERFORMANCE NOTE
+--------------------------------------------------------------------------------
+
+Refactoring into more components does NOT automatically mean:
+
+"Optimized re-renders."
+
+When App state changes, child components can render again.
+
+Component extraction primarily improves:
+
+• Architecture
+
+• Separation
+
+• Maintainability
+
+• Testability
+
+
+Performance optimization should be based on measurement.
+
+React.memo, useMemo, or useCallback should not be added everywhere simply
+because components were extracted.
+
+
+================================================================================
+PART 11: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE ACCOMPLISHED
+--------------------------------------------------------------------------------
+
+✓ Analyzed the existing Quote App
+
+✓ Identified the existing shared-state owner
+
+✓ Kept shared state in App
+
+✓ Extracted QuoteContainer
+
+✓ Extracted QuoteDisplay
+
+✓ Extracted QuoteActions
+
+✓ Passed state through props
+
+✓ Passed callbacks through props
+
+✓ Preserved one-way data flow
+
+✓ Coordinated quote/loading/error/color state
+
+✓ Separated presentation from application logic
+
+✓ Improved test granularity
+
+✓ Improved component organization
+
+✓ Preserved application behavior
+
+
+================================================================================
+CRITICAL REFACTORING POINTS
+================================================================================
+
+• Identify Shared State
+
+• Determine Who Reads Each State Value
+
+• Determine Who Updates Each State Value
+
+• Find the Nearest Common Owner
+
+• Keep Shared State in That Owner
+
+• Pass State Down Through Props
+
+• Pass Callback Functions Down
+
+• Keep Presentation Components Focused
+
+• Avoid Duplicating Shared State
+
+• Don't Lift State Higher Than Necessary
+
+• Keep State Local If Only One Component Needs It
+
+• Refactor Incrementally
+
+• Test Behavior After Each Change
+
+
+================================================================================
+REFACTORING WORKFLOW
+================================================================================
+
+1. ANALYZE
+--------------------------------------------------------------------------------
+
+Understand the existing component tree.
+
+
+        ↓
+
+
+2. IDENTIFY STATE OWNERSHIP
+--------------------------------------------------------------------------------
+
+Who currently owns state?
+
+
+        ↓
+
+
+3. IDENTIFY CONSUMERS
+--------------------------------------------------------------------------------
+
+Which components need each state value?
+
+
+        ↓
+
+
+4. FIND COMMON OWNER
+--------------------------------------------------------------------------------
+
+Where should shared state live?
+
+
+        ↓
+
+
+5. EXTRACT COMPONENTS
+--------------------------------------------------------------------------------
+
+QuoteDisplay
+
+QuoteActions
+
+QuoteContainer
+
+
+        ↓
+
+
+6. DEFINE PROPS
+--------------------------------------------------------------------------------
+
+Data Props
+
++
+
+Callback Props
+
+
+        ↓
+
+
+7. CONNECT COMPONENTS
+--------------------------------------------------------------------------------
+
+App → Children
+
+
+        ↓
+
+
+8. TEST
+--------------------------------------------------------------------------------
+
+Verify existing behavior
+
+
+        ↓
+
+
+9. CLEAN UP
+--------------------------------------------------------------------------------
+
+Remove obsolete markup/files
+
+
+        ↓
+
+
+10. REVIEW
+--------------------------------------------------------------------------------
+
+Check:
+
+• State ownership
+• Component responsibilities
+• Prop APIs
+• Duplication
+• Accessibility
+• Testing
+
+
+================================================================================
+KEY CODE PATTERNS
+================================================================================
+
+PARENT STATE:
+--------------------------------------------------------------------------------
+
+const [quote, setQuote] =
+  useState(initialQuote)
+
+
+CALLBACK IN PARENT:
+--------------------------------------------------------------------------------
+
+const handleGetNewQuote =
+  async () => {
+
+    // Update shared state
+
+  }
+
+
+DATA PROP:
+--------------------------------------------------------------------------------
+
+<QuoteDisplay
+  quote={quote}
+/>
+
+
+CALLBACK PROP:
+--------------------------------------------------------------------------------
+
+<QuoteActions
+  onNewQuote={
+    handleGetNewQuote
+  }
+/>
+
+
+CHILD RECEIVES DATA:
+--------------------------------------------------------------------------------
+
+function QuoteDisplay({
+  quote
+}) {
+
+  return (
+    <p>
+      {quote.text}
+    </p>
+  )
+}
+
+
+CHILD RECEIVES ACTION:
+--------------------------------------------------------------------------------
+
+function QuoteActions({
+  onNewQuote
+}) {
+
+  return (
+    <button
+      onClick={onNewQuote}
+    >
+      New Quote
+    </button>
+  )
+}
+
+
+================================================================================
+COMPLETE FINAL STRUCTURE
+================================================================================
+
+App
+│
+├── STATE
+│   ├── quote
+│   ├── loading
+│   ├── error
+│   └── color
+│
+├── HANDLERS
+│   ├── handleGetNewQuote
+│   └── handleTweetQuote
+│
+├── EFFECTS
+│   ├── Initial Quote
+│   └── Keyboard Shortcut
+│
+└── UI
+    │
+    └── QuoteContainer
+        │
+        ├── Header
+        │
+        ├── QuoteDisplay
+        │   ├── Error
+        │   ├── Loading
+        │   └── Quote
+        │
+        ├── QuoteActions
+        │   ├── New Quote
+        │   └── Tweet
+        │
+        └── Footer
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++----------------------+-----------------------------------------------+
+| CONCEPT              | REMEMBER                                      |
++----------------------+-----------------------------------------------+
+| State Owner          | Component that holds shared state              |
+| App                  | Shared state + coordination                    |
+| QuoteContainer       | Layout + dynamic background                    |
+| QuoteDisplay         | Quote/loading/error presentation              |
+| QuoteActions         | User action controls                          |
+| Data Props           | Parent → child values                         |
+| Callback Props       | Child → parent action requests                |
+| children Prop        | Nested component composition                  |
+| Shared State         | One source of truth                           |
+| Local State          | Keep local when sharing isn't required        |
+| One-Way Data Flow    | State down, callback request up               |
+| Refactoring          | Change structure without losing behavior      |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+BEFORE VS AFTER - QUICK VIEW
+================================================================================
+
+BEFORE:
+--------------------------------------------------------------------------------
+
+App
+ ├── State
+ ├── Logic
+ ├── Effects
+ ├── Layout
+ ├── Buttons
+ └── QuoteCard
+
+
+AFTER:
+--------------------------------------------------------------------------------
+
+App
+ ├── State
+ ├── Logic
+ ├── Effects
+ │
+ └── QuoteContainer
+      ├── QuoteDisplay
+      └── QuoteActions
+
+
+STATE OWNERSHIP:
+
+BEFORE:
+
+App
+
+
+AFTER:
+
+App
+
+
+WHAT REALLY CHANGED?
+
+UI RESPONSIBILITIES WERE EXTRACTED INTO FOCUSED CHILD COMPONENTS.
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+STATE OWNERSHIP:
+
+Multiple Components Need Data
+        ↓
+Nearest Common Owner
+        ↓
+Shared State
+
+
+DATA:
+
+App State
+   ↓
+Props
+   ↓
+Child
+
+
+ACTION:
+
+Child
+  ↓
+Callback
+  ↓
+App
+  ↓
+setState()
+  ↓
+Updated Props
+
+
+QUOTE APP:
+
+QuoteActions
+     ↓
+onNewQuote
+     ↓
+App
+     ↓
+API
+     ↓
+State
+     ↓
+QuoteDisplay
+
+
+COLOR:
+
+App color
+   ↓
++--------------------+
+|                    |
+↓                    ↓
+QuoteContainer    QuoteDisplay
+
+
+REFACTORING:
+
+Working Monolithic UI
+        ↓
+Identify Responsibilities
+        ↓
+Extract Components
+        ↓
+Keep Shared State in Correct Owner
+        ↓
+Pass Props + Callbacks
+        ↓
+Test Same Behavior
+
+
+MOST IMPORTANT RULE:
+
+LIFTING STATE IS ABOUT STATE OWNERSHIP.
+
+COMPONENT EXTRACTION IS ABOUT RESPONSIBILITY.
+
+THE TWO PATTERNS OFTEN WORK TOGETHER,
+BUT THEY ARE NOT THE SAME THING.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Apply lifting-state reasoning to larger component trees
+
+2. Extract reusable UI components
+
+3. Practice designing clear component props
+
+4. Test presentational components independently
+
+5. Learn component composition more deeply
+
+6. Learn Context API
+
+7. Learn useReducer
+
+8. Combine Context + useReducer where appropriate
+
+9. Build quote history/favorites functionality
+
+10. Design larger React applications around clear state ownership
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+For the Random Quote App:
+
+App owns the shared application state.
+
+QuoteContainer receives the visual theme.
+
+QuoteDisplay receives the state needed for presentation.
+
+QuoteActions receives callbacks used to request updates.
+
+
+The resulting flow is:
+
+QuoteActions
+     ↓
+Callback
+     ↓
+App
+     ↓
+State Update
+     ↓
+Props
+     ↓
+QuoteDisplay + QuoteContainer
+
+
+This preserves:
+
+SINGLE SOURCE OF TRUTH
++
+ONE-WAY DATA FLOW
++
+CLEAR COMPONENT RESPONSIBILITIES
+
+
+================================================================================
+END OF LESSON 14
+LIFTING STATE UP - HANDS-ON - RANDOM QUOTE APP
+================================================================================
