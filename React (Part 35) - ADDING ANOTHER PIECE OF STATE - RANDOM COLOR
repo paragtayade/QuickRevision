@@ -1,0 +1,2401 @@
+LESSON 12: ADDING ANOTHER PIECE OF STATE - RANDOM COLOR
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on adding color state management to the Random Quote App.
+
+You will understand:
+
+• Why adding color state improves the user experience
+
+• How to create and manage color state
+
+• How to generate random colors dynamically
+
+• How to update multiple state variables during one interaction
+
+• How to apply dynamic colors to components
+
+• How to coordinate state changes across components
+
+• Best practices for managing multiple state variables
+
+• How to create color palettes and arrays
+
+• How to synchronize color changes with quote changes
+
+• How to build more interactive React applications
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+Adding color state is useful because:
+
+• Enhances Visual Appeal
+  - Different colors create visual variety
+
+• Improves User Experience
+  - Color changes indicate that something changed
+
+• Demonstrates State Management
+  - Shows multiple independent pieces of state
+
+• Teaches Coordination
+  - Quote and color can change during the same action
+
+• Builds Interactivity
+  - Makes the application more dynamic
+
+• Demonstrates a Practical Pattern
+  - Dynamic themes and styling are common UI requirements
+
+• Prepares for Advanced Patterns
+  - Builds toward more complex state coordination
+
+• Improves Visual Polish
+  - Creates a more dynamic appearance
+
+• Provides Visual Feedback
+  - Helps the user recognize a new quote
+
+
+================================================================================
+PART 2: UNDERSTANDING COLOR STATE
+================================================================================
+
+WHAT IS COLOR STATE?
+--------------------------------------------------------------------------------
+
+Color state is:
+
+• A state variable storing the current color
+
+• Updated dynamically in response to application actions
+
+• Used to control visual properties
+
+• Coordinated with quote changes
+
+• Stored as a string
+
+Examples:
+
+'#667eea'
+
+'rgb(102, 126, 234)'
+
+'purple'
+
+
+• Preserved across component re-renders
+
+• Updated using its state setter
+
+• Passed to child components through props when needed
+
+
+COLOR STATE FLOW
+--------------------------------------------------------------------------------
+
+Initial Color
+     ↓
+useState(initialColor)
+     ↓
+Current color
+     ↓
+User Requests New Quote
+     ↓
+getRandomColor()
+     ↓
+setColor(newColor)
+     ↓
+React Re-renders
+     ↓
+New Color Applied to UI
+
+
+================================================================================
+WHY ADD COLOR STATE TO THE QUOTE APP?
+================================================================================
+
++-------------------------+----------------------------------------------+
+| BENEFIT                 | IMPACT                                       |
++-------------------------+----------------------------------------------+
+| Visual Feedback         | User can clearly see a visual change         |
+| Enhanced Appearance     | Creates additional visual variety            |
+| User Engagement         | UI doesn't appear completely static          |
+| Interactive Feel        | User action changes both content and theme   |
+| State Practice          | Demonstrates another independent state       |
+| Props Practice          | Color can be passed to child components      |
+| Dynamic Styling         | React state controls CSS values              |
+| Better UX               | Visual change reinforces quote change        |
++-------------------------+----------------------------------------------+
+
+
+================================================================================
+PART 3: CREATING COLOR STATE
+================================================================================
+
+STEP 1: DEFINE THE COLOR ARRAY
+--------------------------------------------------------------------------------
+
+Define the available colors outside the component when the palette itself
+doesn't depend on component state or props.
+
+
+const COLORS = [
+
+  '#667eea',  // Purple
+
+  '#764ba2',  // Dark Purple
+
+  '#f093fb',  // Pink
+
+  '#4facfe',  // Blue
+
+  '#00f2fe',  // Cyan
+
+  '#43e97b',  // Green
+
+  '#fa709a',  // Red-Pink
+
+  '#fee140',  // Yellow
+
+  '#30cfd0',  // Teal
+
+  '#330867',  // Dark Purple
+
+  '#ff6b6b',  // Red
+
+  '#4ecdc4',  // Turquoise
+
+  '#45b7d1',  // Sky Blue
+
+  '#f7b731',  // Gold
+
+  '#5f27cd'   // Deep Purple
+
+]
+
+
+WHAT THIS DOES
+--------------------------------------------------------------------------------
+
+• Defines a reusable color palette
+
+• Provides multiple values for random selection
+
+• Keeps available colors organized
+
+• Makes adding/removing colors easy
+
+• Avoids recreating the same constant array inside every render
+
+
+================================================================================
+STEP 2: CREATE COLOR STATE
+================================================================================
+
+import { useState } from 'react'
+
+
+const COLORS = [
+  '#667eea',
+  '#764ba2',
+  '#f093fb',
+  '#4facfe',
+  '#00f2fe',
+  '#43e97b',
+  '#fa709a',
+  '#fee140',
+  '#30cfd0',
+  '#330867'
+]
+
+
+export default function App() {
+
+  const [quote, setQuote] = useState({
+
+    text:
+      'The only way to do great work is to love what you do.',
+
+    author:
+      'Steve Jobs'
+
+  })
+
+
+  const [loading, setLoading] =
+    useState(false)
+
+
+  const [error, setError] =
+    useState(null)
+
+
+  // New color state
+
+  const [color, setColor] =
+    useState(COLORS[0])
+
+
+  // ...
+}
+
+
+COLOR STATE EXPLANATION
+--------------------------------------------------------------------------------
+
++-------------------------+----------------------------------------------+
+| CODE                    | PURPOSE                                      |
++-------------------------+----------------------------------------------+
+| COLORS                  | Available color palette                      |
+| color                   | Current color                                |
+| setColor                | State setter                                 |
+| useState(COLORS[0])     | Initializes with first palette color         |
+| COLORS[0]               | '#667eea'                                    |
++-------------------------+----------------------------------------------+
+
+
+STATE OVERVIEW:
+--------------------------------------------------------------------------------
+
+quote
+  ↓
+Current Quote
+
+
+loading
+  ↓
+Request Status
+
+
+error
+  ↓
+Error Information
+
+
+color
+  ↓
+Current Visual Theme Color
+
+
+================================================================================
+STEP 3: CREATE getRandomColor()
+================================================================================
+
+const getRandomColor = () => {
+
+  const randomIndex =
+    Math.floor(
+      Math.random() *
+      COLORS.length
+    )
+
+
+  return COLORS[randomIndex]
+}
+
+
+HOW IT WORKS
+--------------------------------------------------------------------------------
+
+Suppose:
+
+COLORS.length = 10
+
+
+Math.random()
+
+returns a value:
+
+0 <= n < 1
+
+
+Example:
+
+0.63
+
+
+Multiply:
+
+0.63 × 10
+=
+6.3
+
+
+Math.floor(6.3)
+
+=
+6
+
+
+Then:
+
+COLORS[6]
+
+returns the color stored at index 6.
+
+
+FUNCTION EXPLANATION
+--------------------------------------------------------------------------------
+
++------------------------------+-----------------------------------------+
+| CODE                         | PURPOSE                                 |
++------------------------------+-----------------------------------------+
+| getRandomColor()             | Defines helper function                 |
+| Math.random()                | Returns random decimal >= 0 and < 1    |
+| * COLORS.length              | Scales number to palette length         |
+| Math.floor(...)              | Converts value to integer index         |
+| COLORS[randomIndex]          | Returns selected color                  |
++------------------------------+-----------------------------------------+
+
+
+RANDOM COLOR FLOW
+--------------------------------------------------------------------------------
+
+Math.random()
+     ↓
+Random Decimal
+     ↓
+× COLORS.length
+     ↓
+Scaled Value
+     ↓
+Math.floor()
+     ↓
+Array Index
+     ↓
+COLORS[index]
+     ↓
+Random Color
+
+
+================================================================================
+IMPORTANT: RANDOM DOES NOT GUARANTEE A DIFFERENT COLOR
+================================================================================
+
+This:
+
+getRandomColor()
+
+selects a random color.
+
+It does NOT guarantee that the selected color differs from the current color.
+
+Example:
+
+Current:
+
+#667eea
+
+
+Random selection:
+
+#667eea
+
+
+Result:
+
+The quote changes but the visual color appears unchanged.
+
+
+IF A DIFFERENT COLOR IS REQUIRED
+--------------------------------------------------------------------------------
+
+const getDifferentRandomColor = (
+  currentColor
+) => {
+
+  if (COLORS.length <= 1) {
+    return COLORS[0]
+  }
+
+
+  let nextColor =
+    currentColor
+
+
+  while (
+    nextColor === currentColor
+  ) {
+
+    const randomIndex =
+      Math.floor(
+        Math.random() *
+        COLORS.length
+      )
+
+
+    nextColor =
+      COLORS[randomIndex]
+  }
+
+
+  return nextColor
+}
+
+
+Then:
+
+setColor(currentColor =>
+  getDifferentRandomColor(
+    currentColor
+  )
+)
+
+
+================================================================================
+PART 4: UPDATING QUOTE AND COLOR STATE
+================================================================================
+
+UPDATE QUOTE AND COLOR TOGETHER
+--------------------------------------------------------------------------------
+
+const getNewQuote = async () => {
+
+  setLoading(true)
+
+  setError(null)
+
+
+  try {
+
+    // Fetch new quote
+
+    const newQuote =
+      await fetchRandomQuote()
+
+
+    // Update quote
+
+    setQuote(newQuote)
+
+
+    // Update theme color
+
+    setColor(
+      getRandomColor()
+    )
+
+
+    console.log(
+      'Quote fetched successfully:',
+      newQuote
+    )
+
+  } catch (err) {
+
+    setError(
+      'Failed to fetch quote. Please try again.'
+    )
+
+
+    console.error(
+      'Error fetching quote:',
+      err
+    )
+
+  } finally {
+
+    setLoading(false)
+
+  }
+}
+
+
+WHAT THIS DOES
+--------------------------------------------------------------------------------
+
+• Starts loading
+
+• Clears the previous error
+
+• Requests a quote
+
+• Updates quote state after success
+
+• Chooses a random color
+
+• Updates color state
+
+• Stops loading after completion
+
+• Causes the UI to reflect the resulting state
+
+
+================================================================================
+STATE UPDATE COORDINATION
+================================================================================
+
++----------------+------------------------+-----------------------------+
+| STATE          | UPDATE MOMENT          | NEXT VALUE                  |
++----------------+------------------------+-----------------------------+
+| loading        | Request begins         | true                        |
+| error          | Request begins         | null                        |
+| quote          | Successful request     | New quote                   |
+| color          | Successful request     | Random palette color        |
+| error          | Failed request         | Error message               |
+| loading        | Request completes      | false                       |
++----------------+------------------------+-----------------------------+
+
+
+================================================================================
+STATE UPDATE FLOW
+================================================================================
+
+User Clicks "New Quote"
+          ↓
+     getNewQuote()
+          ↓
+ setLoading(true)
+          ↓
+ setError(null)
+          ↓
+ fetchRandomQuote()
+          ↓
+     +----+----+
+     |         |
+  Success   Failure
+     |         |
+     ↓         ↓
+ setQuote   setError
+     |
+     ↓
+ setColor
+     |
+     +----+----+
+          ↓
+       finally
+          ↓
+ setLoading(false)
+          ↓
+ React Processes Updates
+          ↓
+ Component Renders
+          ↓
+ New Quote + New Color
+
+
+================================================================================
+MULTIPLE STATE UPDATES
+================================================================================
+
+Calling:
+
+setQuote(newQuote)
+
+and:
+
+setColor(newColor)
+
+does NOT mean you should manually call a render function.
+
+React manages rendering after state updates.
+
+In modern React, multiple state updates occurring in the same operation can
+also be batched.
+
+
+================================================================================
+PART 5: APPLYING COLOR TO THE UI
+================================================================================
+
+DYNAMIC BACKGROUND
+--------------------------------------------------------------------------------
+
+return (
+
+  <div
+    className="
+      min-vh-100
+      d-flex
+      align-items-center
+      justify-content-center
+      py-5
+    "
+    style={{
+      background:
+        `linear-gradient(
+          135deg,
+          ${color} 0%,
+          ${color}cc 100%
+        )`
+    }}
+  >
+
+    {/* Application */}
+
+  </div>
+
+)
+
+
+WHAT HAPPENS?
+--------------------------------------------------------------------------------
+
+color state:
+
+#667eea
+
+        ↓
+
+Template literal:
+
+linear-gradient(
+  135deg,
+  #667eea 0%,
+  #667eeacc 100%
+)
+
+        ↓
+
+style.background
+
+        ↓
+
+Browser
+
+        ↓
+
+Dynamic Gradient
+
+
+================================================================================
+ABOUT ${color}cc
+================================================================================
+
+For a six-digit hexadecimal color such as:
+
+#667eea
+
+appending:
+
+cc
+
+creates an eight-digit hexadecimal color:
+
+#667eeacc
+
+
+The final two hexadecimal digits represent alpha.
+
+
+cc corresponds to approximately:
+
+80% opacity
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+This technique assumes color contains a compatible six-digit hexadecimal
+value.
+
+It would not work correctly by blindly appending "cc" to values such as:
+
+'red'
+
+'rgb(102, 126, 234)'
+
+
+For this lesson, COLORS contains six-digit hex colors, so the approach is
+appropriate.
+
+
+================================================================================
+PASSING COLOR TO QuoteCard
+================================================================================
+
+<QuoteCard
+  quote={quote}
+  loading={loading}
+  error={error}
+  color={color}
+/>
+
+
+DATA FLOW:
+--------------------------------------------------------------------------------
+
+App.jsx
+   │
+   └── color State
+          │
+          ↓
+     color={color}
+          │
+          ↓
+    QuoteCard.jsx
+          │
+    +-----+-------+
+    |             |
+    ↓             ↓
+Quote Marks     Author
+    |             |
+    +------+------+
+           ↓
+     Dynamic Color
+
+
+================================================================================
+UPDATED QuoteCard.jsx
+================================================================================
+
+export default function QuoteCard({
+  quote,
+  loading,
+  error,
+  color
+}) {
+
+  return (
+    <div className="quote-card-container">
+
+
+      {/* Error Alert */}
+
+      {error && (
+
+        <div
+          className="alert alert-danger"
+          role="alert"
+        >
+
+          <i className="bi bi-exclamation-circle me-2"></i>
+
+          <strong>
+            Error:
+          </strong>
+
+          {' '}
+
+          {error}
+
+        </div>
+
+      )}
+
+
+      {/* Loading */}
+
+      {loading && (
+
+        <div className="d-flex flex-column align-items-center justify-content-center py-5">
+
+          <div
+            className="spinner-border text-white mb-3"
+            role="status"
+          >
+
+            <span className="visually-hidden">
+              Loading...
+            </span>
+
+          </div>
+
+
+          <p className="text-white fw-bold">
+            Fetching a new quote...
+          </p>
+
+        </div>
+
+      )}
+
+
+      {/* Quote */}
+
+      {!loading && !error && (
+
+        <div
+          className="card shadow-lg border-0"
+          style={{
+            borderLeft:
+              `5px solid ${color}`
+          }}
+        >
+
+
+          <div className="card-body p-5">
+
+
+            {/* Opening Quote Mark */}
+
+            <div
+              className="display-1 mb-3"
+              style={{
+                color
+              }}
+            >
+              "
+            </div>
+
+
+            {/* Quote Text */}
+
+            <p className="card-text fs-5 lh-lg mb-4 text-dark">
+
+              {quote.text}
+
+            </p>
+
+
+            {/* Closing Quote Mark */}
+
+            <div
+              className="display-1 text-end mb-3"
+              style={{
+                color
+              }}
+            >
+              "
+            </div>
+
+          </div>
+
+
+          {/* Author */}
+
+          <div className="card-footer bg-light border-top">
+
+            <p className="card-text text-end mb-0">
+
+              <strong
+                style={{
+                  color
+                }}
+              >
+
+                — {quote.author}
+
+              </strong>
+
+            </p>
+
+          </div>
+
+        </div>
+
+      )}
+
+    </div>
+  )
+}
+
+
+================================================================================
+COLOR APPLICATION POINTS
+================================================================================
+
++----------------------+-----------------------------------------------+
+| ELEMENT              | COLOR USAGE                                   |
++----------------------+-----------------------------------------------+
+| App Background       | Dynamic gradient                              |
+| Card Border          | Dynamic left border                           |
+| Opening Quote Mark   | Dynamic text color                            |
+| Closing Quote Mark   | Dynamic text color                            |
+| Author               | Dynamic text color                            |
+| Button               | Could optionally use current color            |
+| Spinner              | Could optionally use current color            |
+| Other Accents        | Could optionally use current color            |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+STATIC CSS VS DYNAMIC INLINE STYLE
+================================================================================
+
+STATIC RULE:
+--------------------------------------------------------------------------------
+
+className="card shadow-lg"
+
+
+Good for:
+
+• Layout
+• Spacing
+• Typography
+• Reusable visual rules
+
+
+DYNAMIC RULE:
+--------------------------------------------------------------------------------
+
+style={{
+  color
+}}
+
+
+Good for:
+
+• Runtime values
+• State-controlled colors
+• Values that vary between renders
+
+
+This is a practical use of inline styles in React.
+
+
+================================================================================
+PART 6: COMPLETE UPDATED App.jsx
+================================================================================
+
+import {
+  useCallback,
+  useEffect,
+  useState
+} from 'react'
+
+import QuoteCard
+  from './components/QuoteCard'
+
+import {
+  fetchRandomQuote
+} from './utils/quoteApi'
+
+import './App.css'
+
+
+const COLORS = [
+
+  '#667eea',
+
+  '#764ba2',
+
+  '#f093fb',
+
+  '#4facfe',
+
+  '#00f2fe',
+
+  '#43e97b',
+
+  '#fa709a',
+
+  '#fee140',
+
+  '#30cfd0',
+
+  '#330867',
+
+  '#ff6b6b',
+
+  '#4ecdc4',
+
+  '#45b7d1',
+
+  '#f7b731',
+
+  '#5f27cd'
+
+]
+
+
+const getRandomColor = () => {
+
+  const randomIndex =
+    Math.floor(
+      Math.random() *
+      COLORS.length
+    )
+
+
+  return COLORS[randomIndex]
+}
+
+
+export default function App() {
+
+  // Quote state
+
+  const [quote, setQuote] =
+    useState({
+
+      text:
+        'The only way to do great work is to love what you do.',
+
+      author:
+        'Steve Jobs'
+
+    })
+
+
+  // Loading state
+
+  const [loading, setLoading] =
+    useState(false)
+
+
+  // Error state
+
+  const [error, setError] =
+    useState(null)
+
+
+  // Color state
+
+  const [color, setColor] =
+    useState(COLORS[0])
+
+
+  // Fetch new quote + update color
+
+  const getNewQuote =
+    useCallback(async () => {
+
+      setLoading(true)
+
+      setError(null)
+
+
+      try {
+
+        const newQuote =
+          await fetchRandomQuote()
+
+
+        setQuote(newQuote)
+
+
+        setColor(
+          getRandomColor()
+        )
+
+
+        console.log(
+          'Quote fetched successfully:',
+          newQuote
+        )
+
+      } catch (err) {
+
+        setError(
+          'Failed to fetch quote. Please try again.'
+        )
+
+
+        console.error(
+          'Error fetching quote:',
+          err
+        )
+
+      } finally {
+
+        setLoading(false)
+
+      }
+
+    }, [])
+
+
+  // Share current quote
+
+  const tweetQuote = () => {
+
+    const tweetText =
+      `"${quote.text}" — ${quote.author}`
+
+
+    const twitterUrl =
+      `https://twitter.com/intent/tweet?text=${
+        encodeURIComponent(tweetText)
+      }`
+
+
+    window.open(
+      twitterUrl,
+      '_blank',
+      'width=550,height=420'
+    )
+  }
+
+
+  // Keyboard shortcut
+
+  useEffect(() => {
+
+    const handleKeyPress = (e) => {
+
+      if (
+        e.code === 'Space' &&
+        !loading
+      ) {
+
+        const tagName =
+          e.target.tagName
+
+
+        if (
+          tagName === 'INPUT' ||
+          tagName === 'TEXTAREA' ||
+          tagName === 'SELECT'
+        ) {
+
+          return
+        }
+
+
+        e.preventDefault()
+
+        getNewQuote()
+      }
+    }
+
+
+    window.addEventListener(
+      'keydown',
+      handleKeyPress
+    )
+
+
+    return () => {
+
+      window.removeEventListener(
+        'keydown',
+        handleKeyPress
+      )
+
+    }
+
+  }, [getNewQuote, loading])
+
+
+  // Initial quote
+
+  useEffect(() => {
+
+    getNewQuote()
+
+  }, [getNewQuote])
+
+
+  return (
+    <div
+      className="
+        min-vh-100
+        d-flex
+        align-items-center
+        justify-content-center
+        py-5
+      "
+      style={{
+        background:
+          `linear-gradient(
+            135deg,
+            ${color} 0%,
+            ${color}cc 100%
+          )`
+      }}
+    >
+
+      <div className="container">
+
+
+        {/* Header */}
+
+        <header className="text-center mb-5">
+
+          <h1 className="display-4 fw-bold text-white mb-3">
+
+            Random Quote Generator
+
+          </h1>
+
+
+          <p className="lead text-white-50">
+
+            Press spacebar or click button
+            for a new quote
+
+          </p>
+
+        </header>
+
+
+        {/* Quote Card */}
+
+        <div className="row justify-content-center mb-5">
+
+          <div className="col-12 col-lg-8">
+
+            <QuoteCard
+              quote={quote}
+              loading={loading}
+              error={error}
+              color={color}
+            />
+
+          </div>
+
+        </div>
+
+
+        {/* Action Buttons */}
+
+        <div className="row justify-content-center">
+
+          <div className="col-12 col-lg-8">
+
+            <div className="d-flex gap-3 justify-content-center flex-wrap">
+
+
+              <button
+                onClick={getNewQuote}
+                disabled={loading}
+                className="btn btn-light btn-lg fw-bold"
+                title="Click or press spacebar for new quote"
+              >
+
+                {loading ? (
+
+                  <>
+
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    >
+                    </span>
+
+                    Loading...
+
+                  </>
+
+                ) : (
+
+                  <>
+
+                    <i className="bi bi-arrow-repeat me-2"></i>
+
+                    New Quote
+
+                  </>
+
+                )}
+
+              </button>
+
+
+              <button
+                onClick={tweetQuote}
+                disabled={loading}
+                className="btn btn-info btn-lg fw-bold text-white"
+                title="Share this quote on Twitter"
+              >
+
+                <i className="bi bi-twitter me-2"></i>
+
+                Tweet
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* Footer */}
+
+        <footer className="text-center mt-5">
+
+          <p className="text-white-50">
+            Random Quote App
+          </p>
+
+        </footer>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+================================================================================
+COMPLETE APP STRUCTURE
+================================================================================
+
++-----------------------+-----------------------------------------------+
+| SECTION               | PURPOSE                                       |
++-----------------------+-----------------------------------------------+
+| COLORS                | Available visual theme colors                 |
+| quote state           | Current quote                                 |
+| loading state         | Request progress                              |
+| error state           | Request error                                 |
+| color state           | Current application accent                    |
+| getRandomColor()      | Select random palette color                   |
+| getNewQuote()         | Fetch quote + update state                    |
+| tweetQuote()          | Share current quote                           |
+| Keyboard effect       | Spacebar shortcut                             |
+| Initial-load effect   | Fetch initial quote                           |
+| JSX                   | Render Bootstrap UI + dynamic color           |
++-----------------------+-----------------------------------------------+
+
+
+================================================================================
+PART 7: STATE MANAGEMENT PATTERNS
+================================================================================
+
+MULTIPLE STATE VARIABLES
+--------------------------------------------------------------------------------
+
+const [quote, setQuote] =
+  useState(initialQuote)
+
+
+const [color, setColor] =
+  useState(initialColor)
+
+
+const [loading, setLoading] =
+  useState(false)
+
+
+const [error, setError] =
+  useState(null)
+
+
+These states represent different concerns:
+
+quote
+  =
+Content
+
+
+color
+  =
+Visual theme
+
+
+loading
+  =
+Request status
+
+
+error
+  =
+Failure information
+
+
+================================================================================
+ASYNC STATE COORDINATION
+================================================================================
+
+const handleAction = async () => {
+
+  setLoading(true)
+
+  setError(null)
+
+
+  try {
+
+    const data =
+      await fetchData()
+
+
+    setQuote(data)
+
+
+    setColor(
+      getRandomColor()
+    )
+
+  } catch (err) {
+
+    setError(
+      err.message
+    )
+
+  } finally {
+
+    setLoading(false)
+
+  }
+}
+
+
+================================================================================
+STATE COORDINATION PATTERNS
+================================================================================
+
++------------------------+----------------------------------------------+
+| PATTERN                | USE WHEN                                     |
++------------------------+----------------------------------------------+
+| Sequential Logic       | Later calculation depends on earlier result  |
+| Independent Updates    | States don't depend on each other            |
+| Conditional Update     | State changes only under condition           |
+| Batched Processing     | Multiple setters occur together              |
+| Async Update           | State depends on async result                |
+| Loading State          | Track request progress                       |
+| Error State            | Track request failure                        |
+| Reset                  | Return state to known initial values         |
++------------------------+----------------------------------------------+
+
+
+================================================================================
+WHEN SHOULD MULTIPLE STATE VALUES BE GROUPED?
+================================================================================
+
+Separate state is appropriate when values represent independent concerns.
+
+Example:
+
+quote
+
+color
+
+loading
+
+error
+
+
+Grouping everything is NOT automatically better.
+
+You might consider useReducer or grouped state when:
+
+• State transitions become complicated
+
+• Many setters always change together
+
+• One action has several related transition rules
+
+• State logic becomes difficult to maintain
+
+
+================================================================================
+BEST PRACTICES FOR MULTIPLE STATE VALUES
+================================================================================
+
+• Use descriptive names
+
+• Keep state minimal
+
+• Keep unrelated concerns separate when useful
+
+• Use functional updates when next state depends on previous state
+
+• Handle loading and error states explicitly
+
+• Avoid unnecessary prop drilling
+
+• Pass only data required by child components
+
+• Avoid duplicating derived values
+
+• Move constants outside components when possible
+
+• Consider useReducer when transitions become complex
+
+• Test behavior rather than internal setter calls
+
+
+================================================================================
+PART 8: TESTING COLOR STATE
+================================================================================
+
+MANUAL TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Initial color displays
+
+[ ] New Quote changes quote
+
+[ ] New Quote triggers a color selection
+
+[ ] Spacebar triggers quote/color update
+
+[ ] Spacebar is ignored while loading
+
+[ ] Spacebar doesn't interfere with inputs
+
+[ ] Background uses current color
+
+[ ] Quote marks use current color
+
+[ ] Author uses current color
+
+[ ] Card border uses current color
+
+[ ] Color persists until another update
+
+[ ] Loading indicator works
+
+[ ] Error behavior works
+
+[ ] Tweet button works
+
+[ ] No unexpected console errors
+
+[ ] Mobile layout works
+
+[ ] Color contrast remains readable
+
+
+================================================================================
+IMPORTANT TESTING CORRECTION
+================================================================================
+
+Do NOT write a test that assumes:
+
+"One click must always produce a different color."
+
+Because the selection is random, the same color can legally be selected again.
+
+Better options:
+
+1. Mock Math.random() with a known value
+
+or
+
+2. Inject a predictable color-selection function
+
+or
+
+3. Test that the rendered style uses the selected color
+
+
+================================================================================
+TESTING EXAMPLE
+================================================================================
+
+import {
+  render,
+  screen,
+  waitFor
+} from '@testing-library/react'
+
+import userEvent
+  from '@testing-library/user-event'
+
+import App
+  from './App'
+
+
+test(
+  'requests another quote when button is clicked',
+
+  async () => {
+
+    const user =
+      userEvent.setup()
+
+
+    render(
+      <App />
+    )
+
+
+    const button =
+      screen.getByRole(
+        'button',
+        {
+          name: /new quote/i
+        }
+      )
+
+
+    await user.click(button)
+
+
+    await waitFor(() => {
+
+      expect(
+        button
+      ).toBeEnabled()
+
+    })
+
+  }
+)
+
+
+FOR A DETERMINISTIC COLOR TEST
+--------------------------------------------------------------------------------
+
+Mock the random selection so your test knows exactly which color should be
+chosen.
+
+Concept:
+
+Math.random()
+   ↓
+Mocked Known Value
+   ↓
+Known Array Index
+   ↓
+Known Color
+   ↓
+Assert UI Style
+
+
+================================================================================
+COLOR TESTING TABLE
+================================================================================
+
++---------------------------+--------------------------------------------+
+| TEST CASE                 | EXPECTED RESULT                            |
++---------------------------+--------------------------------------------+
+| Initial load              | Initial/default color rendered             |
+| New quote                 | Color selection occurs                     |
+| Spacebar                  | Quote/color action triggered               |
+| Background                | Uses color state                           |
+| Quote marks               | Use color prop                             |
+| Author                    | Uses color prop                             |
+| Card border               | Uses color prop                            |
+| Loading                   | Loading UI shown                           |
+| Failure                   | Defined error/fallback strategy runs       |
+| Accessibility             | Sufficient readable contrast               |
++---------------------------+--------------------------------------------+
+
+
+================================================================================
+PART 9: EXTENDING COLOR STATE
+================================================================================
+
+FEATURE 1: COLOR HISTORY
+================================================================================
+
+const [
+  colorHistory,
+  setColorHistory
+] = useState([])
+
+
+When new color is selected:
+
+const newColor =
+  getRandomColor()
+
+
+setColor(newColor)
+
+
+setColorHistory(history => [
+  ...history,
+  newColor
+])
+
+
+WHY FUNCTIONAL UPDATE?
+--------------------------------------------------------------------------------
+
+Because the new history depends on the previous history.
+
+
+================================================================================
+FEATURE 2: FAVORITE COLORS
+================================================================================
+
+const [
+  favoriteColors,
+  setFavoriteColors
+] = useState([])
+
+
+const addFavoriteColor = () => {
+
+  setFavoriteColors(
+    favorites => {
+
+      if (
+        favorites.includes(color)
+      ) {
+
+        return favorites
+      }
+
+
+      return [
+        ...favorites,
+        color
+      ]
+    }
+  )
+}
+
+
+================================================================================
+FEATURE 3: CUSTOM COLOR SELECTION
+================================================================================
+
+const [
+  customColor,
+  setCustomColor
+] = useState('#667eea')
+
+
+const useCustomColor = () => {
+
+  setColor(customColor)
+}
+
+
+Possible input:
+
+<input
+  type="color"
+  value={customColor}
+  onChange={(e) =>
+    setCustomColor(
+      e.target.value
+    )
+  }
+/>
+
+
+================================================================================
+FEATURE 4: COLOR THEMES
+================================================================================
+
+const THEMES = {
+
+  vibrant: [
+    '#667eea',
+    '#764ba2',
+    '#f093fb',
+    '#4facfe'
+  ],
+
+
+  pastel: [
+    '#FFB3BA',
+    '#FFCCCB',
+    '#FFFFBA',
+    '#BAE1FF'
+  ],
+
+
+  dark: [
+    '#1a1a1a',
+    '#2d2d2d',
+    '#3d3d3d',
+    '#4d4d4d'
+  ],
+
+
+  nature: [
+    '#43e97b',
+    '#38f9d7',
+    '#fa709a',
+    '#fee140'
+  ]
+
+}
+
+
+const [
+  currentTheme,
+  setCurrentTheme
+] = useState('vibrant')
+
+
+Current palette:
+
+const activeColors =
+  THEMES[currentTheme]
+
+
+================================================================================
+ADVANCED COLOR FEATURES
+================================================================================
+
++--------------------------+---------------------------------------------+
+| FEATURE                  | IMPLEMENTATION                              |
++--------------------------+---------------------------------------------+
+| Color History            | Array of previous colors                    |
+| Favorite Colors          | Array of selected colors                    |
+| Custom Color             | input type="color"                         |
+| Color Themes             | Object containing palettes                  |
+| Color Preferences        | Persist appropriate preference             |
+| High Contrast Mode       | Accessible color palette                    |
+| Color Animation          | CSS transition                              |
+| Color Statistics         | Track usage only if product needs it        |
++--------------------------+---------------------------------------------+
+
+
+================================================================================
+COLOR ACCESSIBILITY
+================================================================================
+
+Random color selection introduces an important requirement:
+
+READABILITY.
+
+
+A visually attractive random color may not provide sufficient contrast
+against:
+
+• White text
+• Dark text
+• Buttons
+• Icons
+
+
+Example:
+
+Very light yellow:
+
+#fee140
+
+with white text may be harder to read than a darker background.
+
+
+PRACTICAL OPTIONS
+--------------------------------------------------------------------------------
+
+• Curate the palette so every color works with the foreground text
+
+• Store a corresponding foreground color with each background
+
+• Calculate/select an appropriate text color
+
+• Provide a high-contrast theme
+
+• Test actual color combinations
+
+
+BETTER COLOR MODEL EXAMPLE
+--------------------------------------------------------------------------------
+
+const THEMES = [
+
+  {
+    background: '#667eea',
+    foreground: '#ffffff'
+  },
+
+  {
+    background: '#fee140',
+    foreground: '#212529'
+  }
+
+]
+
+
+Then state could store a theme:
+
+const [theme, setTheme] =
+  useState(THEMES[0])
+
+
+Use:
+
+style={{
+  backgroundColor:
+    theme.background,
+
+  color:
+    theme.foreground
+}}
+
+
+================================================================================
+PART 10: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE LEARNED
+--------------------------------------------------------------------------------
+
+✓ Why color state can improve visual feedback
+
+✓ How to define a color palette
+
+✓ How to create color state with useState
+
+✓ How Math.random() selects an array element
+
+✓ How to update quote and color during the same action
+
+✓ How multiple state setters work together
+
+✓ How to apply dynamic styles
+
+✓ How to pass color through props
+
+✓ How child components use color props
+
+✓ How to test random behavior properly
+
+✓ Why random does not guarantee a different result
+
+✓ How to track color history
+
+✓ How to build custom color selection
+
+✓ How to create theme palettes
+
+✓ Why color accessibility matters
+
+
+================================================================================
+CRITICAL COLOR STATE POINTS
+================================================================================
+
+• Define the Palette
+  - Keep available colors organized
+
+• Create Color State
+
+const [color, setColor] =
+  useState(COLORS[0])
+
+
+• Select Random Color
+
+const randomIndex =
+  Math.floor(
+    Math.random() *
+    COLORS.length
+  )
+
+
+• Update Color
+
+setColor(
+  COLORS[randomIndex]
+)
+
+
+• Coordinate Quote + Color
+
+setQuote(newQuote)
+
+setColor(getRandomColor())
+
+
+• Pass to Child
+
+<QuoteCard
+  color={color}
+/>
+
+
+• Apply Dynamic Style
+
+style={{
+  color
+}}
+
+
+• Test Randomness Deterministically
+  - Mock/control the random value during automated tests
+
+• Check Contrast
+  - Dynamic colors must remain readable
+
+
+================================================================================
+COLOR STATE IMPLEMENTATION CHECKLIST
+================================================================================
+
+[✓] Color array defined
+
+[✓] Color state created
+
+[✓] Initial color defined
+
+[✓] getRandomColor() created
+
+[✓] Quote update coordinated with color update
+
+[✓] Dynamic background defined
+
+[✓] Color passed to QuoteCard
+
+[✓] Quote marks use color
+
+[✓] Author uses color
+
+[✓] Card border can use color
+
+[✓] Keyboard shortcut uses same quote-update flow
+
+[✓] Loading management included
+
+[✓] Error management included
+
+[ ] Verify color contrast for every palette entry
+
+[ ] Add deterministic automated color tests
+
+[ ] Decide whether repeated consecutive colors are allowed
+
+
+================================================================================
+STATE MANAGEMENT WORKFLOW
+================================================================================
+
+1. DEFINE COLORS
+--------------------------------------------------------------------------------
+
+const COLORS = [
+  ...
+]
+
+
+        ↓
+
+
+2. CREATE COLOR STATE
+--------------------------------------------------------------------------------
+
+const [color, setColor] =
+  useState(COLORS[0])
+
+
+        ↓
+
+
+3. CREATE SELECTOR
+--------------------------------------------------------------------------------
+
+getRandomColor()
+
+
+        ↓
+
+
+4. USER REQUESTS QUOTE
+--------------------------------------------------------------------------------
+
+getNewQuote()
+
+
+        ↓
+
+
+5. FETCH QUOTE
+--------------------------------------------------------------------------------
+
+await fetchRandomQuote()
+
+
+        ↓
+
+
+6. UPDATE QUOTE
+--------------------------------------------------------------------------------
+
+setQuote(newQuote)
+
+
+        ↓
+
+
+7. UPDATE COLOR
+--------------------------------------------------------------------------------
+
+setColor(getRandomColor())
+
+
+        ↓
+
+
+8. REACT PROCESSES STATE
+--------------------------------------------------------------------------------
+
+quote + color
+
+
+        ↓
+
+
+9. APP RE-RENDERS
+--------------------------------------------------------------------------------
+
+Current state used in JSX
+
+
+        ↓
+
+
+10. PASS COLOR TO CHILD
+--------------------------------------------------------------------------------
+
+<QuoteCard
+  color={color}
+/>
+
+
+        ↓
+
+
+11. UPDATED UI
+--------------------------------------------------------------------------------
+
+New Quote
++
+New Theme Color
+
+
+================================================================================
+KEY CODE PATTERNS
+================================================================================
+
+COLOR ARRAY:
+--------------------------------------------------------------------------------
+
+const COLORS = [
+  '#667eea',
+  '#764ba2',
+  '#f093fb'
+]
+
+
+COLOR STATE:
+--------------------------------------------------------------------------------
+
+const [color, setColor] =
+  useState(COLORS[0])
+
+
+RANDOM COLOR:
+--------------------------------------------------------------------------------
+
+const getRandomColor = () => {
+
+  const index =
+    Math.floor(
+      Math.random() *
+      COLORS.length
+    )
+
+
+  return COLORS[index]
+}
+
+
+UPDATE:
+--------------------------------------------------------------------------------
+
+setColor(
+  getRandomColor()
+)
+
+
+QUOTE + COLOR:
+--------------------------------------------------------------------------------
+
+const newQuote =
+  await fetchRandomQuote()
+
+
+setQuote(newQuote)
+
+setColor(
+  getRandomColor()
+)
+
+
+DYNAMIC BACKGROUND:
+--------------------------------------------------------------------------------
+
+style={{
+  background:
+    `linear-gradient(
+      135deg,
+      ${color} 0%,
+      ${color}cc 100%
+    )`
+}}
+
+
+PASS TO CHILD:
+--------------------------------------------------------------------------------
+
+<QuoteCard
+  quote={quote}
+  color={color}
+/>
+
+
+USE IN CHILD:
+--------------------------------------------------------------------------------
+
+<strong
+  style={{
+    color
+  }}
+>
+  {quote.author}
+</strong>
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++-------------------------+----------------------------------------------+
+| CONCEPT                 | REMEMBER                                     |
++-------------------------+----------------------------------------------+
+| COLORS                  | Palette of available colors                  |
+| color                   | Current color state                          |
+| setColor                | Updates color state                          |
+| Math.random()           | Generates random decimal                     |
+| Math.floor()            | Converts scaled value to integer             |
+| COLORS[index]           | Selects color                                |
+| setQuote()              | Updates quote                                |
+| setColor()              | Updates visual theme                        |
+| Props                   | Parent passes color to child                 |
+| Inline Style            | Useful for state-dependent CSS value         |
+| Batching                | React can process multiple updates together  |
+| Random Selection        | Can repeat current color                     |
+| Functional Update       | Useful when depending on previous state      |
+| Contrast                | Dynamic colors must remain readable          |
++-------------------------+----------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - COMPLETE FLOW
+================================================================================
+
+COLORS
+  ↓
+getRandomColor()
+  ↓
+setColor()
+  ↓
+color State
+  ↓
++-----------------------------+
+|                             |
+↓                             ↓
+App Background            QuoteCard Prop
+                              ↓
+                        Quote Marks
+                        Author
+                        Card Border
+
+
+QUOTE FLOW:
+
+New Quote Button
+      ↓
+getNewQuote()
+      ↓
+fetchRandomQuote()
+      ↓
+setQuote()
+      ↓
+setColor()
+      ↓
+React Render
+      ↓
+New Quote + Color
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+COLOR STATE:
+
+Palette
+  ↓
+Random Index
+  ↓
+Color
+  ↓
+setColor()
+  ↓
+UI
+
+
+RANDOM INDEX:
+
+Math.floor(
+  Math.random() *
+  COLORS.length
+)
+
+
+STATE:
+
+const [color, setColor] =
+  useState(COLORS[0])
+
+
+QUOTE + COLOR:
+
+New Quote
+   +
+Random Color
+   ↓
+State Updates
+   ↓
+React Render
+   ↓
+Visual Feedback
+
+
+PARENT → CHILD:
+
+App color State
+      ↓
+color Prop
+      ↓
+QuoteCard
+      ↓
+Dynamic Styling
+
+
+ACCESSIBILITY:
+
+Background Color
+      ↓
+Contrast Check
+      ↓
+Appropriate Foreground Color
+      ↓
+Readable UI
+
+
+MOST IMPORTANT RULE:
+
+COLOR IS JUST ANOTHER PIECE OF STATE.
+
+WHEN COLOR CHANGES, REACT RE-RENDERS THE UI THAT DEPENDS ON THAT COLOR.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Manage multiple state variables confidently
+
+2. Coordinate visual and data state
+
+3. Build theme-aware components
+
+4. Create user-selectable themes
+
+5. Persist theme preferences
+
+6. Build accessible color systems
+
+7. Create light/dark themes
+
+8. Explore Context for shared theme state
+
+9. Explore useReducer for more complex state transitions
+
+10. Build reusable theme systems for larger React applications
+
+
+================================================================================
+END OF LESSON 12
+ADDING ANOTHER PIECE OF STATE - RANDOM COLOR
+================================================================================
