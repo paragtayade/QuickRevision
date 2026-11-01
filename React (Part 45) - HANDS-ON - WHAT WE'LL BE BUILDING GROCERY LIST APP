@@ -1,0 +1,3727 @@
+LESSON 9: HANDS-ON - WHAT WE'LL BE BUILDING
+GROCERY LIST APP - DEMO
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson introduces a complete Grocery List application that combines
+many of the React concepts covered so far.
+
+You will understand:
+
+• Grocery List App architecture
+
+• Component responsibilities
+
+• Managing grocery items in state
+
+• Managing form state
+
+• Validating grocery input
+
+• Adding grocery items
+
+• Displaying items dynamically
+
+• Editing existing items
+
+• Deleting items
+
+• Marking items as purchased
+
+• Filtering by purchase status
+
+• Calculating totals
+
+• Calculating shopping progress
+
+• Working with derived values
+
+• Building a complete interactive workflow
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+The Grocery List App combines several React fundamentals:
+
+CONTROLLED FORM
+      +
+VALIDATION
+      +
+ARRAY STATE
+      +
+CRUD OPERATIONS
+      +
+FILTERING
+      +
+DERIVED STATISTICS
+      +
+CONDITIONAL RENDERING
+
+
+It is useful because the same architecture appears in:
+
+• Todo Applications
+
+• Task Managers
+
+• Shopping Lists
+
+• Cart Interfaces
+
+• Inventory Screens
+
+• Reminder Applications
+
+• Expense Lists
+
+• Notes Applications
+
+
+================================================================================
+PART 2: GROCERY LIST APP OVERVIEW
+================================================================================
+
+WHAT IS THE GROCERY LIST APP?
+--------------------------------------------------------------------------------
+
+The application lets users:
+
+• Add grocery items
+
+• Enter quantity
+
+• Choose a category
+
+• Enter a unit price
+
+• View grocery items
+
+• Mark items as purchased
+
+• Edit existing items
+
+• Delete items
+
+• Filter items
+
+• View summary statistics
+
+• Track shopping progress
+
+• Clear the list
+
+
+================================================================================
+CORE FEATURES
+================================================================================
+
++----------------------+-----------------------------------------------+
+| FEATURE              | PURPOSE                                       |
++----------------------+-----------------------------------------------+
+| Add Item             | Create a new grocery item                     |
+| Quantity             | Track number required                         |
+| Category             | Organize grocery items                        |
+| Unit Price           | Store price per unit                          |
+| Purchased            | Track whether item has been bought            |
+| Edit                 | Modify an existing item                       |
+| Delete               | Remove one item                              |
+| Filter               | All / To Buy / Purchased                     |
+| Total Cost           | quantity × price across items                 |
+| Statistics           | Counts derived from items                    |
+| Progress             | Percentage purchased                          |
+| Clear All            | Remove all items                             |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+FEATURE SCOPE OF THIS DEMO
+================================================================================
+
+This implementation uses:
+
+React State
+
+for storing grocery items.
+
+
+Therefore:
+
+• Items remain available while the component is active
+
+• State changes update the UI
+
+• Items are NOT automatically persisted after a page reload
+
+
+Persistence would be a separate feature using something such as:
+
+• localStorage
+
+• Backend API
+
+• Database
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+The supplied app does NOT perform API integration.
+
+It is a client-side React state-management demo.
+
+
+================================================================================
+PART 3: GROCERY LIST APP ARCHITECTURE
+================================================================================
+
+PLANNED COMPONENT ARCHITECTURE
+--------------------------------------------------------------------------------
+
+GroceryListApp
+│
+├── STATE
+│   ├── items
+│   ├── formData
+│   ├── filter
+│   └── editingId
+│
+├── GroceryForm
+│   ├── Item Name
+│   ├── Quantity
+│   ├── Category
+│   ├── Unit Price
+│   └── Add / Update
+│
+├── GroceryStats
+│   ├── Total Items
+│   ├── Purchased
+│   ├── Remaining
+│   ├── Total Cost
+│   └── Progress
+│
+├── GroceryFilter
+│   ├── All
+│   ├── To Buy
+│   └── Purchased
+│
+└── GroceryList
+    │
+    └── GroceryItem
+        ├── Purchased Checkbox
+        ├── Item Details
+        ├── Edit
+        └── Delete
+
+
+================================================================================
+COMPONENT RESPONSIBILITIES
+================================================================================
+
++----------------------+-----------------------------------------------+
+| COMPONENT            | RESPONSIBILITY                                |
++----------------------+-----------------------------------------------+
+| GroceryListApp       | Own shared application state                  |
+| GroceryForm          | Capture add/edit data                         |
+| GroceryStats         | Display derived statistics                    |
+| GroceryFilter        | Choose visible status                         |
+| GroceryList          | Render current filtered collection            |
+| GroceryItem          | Display/interact with one item                |
++----------------------+-----------------------------------------------+
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+For a small learning project, all of this could remain in one component.
+
+Separating components becomes useful when:
+
+• JSX becomes difficult to scan
+
+• Components have clear individual responsibilities
+
+• Parts need independent testing
+
+• Parts can reasonably be reused
+
+
+================================================================================
+GROCERY ITEM DATA STRUCTURE
+================================================================================
+
+Example:
+
+{
+  id:
+    '550e8400-e29b-41d4-a716-446655440000',
+
+  name:
+    'Milk',
+
+  quantity:
+    2,
+
+  category:
+    'Dairy',
+
+  price:
+    3.99,
+
+  purchased:
+    false,
+
+  createdAt:
+    '2026-11-01T10:30:00.000Z'
+}
+
+
+================================================================================
+DATA STRUCTURE TABLE
+================================================================================
+
++----------------------+------------------+-------------------------------+
+| PROPERTY             | TYPE             | PURPOSE                       |
++----------------------+------------------+-------------------------------+
+| id                   | String           | Stable item identity          |
+| name                 | String           | Grocery item name             |
+| quantity             | Number           | Units required                |
+| category             | String           | Grocery category              |
+| price                | Number           | Price per unit                |
+| purchased            | Boolean          | Purchase status               |
+| createdAt            | String           | Creation timestamp            |
++----------------------+------------------+-------------------------------+
+
+
+================================================================================
+FORM DATA STRUCTURE
+================================================================================
+
+While editing a form, numeric controls can conveniently remain strings:
+
+const INITIAL_FORM = {
+
+  name: '',
+
+  quantity: '1',
+
+  category: 'Produce',
+
+  price: '0'
+
+}
+
+
+WHY?
+--------------------------------------------------------------------------------
+
+HTML number inputs use:
+
+event.target.value
+
+
+which normally provides a string.
+
+Examples:
+
+"1"
+
+"25"
+
+"3.99"
+
+""
+
+
+After validation, convert values when creating/updating the grocery record.
+
+
+================================================================================
+PART 4: COMPLETE GROCERY LIST APP IMPLEMENTATION
+================================================================================
+
+File:
+
+src/components/GroceryListApp.jsx
+
+
+import { useState } from 'react'
+
+import './GroceryListApp.css'
+
+
+const CATEGORIES = [
+
+  'Produce',
+
+  'Dairy',
+
+  'Bakery',
+
+  'Meat',
+
+  'Frozen',
+
+  'Pantry',
+
+  'Beverages'
+
+]
+
+
+const INITIAL_FORM = {
+
+  name: '',
+
+  quantity: '1',
+
+  category: 'Produce',
+
+  price: '0'
+
+}
+
+
+const INITIAL_ITEMS = [
+
+  {
+    id:
+      crypto.randomUUID(),
+
+    name:
+      'Milk',
+
+    quantity:
+      2,
+
+    category:
+      'Dairy',
+
+    price:
+      3.99,
+
+    purchased:
+      false,
+
+    createdAt:
+      new Date().toISOString()
+  },
+
+
+  {
+    id:
+      crypto.randomUUID(),
+
+    name:
+      'Bread',
+
+    quantity:
+      1,
+
+    category:
+      'Bakery',
+
+    price:
+      2.50,
+
+    purchased:
+      false,
+
+    createdAt:
+      new Date().toISOString()
+  }
+
+]
+
+
+export default function GroceryListApp() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [items, setItems] =
+    useState(INITIAL_ITEMS)
+
+
+  const [formData, setFormData] =
+    useState(INITIAL_FORM)
+
+
+  const [filter, setFilter] =
+    useState('ALL')
+
+
+  const [
+    editingId,
+    setEditingId
+  ] = useState(null)
+
+
+  const [
+    formError,
+    setFormError
+  ] = useState('')
+
+
+  // ============================================
+  // FORM CHANGE
+  // ============================================
+
+  const handleFormChange = (
+    event
+  ) => {
+
+    const {
+      name,
+      value
+    } = event.target
+
+
+    setFormData(previousData => ({
+
+      ...previousData,
+
+      value
+
+    }))
+
+
+    setFormError('')
+  }
+
+
+  // ============================================
+  // VALIDATION
+  // ============================================
+
+  const validateForm = () => {
+
+    const name =
+      formData.name.trim()
+
+
+    const quantity =
+      Number(formData.quantity)
+
+
+    const price =
+      Number(formData.price)
+
+
+    if (!name) {
+
+      return 'Please enter an item name'
+    }
+
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+
+      return 'Quantity must be a positive whole number'
+    }
+
+
+    if (
+      formData.price === '' ||
+      !Number.isFinite(price) ||
+      price < 0
+    ) {
+
+      return 'Price must be zero or greater'
+    }
+
+
+    if (
+      !CATEGORIES.includes(
+        formData.category
+      )
+    ) {
+
+      return 'Please select a valid category'
+    }
+
+
+    return ''
+  }
+
+
+  // ============================================
+  // SUBMIT - ADD OR UPDATE
+  // ============================================
+
+  const handleSubmit = (
+    event
+  ) => {
+
+    event.preventDefault()
+
+
+    const validationError =
+      validateForm()
+
+
+    if (validationError) {
+
+      setFormError(
+        validationError
+      )
+
+      return
+    }
+
+
+    const normalizedValues = {
+
+      name:
+        formData.name.trim(),
+
+      quantity:
+        Number(
+          formData.quantity
+        ),
+
+      category:
+        formData.category,
+
+      price:
+        Number(
+          formData.price
+        )
+
+    }
+
+
+    if (editingId !== null) {
+
+      // UPDATE ITEM
+
+      setItems(previousItems =>
+
+        previousItems.map(item =>
+
+          item.id === editingId
+            ? {
+                ...item,
+                ...normalizedValues
+              }
+            : item
+
+        )
+
+      )
+
+    } else {
+
+      // ADD ITEM
+
+      const newItem = {
+
+        id:
+          crypto.randomUUID(),
+
+        ...normalizedValues,
+
+        purchased:
+          false,
+
+        createdAt:
+          new Date()
+            .toISOString()
+
+      }
+
+
+      setItems(previousItems => [
+
+        newItem,
+
+        ...previousItems
+
+      ])
+    }
+
+
+    resetEditor()
+  }
+
+
+  // ============================================
+  // EDIT
+  // ============================================
+
+  const handleEditItem = (
+    item
+  ) => {
+
+    setFormData({
+
+      name:
+        item.name,
+
+      quantity:
+        String(
+          item.quantity
+        ),
+
+      category:
+        item.category,
+
+      price:
+        String(
+          item.price
+        )
+
+    })
+
+
+    setEditingId(
+      item.id
+    )
+
+
+    setFormError('')
+  }
+
+
+  // ============================================
+  // CANCEL EDIT
+  // ============================================
+
+  const handleCancelEdit = () => {
+
+    resetEditor()
+  }
+
+
+  // ============================================
+  // DELETE
+  // ============================================
+
+  const handleDeleteItem = (
+    id
+  ) => {
+
+    setItems(previousItems =>
+
+      previousItems.filter(
+        item =>
+          item.id !== id
+      )
+
+    )
+
+
+    if (editingId === id) {
+
+      resetEditor()
+    }
+  }
+
+
+  // ============================================
+  // TOGGLE PURCHASED
+  // ============================================
+
+  const handleTogglePurchased = (
+    id
+  ) => {
+
+    setItems(previousItems =>
+
+      previousItems.map(item =>
+
+        item.id === id
+          ? {
+              ...item,
+              purchased:
+                !item.purchased
+            }
+          : item
+
+      )
+
+    )
+  }
+
+
+  // ============================================
+  // CLEAR ALL
+  // ============================================
+
+  const handleClearAll = () => {
+
+    const shouldClear =
+      window.confirm(
+        'Clear all grocery items?'
+      )
+
+
+    if (!shouldClear) {
+
+      return
+    }
+
+
+    setItems([])
+
+    setFilter('ALL')
+
+    resetEditor()
+  }
+
+
+  // ============================================
+  // RESET EDITOR
+  // ============================================
+
+  function resetEditor() {
+
+    setFormData(
+      INITIAL_FORM
+    )
+
+    setEditingId(null)
+
+    setFormError('')
+  }
+
+
+  // ============================================
+  // DERIVED VALUES
+  // ============================================
+
+  const filteredItems =
+    items.filter(item => {
+
+      if (
+        filter ===
+        'PURCHASED'
+      ) {
+
+        return item.purchased
+      }
+
+
+      if (
+        filter ===
+        'UNPURCHASED'
+      ) {
+
+        return !item.purchased
+      }
+
+
+      return true
+    })
+
+
+  const totalItems =
+    items.length
+
+
+  const purchasedCount =
+    items.filter(
+      item =>
+        item.purchased
+    ).length
+
+
+  const remainingCount =
+    totalItems -
+    purchasedCount
+
+
+  const totalCost =
+    items.reduce(
+      (sum, item) =>
+
+        sum +
+        item.price *
+        item.quantity,
+
+      0
+    )
+
+
+  const purchasedCost =
+    items
+      .filter(
+        item =>
+          item.purchased
+      )
+      .reduce(
+        (sum, item) =>
+
+          sum +
+          item.price *
+          item.quantity,
+
+        0
+      )
+
+
+  const progress =
+    totalItems === 0
+      ? 0
+      : Math.round(
+          (
+            purchasedCount /
+            totalItems
+          ) * 100
+        )
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="grocery-list-container">
+
+
+      {/* Header */}
+
+      <header className="app-header">
+
+        <h1>
+          Grocery List App
+        </h1>
+
+        <p>
+          Organize your shopping list
+        </p>
+
+      </header>
+
+
+      <div className="app-content">
+
+
+        {/* ======================================
+            FORM
+            ====================================== */}
+
+        <section className="form-section">
+
+          <h2>
+
+            {editingId !== null
+              ? 'Edit Item'
+              : 'Add Item'}
+
+          </h2>
+
+
+          <form
+            onSubmit={handleSubmit}
+            className="grocery-form"
+            noValidate
+          >
+
+            <div className="form-row">
+
+
+              {/* Item Name */}
+
+              <div className="form-group">
+
+                <label htmlFor="name">
+                  Item Name:
+                </label>
+
+                <input
+                  id="name"
+                  type="text"
+                  name="name"
+                  value={
+                    formData.name
+                  }
+                  onChange={
+                    handleFormChange
+                  }
+                  placeholder="e.g. Milk"
+                  className="form-input"
+                />
+
+              </div>
+
+
+              {/* Quantity */}
+
+              <div className="form-group">
+
+                <label htmlFor="quantity">
+                  Quantity:
+                </label>
+
+                <input
+                  id="quantity"
+                  type="number"
+                  name="quantity"
+                  value={
+                    formData.quantity
+                  }
+                  onChange={
+                    handleFormChange
+                  }
+                  min="1"
+                  step="1"
+                  className="form-input"
+                />
+
+              </div>
+
+
+              {/* Category */}
+
+              <div className="form-group">
+
+                <label htmlFor="category">
+                  Category:
+                </label>
+
+                <select
+                  id="category"
+                  name="category"
+                  value={
+                    formData.category
+                  }
+                  onChange={
+                    handleFormChange
+                  }
+                  className="form-select"
+                >
+
+                  {CATEGORIES.map(
+                    category => (
+
+                      <option
+                        key={category}
+                        value={category}
+                      >
+                        {category}
+                      </option>
+
+                    )
+                  )}
+
+                </select>
+
+              </div>
+
+
+              {/* Price */}
+
+              <div className="form-group">
+
+                <label htmlFor="price">
+                  Unit Price:
+                </label>
+
+                <input
+                  id="price"
+                  type="number"
+                  name="price"
+                  value={
+                    formData.price
+                  }
+                  onChange={
+                    handleFormChange
+                  }
+                  min="0"
+                  step="0.01"
+                  className="form-input"
+                />
+
+              </div>
+
+            </div>
+
+
+            {formError && (
+
+              <p
+                className="error-message"
+                role="alert"
+              >
+                {formError}
+              </p>
+
+            )}
+
+
+            <div className="form-actions">
+
+              <button
+                type="submit"
+                className="btn-add"
+              >
+
+                {editingId !== null
+                  ? 'Update Item'
+                  : 'Add Item'}
+
+              </button>
+
+
+              {editingId !== null && (
+
+                <button
+                  type="button"
+                  onClick={
+                    handleCancelEdit
+                  }
+                  className="btn-cancel"
+                >
+                  Cancel Edit
+                </button>
+
+              )}
+
+            </div>
+
+          </form>
+
+        </section>
+
+
+        {/* ======================================
+            STATISTICS
+            ====================================== */}
+
+        <section className="statistics-section">
+
+          <h2>
+            Shopping Summary
+          </h2>
+
+
+          <div className="stats-grid">
+
+
+            <div className="stat-card">
+
+              <h3>
+                Total Items
+              </h3>
+
+              <p className="stat-value">
+                {totalItems}
+              </p>
+
+            </div>
+
+
+            <div className="stat-card">
+
+              <h3>
+                Purchased
+              </h3>
+
+              <p className="stat-value purchased">
+                {purchasedCount}
+              </p>
+
+            </div>
+
+
+            <div className="stat-card">
+
+              <h3>
+                Remaining
+              </h3>
+
+              <p className="stat-value remaining">
+                {remainingCount}
+              </p>
+
+            </div>
+
+
+            <div className="stat-card">
+
+              <h3>
+                Total Cost
+              </h3>
+
+              <p className="stat-value">
+
+                ${totalCost.toFixed(2)}
+
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div className="cost-summary">
+
+            Purchased Cost:
+            {' '}
+
+            <strong>
+
+              ${purchasedCost.toFixed(2)}
+
+            </strong>
+
+          </div>
+
+
+          {/* Progress */}
+
+          <div className="progress-section">
+
+            <p>
+              Shopping Progress
+            </p>
+
+
+            <div
+              className="progress-bar"
+              role="progressbar"
+              aria-label="Shopping progress"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow={
+                progress
+              }
+            >
+
+              <div
+                className="progress-fill"
+                style={{
+                  width:
+                    `${progress}%`
+                }}
+              >
+              </div>
+
+            </div>
+
+
+            <p className="progress-text">
+
+              {progress}% Complete
+
+            </p>
+
+          </div>
+
+        </section>
+
+
+        {/* ======================================
+            FILTER
+            ====================================== */}
+
+        <section className="filter-section">
+
+          <h2>
+            Filter Items
+          </h2>
+
+
+          <div className="filter-buttons">
+
+
+            <button
+              type="button"
+              onClick={() =>
+                setFilter('ALL')
+              }
+              className={
+                `filter-btn ${
+                  filter === 'ALL'
+                    ? 'active'
+                    : ''
+                }`
+              }
+              aria-pressed={
+                filter === 'ALL'
+              }
+            >
+
+              All ({totalItems})
+
+            </button>
+
+
+            <button
+              type="button"
+              onClick={() =>
+                setFilter(
+                  'UNPURCHASED'
+                )
+              }
+              className={
+                `filter-btn ${
+                  filter ===
+                  'UNPURCHASED'
+                    ? 'active'
+                    : ''
+                }`
+              }
+              aria-pressed={
+                filter ===
+                'UNPURCHASED'
+              }
+            >
+
+              To Buy ({remainingCount})
+
+            </button>
+
+
+            <button
+              type="button"
+              onClick={() =>
+                setFilter(
+                  'PURCHASED'
+                )
+              }
+              className={
+                `filter-btn ${
+                  filter ===
+                  'PURCHASED'
+                    ? 'active'
+                    : ''
+                }`
+              }
+              aria-pressed={
+                filter ===
+                'PURCHASED'
+              }
+            >
+
+              Purchased ({purchasedCount})
+
+            </button>
+
+          </div>
+
+        </section>
+
+
+        {/* ======================================
+            ITEMS
+            ====================================== */}
+
+        <section className="items-section">
+
+          <h2>
+
+            Items
+            {' '}
+            ({filteredItems.length})
+
+          </h2>
+
+
+          {filteredItems.length === 0 ? (
+
+            <p className="empty-message">
+
+              {items.length === 0
+                ? 'No grocery items yet. Add one to get started.'
+                : 'No items match the current filter.'}
+
+            </p>
+
+          ) : (
+
+            <div className="items-list">
+
+              {filteredItems.map(item => (
+
+                <article
+                  key={item.id}
+                  className={
+                    `item-card ${
+                      item.purchased
+                        ? 'purchased'
+                        : ''
+                    }`
+                  }
+                >
+
+
+                  {/* Purchased Checkbox */}
+
+                  <input
+                    type="checkbox"
+                    checked={
+                      item.purchased
+                    }
+                    onChange={() =>
+                      handleTogglePurchased(
+                        item.id
+                      )
+                    }
+                    className="item-checkbox"
+                    aria-label={
+                      `Mark ${item.name} as ${
+                        item.purchased
+                          ? 'not purchased'
+                          : 'purchased'
+                      }`
+                    }
+                  />
+
+
+                  {/* Details */}
+
+                  <div className="item-details">
+
+                    <h3 className="item-name">
+
+                      {item.name}
+
+                    </h3>
+
+
+                    <div className="item-meta">
+
+                      <span className="item-category">
+
+                        {item.category}
+
+                      </span>
+
+
+                      <span className="item-quantity">
+
+                        Qty:
+                        {' '}
+                        {item.quantity}
+
+                      </span>
+
+
+                      <span className="item-price">
+
+                        $
+                        {
+                          (
+                            item.price *
+                            item.quantity
+                          ).toFixed(2)
+                        }
+
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                  {/* Actions */}
+
+                  <div className="item-actions">
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleEditItem(
+                          item
+                        )
+                      }
+                      className="btn-edit"
+                      aria-label={
+                        `Edit ${item.name}`
+                      }
+                    >
+                      Edit
+                    </button>
+
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleDeleteItem(
+                          item.id
+                        )
+                      }
+                      className="btn-delete"
+                      aria-label={
+                        `Delete ${item.name}`
+                      }
+                    >
+                      Delete
+                    </button>
+
+                  </div>
+
+                </article>
+
+              ))}
+
+            </div>
+
+          )}
+
+        </section>
+
+
+        {/* ======================================
+            CLEAR ALL
+            ====================================== */}
+
+        {items.length > 0 && (
+
+          <div className="footer-actions">
+
+            <button
+              type="button"
+              onClick={
+                handleClearAll
+              }
+              className="btn-clear-all"
+            >
+              Clear All Items
+            </button>
+
+          </div>
+
+        )}
+
+      </div>
+
+
+      {/* Debug */}
+
+      <details className="debug-section">
+
+        <summary>
+          Debug Information
+        </summary>
+
+        <pre>
+
+          {JSON.stringify(
+            {
+              items,
+              formData,
+              filter,
+              editingId
+            },
+            null,
+            2
+          )}
+
+        </pre>
+
+      </details>
+
+    </div>
+  )
+}
+
+
+================================================================================
+STATE RESPONSIBILITIES
+================================================================================
+
+items:
+--------------------------------------------------------------------------------
+
+Source of truth for grocery records
+
+
+formData:
+--------------------------------------------------------------------------------
+
+Temporary controlled-form values
+
+
+filter:
+--------------------------------------------------------------------------------
+
+Determines which items are visible
+
+
+editingId:
+--------------------------------------------------------------------------------
+
+Identifies the item currently being edited
+
+
+formError:
+--------------------------------------------------------------------------------
+
+Simple form validation feedback
+
+
+================================================================================
+IMPORTANT: DO NOT STORE DERIVED VALUES IN STATE
+================================================================================
+
+These values can be calculated from items:
+
+filteredItems
+
+totalItems
+
+purchasedCount
+
+remainingCount
+
+totalCost
+
+purchasedCost
+
+progress
+
+
+Therefore they usually do NOT need:
+
+useState()
+
+
+Example:
+
+const totalItems =
+  items.length
+
+
+instead of:
+
+const [totalItems, setTotalItems] =
+  useState(0)
+
+
+MEMORY:
+--------------------------------------------------------------------------------
+
+IF A VALUE CAN BE CALCULATED DIRECTLY
+FROM EXISTING STATE,
+
+DERIVE IT INSTEAD OF DUPLICATING IT.
+
+
+================================================================================
+FORM CHANGE FLOW
+================================================================================
+
+User Changes Quantity
+        ↓
+event.target.name
+=
+"quantity"
+
+event.target.value
+=
+"3"
+        ↓
+handleFormChange
+        ↓
+formData.quantity
+=
+"3"
+        ↓
+Submit
+        ↓
+Number("3")
+        ↓
+Stored Item quantity
+=
+3
+
+
+================================================================================
+ADD FLOW
+================================================================================
+
+Form Data
+    ↓
+Validate
+    ↓
+Normalize Numbers/Text
+    ↓
+Create Item
+    ↓
+crypto.randomUUID()
+    ↓
+setItems(previous => [
+  newItem,
+  ...previous
+])
+    ↓
+Reset Form
+
+
+================================================================================
+EDIT FLOW
+================================================================================
+
+User Clicks Edit
+       ↓
+Existing Item
+       ↓
+Load Into formData
+       ↓
+editingId = item.id
+       ↓
+User Changes Fields
+       ↓
+Submit
+       ↓
+map()
+       ↓
+Replace Matching Item
+       ↓
+Preserve:
+purchased
+createdAt
+id
+       ↓
+Reset Editor
+
+
+================================================================================
+IMPORTANT EDITING CHECK
+================================================================================
+
+Prefer:
+
+editingId !== null
+
+
+instead of:
+
+if (editingId)
+
+
+This clearly distinguishes:
+
+null
+=
+not editing
+
+
+from:
+
+an actual item identifier
+=
+editing
+
+
+================================================================================
+DELETE FLOW
+================================================================================
+
+Item ID
+   ↓
+handleDeleteItem(id)
+   ↓
+filter()
+   ↓
+Remove Matching Item
+   ↓
+New items Array
+
+
+================================================================================
+TOGGLE FLOW
+================================================================================
+
+Item ID
+   ↓
+map()
+   ↓
+Matching Item
+   ↓
+purchased:
+!item.purchased
+   ↓
+Updated Array
+
+
+================================================================================
+FILTER FLOW
+================================================================================
+
+items
+ +
+filter
+   ↓
+filter()
+   ↓
+filteredItems
+   ↓
+Render
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Filtering does NOT modify the original items array.
+
+
+================================================================================
+STATISTICS FLOW
+================================================================================
+
+items
+  ↓
++----------------------------------+
+|                                  |
+↓                                  ↓
+filter()                        reduce()
+|                                  |
+↓                                  ↓
+Purchased Count                 Total Cost
+|
+↓
+Progress
+
+
+================================================================================
+COST EXAMPLE
+================================================================================
+
+Milk:
+
+quantity:
+2
+
+unit price:
+3.99
+
+
+Line cost:
+
+2 × 3.99
+
+=
+7.98
+
+
+Bread:
+
+quantity:
+1
+
+unit price:
+2.50
+
+
+Line cost:
+
+1 × 2.50
+
+=
+2.50
+
+
+Total:
+
+7.98 + 2.50
+
+=
+10.48
+
+
+IMPORTANT CORRECTION:
+--------------------------------------------------------------------------------
+
+For the original test data:
+
+Milk:
+2 × $3.99 = $7.98
+
+Bread:
+1 × $2.50 = $2.50
+
+
+the correct total is:
+
+$10.48
+
+
+not:
+
+$9.48
+
+
+================================================================================
+PART 5: STYLING THE GROCERY LIST APP
+================================================================================
+
+File:
+
+src/components/GroceryListApp.css
+
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+
+.grocery-list-container {
+
+  max-width: 1200px;
+
+  margin: 0 auto;
+
+  padding: 20px;
+
+  background:
+    #f5f5f5;
+
+  min-height: 100vh;
+}
+
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.app-header {
+
+  text-align: center;
+
+  margin-bottom: 40px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #667eea 0%,
+      #764ba2 100%
+    );
+
+  color: white;
+
+  padding:
+    40px 20px;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 4px 15px
+    rgba(0, 0, 0, 0.1);
+}
+
+
+.app-header h1 {
+
+  font-size: 2.5rem;
+
+  margin:
+    0 0 10px;
+}
+
+
+.app-header p {
+
+  font-size: 1.1rem;
+
+  opacity: 0.9;
+
+  margin: 0;
+}
+
+
+/* ============================================
+   CONTENT
+   ============================================ */
+
+.app-content {
+
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 30px;
+}
+
+
+/* ============================================
+   FORM
+   ============================================ */
+
+.form-section {
+
+  background: white;
+
+  padding: 30px;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 2px 10px
+    rgba(0, 0, 0, 0.1);
+}
+
+
+.grocery-form {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 15px;
+}
+
+
+.form-row {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(
+        150px,
+        1fr
+      )
+    );
+
+  gap: 15px;
+}
+
+
+.form-group {
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.form-group label {
+
+  font-weight: 600;
+
+  color: #333;
+
+  margin-bottom: 5px;
+}
+
+
+.form-input,
+.form-select {
+
+  padding:
+    10px 12px;
+
+  border:
+    2px solid #ddd;
+
+  border-radius: 6px;
+
+  font-size: 1rem;
+
+  font-family: inherit;
+}
+
+
+.form-input:focus,
+.form-select:focus {
+
+  outline: none;
+
+  border-color:
+    #667eea;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(102, 126, 234, 0.15);
+}
+
+
+.error-message {
+
+  color:
+    #b71c1c;
+
+  font-weight: 500;
+
+  margin:
+    0;
+}
+
+
+.form-actions {
+
+  display: flex;
+
+  gap: 10px;
+}
+
+
+.btn-add,
+.btn-cancel {
+
+  padding:
+    12px 20px;
+
+  border: none;
+
+  border-radius: 6px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+
+.btn-add {
+
+  background:
+    #667eea;
+
+  color: white;
+}
+
+
+.btn-cancel {
+
+  background:
+    #f44336;
+
+  color: white;
+}
+
+
+/* ============================================
+   STATISTICS
+   ============================================ */
+
+.statistics-section {
+
+  background: white;
+
+  padding: 30px;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 2px 10px
+    rgba(0, 0, 0, 0.1);
+}
+
+
+.stats-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 15px;
+
+  margin-bottom: 25px;
+}
+
+
+.stat-card {
+
+  background:
+    linear-gradient(
+      135deg,
+      #f5f7fa 0%,
+      #dce5f2 100%
+    );
+
+  padding: 20px;
+
+  border-radius: 8px;
+
+  text-align: center;
+}
+
+
+.stat-card h3 {
+
+  color: #666;
+
+  margin:
+    0 0 10px;
+
+  font-size: 0.9rem;
+
+  text-transform:
+    uppercase;
+}
+
+
+.stat-value {
+
+  font-size: 2rem;
+
+  font-weight: bold;
+
+  margin: 0;
+
+  color: #333;
+}
+
+
+.stat-value.purchased {
+
+  color: #2e7d32;
+}
+
+
+.stat-value.remaining {
+
+  color: #e65100;
+}
+
+
+.cost-summary {
+
+  margin-bottom: 20px;
+
+  text-align: center;
+
+  color: #444;
+}
+
+
+/* ============================================
+   PROGRESS
+   ============================================ */
+
+.progress-section {
+
+  margin-top: 20px;
+}
+
+
+.progress-bar {
+
+  width: 100%;
+
+  height: 20px;
+
+  background:
+    #eee;
+
+  border-radius: 10px;
+
+  overflow: hidden;
+
+  margin-bottom: 10px;
+}
+
+
+.progress-fill {
+
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      #667eea 0%,
+      #764ba2 100%
+    );
+
+  transition:
+    width 0.3s ease;
+}
+
+
+.progress-text {
+
+  text-align: center;
+
+  color: #667eea;
+
+  font-weight: bold;
+}
+
+
+/* ============================================
+   FILTER
+   ============================================ */
+
+.filter-section {
+
+  grid-column:
+    1 / -1;
+
+  background: white;
+
+  padding: 30px;
+
+  border-radius: 12px;
+}
+
+
+.filter-buttons {
+
+  display: flex;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+}
+
+
+.filter-btn {
+
+  padding:
+    10px 20px;
+
+  border:
+    2px solid #ddd;
+
+  background:
+    white;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+
+.filter-btn.active {
+
+  background:
+    #667eea;
+
+  color: white;
+
+  border-color:
+    #667eea;
+}
+
+
+/* ============================================
+   ITEMS
+   ============================================ */
+
+.items-section {
+
+  grid-column:
+    1 / -1;
+
+  background: white;
+
+  padding: 30px;
+
+  border-radius: 12px;
+}
+
+
+.empty-message {
+
+  text-align: center;
+
+  color: #666;
+
+  padding:
+    40px 20px;
+}
+
+
+.items-list {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(
+        300px,
+        1fr
+      )
+    );
+
+  gap: 20px;
+}
+
+
+/* ============================================
+   ITEM CARD
+   ============================================ */
+
+.item-card {
+
+  background:
+    white;
+
+  border:
+    2px solid #eee;
+
+  border-radius: 8px;
+
+  padding: 20px;
+
+  display: flex;
+
+  gap: 15px;
+
+  align-items:
+    flex-start;
+}
+
+
+.item-card.purchased {
+
+  opacity: 0.65;
+
+  background:
+    #f9f9f9;
+}
+
+
+.item-checkbox {
+
+  width: 20px;
+
+  height: 20px;
+
+  cursor: pointer;
+
+  accent-color:
+    #667eea;
+}
+
+
+.item-details {
+
+  flex: 1;
+
+  min-width: 0;
+}
+
+
+.item-name {
+
+  margin:
+    0 0 10px;
+
+  color: #333;
+
+  overflow-wrap:
+    anywhere;
+}
+
+
+.item-card.purchased
+.item-name {
+
+  text-decoration:
+    line-through;
+
+  color: #777;
+}
+
+
+.item-meta {
+
+  display: flex;
+
+  gap: 15px;
+
+  flex-wrap: wrap;
+
+  font-size: 0.9rem;
+
+  color: #555;
+}
+
+
+.item-category {
+
+  background:
+    #f0f0f0;
+
+  padding:
+    4px 8px;
+
+  border-radius: 4px;
+
+  font-weight: 600;
+}
+
+
+.item-quantity,
+.item-price {
+
+  color: #667eea;
+
+  font-weight: 600;
+}
+
+
+/* ============================================
+   ITEM ACTIONS
+   ============================================ */
+
+.item-actions {
+
+  display: flex;
+
+  gap: 8px;
+
+  flex-direction: column;
+}
+
+
+.btn-edit,
+.btn-delete {
+
+  border: none;
+
+  border-radius: 4px;
+
+  padding:
+    7px 10px;
+
+  cursor: pointer;
+}
+
+
+.btn-edit {
+
+  background:
+    #e8eaf6;
+
+  color:
+    #303f9f;
+}
+
+
+.btn-delete {
+
+  background:
+    #ffebee;
+
+  color:
+    #b71c1c;
+}
+
+
+/* ============================================
+   FOOTER ACTIONS
+   ============================================ */
+
+.footer-actions {
+
+  grid-column:
+    1 / -1;
+
+  text-align: center;
+}
+
+
+.btn-clear-all {
+
+  padding:
+    12px 30px;
+
+  background:
+    #f44336;
+
+  color: white;
+
+  border: none;
+
+  border-radius: 6px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+
+/* ============================================
+   DEBUG
+   ============================================ */
+
+.debug-section {
+
+  background:
+    #f5f5f5;
+
+  padding: 20px;
+
+  border-radius: 8px;
+
+  margin-top: 30px;
+}
+
+
+.debug-section summary {
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+
+.debug-section pre {
+
+  background:
+    #2d2d2d;
+
+  color:
+    #f8f8f2;
+
+  padding: 15px;
+
+  border-radius: 4px;
+
+  overflow-x: auto;
+}
+
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+
+  .app-content {
+
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .filter-section,
+  .items-section,
+  .footer-actions {
+
+    grid-column:
+      1;
+  }
+
+
+  .stats-grid {
+
+    grid-template-columns:
+      repeat(4, 1fr);
+  }
+
+}
+
+
+@media (max-width: 768px) {
+
+  .app-header h1 {
+
+    font-size:
+      1.8rem;
+  }
+
+
+  .form-row {
+
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .form-actions {
+
+    flex-direction:
+      column;
+  }
+
+
+  .stats-grid {
+
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+
+  .items-list {
+
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .filter-buttons {
+
+    flex-direction:
+      column;
+  }
+
+
+  .filter-btn {
+
+    width: 100%;
+  }
+
+}
+
+
+================================================================================
+CSS SUMMARY
+================================================================================
+
++--------------------------+--------------------------------------------+
+| CLASS                    | PURPOSE                                    |
++--------------------------+--------------------------------------------+
+| .grocery-list-container  | Main application wrapper                   |
+| .app-header              | Page header                                |
+| .app-content             | Main layout                                |
+| .form-section            | Form panel                                 |
+| .grocery-form            | Form layout                                |
+| .form-row                | Input grid                                 |
+| .form-input              | Input styling                              |
+| .form-select             | Category dropdown                          |
+| .form-actions            | Form buttons                               |
+| .statistics-section      | Summary panel                              |
+| .stats-grid              | Statistic cards                           |
+| .stat-card               | Individual statistic                       |
+| .progress-bar            | Progress track                             |
+| .progress-fill           | Completed progress                         |
+| .filter-section          | Filter controls                            |
+| .filter-btn              | Filter option                              |
+| .items-section           | Grocery items panel                        |
+| .items-list              | Item grid                                  |
+| .item-card               | Individual grocery card                    |
+| .purchased               | Purchased visual state                     |
+| .item-meta               | Category/quantity/cost                     |
+| .item-actions            | Edit/delete actions                        |
+| .btn-clear-all           | Remove entire list                         |
++--------------------------+--------------------------------------------+
+
+
+================================================================================
+PART 6: APP FEATURES DEMONSTRATION
+================================================================================
+
+FEATURE 1: ADD ITEM
+--------------------------------------------------------------------------------
+
+1. Enter item name
+
+2. Enter quantity
+
+3. Select category
+
+4. Enter unit price
+
+5. Click:
+
+   Add Item
+
+
+FLOW:
+
+Form
+ ↓
+Validation
+ ↓
+Normalize
+ ↓
+Create Grocery Object
+ ↓
+Add to items
+ ↓
+Reset Form
+ ↓
+Render Item
+
+
+================================================================================
+FEATURE 2: VIEW ITEMS
+================================================================================
+
+Each item shows:
+
+• Name
+
+• Category
+
+• Quantity
+
+• Calculated line cost
+
+• Purchased checkbox
+
+• Edit action
+
+• Delete action
+
+
+LINE COST:
+--------------------------------------------------------------------------------
+
+item.price
+    ×
+item.quantity
+
+
+Example:
+
+3.99 × 2
+
+=
+7.98
+
+
+================================================================================
+FEATURE 3: FILTER
+================================================================================
+
+ALL:
+--------------------------------------------------------------------------------
+
+Returns every item
+
+
+TO BUY:
+--------------------------------------------------------------------------------
+
+return !item.purchased
+
+
+PURCHASED:
+--------------------------------------------------------------------------------
+
+return item.purchased
+
+
+No duplicate filtered state is required.
+
+
+================================================================================
+FEATURE 4: MARK PURCHASED
+================================================================================
+
+User clicks checkbox
+
+        ↓
+
+handleTogglePurchased(id)
+
+        ↓
+
+map()
+
+        ↓
+
+Matching item:
+
+purchased:
+!item.purchased
+
+        ↓
+
+Statistics re-derived
+
+        ↓
+
+Progress re-derived
+
+        ↓
+
+UI updates
+
+
+================================================================================
+FEATURE 5: EDIT ITEM
+================================================================================
+
+1. Click Edit
+
+2. Existing values load into form
+
+3. editingId is set
+
+4. Change form values
+
+5. Submit
+
+6. Matching record is replaced using map()
+
+7. Original:
+
+   • id
+   • purchased
+   • createdAt
+
+   remain intact
+
+8. Form returns to add mode
+
+
+================================================================================
+FEATURE 6: DELETE ITEM
+================================================================================
+
+Item ID
+   ↓
+filter()
+   ↓
+Matching Item Removed
+   ↓
+Statistics Recalculate
+
+
+================================================================================
+FEATURE 7: STATISTICS
+================================================================================
+
+TOTAL ITEMS:
+--------------------------------------------------------------------------------
+
+items.length
+
+
+PURCHASED:
+--------------------------------------------------------------------------------
+
+items.filter(
+  item =>
+    item.purchased
+).length
+
+
+REMAINING:
+--------------------------------------------------------------------------------
+
+totalItems -
+purchasedCount
+
+
+TOTAL COST:
+--------------------------------------------------------------------------------
+
+items.reduce(
+  (sum, item) =>
+    sum +
+    item.price *
+    item.quantity,
+  0
+)
+
+
+PROGRESS:
+--------------------------------------------------------------------------------
+
+purchasedCount
+      ÷
+totalItems
+      ×
+100
+
+
+If totalItems = 0:
+
+progress = 0
+
+
+================================================================================
+FEATURE 8: CLEAR ALL
+================================================================================
+
+User Clicks Clear All
+        ↓
+Confirmation
+        ↓
+User Confirms?
+        │
+        ├── NO
+        │    ↓
+        │   No Change
+        │
+        └── YES
+             ↓
+           items = []
+             ↓
+           filter = ALL
+             ↓
+           Cancel Edit
+             ↓
+           Stats Recalculate
+
+
+================================================================================
+FEATURES TABLE
+================================================================================
+
++----------------------+-------------------------+-----------------------------+
+| FEATURE              | ACTION                  | RESULT                      |
++----------------------+-------------------------+-----------------------------+
+| Add                  | Submit valid form       | New item created            |
+| View                 | Render list             | Details visible             |
+| Filter               | Change filter state     | Visible subset changes      |
+| Purchase             | Toggle checkbox         | Status changes              |
+| Edit                 | Load + submit           | Existing record changes     |
+| Delete               | Click Delete            | Record removed              |
+| Statistics           | Derived from items      | Summary updates             |
+| Progress             | Derived percentage      | Completion updates          |
+| Clear All            | Confirm destructive act | List becomes empty          |
++----------------------+-------------------------+-----------------------------+
+
+
+================================================================================
+PART 7: TESTING THE APP
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Name input works
+
+[ ] Quantity input works
+
+[ ] Category select works
+
+[ ] Price input works
+
+[ ] Empty name is rejected
+
+[ ] Invalid quantity is rejected
+
+[ ] Negative price is rejected
+
+[ ] Add creates new item
+
+[ ] Form resets after add
+
+[ ] Edit populates form
+
+[ ] Edit preserves item identity
+
+[ ] Edit preserves purchased status
+
+[ ] Cancel edit works
+
+[ ] Delete removes correct item
+
+[ ] Deleting active edited item exits edit mode
+
+[ ] Purchased checkbox toggles status
+
+[ ] All filter works
+
+[ ] To Buy filter works
+
+[ ] Purchased filter works
+
+[ ] Counts update
+
+[ ] Costs update
+
+[ ] Progress updates
+
+[ ] Clear All works
+
+[ ] Empty state works
+
+[ ] Stable IDs are used as keys
+
+[ ] Buttons have appropriate types
+
+[ ] Checkbox has accessible label
+
+[ ] Layout works on smaller screens
+
+
+================================================================================
+SCENARIO 1: ADD AND DISPLAY
+================================================================================
+
+START:
+--------------------------------------------------------------------------------
+
+Use an empty item list when executing this scenario so the expected values
+are unambiguous.
+
+
+ADD:
+--------------------------------------------------------------------------------
+
+Milk
+
+Quantity:
+2
+
+Category:
+Dairy
+
+Unit Price:
+3.99
+
+
+Bread
+
+Quantity:
+1
+
+Category:
+Bakery
+
+Unit Price:
+2.50
+
+
+EXPECTED:
+--------------------------------------------------------------------------------
+
+Total Items:
+
+2
+
+
+Milk Line Cost:
+
+2 × 3.99
+=
+7.98
+
+
+Bread Line Cost:
+
+1 × 2.50
+=
+2.50
+
+
+Total Cost:
+
+7.98 + 2.50
+=
+10.48
+
+
+================================================================================
+SCENARIO 2: FILTERING
+================================================================================
+
+Start with:
+
+3 items
+
+
+Mark:
+
+1 purchased
+
+
+Expected:
+
+All:
+
+3
+
+
+To Buy:
+
+2
+
+
+Purchased:
+
+1
+
+
+================================================================================
+SCENARIO 3: EDIT
+================================================================================
+
+Item:
+
+Apples
+
+
+Quantity:
+
+5
+
+
+Unit Price:
+
+1.50
+
+
+Initial line cost:
+
+5 × 1.50
+
+=
+7.50
+
+
+Edit quantity:
+
+10
+
+
+Expected line cost:
+
+10 × 1.50
+
+=
+15.00
+
+
+Expected:
+
+• Same item ID
+
+• Same purchased state
+
+• Same createdAt
+
+• Quantity becomes 10
+
+• Form exits edit mode
+
+
+================================================================================
+SCENARIO 4: STATISTICS
+================================================================================
+
+5 items total
+
+3 purchased
+
+
+Progress:
+
+3 / 5 × 100
+
+=
+60%
+
+
+Expected:
+
+Total:
+5
+
+
+Purchased:
+3
+
+
+Remaining:
+2
+
+
+Progress:
+60%
+
+
+================================================================================
+SCENARIO 5: DELETE
+================================================================================
+
+Before:
+
+Milk
+
+Bread
+
+Eggs
+
+
+Delete:
+
+Bread
+
+
+After:
+
+Milk
+
+Eggs
+
+
+Total:
+
+2
+
+
+================================================================================
+SCENARIO 6: CLEAR ALL
+================================================================================
+
+Before:
+
+items.length > 0
+
+
+Click:
+
+Clear All Items
+
+
+Confirm:
+
+Yes
+
+
+Expected:
+
+items:
+
+[]
+
+
+Total:
+
+0
+
+
+Purchased:
+
+0
+
+
+Remaining:
+
+0
+
+
+Progress:
+
+0%
+
+
+================================================================================
+TESTING TABLE
+================================================================================
+
++----------------------+-----------------------------------------------+
+| SCENARIO             | EXPECTED                                      |
++----------------------+-----------------------------------------------+
+| Add                  | Valid item appears                            |
+| Invalid Form         | Error shown, no item created                  |
+| Filter               | Correct subset displayed                     |
+| Purchase Toggle      | Status and stats update                       |
+| Edit                 | Matching item updated                         |
+| Cancel Edit          | Form returns to add mode                      |
+| Delete               | Matching item removed                         |
+| Cost                 | quantity × unit price                         |
+| Progress             | purchased / total × 100                       |
+| Clear All            | Items removed after confirmation              |
+| Empty State          | Appropriate message displayed                 |
+| Responsive           | Layout adapts                                 |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+PART 8: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE LEARNED
+--------------------------------------------------------------------------------
+
+✓ Grocery List application architecture
+
+✓ Managing item-array state
+
+✓ Managing temporary form state
+
+✓ Controlled form inputs
+
+✓ Validating quantity and price
+
+✓ Converting numeric strings at submission
+
+✓ Creating grocery records
+
+✓ Stable client-side IDs
+
+✓ Adding records immutably
+
+✓ Editing records with map()
+
+✓ Deleting records with filter()
+
+✓ Toggling boolean status with map()
+
+✓ Filtering without changing source state
+
+✓ Calculating statistics
+
+✓ Calculating cost with reduce()
+
+✓ Calculating progress
+
+✓ Keeping derived values out of state
+
+✓ Empty-state rendering
+
+✓ Accessible item/filter controls
+
+✓ Responsive application styling
+
+
+================================================================================
+CRITICAL IMPLEMENTATION POINTS
+================================================================================
+
+FORM STATE:
+--------------------------------------------------------------------------------
+
+const [formData, setFormData] =
+  useState(INITIAL_FORM)
+
+
+ITEM STATE:
+--------------------------------------------------------------------------------
+
+const [items, setItems] =
+  useState([])
+
+
+FILTER:
+--------------------------------------------------------------------------------
+
+const [filter, setFilter] =
+  useState('ALL')
+
+
+EDITING:
+--------------------------------------------------------------------------------
+
+const [editingId, setEditingId] =
+  useState(null)
+
+
+================================================================================
+ADD
+================================================================================
+
+setItems(previous => [
+
+  newItem,
+
+  ...previous
+
+])
+
+
+================================================================================
+EDIT
+================================================================================
+
+setItems(previous =>
+
+  previous.map(item =>
+
+    item.id === editingId
+      ? {
+          ...item,
+          ...updates
+        }
+      : item
+
+  )
+
+)
+
+
+================================================================================
+DELETE
+================================================================================
+
+setItems(previous =>
+
+  previous.filter(
+    item =>
+      item.id !== id
+  )
+
+)
+
+
+================================================================================
+TOGGLE
+================================================================================
+
+setItems(previous =>
+
+  previous.map(item =>
+
+    item.id === id
+      ? {
+          ...item,
+          purchased:
+            !item.purchased
+        }
+      : item
+
+  )
+
+)
+
+
+================================================================================
+FILTER
+================================================================================
+
+const filteredItems =
+  items.filter(item => {
+
+    // Determine visibility
+
+  })
+
+
+================================================================================
+TOTAL COST
+================================================================================
+
+const totalCost =
+  items.reduce(
+    (sum, item) =>
+
+      sum +
+      item.price *
+      item.quantity,
+
+    0
+  )
+
+
+================================================================================
+PROGRESS
+================================================================================
+
+const progress =
+  totalItems === 0
+    ? 0
+    : Math.round(
+        (
+          purchasedCount /
+          totalItems
+        ) * 100
+      )
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++-----------------------+----------------------------------------------+
+| CONCEPT               | REMEMBER                                     |
++-----------------------+----------------------------------------------+
+| items                 | Source grocery records                       |
+| formData              | Temporary editable values                    |
+| filter                | Current list view                            |
+| editingId             | Item being edited                            |
+| crypto.randomUUID()   | Client-side item identity                    |
+| map()                 | Update/toggle items                          |
+| filter()              | Delete/filter items                          |
+| reduce()              | Calculate totals                            |
+| Number()              | Convert validated numeric input              |
+| Derivation            | Don't duplicate calculated state             |
+| key                   | Stable item identity                         |
+| progress              | purchased / total × 100                     |
++-----------------------+----------------------------------------------+
+
+
+================================================================================
+COMPLETE APP FLOW
+================================================================================
+
+                   GroceryListApp
+                         │
+                         │
+          +--------------+--------------+
+          |              |              |
+          ↓              ↓              ↓
+      formData          items          filter
+          |              |              |
+          ↓              ↓              ↓
+     GroceryForm     GroceryList    Visible Items
+          |              |
+          ↓              ↓
+       Submit       GroceryItem
+          |              |
+          ↓          +---+---+
+      Validate       |       |
+          |          ↓       ↓
+          ↓        Toggle   Edit/Delete
+      Add/Update      |       |
+          |           +---+---+
+          |               |
+          +-------+-------+
+                  ↓
+                items
+                  ↓
+        +---------+----------+
+        |                    |
+        ↓                    ↓
+    Statistics           Filtered View
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+ADD:
+
+Form
+ ↓
+Validate
+ ↓
+Normalize
+ ↓
+Create Item
+ ↓
+Spread Into Array
+
+
+EDIT:
+
+Item
+ ↓
+Load Form
+ ↓
+editingId
+ ↓
+Modify
+ ↓
+map()
+
+
+DELETE:
+
+ID
+ ↓
+filter()
+
+
+TOGGLE:
+
+ID
+ ↓
+map()
+ ↓
+Invert purchased
+
+
+FILTER:
+
+items + filter
+     ↓
+Derived filteredItems
+
+
+COST:
+
+price × quantity
+       ↓
+reduce()
+       ↓
+Total
+
+
+PROGRESS:
+
+Purchased
+    ÷
+Total
+    ×
+100
+
+
+MOST IMPORTANT ARCHITECTURE RULE:
+
+STORE THE MINIMUM STATE NECESSARY.
+
+KEEP:
+
+items
+formData
+filter
+editingId
+
+
+DERIVE:
+
+filteredItems
+counts
+costs
+progress
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Split the app into GroceryForm, GroceryItem, GroceryList, and GroceryStats
+
+2. Add per-field validation messages
+
+3. Add search
+
+4. Add category filtering
+
+5. Add sorting
+
+6. Persist items with localStorage
+
+7. Connect the list to a backend API
+
+8. Add server-side IDs and validation
+
+9. Add loading/error states when asynchronous operations are introduced
+
+10. Use useReducer if item/form transitions become significantly more complex
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The Grocery List App brings together the major React concepts learned so far:
+
+CONTROLLED FORM
+      ↓
+VALIDATION
+      ↓
+ADD / EDIT
+      ↓
+ARRAY STATE
+      ↓
+MAP / FILTER / REDUCE
+      ↓
+DERIVED DATA
+      ↓
+DYNAMIC UI
+
+
+The central architecture is:
+
+STATE
+  ↓
+UI
+  ↓
+USER ACTION
+  ↓
+HANDLER
+  ↓
+NEW STATE
+  ↓
+UPDATED UI
+
+
+This gives you a practical foundation for building larger CRUD-style
+React applications.
+
+
+================================================================================
+END OF LESSON 9
+HANDS-ON - WHAT WE'LL BE BUILDING
+GROCERY LIST APP - DEMO
+================================================================================
