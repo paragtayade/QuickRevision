@@ -1,0 +1,3081 @@
+LESSON 7: SETTING UP MULTI-FORM INPUT DATA
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on organizing and managing a larger collection of form
+inputs using React state.
+
+You will understand:
+
+• Creating structured form-data objects
+
+• Managing many related input fields
+
+• Using one change handler
+
+• Using computed property names
+
+• Handling mixed input types
+
+• Organizing fields into logical sections
+
+• Using flat and nested form structures
+
+• Validating multiple fields
+
+• Tracking field-level errors
+
+• Resetting large controlled forms
+
+• Creating dynamic fields
+
+• Creating conditional fields
+
+• Building scalable form architectures
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+Larger forms appear in many applications:
+
+• Registration
+
+• Customer onboarding
+
+• Account creation
+
+• Profile management
+
+• Address/contact information
+
+• Checkout
+
+• Application workflows
+
+
+As the number of fields grows, organization becomes important.
+
+Instead of:
+
+Many Inputs
+    ↓
+Many Independent Handlers
+    ↓
+Scattered Form Logic
+
+
+A common approach is:
+
+Many Inputs
+    ↓
+Structured State
+    ↓
+Generic Handler
+    ↓
+Validation
+    ↓
+Submit
+
+
+================================================================================
+PART 2: UNDERSTANDING MULTI-FORM INPUT DATA
+================================================================================
+
+WHAT IS MULTI-FORM INPUT DATA?
+--------------------------------------------------------------------------------
+
+In this lesson, "multi-form input data" means:
+
+ONE FORM
++
+MANY RELATED INPUT FIELDS
+
+
+Example:
+
+formData
+│
+├── firstName
+├── lastName
+├── email
+├── phone
+├── street
+├── city
+├── state
+├── zipCode
+├── country
+├── company
+└── jobTitle
+
+
+IMPORTANT TERMINOLOGY
+--------------------------------------------------------------------------------
+
+This lesson is about:
+
+MULTIPLE INPUTS IN A FORM
+
+
+It does NOT necessarily mean:
+
+MULTIPLE SEPARATE <form> ELEMENTS
+
+
+================================================================================
+CORE CHARACTERISTICS
+================================================================================
+
+• Structured values
+
+• Controlled fields
+
+• Shared update logic
+
+• Computed property names
+
+• Logical form sections
+
+• Validation support
+
+• Field-specific errors
+
+• Reset support
+
+• Submission-ready data
+
+
+================================================================================
+WHY STRUCTURED FORM DATA HELPS
+================================================================================
+
+Instead of:
+
+const [firstName, setFirstName] =
+  useState('')
+
+const [lastName, setLastName] =
+  useState('')
+
+const [email, setEmail] =
+  useState('')
+
+// etc.
+
+
+We can use:
+
+const [formData, setFormData] =
+  useState({
+
+    firstName: '',
+
+    lastName: '',
+
+    email: ''
+
+  })
+
+
+Then:
+
+formData.firstName
+
+formData.lastName
+
+formData.email
+
+
+================================================================================
+IMPORTANT
+================================================================================
+
+A single object is useful, but it is NOT mandatory.
+
+Possible approaches include:
+
+• Separate useState calls
+
+• One flat object
+
+• Nested objects
+
+• useReducer
+
+• A form-management library
+
+
+Choose based on the form's actual complexity.
+
+
+================================================================================
+PART 3: BASIC MULTI-FORM INPUT DATA SETUP
+================================================================================
+
+File:
+
+src/components/BasicMultiFormInput.jsx
+
+
+import { useState } from 'react'
+import './BasicMultiFormInput.css'
+
+
+const INITIAL_FORM = {
+
+  // Personal
+
+  firstName: '',
+
+  lastName: '',
+
+  email: '',
+
+  phone: '',
+
+
+  // Address
+
+  street: '',
+
+  city: '',
+
+  state: '',
+
+  zipCode: '',
+
+
+  // Additional
+
+  country: '',
+
+  company: '',
+
+  jobTitle: ''
+
+}
+
+
+export default function BasicMultiFormInput() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [formData, setFormData] =
+    useState(INITIAL_FORM)
+
+
+  // ============================================
+  // CHANGE
+  // ============================================
+
+  const handleChange = (event) => {
+
+    const {
+      name,
+      value
+    } = event.target
+
+
+    setFormData(previousData => ({
+
+      ...previousData,
+
+      [name]:
+        value
+
+    }))
+  }
+
+
+  // ============================================
+  // SUBMIT
+  // ============================================
+
+  const handleSubmit = (event) => {
+
+    event.preventDefault()
+
+
+    console.log(
+      'Form submitted'
+    )
+
+
+    // Process formData here.
+  }
+
+
+  // ============================================
+  // RESET
+  // ============================================
+
+  const handleReset = () => {
+
+    setFormData(
+      INITIAL_FORM
+    )
+  }
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="basic-multi-form-container">
+
+      <h1>
+        Multi-Form Input Data Setup
+      </h1>
+
+
+      <p>
+        Organizing multiple form inputs
+      </p>
+
+
+      <form
+        onSubmit={handleSubmit}
+        onReset={handleReset}
+        className="form"
+      >
+
+
+        {/* ======================================
+            PERSONAL INFORMATION
+            ====================================== */}
+
+        <fieldset className="form-section">
+
+          <legend>
+            Personal Information
+          </legend>
+
+
+          <div className="form-row">
+
+
+            <div className="form-group">
+
+              <label htmlFor="firstName">
+                First Name:
+              </label>
+
+              <input
+                id="firstName"
+                type="text"
+                name="firstName"
+       
+                  formData.firstName
+                }
+                onChange={handleChange}
+                placeholder="Enter first name"
+                className="form-input"
+              />
+
+            </div>
+
+
+            <div className="form-group">
+
+              <label htmlFor="lastName">
+                Last Name:
+              </label>
+
+              <input
+                id="lastName"
+                type="text"
+                name="lastName"
+                value={
+                  formData.lastName
+                }
+                onChange={handleChange}
+                placeholder="Enter last name"
+                className="form-input"
+              />
+
+            </div>
+
+          </div>
+
+
+          <div className="form-row">
+
+
+            <div className="form-group">
+
+              <label htmlFor="email">
+                Email:
+              </label>
+
+              <input
+                id="email"
+                type="email"
+                name="email"
+                value={
+                  formData.email
+                }
+                onChange={handleChange}
+                placeholder="Enter email"
+                className="form-input"
+              />
+
+            </div>
+
+
+            <div className="form-group">
+
+              <label htmlFor="phone">
+                Phone:
+              </label>
+
+              <input
+                id="phone"
+                type="tel"
+                name="phone"
+                value={
+                  formData.phone
+                }
+                onChange={handleChange}
+                placeholder="Enter phone"
+                className="form-input"
+              />
+
+            </div>
+
+          </div>
+
+        </fieldset>
+
+
+        {/* ======================================
+            ADDRESS
+            ====================================== */}
+
+        <fieldset className="form-section">
+
+          <legend>
+            Address Information
+          </legend>
+
+
+          <div className="form-group">
+
+            <label htmlFor="street">
+              Street:
+            </label>
+
+            <input
+              id="street"
+              type="text"
+              name="street"
+              value={
+                formData.street
+              }
+              onChange={handleChange}
+              placeholder="Enter street address"
+              className="form-input"
+            />
+
+          </div>
+
+
+          <div className="form-row">
+
+
+            <div className="form-group">
+
+              <label htmlFor="city">
+                City:
+              </label>
+
+              <input
+                id="city"
+                type="text"
+                name="city"
+                value={
+                  formData.city
+                }
+                onChange={handleChange}
+                placeholder="Enter city"
+                className="form-input"
+              />
+
+            </div>
+
+
+            <div className="form-group">
+
+              <label htmlFor="state">
+                State:
+              </label>
+
+              <input
+                id="state"
+                type="text"
+                name="state"
+                value={
+                  formData.state
+                }
+                onChange={handleChange}
+                placeholder="Enter state"
+                className="form-input"
+              />
+
+            </div>
+
+
+            <div className="form-group">
+
+              <label htmlFor="zipCode">
+                Zip / Postal Code:
+              </label>
+
+              <input
+                id="zipCode"
+                type="text"
+                name="zipCode"
+                value={
+                  formData.zipCode
+                }
+                onChange={handleChange}
+                placeholder="Enter postal code"
+                className="form-input"
+              />
+
+            </div>
+
+          </div>
+
+        </fieldset>
+
+
+        {/* ======================================
+            ADDITIONAL INFORMATION
+            ====================================== */}
+
+        <fieldset className="form-section">
+
+          <legend>
+            Additional Information
+          </legend>
+
+
+          <div className="form-row">
+
+
+            <div className="form-group">
+
+              <label htmlFor="country">
+                Country:
+              </label>
+
+              <input
+                id="country"
+                type="text"
+                name="country"
+                value={
+                  formData.country
+                }
+                onChange={handleChange}
+                placeholder="Enter country"
+                className="form-input"
+              />
+
+            </div>
+
+
+            <div className="form-group">
+
+              <label htmlFor="company">
+                Company:
+              </label>
+
+              <input
+                id="company"
+                type="text"
+                name="company"
+                value={
+                  formData.company
+                }
+                onChange={handleChange}
+                placeholder="Enter company"
+                className="form-input"
+              />
+
+            </div>
+
+
+            <div className="form-group">
+
+              <label htmlFor="jobTitle">
+                Job Title:
+              </label>
+
+              <input
+                id="jobTitle"
+                type="text"
+                name="jobTitle"
+                value={
+                  formData.jobTitle
+                }
+                onChange={handleChange}
+                placeholder="Enter job title"
+                className="form-input"
+              />
+
+            </div>
+
+          </div>
+
+        </fieldset>
+
+
+        {/* Buttons */}
+
+        <div className="button-group">
+
+          <button
+            type="submit"
+            className="btn-submit"
+          >
+            Submit
+          </button>
+
+
+          <button
+            type="reset"
+            className="btn-reset"
+          >
+            Clear
+          </button>
+
+        </div>
+
+      </form>
+
+
+      {/* Current Data */}
+
+      <div className="display-section">
+
+        <h3>
+          Current Form Data:
+        </h3>
+
+
+        <div className="data-display">
+
+
+          <div className="data-column">
+
+            <h4>
+              Personal Information
+            </h4>
+
+            <p>
+              <strong>First Name:</strong>
+              {' '}
+              {formData.firstName ||
+                '(empty)'}
+            </p>
+
+            <p>
+              <strong>Last Name:</strong>
+              {' '}
+              {formData.lastName ||
+                '(empty)'}
+            </p>
+
+            <p>
+              <strong>Email:</strong>
+              {' '}
+              {formData.email ||
+                '(empty)'}
+            </p>
+
+            <p>
+              <strong>Phone:</strong>
+              {' '}
+              {formData.phone ||
+                '(empty)'}
+            </p>
+
+          </div>
+
+
+          <div className="data-column">
+
+            <h4>
+              Address Information
+            </h4>
+
+            <p>
+              <strong>Street:</strong>
+              {' '}
+              {formData.street ||
+                '(empty)'}
+            </p>
+
+            <p>
+              <strong>City:</strong>
+              {' '}
+              {formData.city ||
+                '(empty)'}
+            </p>
+
+            <p>
+              <strong>State:</strong>
+              {' '}
+              {formData.state ||
+                '(empty)'}
+            </p>
+
+            <p>
+              <strong>Postal Code:</strong>
+              {' '}
+              {formData.zipCode ||
+                '(empty)'}
+            </p>
+
+          </div>
+
+
+          <div className="data-column">
+
+            <h4>
+              Additional Information
+            </h4>
+
+            <p>
+              <strong>Country:</strong>
+              {' '}
+              {formData.country ||
+                '(empty)'}
+            </p>
+
+            <p>
+              <strong>Company:</strong>
+              {' '}
+              {formData.company ||
+                '(empty)'}
+            </p>
+
+            <p>
+              <strong>Job Title:</strong>
+              {' '}
+              {formData.jobTitle ||
+                '(empty)'}
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* Debug */}
+
+      <div className="debug-section">
+
+        <h3>
+          Form Data as JSON:
+        </h3>
+
+        <pre>
+          {JSON.stringify(
+            formData,
+            null,
+            2
+          )}
+        </pre>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+================================================================================
+HOW THE GENERIC UPDATE WORKS
+================================================================================
+
+Input:
+
+<input
+  name="city"
+  value={formData.city}
+  onChange={handleChange}
+/>
+
+
+User enters:
+
+Mumbai
+
+
+event.target:
+
+name:
+'city'
+
+value:
+'Mumbai'
+
+
+Handler:
+
+setFormData(previous => ({
+
+  ...previous,
+
+  value
+
+}))
+
+
+Conceptually:
+
+setFormData(previous => ({
+
+  ...previous,
+
+  city:
+    'Mumbai'
+
+}))
+
+
+================================================================================
+WHY fieldset + legend?
+================================================================================
+
+These provide semantic grouping for related form controls.
+
+Example:
+
+<fieldset>
+  <legend>
+    Address Information
+  </legend>
+
+  ...
+</fieldset>
+
+
+This is more meaningful than grouping controls for styling alone.
+
+
+================================================================================
+PART 4: ADVANCED MULTI-FORM DATA WITH VALIDATION
+================================================================================
+
+A larger form can include:
+
+• Personal Information
+
+• Address Information
+
+• Account Information
+
+• Preferences
+
+• Validation errors
+
+• Submission feedback
+
+
+================================================================================
+INITIAL FORM
+================================================================================
+
+const INITIAL_FORM = {
+
+  // Personal
+
+  firstName: '',
+
+  lastName: '',
+
+  email: '',
+
+  phone: '',
+
+  dateOfBirth: '',
+
+
+  // Address
+
+  street: '',
+
+  city: '',
+
+  state: '',
+
+  zipCode: '',
+
+  country: '',
+
+
+  // Account
+
+  username: '',
+
+  password: '',
+
+  confirmPassword: '',
+
+
+  // Preferences
+
+  newsletter: false,
+
+  notifications: true,
+
+  privacy: false
+
+}
+
+
+================================================================================
+STATE
+================================================================================
+
+const [formData, setFormData] =
+  useState(INITIAL_FORM)
+
+
+const [errors, setErrors] =
+  useState({})
+
+
+const [submitted, setSubmitted] =
+  useState(false)
+
+
+================================================================================
+VALIDATION
+================================================================================
+
+const validateForm = () => {
+
+  const newErrors = {}
+
+
+  // First Name
+
+  if (
+    !formData.firstName.trim()
+  ) {
+
+    newErrors.firstName =
+      'First name is required'
+  }
+
+
+  // Last Name
+
+  if (
+    !formData.lastName.trim()
+  ) {
+
+    newErrors.lastName =
+      'Last name is required'
+  }
+
+
+  // Email
+
+  if (
+    !formData.email.trim()
+  ) {
+
+    newErrors.email =
+      'Email is required'
+
+  } else if (
+    !formData.email.includes('@')
+  ) {
+
+    newErrors.email =
+      'Enter a valid email address'
+  }
+
+
+  // Phone
+
+  const phoneDigits =
+    formData.phone
+      .replace(/\D/g, '')
+
+
+  if (
+    !formData.phone.trim()
+  ) {
+
+    newErrors.phone =
+      'Phone is required'
+
+  } else if (
+    phoneDigits.length < 10
+  ) {
+
+    newErrors.phone =
+      'Enter at least 10 digits'
+  }
+
+
+  // Street
+
+  if (
+    !formData.street.trim()
+  ) {
+
+    newErrors.street =
+      'Street is required'
+  }
+
+
+  // City
+
+  if (
+    !formData.city.trim()
+  ) {
+
+    newErrors.city =
+      'City is required'
+  }
+
+
+  // Postal Code
+
+  if (
+    !formData.zipCode.trim()
+  ) {
+
+    newErrors.zipCode =
+      'Postal code is required'
+  }
+
+
+  // Username
+
+  if (
+    !formData.username.trim()
+  ) {
+
+    newErrors.username =
+      'Username is required'
+
+  } else if (
+    formData.username
+      .trim()
+      .length < 3
+  ) {
+
+    newErrors.username =
+      'Username must be at least 3 characters'
+  }
+
+
+  // Password
+
+  if (!formData.password) {
+
+    newErrors.password =
+      'Password is required'
+
+  } else if (
+    formData.password.length < 8
+  ) {
+
+    newErrors.password =
+      'Password must be at least 8 characters'
+  }
+
+
+  // Confirm Password
+
+  if (
+    !formData.confirmPassword
+  ) {
+
+    newErrors.confirmPassword =
+      'Confirm your password'
+
+  } else if (
+    formData.password !==
+    formData.confirmPassword
+  ) {
+
+    newErrors.confirmPassword =
+      'Passwords do not match'
+  }
+
+
+  // Privacy
+
+  if (!formData.privacy) {
+
+    newErrors.privacy =
+      'You must agree before continuing'
+  }
+
+
+  return newErrors
+}
+
+
+================================================================================
+GENERIC CHANGE HANDLER
+================================================================================
+
+const handleChange = (
+  event
+) => {
+
+  const {
+    name,
+    value,
+    type,
+    checked
+  } = event.target
+
+
+  const nextValue =
+    type === 'checkbox'
+      ? checked
+      : value
+
+
+  setFormData(previousData => ({
+
+    ...previousData,
+
+    nextValue
+
+  }))
+
+
+  // Remove old error for this field
+  // while the user is correcting it.
+
+  setErrors(previousErrors => {
+
+    if (
+      !previousErrors[name]
+    ) {
+
+      return previousErrors
+    }
+
+
+    return {
+
+      ...previousErrors,
+
+      ''
+
+    }
+  })
+}
+
+
+================================================================================
+SUBMIT HANDLER
+================================================================================
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+
+  const newErrors =
+    validateForm()
+
+
+  if (
+    Object.keys(
+      newErrors
+    ).length > 0
+  ) {
+
+    setErrors(
+      newErrors
+    )
+
+    setSubmitted(false)
+
+    return
+  }
+
+
+  setErrors({})
+
+
+  /*
+   * Do not log passwords or other
+   * sensitive form information.
+   *
+   * Real application:
+   * send an appropriate payload
+   * through the application's API.
+   */
+
+
+  setSubmitted(true)
+}
+
+
+================================================================================
+RESET HANDLER
+================================================================================
+
+const handleReset = () => {
+
+  setFormData(
+    INITIAL_FORM
+  )
+
+  setErrors({})
+
+  setSubmitted(false)
+}
+
+
+Use:
+
+<form
+  onSubmit={handleSubmit}
+  onReset={handleReset}
+>
+
+
+and:
+
+<button type="reset">
+  Clear
+</button>
+
+
+There is normally no need to call:
+
+preventDefault()
+
+merely to reset controlled React fields.
+
+
+================================================================================
+FIELD WITH ERROR DISPLAY
+================================================================================
+
+<div className="form-group">
+
+  <label htmlFor="email">
+    Email:
+  </label>
+
+
+  <input
+    id="email"
+    type="email"
+    name="email"
+    value={
+      formData.email
+    }
+    onChange={handleChange}
+    className={
+      `form-input ${
+        errors.email
+          ? 'input-error'
+          : ''
+      }`
+    }
+    aria-invalid={
+      Boolean(
+        errors.email
+      )
+    }
+    aria-describedby={
+      errors.email
+        ? 'email-error'
+        : undefined
+    }
+  />
+
+
+  {errors.email && (
+
+    <p
+      id="email-error"
+      className="error-message"
+    >
+      {errors.email}
+    </p>
+
+  )}
+
+</div>
+
+
+================================================================================
+PREFERENCE CHECKBOX
+================================================================================
+
+<div className="checkbox-group">
+
+  <input
+    id="newsletter"
+    type="checkbox"
+    name="newsletter"
+    checked={
+      formData.newsletter
+    }
+    onChange={handleChange}
+  />
+
+
+  <label htmlFor="newsletter">
+
+    Subscribe to newsletter
+
+  </label>
+
+</div>
+
+
+================================================================================
+REQUIRED CHECKBOX WITH ERROR
+================================================================================
+
+<div className="form-group">
+
+  <div className="checkbox-group">
+
+    <input
+      id="privacy"
+      type="checkbox"
+      name="privacy"
+      checked={
+        formData.privacy
+      }
+      onChange={handleChange}
+      aria-invalid={
+        Boolean(
+          errors.privacy
+        )
+      }
+      aria-describedby={
+        errors.privacy
+          ? 'privacy-error'
+          : undefined
+      }
+    />
+
+
+    <label htmlFor="privacy">
+
+      I agree to continue
+
+    </label>
+
+  </div>
+
+
+  {errors.privacy && (
+
+    <p
+      id="privacy-error"
+      className="error-message"
+    >
+      {errors.privacy}
+    </p>
+
+  )}
+
+</div>
+
+
+================================================================================
+VALIDATION FLOW
+================================================================================
+
+User Fills Form
+      ↓
+Submit
+      ↓
+preventDefault()
+      ↓
+validateForm()
+      ↓
+newErrors
+      ↓
++--------------------------+
+|                          |
+Errors                   Valid
+|                          |
+↓                          ↓
+setErrors()             setErrors({})
+|                          |
+↓                          ↓
+Render Errors           Process Data
+                           |
+                           ↓
+                       submitted=true
+
+
+================================================================================
+IMPORTANT VALIDATION NOTES
+================================================================================
+
+The rules above are educational examples.
+
+Real-world validation varies by application.
+
+For example:
+
+• Email validation can be more sophisticated
+
+• Phone formats vary internationally
+
+• Postal code formats differ by country
+
+• Password policy should match the actual security requirements
+
+• Username availability may require a server request
+
+
+Most importantly:
+
+CLIENT-SIDE VALIDATION
+        ≠
+SECURITY BOUNDARY
+
+
+Server/API validation is still necessary for data sent to a backend.
+
+
+================================================================================
+PART 5: MULTI-FORM INPUT DATA PATTERNS
+================================================================================
+
+PATTERN 1: FLAT STRUCTURE
+================================================================================
+
+const [formData, setFormData] =
+  useState({
+
+    field1: '',
+
+    field2: '',
+
+    field3: '',
+
+    field4: ''
+
+  })
+
+
+Good when:
+
+• Form fields are logically simple
+
+• Deep nesting provides little benefit
+
+• Generic handling is straightforward
+
+
+================================================================================
+PATTERN 2: GROUPED / NESTED STRUCTURE
+================================================================================
+
+const [formData, setFormData] =
+  useState({
+
+    personal: {
+
+      firstName: '',
+
+      lastName: ''
+
+    },
+
+
+    contact: {
+
+      email: '',
+
+      phone: ''
+
+    }
+
+  })
+
+
+Input name:
+
+name="personal.firstName"
+
+
+Generic nested handler:
+
+const handleChange = (
+  event
+) => {
+
+  const {
+    name,
+    value
+  } = event.target
+
+
+  const [
+    section,
+    field
+  ] = name.split('.')
+
+
+  setFormData(previousData => ({
+
+    ...previousData,
+
+    {
+
+      ...previousData[section],
+
+      value
+
+    }
+
+  }))
+}
+
+
+================================================================================
+NESTED UPDATE FLOW
+================================================================================
+
+name:
+
+personal.firstName
+
+
+        ↓
+
+
+split('.')
+
+
+        ↓
+
+
+section:
+
+personal
+
+
+field:
+
+firstName
+
+
+        ↓
+
+
+Previous State
+
+
+        ↓
+
+
+Copy Top-Level Object
+
+
+        ↓
+
+
+Copy personal Object
+
+
+        ↓
+
+
+Update personal.firstName
+
+
+================================================================================
+PATTERN 3: MIXED INPUT TYPES
+================================================================================
+
+const handleChange = (
+  event
+) => {
+
+  const {
+    name,
+    value,
+    type,
+    checked
+  } = event.target
+
+
+  const nextValue =
+    type === 'checkbox'
+      ? checked
+      : value
+
+
+  setFormData(previous => ({
+
+    ...previous,
+
+    nextValue
+
+  }))
+}
+
+
+================================================================================
+PATTERN 4: WITH VALIDATION
+================================================================================
+
+const [errors, setErrors] =
+  useState({})
+
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+
+  const nextErrors =
+    validateForm()
+
+
+  if (
+    Object.keys(
+      nextErrors
+    ).length > 0
+  ) {
+
+    setErrors(
+      nextErrors
+    )
+
+    return
+  }
+
+
+  setErrors({})
+
+
+  // Process valid data
+}
+
+
+================================================================================
+PATTERN 5: DYNAMIC FIELDS
+================================================================================
+
+For dynamic repeated controls, an array may be more natural.
+
+
+Example:
+
+const [
+  fields,
+  setFields
+] = useState([
+
+  {
+    id:
+      crypto.randomUUID(),
+
+    label:
+      '',
+
+    value:
+      ''
+  }
+
+])
+
+
+ADD:
+--------------------------------------------------------------------------------
+
+const handleAddField = () => {
+
+  setFields(previous => [
+
+    ...previous,
+
+    {
+      id:
+        crypto.randomUUID(),
+
+      label:
+        '',
+
+      value:
+        ''
+    }
+
+  ])
+}
+
+
+REMOVE:
+--------------------------------------------------------------------------------
+
+const handleRemoveField = (
+  id
+) => {
+
+  setFields(previous =>
+
+    previous.filter(
+      field =>
+        field.id !== id
+    )
+
+  )
+}
+
+
+UPDATE:
+--------------------------------------------------------------------------------
+
+const handleFieldChange = (
+  id,
+  updates
+) => {
+
+  setFields(previous =>
+
+    previous.map(field =>
+
+      field.id === id
+        ? {
+            ...field,
+            ...updates
+          }
+        : field
+
+    )
+
+  )
+}
+
+
+================================================================================
+PATTERN 6: CONDITIONAL FIELDS
+================================================================================
+
+const [formData, setFormData] =
+  useState({
+
+    accountType:
+      'individual',
+
+    companyName:
+      ''
+
+  })
+
+
+JSX:
+
+{formData.accountType ===
+  'company' && (
+
+  <input
+    name="companyName"
+    value={
+      formData.companyName
+    }
+    onChange={
+      handleChange
+    }
+  />
+
+)}
+
+
+================================================================================
+CONDITIONAL DATA DECISION
+================================================================================
+
+Suppose:
+
+accountType = company
+
+companyName = Contoso
+
+
+Then user changes:
+
+accountType = individual
+
+
+The Company Name control disappears.
+
+
+Question:
+
+Should:
+
+companyName = 'Contoso'
+
+
+remain in formData?
+
+
+Possible policies:
+
+OPTION A:
+Keep it
+
+OPTION B:
+Clear it
+
+
+Choose based on business requirements.
+
+Do not let hidden stale data accidentally reach submission if the application
+does not expect it.
+
+
+================================================================================
+PATTERNS TABLE
+================================================================================
+
++-------------------------+--------------------------------------------+
+| PATTERN                 | USE CASE                                   |
++-------------------------+--------------------------------------------+
+| Flat Object             | Straightforward forms                     |
+| Nested Object           | Domain-oriented sections                  |
+| Mixed Types             | Checkbox + text + select etc.             |
+| Validation              | Field-level business rules                |
+| Dynamic Fields          | Variable repeated controls                |
+| Conditional Fields      | Show/hide based on state                  |
+| Array of Objects        | Addresses/contacts/items                  |
+| Dependencies            | One field influences another              |
+| Async Validation        | Server-dependent checks                   |
++-------------------------+--------------------------------------------+
+
+
+================================================================================
+FLAT VS NESTED STATE
+================================================================================
+
+FLAT:
+--------------------------------------------------------------------------------
+
+{
+  firstName: '',
+  lastName: '',
+  street: '',
+  city: ''
+}
+
+
+Advantages:
+
+• Simple generic handler
+
+• Fewer nested copies
+
+• Easy for modest forms
+
+
+NESTED:
+--------------------------------------------------------------------------------
+
+{
+  personal: {
+    firstName: '',
+    lastName: ''
+  },
+
+  address: {
+    street: '',
+    city: ''
+  }
+}
+
+
+Advantages:
+
+• Can mirror domain structure
+
+• Related properties grouped together
+
+
+Trade-off:
+
+Nested immutable updates require more care.
+
+
+================================================================================
+PART 6: STYLING MULTI-FORM INPUT DATA
+================================================================================
+
+File:
+
+src/components/AdvancedMultiFormInput.css
+
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+
+.advanced-multi-form-container {
+
+  max-width: 900px;
+
+  margin: 0 auto;
+
+  padding: 30px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #667eea 0%,
+      #764ba2 100%
+    );
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 10px 30px
+    rgba(0, 0, 0, 0.2);
+}
+
+
+.advanced-multi-form-container h1 {
+
+  color: white;
+
+  text-align: center;
+
+  margin-bottom: 30px;
+}
+
+
+/* ============================================
+   SUCCESS
+   ============================================ */
+
+.success-message {
+
+  background:
+    #4caf50;
+
+  color: white;
+
+  padding: 20px;
+
+  border-radius: 8px;
+
+  margin-bottom: 20px;
+
+  animation:
+    slideIn
+    0.3s
+    ease;
+}
+
+
+/* ============================================
+   FORM
+   ============================================ */
+
+.form {
+
+  background:
+    white;
+
+  padding: 30px;
+
+  border-radius: 8px;
+
+  box-shadow:
+    0 5px 15px
+    rgba(0, 0, 0, 0.1);
+}
+
+
+/* ============================================
+   FIELDSET
+   ============================================ */
+
+.form-section {
+
+  margin-bottom: 30px;
+
+  padding: 20px;
+
+  border:
+    2px solid #ddd;
+
+  border-radius: 8px;
+
+  background:
+    #f9f9f9;
+}
+
+
+.form-section legend {
+
+  font-size: 1.1rem;
+
+  font-weight: 600;
+
+  color: #333;
+
+  padding:
+    0 10px;
+}
+
+
+/* ============================================
+   ROW
+   ============================================ */
+
+.form-row {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(
+        220px,
+        1fr
+      )
+    );
+
+  gap: 20px;
+
+  margin-bottom: 20px;
+}
+
+
+/* ============================================
+   GROUP
+   ============================================ */
+
+.form-group {
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.form-group label {
+
+  font-weight: 600;
+
+  color: #333;
+
+  margin-bottom: 8px;
+}
+
+
+/* ============================================
+   INPUT
+   ============================================ */
+
+.form-input {
+
+  padding:
+    12px 15px;
+
+  border:
+    2px solid #ddd;
+
+  border-radius: 6px;
+
+  font-size: 1rem;
+
+  font-family: inherit;
+
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    background-color 0.3s ease;
+}
+
+
+.form-input:focus {
+
+  outline: none;
+
+  border-color:
+    #667eea;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(102, 126, 234, 0.15);
+
+  background-color:
+    #f8f9ff;
+}
+
+
+/* ============================================
+   ERROR
+   ============================================ */
+
+.form-input.input-error {
+
+  border-color:
+    #f44336;
+
+  background-color:
+    #ffebee;
+}
+
+
+.error-message {
+
+  color:
+    #b71c1c;
+
+  font-size:
+    0.85rem;
+
+  margin-top:
+    5px;
+
+  font-weight:
+    500;
+}
+
+
+/* ============================================
+   CHECKBOX
+   ============================================ */
+
+.checkbox-group {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 15px;
+}
+
+
+.checkbox-group input {
+
+  cursor: pointer;
+
+  width: 18px;
+
+  height: 18px;
+}
+
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.button-group {
+
+  display: flex;
+
+  gap: 15px;
+
+  margin-top: 30px;
+}
+
+
+.btn-submit,
+.btn-reset {
+
+  flex: 1;
+
+  padding:
+    12px 20px;
+
+  border: none;
+
+  border-radius: 6px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  font-size: 1rem;
+}
+
+
+.btn-submit {
+
+  background:
+    #667eea;
+
+  color: white;
+}
+
+
+.btn-reset {
+
+  background:
+    #f44336;
+
+  color: white;
+}
+
+
+/* ============================================
+   DISPLAY
+   ============================================ */
+
+.display-section {
+
+  background:
+    #f5f5f5;
+
+  padding: 20px;
+
+  border-radius: 8px;
+
+  margin-top: 30px;
+}
+
+
+.display-section pre {
+
+  background:
+    #2d2d2d;
+
+  color:
+    #f8f8f2;
+
+  padding: 15px;
+
+  border-radius: 4px;
+
+  overflow-x: auto;
+}
+
+
+/* ============================================
+   ERROR SUMMARY
+   ============================================ */
+
+.errors-section {
+
+  background:
+    #ffebee;
+
+  border-left:
+    4px solid #f44336;
+
+  padding: 20px;
+
+  border-radius: 8px;
+
+  margin-top: 20px;
+}
+
+
+/* ============================================
+   INFO
+   ============================================ */
+
+.info-box {
+
+  background:
+    #e8f5e9;
+
+  border-left:
+    4px solid #4caf50;
+
+  padding: 20px;
+
+  border-radius: 6px;
+
+  margin-top: 20px;
+}
+
+
+/* ============================================
+   ANIMATION
+   ============================================ */
+
+@keyframes slideIn {
+
+  from {
+
+    opacity: 0;
+
+    transform:
+      translateY(-10px);
+  }
+
+
+  to {
+
+    opacity: 1;
+
+    transform:
+      translateY(0);
+  }
+
+}
+
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+
+  .advanced-multi-form-container {
+
+    padding: 20px;
+  }
+
+
+  .form {
+
+    padding: 20px;
+  }
+
+
+  .form-section {
+
+    padding: 15px;
+  }
+
+
+  .form-row {
+
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .button-group {
+
+    flex-direction:
+      column;
+  }
+
+}
+
+
+================================================================================
+CSS SUMMARY
+================================================================================
+
++------------------------------+---------------------------------------+
+| CLASS                        | PURPOSE                               |
++------------------------------+---------------------------------------+
+| .advanced-multi-form-container| Main application container          |
+| .success-message             | Successful submission feedback        |
+| .form                        | Main form card                         |
+| .form-section                | Related field group                   |
+| .form-row                    | Responsive field grid                 |
+| .form-group                  | Label/control wrapper                 |
+| .form-input                  | Input styling                         |
+| .input-error                 | Invalid field state                   |
+| .error-message               | Field error text                      |
+| .checkbox-group              | Checkbox + label grouping             |
+| .button-group                | Form buttons                          |
+| .display-section             | Current/debug data                    |
+| .errors-section              | Error summary                         |
+| .info-box                    | Supporting information                |
++------------------------------+---------------------------------------+
+
+
+================================================================================
+PART 7: TESTING MULTI-FORM INPUT DATA
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] All expected controls render
+
+[ ] Labels are correctly associated
+
+[ ] Typing updates correct field
+
+[ ] Updating one property preserves others
+
+[ ] Checkboxes update booleans
+
+[ ] Date field updates
+
+[ ] Form sections are understandable
+
+[ ] Validation detects missing required values
+
+[ ] Field-specific errors display
+
+[ ] Error associations work
+
+[ ] Existing values remain after invalid submission
+
+[ ] Successful submission follows expected flow
+
+[ ] Reset restores INITIAL_FORM
+
+[ ] Reset clears validation errors
+
+[ ] Keyboard navigation works
+
+[ ] Responsive layout works
+
+[ ] Sensitive data isn't exposed in debug/log output
+
+
+================================================================================
+SCENARIO 1: UPDATE ONE FIELD
+================================================================================
+
+Initial:
+
+{
+  firstName:
+    'John',
+
+  lastName:
+    'Smith',
+
+  city:
+    'Mumbai'
+}
+
+
+Update:
+
+city = 'Thane'
+
+
+Expected:
+
+{
+  firstName:
+    'John',
+
+  lastName:
+    'Smith',
+
+  city:
+    'Thane'
+}
+
+
+The other fields must remain unchanged.
+
+
+================================================================================
+SCENARIO 2: CHECKBOX
+================================================================================
+
+Before:
+
+newsletter:
+false
+
+
+User checks box.
+
+
+event.target.checked:
+
+true
+
+
+After:
+
+newsletter:
+true
+
+
+================================================================================
+SCENARIO 3: VALIDATION
+================================================================================
+
+Submit with:
+
+firstName:
+''
+
+
+Expected:
+
+errors:
+
+{
+  firstName:
+    'First name is required',
+
+  ...
+}
+
+
+UI:
+
+• First-name field marked invalid
+
+• Error message displayed
+
+• Existing valid data preserved
+
+
+================================================================================
+SCENARIO 4: CORRECT ERROR
+================================================================================
+
+Existing error:
+
+email:
+'Email is required'
+
+
+User begins entering:
+
+john@example.com
+
+
+Depending on your UX design:
+
+• Old error may be cleared immediately
+
+or
+
+• Field can be revalidated
+
+or
+
+• Validation can occur on blur
+
+
+The important point:
+
+Error behavior should be intentional and consistent.
+
+
+================================================================================
+SCENARIO 5: RESET
+================================================================================
+
+Before:
+
+{
+  firstName:
+    'John',
+
+  newsletter:
+    true,
+
+  notifications:
+    false,
+
+  privacy:
+    true
+}
+
+
+Reset
+
+
+After:
+
+INITIAL_FORM
+
+
+Remember:
+
+INITIAL_FORM.notifications
+
+is:
+
+true
+
+
+so reset returns it to true, not false.
+
+
+================================================================================
+TEST TABLE
+================================================================================
+
++--------------------------+--------------------------------------------+
+| TEST                     | EXPECTED                                   |
++--------------------------+--------------------------------------------+
+| Text Change              | Matching state property updated           |
+| Checkbox Change          | Boolean updated                           |
+| Date Change              | Date string updated                       |
+| Preserve Fields          | Unchanged properties retained             |
+| Invalid Submit           | Errors displayed                          |
+| Correct Field            | Chosen error policy applied               |
+| Valid Submit             | Submission logic runs                     |
+| Reset                    | Initial state restored                    |
+| Keyboard                 | Form usable without pointer               |
+| Responsive               | Layout adapts                             |
++--------------------------+--------------------------------------------+
+
+
+================================================================================
+PART 8: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE LEARNED
+--------------------------------------------------------------------------------
+
+✓ Structuring a large form-data object
+
+✓ Managing many related controlled inputs
+
+✓ Using one generic handler
+
+✓ Using the name attribute
+
+✓ Using computed property names
+
+✓ Using functional object updates
+
+✓ Grouping related controls with fieldset/legend
+
+✓ Handling checkbox values
+
+✓ Maintaining validation errors
+
+✓ Validating before submission
+
+✓ Resetting to reusable initial state
+
+✓ Flat vs nested form structures
+
+✓ Updating nested state immutably
+
+✓ Dynamic field arrays
+
+✓ Conditional controls
+
+✓ Avoiding unnecessary sensitive-data logging
+
+✓ Understanding client vs server validation
+
+
+================================================================================
+CRITICAL MULTI-FORM POINTS
+================================================================================
+
+STATE:
+--------------------------------------------------------------------------------
+
+const [formData, setFormData] =
+  useState(INITIAL_FORM)
+
+
+GENERIC TEXT-LIKE HANDLER:
+--------------------------------------------------------------------------------
+
+const handleChange = (
+  event
+) => {
+
+  const {
+    name,
+    value
+  } = event.target
+
+
+  setFormData(previous => ({
+
+    ...previous,
+
+    value
+
+  }))
+}
+
+
+MIXED-TYPE HANDLER:
+--------------------------------------------------------------------------------
+
+const {
+  name,
+  value,
+  type,
+  checked
+} = event.target
+
+
+const nextValue =
+  type === 'checkbox'
+    ? checked
+    : value
+
+
+setFormData(previous => ({
+
+  ...previous,
+
+  nextValue
+
+}))
+
+
+================================================================================
+FLAT STATE
+================================================================================
+
+{
+  firstName: '',
+  lastName: '',
+  email: '',
+  city: ''
+}
+
+
+Useful when:
+
+• Form structure is straightforward
+
+• A generic handler is desirable
+
+
+================================================================================
+NESTED STATE
+================================================================================
+
+{
+  personal: {
+    firstName: '',
+    lastName: ''
+  },
+
+  address: {
+    city: '',
+    state: ''
+  }
+}
+
+
+Useful when:
+
+• Domain grouping is meaningful
+
+• Submission data is naturally nested
+
+
+Trade-off:
+
+Nested updates require copying each modified level.
+
+
+================================================================================
+FORM SUBMISSION
+================================================================================
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+
+  const errors =
+    validateForm()
+
+
+  if (
+    Object.keys(
+      errors
+    ).length > 0
+  ) {
+
+    setErrors(errors)
+
+    return
+  }
+
+
+  // Process safe submission payload
+}
+
+
+================================================================================
+FORM RESET
+================================================================================
+
+const handleReset = () => {
+
+  setFormData(
+    INITIAL_FORM
+  )
+
+  setErrors({})
+
+  setSubmitted(false)
+}
+
+
+================================================================================
+QUICK REVISION - DATA FLOW
+================================================================================
+
+INPUT
+  ↓
+name + value/checked
+  ↓
+handleChange
+  ↓
+setFormData(previous => ...)
+  ↓
+React State
+  ↓
+Render
+  ↓
+Controlled Inputs
+
+
+================================================================================
+QUICK REVISION - SECTIONS
+================================================================================
+
+FORM
+│
+├── Personal Information
+│   ├── First Name
+│   ├── Last Name
+│   ├── Email
+│   └── Phone
+│
+├── Address
+│   ├── Street
+│   ├── City
+│   ├── State
+│   └── Postal Code
+│
+├── Account
+│   ├── Username
+│   ├── Password
+│   └── Confirm Password
+│
+└── Preferences
+    ├── Newsletter
+    ├── Notifications
+    └── Required Agreement
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++------------------------+----------------------------------------------+
+| CONCEPT                | REMEMBER                                     |
++------------------------+----------------------------------------------+
+| INITIAL_FORM           | Reusable reset/initial structure             |
+| formData               | Current controlled values                    |
+| errors                 | Validation messages                          |
+| name                   | Maps input to state property                 |
+| value                  | Text-like control value                      |
+| checked                | Checkbox state                               |
+| [name]                 | Computed property                            |
+| Spread                 | Preserves other properties                   |
+| Functional Update      | Uses latest previous state                   |
+| fieldset               | Groups related controls                      |
+| legend                 | Names grouped controls                       |
+| preventDefault         | Cancels native submit action                 |
+| Nested State           | Requires nested immutable copying            |
+| Dynamic Fields         | Often modeled as arrays                      |
+| Conditional Fields     | May require stale-value policy               |
++------------------------+----------------------------------------------+
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+MULTIPLE FIELDS:
+
+Many Inputs
+    ↓
+One State Object
+    ↓
+One Handler
+
+
+GENERIC UPDATE:
+
+name
+ +
+value
+   ↓
+value
+
+
+CHECKBOX:
+
+checked
+   ↓
+Boolean State
+
+
+IMMUTABLE OBJECT UPDATE:
+
+Previous State
+     ↓
+Spread Existing Properties
+     ↓
+Override Changed Property
+     ↓
+Next State
+
+
+NESTED UPDATE:
+
+Previous Parent
+     ↓
+Copy Parent
+     ↓
+Copy Nested Object
+     ↓
+Update Nested Property
+
+
+VALIDATION:
+
+formData
+   ↓
+validateForm()
+   ↓
+errors
+   ↓
+Render Messages
+
+
+RESET:
+
+INITIAL_FORM
+     ↓
+setFormData()
+     ↓
+Initial Controlled Values
+
+
+MOST IMPORTANT RULE:
+
+THE INPUT'S name ATTRIBUTE SHOULD IDENTIFY
+THE FORM-DATA PROPERTY THAT THE GENERIC HANDLER UPDATES.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Add field-level validation on blur/change
+
+2. Add async form submission
+
+3. Map server validation errors to fields
+
+4. Add submitting/loading state
+
+5. Create reusable field components
+
+6. Build dynamic groups such as multiple addresses
+
+7. Manage more complex forms with useReducer
+
+8. Build conditional/dependent fields
+
+9. Separate safe submission payloads from UI-only form fields
+
+10. Explore form libraries when complexity justifies them
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+A scalable multi-input React form commonly follows:
+
+FORM CONTROLS
+      ↓
+name + value / checked
+      ↓
+GENERIC CHANGE HANDLER
+      ↓
+STRUCTURED formData
+      ↓
+VALIDATION
+      ↓
+SUBMISSION
+
+
+For a flat form:
+
+setFormData(previous => ({
+
+  ...previous,
+
+  nextValue
+
+}))
+
+
+For nested data:
+
+setFormData(previous => ({
+
+  ...previous,
+
+  {
+
+    ...previous[section],
+
+    nextValue
+
+  }
+
+}))
+
+
+The goal is not simply to put every field into one large object.
+
+The goal is to choose a state structure that keeps:
+
+DATA
++
+UPDATES
++
+VALIDATION
++
+SUBMISSION
+
+clear and maintainable.
+
+
+================================================================================
+END OF LESSON 7
+SETTING UP MULTI-FORM INPUT DATA
+================================================================================
