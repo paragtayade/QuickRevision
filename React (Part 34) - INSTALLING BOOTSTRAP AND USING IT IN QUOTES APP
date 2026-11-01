@@ -1,0 +1,2597 @@
+LESSON 11: INSTALLING BOOTSTRAP AND USING IT IN QUOTES APP
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on integrating Bootstrap into a React project and
+using it to style the Random Quote App.
+
+You will understand:
+
+• What Bootstrap is and why it's useful
+
+• How to install Bootstrap in a React project
+
+• Importing Bootstrap CSS
+
+• When Bootstrap JavaScript is required
+
+• Using Bootstrap components in React
+
+• Bootstrap grid system and layout
+
+• Bootstrap utility classes
+
+• Styling the Quotes App with Bootstrap
+
+• Responsive design with Bootstrap
+
+• Customizing Bootstrap styles
+
+• Best practices for using Bootstrap in React
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+Using Bootstrap can help because:
+
+• Speeds Up Development
+  - Pre-built styles and components reduce repetitive CSS
+
+• Professional Appearance
+  - Provides consistent visual patterns
+
+• Responsive Design
+  - Includes a mobile-first responsive system
+
+• Consistency
+  - Provides common design conventions
+
+• Accessibility Foundation
+  - Many components include accessibility-oriented markup and patterns,
+    although application developers must still implement accessibility
+    correctly
+
+• Large Ecosystem
+  - Extensive documentation and community usage
+
+• Customizable
+  - Can be customized for application branding
+
+• Browser Compatibility
+  - Designed for modern browser environments
+
+• Reduces CSS Writing
+  - Utility classes cover many common requirements
+
+• Common Industry Tool
+  - Bootstrap is widely used in web applications
+
+
+================================================================================
+PART 2: WHAT IS BOOTSTRAP?
+================================================================================
+
+BOOTSTRAP OVERVIEW
+--------------------------------------------------------------------------------
+
+Bootstrap is:
+
+• CSS Framework
+  - Provides reusable styles
+
+• Component Library
+  - Buttons, cards, alerts, forms, navigation, etc.
+
+• Grid System
+  - Responsive 12-column layout
+
+• Utility System
+  - Spacing, colors, display, flexbox, sizing, etc.
+
+• JavaScript Plugins
+  - Interactive behavior for components such as modals, dropdowns,
+    collapses, and dismissible alerts
+
+• Customizable
+  - Themes and styles can be modified
+
+• Mobile-First
+  - Responsive system starts from smaller screens
+
+• Open Source
+  - Community-maintained project
+
+• Documented
+  - Provides extensive component and utility documentation
+
+
+BOOTSTRAP KEY FEATURES
+--------------------------------------------------------------------------------
+
++----------------------+------------------------------------------------+
+| FEATURE              | PURPOSE                                        |
++----------------------+------------------------------------------------+
+| Grid System          | Responsive layouts                             |
+| Buttons              | Standard button styles                         |
+| Cards                | Content containers                             |
+| Forms                | Form styling                                   |
+| Alerts               | Messages and notifications                     |
+| Navbar               | Navigation                                     |
+| Badges               | Labels/status indicators                       |
+| Pagination           | Page navigation                                |
+| Spinners             | Loading indicators                             |
+| Utilities            | Fast layout/styling                            |
+| Typography           | Consistent text styles                         |
+| JS Plugins           | Interactive Bootstrap behavior                 |
++----------------------+------------------------------------------------+
+
+
+BOOTSTRAP VS CUSTOM CSS
+--------------------------------------------------------------------------------
+
++----------------------+--------------------------+---------------------------+
+| ASPECT               | BOOTSTRAP                | CUSTOM CSS                |
++----------------------+--------------------------+---------------------------+
+| Development Speed    | Faster for common UI     | More code to create       |
+| Learning             | Learn framework classes  | Learn/manage own system   |
+| Customization        | Customizable framework   | Full control              |
+| CSS Footprint        | Framework CSS included   | Can include only needed   |
+| Consistency          | Built-in conventions     | Team must maintain        |
+| Components           | Many pre-built patterns  | Build manually            |
+| Responsive System    | Built-in                 | Implement manually        |
+| Utilities            | Extensive utilities      | Create as needed          |
+| Community            | Large ecosystem          | Project-specific          |
++----------------------+--------------------------+---------------------------+
+
+
+================================================================================
+PART 3: INSTALLING BOOTSTRAP IN REACT
+================================================================================
+
+STEP 1: INSTALL BOOTSTRAP
+--------------------------------------------------------------------------------
+
+Run:
+
+npm install bootstrap
+
+
+Verify:
+
+npm list bootstrap
+
+
+WHAT THIS DOES
+--------------------------------------------------------------------------------
+
+• Downloads the Bootstrap npm package
+
+• Adds the package to node_modules
+
+• Adds Bootstrap to package.json dependencies
+
+• Makes Bootstrap files available for import
+
+
+================================================================================
+STEP 2: IMPORT BOOTSTRAP CSS IN main.jsx
+================================================================================
+
+File:
+
+src/main.jsx
+
+
+import React from 'react'
+
+import ReactDOM
+  from 'react-dom/client'
+
+import App
+  from './App.jsx'
+
+
+// Bootstrap CSS
+
+import 'bootstrap/dist/css/bootstrap.min.css'
+
+
+// Application/global CSS
+// Imported after Bootstrap so custom rules can participate later
+// in the cascade where specificity is otherwise comparable.
+
+import './index.css'
+
+
+ReactDOM.createRoot(
+  document.getElementById('root')
+).render(
+
+  <React.StrictMode>
+
+    <App />
+
+  </React.StrictMode>
+
+)
+
+
+IMPORT EXPLANATION
+--------------------------------------------------------------------------------
+
++------------------------------------------+----------------------------------+
+| CODE                                     | PURPOSE                          |
++------------------------------------------+----------------------------------+
+| bootstrap.min.css                        | Loads Bootstrap CSS              |
+| index.css                                | Loads custom global CSS          |
+| ReactDOM.createRoot(...)                 | Creates React root               |
+| document.getElementById('root')          | Finds application root           |
+| <React.StrictMode>                       | Development checks               |
+| <App />                                  | Renders main application         |
++------------------------------------------+----------------------------------+
+
+
+IMPORTANT: BOOTSTRAP CSS VS JAVASCRIPT
+--------------------------------------------------------------------------------
+
+Many Bootstrap features need ONLY CSS.
+
+Examples:
+
+• Grid
+• Buttons
+• Cards
+• Spacing utilities
+• Typography utilities
+• Colors
+• Spinners
+
+
+Some interactive Bootstrap components require Bootstrap JavaScript.
+
+Examples include:
+
+• Dismissible alerts
+• Dropdowns
+• Modals
+• Collapse
+• Tooltips
+• Popovers
+
+
+If Bootstrap JavaScript behavior is required, the application must include
+the appropriate Bootstrap JavaScript setup.
+
+For example:
+
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+
+
+Do NOT import Bootstrap JavaScript merely for simple CSS-only components
+if the application doesn't need it.
+
+
+================================================================================
+STEP 3: OPTIONAL - INSTALL BOOTSTRAP ICONS
+================================================================================
+
+Install:
+
+npm install bootstrap-icons
+
+
+Import the icon CSS:
+
+import 'bootstrap-icons/font/bootstrap-icons.css'
+
+
+Then use an icon:
+
+<i className="bi bi-twitter"></i>
+
+
+WHAT BOOTSTRAP ICONS PROVIDES
+--------------------------------------------------------------------------------
+
+• SVG-based icon library
+
+• Consistent icon styling
+
+• Scalable icons
+
+• Easy class-based usage
+
+• Useful visual elements for buttons and UI
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Bootstrap Icons is separate from the Bootstrap CSS package.
+
+Installing Bootstrap does NOT automatically install/use Bootstrap Icons.
+
+
+================================================================================
+INSTALLATION VERIFICATION
+================================================================================
+
+File:
+
+src/App.jsx
+
+
+import './App.css'
+
+
+export default function App() {
+
+  return (
+    <div className="container mt-5">
+
+
+      <h1 className="text-center mb-4">
+        Bootstrap Installed!
+      </h1>
+
+
+      <button className="btn btn-primary">
+        Click Me
+      </button>
+
+
+      <div className="alert alert-success mt-3">
+        Bootstrap is working correctly!
+      </div>
+
+    </div>
+  )
+}
+
+
+WHAT THIS VERIFYING CODE USES
+--------------------------------------------------------------------------------
+
++----------------------+-----------------------------------------------+
+| CLASS                | PURPOSE                                       |
++----------------------+-----------------------------------------------+
+| container            | Bootstrap content wrapper                     |
+| mt-5                 | Top margin                                    |
+| text-center          | Center text                                   |
+| mb-4                 | Bottom margin                                 |
+| btn                  | Button base class                             |
+| btn-primary          | Primary button variation                      |
+| alert                | Alert base class                              |
+| alert-success        | Success alert variation                       |
++----------------------+-----------------------------------------------+
+
+
+INSTALLATION CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] npm install bootstrap completed
+
+[ ] Bootstrap CSS imported in main.jsx
+
+[ ] Application starts without import errors
+
+[ ] Bootstrap classes visibly affect elements
+
+[ ] Bootstrap Icons installed/imported if icons are used
+
+[ ] Bootstrap JavaScript included if JS-driven components are used
+
+
+================================================================================
+PART 4: BOOTSTRAP GRID SYSTEM
+================================================================================
+
+BOOTSTRAP GRID OVERVIEW
+--------------------------------------------------------------------------------
+
+The Bootstrap grid system provides:
+
+• 12-column layout
+
+• Responsive breakpoints
+
+• Containers
+
+• Rows
+
+• Columns
+
+• Gutters
+
+• Mobile-first behavior
+
+
+GRID HIERARCHY
+--------------------------------------------------------------------------------
+
+Container
+   ↓
+Row
+   ↓
+Columns
+   ↓
+Content
+
+
+Example:
+
+.container
+   ↓
+.row
+   ↓
+.col-md-4
+.col-md-4
+.col-md-4
+
+
+Total:
+
+4 + 4 + 4 = 12 columns
+
+
+================================================================================
+BOOTSTRAP BREAKPOINTS
+================================================================================
+
++------------------+--------------+---------------------+
+| BREAKPOINT       | PREFIX       | MINIMUM WIDTH       |
++------------------+--------------+---------------------+
+| Extra Small      | none         | < 576px             |
+| Small            | sm           | >= 576px            |
+| Medium           | md           | >= 768px            |
+| Large            | lg           | >= 992px            |
+| Extra Large      | xl           | >= 1200px           |
+| XXL              | xxl          | >= 1400px           |
++------------------+--------------+---------------------+
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Bootstrap is mobile-first.
+
+Example:
+
+col-12 col-md-6 col-lg-3
+
+
+means:
+
+Small / Base:
+12 columns = full row
+
+
+Medium and above:
+6 columns = half row
+
+
+Large and above:
+3 columns = quarter row
+
+
+================================================================================
+GRID SYSTEM EXAMPLE
+================================================================================
+
+export default function GridExample() {
+
+  return (
+    <div className="container mt-5">
+
+
+      <h2 className="mb-4">
+        Bootstrap Grid System
+      </h2>
+
+
+      {/* Three equal columns on md+ */}
+
+      <div className="row mb-4">
+
+        <div className="col-md-4">
+
+          <div className="bg-primary text-white p-3 rounded">
+            Column 1 (4 units)
+          </div>
+
+        </div>
+
+
+        <div className="col-md-4">
+
+          <div className="bg-success text-white p-3 rounded">
+            Column 2 (4 units)
+          </div>
+
+        </div>
+
+
+        <div className="col-md-4">
+
+          <div className="bg-danger text-white p-3 rounded">
+            Column 3 (4 units)
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* Different widths */}
+
+      <div className="row mb-4">
+
+        <div className="col-md-3">
+
+          <div className="bg-info text-white p-3 rounded">
+            3 units
+          </div>
+
+        </div>
+
+
+        <div className="col-md-6">
+
+          <div className="bg-warning text-dark p-3 rounded">
+            6 units
+          </div>
+
+        </div>
+
+
+        <div className="col-md-3">
+
+          <div className="bg-secondary text-white p-3 rounded">
+            3 units
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* Responsive columns */}
+
+      <div className="row">
+
+        <div className="col-12 col-md-6 col-lg-3">
+
+          <div className="bg-light border p-3 rounded">
+            Responsive Column 1
+          </div>
+
+        </div>
+
+
+        <div className="col-12 col-md-6 col-lg-3">
+
+          <div className="bg-light border p-3 rounded">
+            Responsive Column 2
+          </div>
+
+        </div>
+
+
+        <div className="col-12 col-md-6 col-lg-3">
+
+          <div className="bg-light border p-3 rounded">
+            Responsive Column 3
+          </div>
+
+        </div>
+
+
+        <div className="col-12 col-md-6 col-lg-3">
+
+          <div className="bg-light border p-3 rounded">
+            Responsive Column 4
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+GRID CLASSES
+--------------------------------------------------------------------------------
+
++----------------------------+-------------------------------------------+
+| CLASS                      | PURPOSE                                   |
++----------------------------+-------------------------------------------+
+| .container                 | Responsive fixed/max-width container     |
+| .container-fluid           | Full-width container                     |
+| .row                       | Row for columns                          |
+| .col                       | Equal-width flexible column              |
+| .col-{breakpoint}-{n}      | n/12 columns from breakpoint upward      |
+| .col-auto                  | Width based on content                   |
+| .g-{n}                     | Row/column gutter spacing                |
+| .offset-{breakpoint}-{n}   | Column offset                            |
++----------------------------+-------------------------------------------+
+
+
+================================================================================
+PART 5: BOOTSTRAP COMPONENTS
+================================================================================
+
+COMMON BOOTSTRAP COMPONENTS
+--------------------------------------------------------------------------------
+
+• Buttons
+
+• Cards
+
+• Alerts
+
+• Forms
+
+• Navbar
+
+• Modals
+
+• Dropdowns
+
+• Badges
+
+• Pagination
+
+• Progress indicators
+
+• Spinners
+
+
+================================================================================
+BOOTSTRAP BUTTONS
+================================================================================
+
+export default function ButtonExample() {
+
+  return (
+    <div className="container mt-5">
+
+      <h2 className="mb-4">
+        Bootstrap Buttons
+      </h2>
+
+
+      {/* Button Styles */}
+
+      <div className="mb-4">
+
+        <h5>
+          Button Styles
+        </h5>
+
+        <button className="btn btn-primary me-2">
+          Primary
+        </button>
+
+        <button className="btn btn-secondary me-2">
+          Secondary
+        </button>
+
+        <button className="btn btn-success me-2">
+          Success
+        </button>
+
+        <button className="btn btn-danger me-2">
+          Danger
+        </button>
+
+        <button className="btn btn-warning me-2">
+          Warning
+        </button>
+
+        <button className="btn btn-info me-2">
+          Info
+        </button>
+
+      </div>
+
+
+      {/* Sizes */}
+
+      <div className="mb-4">
+
+        <h5>
+          Button Sizes
+        </h5>
+
+        <button className="btn btn-primary btn-lg me-2">
+          Large
+        </button>
+
+        <button className="btn btn-primary me-2">
+          Normal
+        </button>
+
+        <button className="btn btn-primary btn-sm me-2">
+          Small
+        </button>
+
+      </div>
+
+
+      {/* States */}
+
+      <div className="mb-4">
+
+        <h5>
+          Button States
+        </h5>
+
+        <button className="btn btn-primary me-2">
+          Normal
+        </button>
+
+        <button className="btn btn-primary active me-2">
+          Active
+        </button>
+
+        <button
+          className="btn btn-primary"
+          disabled
+        >
+          Disabled
+        </button>
+
+      </div>
+
+
+      {/* Icon */}
+
+      <div className="mb-4">
+
+        <h5>
+          Button with Icon
+        </h5>
+
+        <button className="btn btn-primary">
+
+          <i className="bi bi-download me-2"></i>
+
+          Download
+
+        </button>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+================================================================================
+BOOTSTRAP ALERTS
+================================================================================
+
+export default function AlertExample() {
+
+  return (
+    <div className="container mt-5">
+
+      <h2 className="mb-4">
+        Bootstrap Alerts
+      </h2>
+
+
+      <div
+        className="alert alert-success"
+        role="alert"
+      >
+        <strong>Success!</strong>
+        {' '}
+        This is a success message.
+      </div>
+
+
+      <div
+        className="alert alert-danger"
+        role="alert"
+      >
+        <strong>Error!</strong>
+        {' '}
+        Something went wrong.
+      </div>
+
+
+      <div
+        className="alert alert-warning"
+        role="alert"
+      >
+        <strong>Warning!</strong>
+        {' '}
+        Please be careful.
+      </div>
+
+
+      <div
+        className="alert alert-info"
+        role="alert"
+      >
+        <strong>Info:</strong>
+        {' '}
+        Here's some information.
+      </div>
+
+
+      {/* Requires Bootstrap JS for data-bs-dismiss behavior */}
+
+      <div
+        className="alert alert-primary alert-dismissible fade show"
+        role="alert"
+      >
+
+        <strong>
+          Dismissible Alert!
+        </strong>
+
+        {' '}
+
+        Click the X to close.
+
+        <button
+          type="button"
+          className="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        >
+        </button>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+This:
+
+data-bs-dismiss="alert"
+
+uses Bootstrap's JavaScript behavior.
+
+If Bootstrap JavaScript is not loaded, the close button won't automatically
+perform Bootstrap's dismiss behavior.
+
+
+================================================================================
+BOOTSTRAP CARDS
+================================================================================
+
+export default function CardExample() {
+
+  return (
+    <div className="container mt-5">
+
+      <h2 className="mb-4">
+        Bootstrap Cards
+      </h2>
+
+
+      <div className="row">
+
+
+        {/* Basic Card */}
+
+        <div className="col-md-4 mb-4">
+
+          <div className="card">
+
+            <img
+              src="https://via.placeholder.com/300x200"
+              className="card-img-top"
+              alt="Card"
+            />
+
+            <div className="card-body">
+
+              <h5 className="card-title">
+                Card Title
+              </h5>
+
+              <p className="card-text">
+                This is a basic card with an image,
+                title, and description.
+              </p>
+
+              <a
+                href="#details"
+                className="btn btn-primary"
+              >
+                Learn More
+              </a>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* Header and Footer */}
+
+        <div className="col-md-4 mb-4">
+
+          <div className="card">
+
+            <div className="card-header">
+              Card Header
+            </div>
+
+            <div className="card-body">
+
+              <h5 className="card-title">
+                Card Title
+              </h5>
+
+              <p className="card-text">
+                This card has a header and footer.
+              </p>
+
+            </div>
+
+            <div className="card-footer text-muted">
+              Card Footer
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* List Card */}
+
+        <div className="col-md-4 mb-4">
+
+          <div className="card">
+
+            <div className="card-header">
+              Features
+            </div>
+
+            <ul className="list-group list-group-flush">
+
+              <li className="list-group-item">
+                Feature 1
+              </li>
+
+              <li className="list-group-item">
+                Feature 2
+              </li>
+
+              <li className="list-group-item">
+                Feature 3
+              </li>
+
+            </ul>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+COMMON COMPONENT CLASSES
+--------------------------------------------------------------------------------
+
++----------------------+-----------------------------+--------------------------+
+| COMPONENT            | EXAMPLE CLASS               | PURPOSE                  |
++----------------------+-----------------------------+--------------------------+
+| Button               | .btn .btn-primary           | Button                   |
+| Alert                | .alert .alert-success       | Alert message            |
+| Card                 | .card                       | Content container        |
+| Badge                | .badge .text-bg-primary     | Label/status             |
+| Spinner              | .spinner-border             | Loading                  |
+| Pagination           | .pagination                 | Page navigation          |
+| Breadcrumb           | .breadcrumb                 | Navigation path          |
+| Dropdown             | .dropdown                   | Dropdown UI              |
+| Modal                | .modal                      | Dialog                   |
+| Navbar               | .navbar                     | Navigation bar           |
++----------------------+-----------------------------+--------------------------+
+
+
+================================================================================
+PART 6: USING BOOTSTRAP IN THE QUOTES APP
+================================================================================
+
+UPDATED App.jsx
+--------------------------------------------------------------------------------
+
+import {
+  useCallback,
+  useEffect,
+  useState
+} from 'react'
+
+import QuoteCard
+  from './components/QuoteCard'
+
+import {
+  fetchRandomQuote
+} from './utils/quoteApi'
+
+import './App.css'
+
+
+const COLORS = [
+  '#667eea',
+  '#764ba2',
+  '#f093fb',
+  '#4facfe',
+  '#00f2fe',
+  '#43e97b',
+  '#fa709a',
+  '#fee140',
+  '#30cfd0',
+  '#330867'
+]
+
+
+export default function App() {
+
+  const [quote, setQuote] =
+    useState({
+
+      text:
+        'The only way to do great work is to love what you do.',
+
+      author:
+        'Steve Jobs'
+
+    })
+
+
+  const [loading, setLoading] =
+    useState(false)
+
+
+  const [error, setError] =
+    useState(null)
+
+
+  const [color, setColor] =
+    useState(COLORS[0])
+
+
+  const getRandomColor = () => {
+
+    const randomIndex =
+      Math.floor(
+        Math.random() *
+        COLORS.length
+      )
+
+    return COLORS[randomIndex]
+  }
+
+
+  const getNewQuote =
+    useCallback(async () => {
+
+      setLoading(true)
+
+      setError(null)
+
+
+      try {
+
+        const newQuote =
+          await fetchRandomQuote()
+
+
+        setQuote(newQuote)
+
+        setColor(
+          getRandomColor()
+        )
+
+      } catch (err) {
+
+        setError(
+          'Failed to fetch quote. Please try again.'
+        )
+
+        console.error(
+          'Error fetching quote:',
+          err
+        )
+
+      } finally {
+
+        setLoading(false)
+
+      }
+
+    }, [])
+
+
+  const tweetQuote = () => {
+
+    const tweetText =
+      `"${quote.text}" — ${quote.author}`
+
+
+    const twitterUrl =
+      `https://twitter.com/intent/tweet?text=${
+        encodeURIComponent(tweetText)
+      }`
+
+
+    window.open(
+      twitterUrl,
+      '_blank',
+      'width=550,height=420'
+    )
+  }
+
+
+  useEffect(() => {
+
+    const handleKeyPress = (e) => {
+
+      if (
+        e.code === 'Space' &&
+        !loading
+      ) {
+
+        const tagName =
+          e.target.tagName
+
+
+        if (
+          tagName === 'INPUT' ||
+          tagName === 'TEXTAREA' ||
+          tagName === 'SELECT'
+        ) {
+
+          return
+
+        }
+
+
+        e.preventDefault()
+
+        getNewQuote()
+      }
+    }
+
+
+    window.addEventListener(
+      'keydown',
+      handleKeyPress
+    )
+
+
+    return () => {
+
+      window.removeEventListener(
+        'keydown',
+        handleKeyPress
+      )
+
+    }
+
+  }, [getNewQuote, loading])
+
+
+  useEffect(() => {
+
+    getNewQuote()
+
+  }, [getNewQuote])
+
+
+  return (
+    <div
+      className="
+        min-vh-100
+        d-flex
+        align-items-center
+        justify-content-center
+        py-5
+      "
+      style={{
+        background:
+          `linear-gradient(
+            135deg,
+            ${color} 0%,
+            ${color}cc 100%
+          )`
+      }}
+    >
+
+      <div className="container">
+
+
+        {/* Header */}
+
+        <header className="text-center mb-5">
+
+          <h1 className="display-4 fw-bold text-white mb-3">
+
+            Random Quote Generator
+
+          </h1>
+
+
+          <p className="lead text-white-50">
+
+            Press spacebar or click the button
+            for a new quote
+
+          </p>
+
+        </header>
+
+
+        {/* Quote */}
+
+        <div className="row justify-content-center mb-5">
+
+          <div className="col-12 col-lg-8">
+
+            <QuoteCard
+              quote={quote}
+              loading={loading}
+              error={error}
+              color={color}
+            />
+
+          </div>
+
+        </div>
+
+
+        {/* Actions */}
+
+        <div className="row justify-content-center">
+
+          <div className="col-12 col-lg-8">
+
+            <div className="d-flex gap-3 justify-content-center flex-wrap">
+
+
+              <button
+                onClick={getNewQuote}
+                disabled={loading}
+                className="btn btn-light btn-lg fw-bold"
+                title="Click or press spacebar for a new quote"
+              >
+
+                {loading ? (
+
+                  <>
+
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    >
+                    </span>
+
+                    Loading...
+
+                  </>
+
+                ) : (
+
+                  <>
+
+                    <i className="bi bi-arrow-repeat me-2"></i>
+
+                    New Quote
+
+                  </>
+
+                )}
+
+              </button>
+
+
+              <button
+                onClick={tweetQuote}
+                disabled={loading}
+                className="btn btn-info btn-lg fw-bold text-white"
+                title="Share this quote"
+              >
+
+                <i className="bi bi-twitter me-2"></i>
+
+                Tweet
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* Footer */}
+
+        <footer className="text-center mt-5">
+
+          <p className="text-white-50">
+            Random Quote App
+          </p>
+
+        </footer>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+BOOTSTRAP USAGE IN App.jsx
+--------------------------------------------------------------------------------
+
++-----------------------------+-----------------------------------------+
+| CLASS                       | PURPOSE                                 |
++-----------------------------+-----------------------------------------+
+| min-vh-100                  | Minimum viewport height                 |
+| d-flex                      | Flex display                            |
+| align-items-center          | Cross-axis center                       |
+| justify-content-center      | Main-axis center                        |
+| py-5                        | Vertical padding                        |
+| container                   | Responsive content container            |
+| text-center                 | Center text                             |
+| display-4                   | Display heading                         |
+| fw-bold                     | Bold weight                             |
+| text-white                  | White text                              |
+| text-white-50               | Semi-transparent white text             |
+| mb-5                        | Bottom margin                           |
+| row                         | Grid row                                |
+| col-12                      | Full width base                         |
+| col-lg-8                    | 8/12 width on large+                    |
+| gap-3                       | Flex/Grid gap                           |
+| flex-wrap                   | Wrap flex items                         |
+| btn                         | Button base                             |
+| btn-light                   | Light button                            |
+| btn-info                    | Info-colored button                     |
+| btn-lg                      | Large button                            |
+| spinner-border              | Loading spinner                        |
+| spinner-border-sm           | Small spinner                           |
+| me-2                        | End-side margin                         |
++-----------------------------+-----------------------------------------+
+
+
+================================================================================
+UPDATED QuoteCard.jsx WITH BOOTSTRAP
+================================================================================
+
+export default function QuoteCard({
+  quote,
+  loading,
+  error,
+  color
+}) {
+
+  return (
+    <div className="quote-card-container">
+
+
+      {/* Error */}
+
+      {error && (
+
+        <div
+          className="alert alert-danger"
+          role="alert"
+        >
+
+          <i className="bi bi-exclamation-circle me-2"></i>
+
+          <strong>
+            Error:
+          </strong>
+
+          {' '}
+
+          {error}
+
+        </div>
+
+      )}
+
+
+      {/* Loading */}
+
+      {loading && (
+
+        <div className="d-flex flex-column align-items-center justify-content-center py-5">
+
+          <div
+            className="spinner-border text-white mb-3"
+            role="status"
+          >
+
+            <span className="visually-hidden">
+              Loading...
+            </span>
+
+          </div>
+
+
+          <p className="text-white fw-bold">
+
+            Fetching a new quote...
+
+          </p>
+
+        </div>
+
+      )}
+
+
+      {/* Quote */}
+
+      {!loading && !error && (
+
+        <div
+          className="card shadow-lg border-0"
+          style={{
+            borderLeft:
+              `5px solid ${color}`
+          }}
+        >
+
+          <div className="card-body p-5">
+
+            <div className="display-1 text-muted mb-3">
+              "
+            </div>
+
+
+            <p className="card-text fs-5 lh-lg mb-4 text-dark">
+
+              {quote.text}
+
+            </p>
+
+
+            <div className="display-1 text-muted text-end mb-3">
+              "
+            </div>
+
+          </div>
+
+
+          {/* Author */}
+
+          <div className="card-footer bg-light border-top">
+
+            <p className="card-text text-end mb-0">
+
+              <strong
+                style={{
+                  color
+                }}
+              >
+                — {quote.author}
+              </strong>
+
+            </p>
+
+          </div>
+
+        </div>
+
+      )}
+
+    </div>
+  )
+}
+
+
+BOOTSTRAP DESIGN FLOW
+--------------------------------------------------------------------------------
+
+Bootstrap
+   ↓
+Layout Classes
+   ↓
+container / row / col
+   ↓
+Utility Classes
+   ↓
+Spacing / Text / Flex
+   ↓
+Component Classes
+   ↓
+Card / Button / Alert / Spinner
+   ↓
+Small Custom CSS / Dynamic Styles
+   ↓
+Final UI
+
+
+================================================================================
+PART 7: BOOTSTRAP UTILITY CLASSES
+================================================================================
+
+SPACING UTILITIES
+--------------------------------------------------------------------------------
+
+Bootstrap spacing syntax:
+
+{property}{side}-{size}
+
+
+Examples:
+
+m-3
+mt-5
+mb-2
+
+p-3
+pt-5
+pb-2
+
+
+Bootstrap 5 logical horizontal sides:
+
+ms-* = margin-start
+
+me-* = margin-end
+
+ps-* = padding-start
+
+pe-* = padding-end
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Older Bootstrap versions commonly used:
+
+ml-*
+mr-*
+pl-*
+pr-*
+
+
+Bootstrap 5 uses logical-direction utilities:
+
+ms-*
+me-*
+ps-*
+pe-*
+
+
+================================================================================
+DISPLAY UTILITIES
+================================================================================
+
+d-none
+
+d-block
+
+d-inline
+
+d-inline-block
+
+d-flex
+
+d-grid
+
+
+================================================================================
+FLEXBOX UTILITIES
+================================================================================
+
+flex-row
+
+flex-column
+
+justify-content-start
+
+justify-content-center
+
+justify-content-end
+
+justify-content-between
+
+align-items-start
+
+align-items-center
+
+align-items-end
+
+flex-wrap
+
+
+================================================================================
+TEXT UTILITIES
+================================================================================
+
+text-start
+
+text-center
+
+text-end
+
+text-white
+
+text-dark
+
+text-muted
+
+fw-bold
+
+fw-normal
+
+fs-1
+
+fs-2
+
+fs-3
+
+fs-4
+
+fs-5
+
+fs-6
+
+lh-1
+
+lh-sm
+
+lh-base
+
+lh-lg
+
+
+================================================================================
+COLOR UTILITIES
+================================================================================
+
+TEXT:
+
+text-primary
+
+text-secondary
+
+text-success
+
+text-danger
+
+text-warning
+
+text-info
+
+text-light
+
+text-dark
+
+
+BACKGROUND:
+
+bg-primary
+
+bg-secondary
+
+bg-success
+
+bg-danger
+
+bg-warning
+
+bg-info
+
+bg-light
+
+bg-dark
+
+
+================================================================================
+UTILITY CLASSES SUMMARY
+================================================================================
+
++-------------------+----------------------------------------+
+| TYPE              | EXAMPLES                               |
++-------------------+----------------------------------------+
+| Margin            | m-3, mt-5, mb-2, me-2                |
+| Padding           | p-3, pt-5, pb-2, px-4                |
+| Display           | d-flex, d-grid, d-none                |
+| Flexbox           | justify-content-center                |
+| Alignment         | align-items-center                    |
+| Text              | text-center, text-end                 |
+| Text Color        | text-primary, text-white              |
+| Background        | bg-primary, bg-light                  |
+| Weight            | fw-bold, fw-normal                    |
+| Font Size         | fs-1 through fs-6                     |
+| Radius            | rounded, rounded-circle               |
+| Shadow            | shadow, shadow-sm, shadow-lg          |
+| Opacity           | opacity-50, opacity-75                |
+| Visibility        | visible, invisible                    |
+| Gap               | gap-1 through gap-5                   |
++-------------------+----------------------------------------+
+
+
+================================================================================
+PART 8: CUSTOMIZING BOOTSTRAP
+================================================================================
+
+METHOD 1: CUSTOM CSS OVERRIDES
+--------------------------------------------------------------------------------
+
+Bootstrap first:
+
+import 'bootstrap/dist/css/bootstrap.min.css'
+
+
+Custom styles after:
+
+import './index.css'
+
+
+Example:
+
+.btn-primary {
+  background-color: #667eea;
+  border-color: #667eea;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+
+.btn-primary:hover {
+  background-color: #5568d3;
+  border-color: #5568d3;
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 8px 16px
+    rgba(102, 126, 234, 0.3);
+}
+
+
+.card {
+  border: none;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 4px 8px
+    rgba(0, 0, 0, 0.1);
+
+  transition:
+    all 0.3s ease;
+}
+
+
+.card:hover {
+  transform:
+    translateY(-4px);
+
+  box-shadow:
+    0 8px 16px
+    rgba(0, 0, 0, 0.15);
+}
+
+
+.alert {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+
+================================================================================
+METHOD 2: BOOTSTRAP CSS VARIABLES
+================================================================================
+
+Bootstrap exposes CSS custom properties for many runtime styling concerns.
+
+You can override supported variables when appropriate.
+
+Example:
+
+:root {
+  --bs-primary: #667eea;
+  --bs-secondary: #764ba2;
+}
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Do not assume that changing a single root variable automatically recompiles
+every Bootstrap utility or variant exactly as Sass customization would.
+
+Bootstrap's CSS variables and Bootstrap's Sass build-time customization are
+related but different customization mechanisms.
+
+
+================================================================================
+METHOD 3: SASS CUSTOMIZATION
+================================================================================
+
+For deeper framework customization, Bootstrap's Sass source can be compiled
+with custom variables/settings.
+
+Conceptual flow:
+
+Bootstrap Sass Source
+        ↓
+Custom Sass Variables
+        ↓
+Compile
+        ↓
+Customized Bootstrap CSS
+
+
+================================================================================
+CUSTOMIZATION OPTIONS
+================================================================================
+
++----------------------+-----------------------------------------------+
+| METHOD               | PURPOSE                                       |
++----------------------+-----------------------------------------------+
+| Utility Classes      | Use existing Bootstrap design                 |
+| Custom CSS           | Override/add project styles                   |
+| CSS Variables        | Runtime-supported custom properties           |
+| Sass                 | Deeper build-time customization               |
+| Inline Style         | Dynamic element-specific value                |
+| CSS Modules          | Scope your own component CSS                  |
+| CSS-in-JS            | Alternative component styling approach        |
++----------------------+-----------------------------------------------+
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+CSS Modules do NOT "scope Bootstrap itself."
+
+They scope class names declared inside your own *.module.css files.
+
+
+================================================================================
+PART 9: BOOTSTRAP BEST PRACTICES
+================================================================================
+
+BEST PRACTICES
+--------------------------------------------------------------------------------
+
+• Use Semantic HTML
+  - Bootstrap classes should enhance good HTML structure
+
+• Use Grid When It Fits the Layout
+  - container → row → columns
+
+• Use Utilities for Common Styling
+  - Spacing, alignment, colors, display, etc.
+
+• Avoid Reimplementing Existing Bootstrap Styles Without a Reason
+
+• Keep Custom CSS Focused
+  - Add only application-specific styling
+
+• Customize Intentionally
+  - Avoid overriding large parts of Bootstrap unnecessarily
+
+• Build Responsive Layouts
+  - Use breakpoint-aware classes
+
+• Test Accessibility
+  - A Bootstrap class does not automatically make application logic accessible
+
+• Include Bootstrap JS Only When Needed
+
+• Prefer Bootstrap 5 Logical Spacing Utilities
+  - ms / me / ps / pe
+
+• Test on Different Screen Sizes
+
+• Keep Framework Version in Mind
+  - Classes/components can differ between Bootstrap releases
+
+
+================================================================================
+GOOD EXAMPLE
+================================================================================
+
+export default function GoodExample() {
+
+  return (
+    <div className="container py-5">
+
+      <div className="row g-4">
+
+        <div className="col-12 col-md-6 col-lg-4">
+
+          <div className="card h-100 shadow-sm">
+
+            <div className="card-body">
+
+              <h5 className="card-title">
+                Card Title
+              </h5>
+
+              <p className="card-text">
+                Card description
+              </p>
+
+              <button className="btn btn-primary">
+                Action
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+WHY THIS WORKS WELL
+--------------------------------------------------------------------------------
+
+• Bootstrap grid manages responsive layout
+
+• Spacing uses Bootstrap utilities
+
+• Card uses Bootstrap component classes
+
+• Button uses Bootstrap styles
+
+• Minimal additional CSS is required
+
+
+================================================================================
+LESS EFFECTIVE FOR A BOOTSTRAP-BASED PROJECT
+================================================================================
+
+<div
+  style={{
+    padding: '20px'
+  }}
+>
+
+  <div
+    style={{
+      display: 'flex',
+      gap: '16px'
+    }}
+  >
+
+    <div
+      style={{
+        border:
+          '1px solid #ddd',
+
+        borderRadius:
+          '8px',
+
+        padding:
+          '16px'
+      }}
+    >
+
+      Card
+
+    </div>
+
+  </div>
+
+</div>
+
+
+This is valid React.
+
+It is simply not leveraging the Bootstrap framework that the project has
+already chosen.
+
+
+================================================================================
+BEST PRACTICES COMPARISON
+================================================================================
+
++----------------------+---------------------------+-----------------------------+
+| AREA                 | LESS BOOTSTRAP-ORIENTED   | BOOTSTRAP APPROACH          |
++----------------------+---------------------------+-----------------------------+
+| Spacing              | Repeated inline values    | Spacing utilities           |
+| Layout               | Rebuild every layout      | Grid/Flex utilities         |
+| Buttons              | Recreate standard button  | .btn variants               |
+| Cards                | Recreate common card      | .card                       |
+| Responsive           | All custom media queries  | Responsive grid/utilities   |
+| Common States        | Rebuild basic patterns    | Framework components        |
+| Customization        | Override everything       | Customize selectively       |
++----------------------+---------------------------+-----------------------------+
+
+
+================================================================================
+PART 10: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE LEARNED
+--------------------------------------------------------------------------------
+
+✓ What Bootstrap is
+
+✓ How to install Bootstrap
+
+✓ How to import Bootstrap CSS
+
+✓ When Bootstrap JavaScript is required
+
+✓ How Bootstrap Icons are installed/imported
+
+✓ Bootstrap's responsive grid
+
+✓ Containers, rows, and columns
+
+✓ Bootstrap buttons
+
+✓ Bootstrap cards
+
+✓ Bootstrap alerts
+
+✓ Bootstrap spinners
+
+✓ Bootstrap utility classes
+
+✓ Bootstrap responsive classes
+
+✓ Applying Bootstrap to the Quotes App
+
+✓ Combining Bootstrap with custom CSS
+
+✓ Customizing Bootstrap
+
+✓ Bootstrap best practices
+
+
+================================================================================
+CRITICAL BOOTSTRAP POINTS
+================================================================================
+
+• Install:
+
+npm install bootstrap
+
+
+• Import CSS:
+
+import 'bootstrap/dist/css/bootstrap.min.css'
+
+
+• Optional Icons:
+
+npm install bootstrap-icons
+
+
+import 'bootstrap-icons/font/bootstrap-icons.css'
+
+
+• Optional Bootstrap JS:
+
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+
+
+Only required when using behavior supplied by Bootstrap JavaScript.
+
+
+• Grid:
+
+container
+   ↓
+row
+   ↓
+col-*
+
+
+• Components:
+
+btn
+card
+alert
+spinner-border
+
+
+• Utilities:
+
+d-flex
+text-center
+mb-*
+p-*
+gap-*
+fw-bold
+
+
+• Responsive:
+
+sm
+md
+lg
+xl
+xxl
+
+
+================================================================================
+BOOTSTRAP INSTALLATION CHECKLIST
+================================================================================
+
+[ ] Bootstrap package installed
+
+[ ] Bootstrap CSS imported
+
+[ ] Application starts successfully
+
+[ ] Bootstrap classes apply expected styling
+
+[ ] Bootstrap Icons installed if icon classes are used
+
+[ ] Bootstrap Icons CSS imported if needed
+
+[ ] Bootstrap JS included if interactive plugins require it
+
+[ ] Responsive grid behavior verified
+
+[ ] Custom overrides tested
+
+[ ] Keyboard accessibility checked
+
+[ ] Mobile layout tested
+
+[ ] Browser console checked
+
+
+================================================================================
+BOOTSTRAP USAGE WORKFLOW
+================================================================================
+
+1. INSTALL
+--------------------------------------------------------------------------------
+
+npm install bootstrap
+
+
+        ↓
+
+
+2. IMPORT CSS
+--------------------------------------------------------------------------------
+
+import 'bootstrap/dist/css/bootstrap.min.css'
+
+
+        ↓
+
+
+3. OPTIONAL ICONS
+--------------------------------------------------------------------------------
+
+npm install bootstrap-icons
+
+import 'bootstrap-icons/font/bootstrap-icons.css'
+
+
+        ↓
+
+
+4. PLAN PAGE LAYOUT
+--------------------------------------------------------------------------------
+
+container
+   ↓
+row
+   ↓
+columns
+
+
+        ↓
+
+
+5. ADD COMPONENTS
+--------------------------------------------------------------------------------
+
+Buttons
+Cards
+Alerts
+Spinners
+Forms
+etc.
+
+
+        ↓
+
+
+6. APPLY UTILITIES
+--------------------------------------------------------------------------------
+
+Spacing
+Flexbox
+Colors
+Typography
+Alignment
+
+
+        ↓
+
+
+7. ADD CUSTOM CSS
+--------------------------------------------------------------------------------
+
+Brand styles
+Special animations
+Project-specific behavior
+
+
+        ↓
+
+
+8. ADD BOOTSTRAP JS IF REQUIRED
+--------------------------------------------------------------------------------
+
+Only for interactive Bootstrap plugin behavior
+
+
+        ↓
+
+
+9. TEST RESPONSIVENESS
+--------------------------------------------------------------------------------
+
+Small
+Medium
+Large
+XL
+XXL
+
+
+        ↓
+
+
+10. TEST ACCESSIBILITY
+--------------------------------------------------------------------------------
+
+Keyboard
+Labels
+Focus
+ARIA where appropriate
+
+
+        ↓
+
+
+11. BUILD
+--------------------------------------------------------------------------------
+
+npm run build
+
+
+================================================================================
+KEY BOOTSTRAP CLASSES
+================================================================================
+
++----------------------------+-------------------------------------------+
+| CLASS                      | REMEMBER                                  |
++----------------------------+-------------------------------------------+
+| .container                 | Responsive wrapper                        |
+| .container-fluid           | Full-width wrapper                        |
+| .row                       | Grid row                                  |
+| .col-*                     | Grid column                               |
+| .col-md-*                  | Medium+ column                            |
+| .col-lg-*                  | Large+ column                             |
+| .btn                       | Button base                               |
+| .btn-primary               | Primary button                            |
+| .btn-light                 | Light button                              |
+| .btn-lg                    | Large button                              |
+| .card                      | Card                                      |
+| .card-body                 | Card main content                         |
+| .card-footer               | Card footer                               |
+| .alert                     | Alert base                                |
+| .alert-danger              | Error/danger alert                        |
+| .spinner-border            | Loading spinner                           |
+| .d-flex                    | Flexbox                                   |
+| .flex-wrap                 | Flexible wrapping                         |
+| .justify-content-center    | Horizontal alignment in flex context      |
+| .align-items-center        | Cross-axis alignment                      |
+| .text-center               | Center text                               |
+| .text-white                | White text                                |
+| .fw-bold                   | Bold font                                 |
+| .mb-*                      | Margin bottom                             |
+| .mt-*                      | Margin top                                |
+| .me-*                      | Margin end                                |
+| .p-*                       | Padding                                   |
+| .gap-*                     | Gap                                       |
++----------------------------+-------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - GRID SYSTEM
+================================================================================
+
+12-COLUMN GRID:
+
++----+----+----+----+----+----+----+----+----+----+----+----+
+| 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
++----+----+----+----+----+----+----+----+----+----+----+----+
+
+
+Three Equal Columns:
+
+col-md-4
++
+col-md-4
++
+col-md-4
+=
+12
+
+
+Two Equal Columns:
+
+col-md-6
++
+col-md-6
+=
+12
+
+
+Four Equal Columns:
+
+col-lg-3
++
+col-lg-3
++
+col-lg-3
++
+col-lg-3
+=
+12
+
+
+================================================================================
+QUICK REVISION - RESPONSIVE COLUMN
+================================================================================
+
+className="col-12 col-md-6 col-lg-3"
+
+
+Means:
+
+BASE / SMALL:
+
+12 / 12
+=
+100% width
+
+
+MEDIUM:
+
+6 / 12
+=
+50% width
+
+
+LARGE:
+
+3 / 12
+=
+25% width
+
+
+================================================================================
+QUICK REVISION - QUOTES APP
+================================================================================
+
+React State
+    ↓
+Quote Data
+    ↓
+QuoteCard
+    ↓
+Bootstrap Card
+
+
+Loading State
+    ↓
+Bootstrap Spinner
+
+
+Error State
+    ↓
+Bootstrap Alert
+
+
+Actions
+    ↓
+Bootstrap Buttons
+
+
+Layout
+    ↓
+Bootstrap Grid
+
+
+Spacing
+    ↓
+Bootstrap Utilities
+
+
+Brand Styling
+    ↓
+Custom CSS / Dynamic Style
+
+
+================================================================================
+QUICK REFERENCE TABLE
+================================================================================
+
++-----------------------+-----------------------------------------------+
+| CONCEPT               | REMEMBER                                      |
++-----------------------+-----------------------------------------------+
+| Bootstrap             | CSS framework + optional JS plugins           |
+| Bootstrap CSS         | Styling/components/utilities                  |
+| Bootstrap JS          | Interactive component behavior                |
+| Bootstrap Icons       | Separate icon package                         |
+| Grid                  | 12-column responsive system                   |
+| container             | Responsive content wrapper                    |
+| row                   | Grid row                                      |
+| col                   | Grid column                                   |
+| Utility Class         | Small reusable styling operation              |
+| btn                   | Button component                              |
+| card                  | Content container                             |
+| alert                 | User message                                  |
+| spinner-border        | Loading indicator                             |
+| sm                    | >= 576px                                      |
+| md                    | >= 768px                                      |
+| lg                    | >= 992px                                      |
+| xl                    | >= 1200px                                     |
+| xxl                   | >= 1400px                                     |
+| me                    | Margin end                                    |
+| ms                    | Margin start                                  |
+| CSS Override          | Project-specific customization                |
+| Sass Customization    | Build-time framework customization           |
++-----------------------+-----------------------------------------------+
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+INSTALL:
+
+npm install bootstrap
+
+
+IMPORT:
+
+Bootstrap CSS
+    ↓
+main.jsx
+    ↓
+React App
+
+
+GRID:
+
+container
+   ↓
+row
+   ↓
+col
+
+
+RESPONSIVE:
+
+Base
+ ↓
+sm
+ ↓
+md
+ ↓
+lg
+ ↓
+xl
+ ↓
+xxl
+
+
+BUTTON:
+
+btn
+ +
+btn-primary
+
+
+CARD:
+
+card
+ ↓
+card-body
+ ↓
+card-footer
+
+
+ALERT:
+
+alert
+ +
+alert-danger
+
+
+QUOTES APP:
+
+React State
+      ↓
+Bootstrap Layout
+      ↓
+Bootstrap Components
+      ↓
+Utility Classes
+      ↓
+Custom CSS
+      ↓
+Responsive UI
+
+
+MOST IMPORTANT RULE:
+
+USE BOOTSTRAP FOR COMMON LAYOUT AND COMPONENT PATTERNS,
+THEN ADD CUSTOM CSS ONLY WHERE YOUR APPLICATION NEEDS IT.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Build responsive layouts using Bootstrap Grid
+
+2. Use Bootstrap forms
+
+3. Build navigation with Bootstrap
+
+4. Learn Bootstrap modal/dropdown behavior
+
+5. Understand Bootstrap JavaScript integration
+
+6. Customize Bootstrap themes
+
+7. Combine Bootstrap with React state
+
+8. Build reusable React + Bootstrap components
+
+9. Explore React-oriented Bootstrap component libraries when appropriate
+
+10. Build production-style responsive React applications
+
+
+================================================================================
+END OF LESSON 11
+INSTALLING BOOTSTRAP AND USING IT IN QUOTES APP
+================================================================================
