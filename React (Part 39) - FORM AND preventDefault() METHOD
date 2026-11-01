@@ -1,0 +1,2707 @@
+LESSON 3: FORM AND preventDefault() METHOD
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on understanding and using preventDefault() when handling
+forms in React.
+
+You will understand:
+
+• What default browser form submission means
+
+• Why preventDefault() is commonly used in React forms
+
+• How preventDefault() works
+
+• Preventing native form navigation/reload behavior
+
+• Handling form submission in React
+
+• Creating onSubmit event handlers
+
+• Processing controlled-form data
+
+• Validating data before application-level submission
+
+• Displaying success/error feedback
+
+• Understanding preventDefault() vs stopPropagation()
+
+• Common preventDefault() use cases
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+Understanding preventDefault() is useful because:
+
+• React applications often handle form submission with JavaScript
+
+• Native form navigation may not match the application's desired behavior
+
+• Form state can be validated before application logic continues
+
+• API requests can be started from the submit handler
+
+• Error messages can be displayed without navigating away
+
+• Success states can be displayed inside the current application
+
+• It is an important browser event API concept
+
+• It helps distinguish browser behavior from React state behavior
+
+
+================================================================================
+PART 2: UNDERSTANDING DEFAULT FORM BEHAVIOR
+================================================================================
+
+WHAT IS DEFAULT FORM BEHAVIOR?
+--------------------------------------------------------------------------------
+
+HTML forms have built-in browser submission behavior.
+
+Example:
+
+<form
+  action="/users"
+  method="post"
+>
+
+  <input
+    name="name"
+  />
+
+  <button type="submit">
+    Submit
+  </button>
+
+</form>
+
+
+When submitted, the browser can perform the form's native submission action
+according to the form configuration.
+
+
+COMMON NATIVE FORM SUBMISSION FLOW
+--------------------------------------------------------------------------------
+
+User Submits Form
+        ↓
+Browser Creates Submission
+        ↓
+Uses Form Configuration
+        ↓
+action + method
+        ↓
+Browser Sends Request
+        ↓
+Browser May Navigate to Resulting Document
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+It is more precise to say:
+
+preventDefault() prevents the browser's DEFAULT SUBMIT ACTION.
+
+Whether a browser visibly "reloads the same page" or navigates elsewhere
+depends on the form and resulting navigation.
+
+
+================================================================================
+WHY DOES DEFAULT FORM BEHAVIOR EXIST?
+================================================================================
+
+HTML forms existed long before React.
+
+Traditional pattern:
+
+Browser
+   ↓
+HTML Form
+   ↓
+Server Request
+   ↓
+Server Processes Form
+   ↓
+Server Returns Document
+   ↓
+Browser Displays Document
+
+
+This behavior is still useful.
+
+Native form submission is NOT inherently wrong.
+
+It may be appropriate for:
+
+• Traditional server-rendered applications
+
+• Progressive enhancement
+
+• Applications intentionally using browser-based form navigation
+
+• Workflows where native HTML submission is desired
+
+
+================================================================================
+WHY INTERCEPT SUBMISSION IN A REACT APP?
+================================================================================
+
+A React application may instead want:
+
+Form
+ ↓
+React Handler
+ ↓
+Validate
+ ↓
+API Request
+ ↓
+Update React State
+ ↓
+Display Feedback
+
+
+without handing navigation control to the browser's default form action.
+
+
+================================================================================
+NATIVE SUBMISSION VS CUSTOM REACT HANDLING
+================================================================================
+
++-----------------------+--------------------------+----------------------------+
+| AREA                  | NATIVE SUBMISSION        | CUSTOM REACT HANDLING      |
++-----------------------+--------------------------+----------------------------+
+| Browser default       | Allowed                  | Prevented                  |
+| Navigation            | May occur                | Controlled by application  |
+| React validation      | Not required             | Can run before API logic   |
+| React state workflow  | May be interrupted       | Can continue in same UI    |
+| API handling          | Browser/native form      | JavaScript can perform it  |
+| Feedback              | New document or browser  | React can render feedback  |
+| Use case              | Native/server workflow   | Client-driven workflow     |
++-----------------------+--------------------------+----------------------------+
+
+
+================================================================================
+PART 3: UNDERSTANDING preventDefault()
+================================================================================
+
+WHAT IS preventDefault()?
+--------------------------------------------------------------------------------
+
+preventDefault() is a method on an event object.
+
+Example:
+
+const handleSubmit = (event) => {
+
+  event.preventDefault()
+
+}
+
+
+It tells the browser:
+
+"Do not perform the default action associated with this event."
+
+
+================================================================================
+FORM EXAMPLE
+================================================================================
+
+const handleSubmit = (event) => {
+
+  event.preventDefault()
+
+
+  console.log(
+    'Handle submission in application code'
+  )
+}
+
+
+return (
+  <form onSubmit={handleSubmit}>
+
+    {/* Fields */}
+
+    <button type="submit">
+      Submit
+    </button>
+
+  </form>
+)
+
+
+FLOW:
+--------------------------------------------------------------------------------
+
+User Submits Form
+       ↓
+submit Event
+       ↓
+handleSubmit(event)
+       ↓
+event.preventDefault()
+       ↓
+Native Submission Prevented
+       ↓
+Application Code Continues
+
+
+================================================================================
+WHAT preventDefault() DOES
+================================================================================
+
+• Prevents the event's cancelable default action
+
+• Allows the current event handler to continue executing
+
+• Lets the application choose what happens next
+
+• Is commonly used when React handles a form submission itself
+
+
+================================================================================
+WHAT preventDefault() DOES NOT DO
+================================================================================
+
+preventDefault() does NOT automatically:
+
+• Validate your form
+
+• Send data to an API
+
+• Reset the fields
+
+• Display success messages
+
+• Stop event propagation
+
+• Update React state
+
+• Make every event cancelable
+
+
+Those behaviors require separate application logic.
+
+
+================================================================================
+preventDefault() PATTERN
+================================================================================
+
+const handleSubmit = (event) => {
+
+  // Stop browser's native submit behavior
+
+  event.preventDefault()
+
+
+  // Your logic starts here
+
+  console.log(
+    'Form Data:',
+    formData
+  )
+}
+
+
+================================================================================
+PART 4: BASIC FORM WITH preventDefault()
+================================================================================
+
+File:
+
+src/components/FormWithPreventDefault.jsx
+
+
+import { useState } from 'react'
+import './FormWithPreventDefault.css'
+
+
+const INITIAL_FORM = {
+
+  name: '',
+
+  email: ''
+
+}
+
+
+export default function FormWithPreventDefault() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [formData, setFormData] =
+    useState(INITIAL_FORM)
+
+
+  const [
+    submittedData,
+    setSubmittedData
+  ] = useState(null)
+
+
+  // ============================================
+  // INPUT HANDLER
+  // ============================================
+
+  const handleChange = (event) => {
+
+    const {
+      name,
+      value
+    } = event.target
+
+
+    setFormData(previousData => ({
+
+      ...previousData,
+
+      value
+
+    }))
+  }
+
+
+  // ============================================
+  // SUBMIT HANDLER
+  // ============================================
+
+  const handleSubmit = (event) => {
+
+    // Prevent browser's native form submission
+
+    event.preventDefault()
+
+
+    console.log(
+      'Form submitted'
+    )
+
+
+    console.log(
+      'Form data:',
+      formData
+    )
+
+
+    // Capture submitted values
+
+    setSubmittedData({
+
+      ...formData
+
+    })
+  }
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="form-container">
+
+
+      <h1>
+        Form with preventDefault()
+      </h1>
+
+
+      <p>
+        This example handles submission
+        with React.
+      </p>
+
+
+      {/* Success / Submitted Data */}
+
+      {submittedData && (
+
+        <div className="success-message">
+
+          <h3>
+            Form Submitted
+          </h3>
+
+
+          <p>
+            Application code handled the
+            submit event.
+          </p>
+
+
+          <div className="submitted-data">
+
+            <p>
+
+              <strong>Name:</strong>
+              {' '}
+              {submittedData.name}
+
+            </p>
+
+
+            <p>
+
+              <strong>Email:</strong>
+              {' '}
+              {submittedData.email}
+
+            </p>
+
+          </div>
+
+        </div>
+
+      )}
+
+
+      {/* Form */}
+
+      <form
+        onSubmit={handleSubmit}
+        className="form"
+      >
+
+
+        {/* Name */}
+
+        <div className="form-group">
+
+          <label htmlFor="name">
+            Name:
+          </label>
+
+
+          <input
+            id="name"
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter your name"
+            className="form-input"
+          />
+
+        </div>
+
+
+        {/* Email */}
+
+        <div className="form-group">
+
+          <label htmlFor="email">
+            Email:
+          </label>
+
+
+          <input
+            id="email"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+            className="form-input"
+          />
+
+        </div>
+
+
+        {/* Submit */}
+
+        <button
+          type="submit"
+          className="btn-submit"
+        >
+
+          Submit Form
+
+        </button>
+
+      </form>
+
+
+      {/* Debug */}
+
+      <div className="debug-info">
+
+        <h3>
+          Current Form Data:
+        </h3>
+
+
+        <pre>
+          {JSON.stringify(
+            formData,
+            null,
+            2
+          )}
+        </pre>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+================================================================================
+BASIC SUBMISSION FLOW
+================================================================================
+
+Controlled Inputs
+      ↓
+formData State
+      ↓
+User Clicks Submit
+      ↓
+<form onSubmit>
+      ↓
+handleSubmit(event)
+      ↓
+event.preventDefault()
+      ↓
+Native Submit Prevented
+      ↓
+Read formData
+      ↓
+Custom Processing
+      ↓
+React UI Continues
+
+
+================================================================================
+CODE EXPLANATION
+================================================================================
+
++----------------------------+-------------------------------------------+
+| CODE                       | PURPOSE                                   |
++----------------------------+-------------------------------------------+
+| onSubmit={handleSubmit}    | Handles form submission                  |
+| type="submit"              | Creates form submit control              |
+| event.preventDefault()     | Prevents default submit action           |
+| formData                   | Current input values                     |
+| submittedData              | Snapshot of submitted values             |
+| setSubmittedData(...)      | Stores data submitted by user            |
++----------------------------+-------------------------------------------+
+
+
+================================================================================
+WHY COPY formData INTO submittedData?
+================================================================================
+
+This:
+
+setSubmittedData({
+  ...formData
+})
+
+
+creates a snapshot-like object for the submitted values.
+
+That separates:
+
+CURRENT EDITABLE FORM
+
+from:
+
+LAST SUBMITTED VALUES
+
+
+Example:
+
+Current formData:
+
+{
+  name: 'John',
+  email: 'john@example.com'
+}
+
+
+After submit:
+
+submittedData:
+
+{
+  name: 'John',
+  email: 'john@example.com'
+}
+
+
+The user can then continue editing formData without changing the already
+captured submitted object.
+
+
+================================================================================
+PART 5: FORM WITH VALIDATION AND preventDefault()
+================================================================================
+
+File:
+
+src/components/AdvancedForm.jsx
+
+
+import { useState } from 'react'
+import './AdvancedForm.css'
+
+
+const INITIAL_FORM = {
+
+  name: '',
+
+  email: '',
+
+  message: ''
+
+}
+
+
+export default function AdvancedForm() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [formData, setFormData] =
+    useState(INITIAL_FORM)
+
+
+  const [errors, setErrors] =
+    useState({})
+
+
+  const [submitted, setSubmitted] =
+    useState(false)
+
+
+  const [
+    isSubmitting,
+    setIsSubmitting
+  ] = useState(false)
+
+
+  // ============================================
+  // VALIDATION
+  // ============================================
+
+  const validateForm = () => {
+
+    const newErrors = {}
+
+
+    // Name
+
+    if (!formData.name.trim()) {
+
+      newErrors.name =
+        'Name is required'
+    }
+
+
+    // Email
+
+    if (!formData.email.trim()) {
+
+      newErrors.email =
+        'Email is required'
+
+    } else if (
+      !formData.email.includes('@')
+    ) {
+
+      newErrors.email =
+        'Enter a valid email address'
+    }
+
+
+    // Message
+
+    if (!formData.message.trim()) {
+
+      newErrors.message =
+        'Message is required'
+
+    } else if (
+      formData.message.trim().length < 10
+    ) {
+
+      newErrors.message =
+        'Message must be at least 10 characters'
+    }
+
+
+    return newErrors
+  }
+
+
+  // ============================================
+  // CHANGE
+  // ============================================
+
+  const handleChange = (event) => {
+
+    const {
+      name,
+      value
+    } = event.target
+
+
+    setFormData(previousData => ({
+
+      ...previousData,
+
+      value
+
+    }))
+
+
+    // Clear this field's application error
+    // after the user starts correcting it.
+
+    setErrors(previousErrors => {
+
+      if (!previousErrors[name]) {
+
+        return previousErrors
+      }
+
+
+      return {
+
+        ...previousErrors,
+
+        ''
+
+      }
+    })
+  }
+
+
+  // ============================================
+  // SUBMIT
+  // ============================================
+
+  const handleSubmit =
+    async (event) => {
+
+      event.preventDefault()
+
+
+      const validationErrors =
+        validateForm()
+
+
+      if (
+        Object.keys(
+          validationErrors
+        ).length > 0
+      ) {
+
+        setErrors(
+          validationErrors
+        )
+
+        return
+      }
+
+
+      setErrors({})
+
+      setIsSubmitting(true)
+
+      setSubmitted(false)
+
+
+      try {
+
+        /*
+         * Real application:
+         *
+         * await submitForm(formData)
+         *
+         * For this educational example,
+         * we'll simulate async work.
+         */
+
+        await new Promise(resolve => {
+
+          setTimeout(
+            resolve,
+            1000
+          )
+
+        })
+
+
+        console.log(
+          'Submitted data:',
+          formData
+        )
+
+
+        setSubmitted(true)
+
+
+        // Reset controlled fields
+        // after successful submission.
+
+        setFormData(
+          INITIAL_FORM
+        )
+
+      } catch (error) {
+
+        console.error(
+          'Submission failed:',
+          error
+        )
+
+      } finally {
+
+        setIsSubmitting(false)
+
+      }
+    }
+
+
+  // ============================================
+  // RESET
+  // ============================================
+
+  const handleReset = () => {
+
+    setFormData(
+      INITIAL_FORM
+    )
+
+    setErrors({})
+
+    setSubmitted(false)
+  }
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="advanced-form-container">
+
+
+      <h1>
+        Advanced Form with preventDefault()
+      </h1>
+
+
+      <p>
+        Client-side validation and
+        custom submission handling
+      </p>
+
+
+      {/* Success */}
+
+      {submitted && (
+
+        <div
+          className="success-message"
+          role="status"
+        >
+
+          <h3>
+            Success
+          </h3>
+
+          <p>
+            The form was processed
+            successfully.
+          </p>
+
+        </div>
+
+      )}
+
+
+      {/* Form */}
+
+      <form
+        onSubmit={handleSubmit}
+        onReset={handleReset}
+        className="form"
+        noValidate
+      >
+
+
+        {/* Name */}
+
+        <div className="form-group">
+
+          <label htmlFor="name">
+            Name:
+          </label>
+
+
+          <input
+            id="name"
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter your name"
+            className={
+              `form-input ${
+                errors.name
+                  ? 'input-error'
+                  : ''
+              }`
+            }
+            aria-invalid={
+              Boolean(errors.name)
+            }
+            aria-describedby={
+              errors.name
+                ? 'name-error'
+                : undefined
+            }
+          />
+
+
+          {errors.name && (
+
+            <p
+              id="name-error"
+              className="error-message"
+            >
+              {errors.name}
+            </p>
+
+          )}
+
+        </div>
+
+
+        {/* Email */}
+
+        <div className="form-group">
+
+          <label htmlFor="email">
+            Email:
+          </label>
+
+
+          <input
+            id="email"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+            className={
+              `form-input ${
+                errors.email
+                  ? 'input-error'
+                  : ''
+              }`
+            }
+            aria-invalid={
+              Boolean(errors.email)
+            }
+            aria-describedby={
+              errors.email
+                ? 'email-error'
+                : undefined
+            }
+          />
+
+
+          {errors.email && (
+
+            <p
+              id="email-error"
+              className="error-message"
+            >
+              {errors.email}
+            </p>
+
+          )}
+
+        </div>
+
+
+        {/* Message */}
+
+        <div className="form-group">
+
+          <label htmlFor="message">
+            Message:
+          </label>
+
+
+          <textarea
+            id="message"
+            name="message"
+            value={formData.message}
+            onChange={handleChange}
+            placeholder="Enter at least 10 characters"
+            className={
+              `form-input ${
+                errors.message
+                  ? 'input-error'
+                  : ''
+              }`
+            }
+            rows={5}
+            aria-invalid={
+              Boolean(errors.message)
+            }
+            aria-describedby={
+              errors.message
+                ? 'message-error'
+                : undefined
+            }
+          >
+          </textarea>
+
+
+          {errors.message && (
+
+            <p
+              id="message-error"
+              className="error-message"
+            >
+              {errors.message}
+            </p>
+
+          )}
+
+        </div>
+
+
+        {/* Buttons */}
+
+        <div className="button-group">
+
+          <button
+            type="submit"
+            className="btn-submit"
+            disabled={isSubmitting}
+          >
+
+            {isSubmitting
+              ? 'Submitting...'
+              : 'Submit Form'}
+
+          </button>
+
+
+          <button
+            type="reset"
+            className="btn-reset"
+            disabled={isSubmitting}
+          >
+
+            Clear Form
+
+          </button>
+
+        </div>
+
+      </form>
+
+
+      {/* Information */}
+
+      <div className="info-box">
+
+        <h3>
+          Submission Flow:
+        </h3>
+
+        <ul>
+
+          <li>
+            User submits the form
+          </li>
+
+          <li>
+            preventDefault() blocks native submission
+          </li>
+
+          <li>
+            Application validation runs
+          </li>
+
+          <li>
+            Invalid fields display errors
+          </li>
+
+          <li>
+            Valid data can be sent asynchronously
+          </li>
+
+          <li>
+            UI displays the resulting state
+          </li>
+
+        </ul>
+
+      </div>
+
+
+      {/* Debug */}
+
+      <div className="debug-info">
+
+        <h3>
+          Current State:
+        </h3>
+
+
+        <div className="debug-section">
+
+          <h4>
+            Form Data:
+          </h4>
+
+          <pre>
+            {JSON.stringify(
+              formData,
+              null,
+              2
+            )}
+          </pre>
+
+        </div>
+
+
+        <div className="debug-section">
+
+          <h4>
+            Errors:
+          </h4>
+
+          <pre>
+            {JSON.stringify(
+              errors,
+              null,
+              2
+            )}
+          </pre>
+
+        </div>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+================================================================================
+ADVANCED FORM FLOW
+================================================================================
+
+Submit
+  ↓
+handleSubmit(event)
+  ↓
+preventDefault()
+  ↓
+validateForm()
+  ↓
++----------------------------+
+|                            |
+Errors                     Valid
+|                            |
+↓                            ↓
+setErrors()           isSubmitting = true
+|                            |
+↓                            ↓
+Render Errors          Async Processing
+                             |
+                       +-----+-----+
+                       |           |
+                    Success      Failure
+                       |           |
+                       ↓           ↓
+                submitted=true   Error Path
+                       |
+                       ↓
+                  Reset Fields
+                       |
+                       ↓
+                 isSubmitting=false
+
+
+================================================================================
+ADVANCED FORM STATE
+================================================================================
+
++-----------------------+-----------------------------------------------+
+| STATE                 | PURPOSE                                       |
++-----------------------+-----------------------------------------------+
+| formData              | Controlled field values                       |
+| errors                | Application validation errors                 |
+| submitted             | Success feedback state                        |
+| isSubmitting          | Async submission progress                     |
++-----------------------+-----------------------------------------------+
+
+
+================================================================================
+WHY noValidate?
+================================================================================
+
+The example uses:
+
+<form
+  noValidate
+  ...
+>
+
+
+because the lesson is demonstrating custom application validation.
+
+Without noValidate, the browser's built-in constraint validation may stop
+submission before your submit handler runs in some invalid-input scenarios.
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+This does NOT mean native browser validation is bad.
+
+Choose deliberately between:
+
+• Native constraint validation
+
+• Custom application validation
+
+• A combination appropriate to the product
+
+
+================================================================================
+RESET: IMPORTANT CORRECTION
+================================================================================
+
+A form reset is different from form submission.
+
+With controlled React inputs, you generally want reset to update React state:
+
+const handleReset = () => {
+
+  setFormData(
+    INITIAL_FORM
+  )
+
+  setErrors({})
+
+}
+
+
+Then:
+
+<form onReset={handleReset}>
+
+
+and:
+
+<button type="reset">
+  Clear Form
+</button>
+
+
+You do NOT normally need:
+
+event.preventDefault()
+
+simply to use a controlled React reset.
+
+
+Why?
+
+Because the application state is the source of truth and the reset handler
+can restore that state.
+
+
+================================================================================
+PART 6: COMMON preventDefault() USE CASES
+================================================================================
+
+1. FORM SUBMISSION
+--------------------------------------------------------------------------------
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+  // Custom processing
+
+}
+
+
+================================================================================
+2. LINK CLICK
+================================================================================
+
+const handleLinkClick = (
+  event
+) => {
+
+  event.preventDefault()
+
+  // Perform custom behavior instead
+  // of following the link.
+}
+
+
+Use this only when preventing navigation is actually required.
+
+If something behaves like a button rather than navigation, a <button>
+element may be more semantically appropriate than an <a> element.
+
+
+================================================================================
+3. CONTEXT MENU
+================================================================================
+
+const handleContextMenu = (
+  event
+) => {
+
+  event.preventDefault()
+
+  // Optional custom context-menu behavior
+
+}
+
+
+================================================================================
+4. DRAG AND DROP
+================================================================================
+
+In browser drag/drop implementations, preventing the default behavior on
+appropriate drag events is commonly part of enabling a custom drop target.
+
+Example:
+
+const handleDragOver = (
+  event
+) => {
+
+  event.preventDefault()
+
+}
+
+
+================================================================================
+5. KEYBOARD BEHAVIOR
+================================================================================
+
+const handleKeyDown = (
+  event
+) => {
+
+  if (
+    event.key === 'Enter'
+  ) {
+
+    event.preventDefault()
+
+    // Custom behavior
+  }
+}
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Do not prevent keyboard defaults unnecessarily.
+
+Native keyboard behavior often exists for usability/accessibility reasons.
+
+
+================================================================================
+6. BUTTON DEFAULTS
+================================================================================
+
+Inside a form:
+
+<button>
+  Click
+</button>
+
+
+defaults to a submit button.
+
+If the button is NOT intended to submit:
+
+<button type="button">
+  Click
+</button>
+
+
+This is usually clearer than relying on:
+
+event.preventDefault()
+
+inside every non-submit button handler.
+
+
+================================================================================
+USE CASE TABLE
+================================================================================
+
++----------------------+-------------------------+----------------------------+
+| EVENT                | DEFAULT ACTION          | POSSIBLE CUSTOM HANDLING   |
++----------------------+-------------------------+----------------------------+
+| Form submit          | Native form submit      | React/API submission       |
+| Link click           | Navigate                | Custom routing/behavior    |
+| Context menu         | Browser context menu    | Custom context menu        |
+| Drag over/drop       | Browser drag behavior   | Custom drop workflow       |
+| Keyboard             | Key-specific default    | App shortcut where needed  |
+| Submit button        | Submit enclosing form   | Use type="button" if not   |
++----------------------+-------------------------+----------------------------+
+
+
+================================================================================
+PART 7: preventDefault() VS stopPropagation()
+================================================================================
+
+THEY SOLVE DIFFERENT PROBLEMS
+--------------------------------------------------------------------------------
+
+preventDefault():
+
+Stops the browser's default action.
+
+
+stopPropagation():
+
+Stops the event from propagating further through the event path.
+
+
+================================================================================
+COMPARISON TABLE
+================================================================================
+
++----------------------+----------------------------+---------------------------+
+| AREA                 | preventDefault()           | stopPropagation()         |
++----------------------+----------------------------+---------------------------+
+| Purpose              | Cancel default action      | Stop propagation          |
+| Form example         | Prevent native submit      | Stop event reaching parent|
+| Link example         | Prevent navigation         | Stop click propagation    |
+| Parent handlers      | Doesn't itself stop them   | Can stop propagation      |
+| Default browser action| Can cancel it             | Doesn't itself cancel it  |
+| Can use together     | Yes                        | Yes                       |
++----------------------+----------------------------+---------------------------+
+
+
+================================================================================
+EXAMPLE: preventDefault()
+================================================================================
+
+<a
+  href="/products"
+  onClick={(event) => {
+
+    event.preventDefault()
+
+    console.log(
+      'Navigation prevented'
+    )
+
+  }}
+>
+  Products
+</a>
+
+
+Click event can still propagate.
+
+Only the default navigation is prevented.
+
+
+================================================================================
+EXAMPLE: stopPropagation()
+================================================================================
+
+<div
+  onClick={() => {
+
+    console.log(
+      'Parent clicked'
+    )
+
+  }}
+>
+
+  <button
+    type="button"
+    onClick={(event) => {
+
+      event.stopPropagation()
+
+      console.log(
+        'Button clicked'
+      )
+
+    }}
+  >
+
+    Click
+
+  </button>
+
+</div>
+
+
+Here:
+
+Button handler runs.
+
+Parent click handler is not reached through normal propagation from that event.
+
+
+================================================================================
+USING BOTH
+================================================================================
+
+const handleClick = (
+  event
+) => {
+
+  event.preventDefault()
+
+  event.stopPropagation()
+
+
+  // Custom logic
+}
+
+
+Use both only when the interaction genuinely requires:
+
+1. Default action cancellation
+
+AND
+
+2. Propagation prevention
+
+
+================================================================================
+PART 8: STYLING THE FORM
+================================================================================
+
+File:
+
+src/components/AdvancedForm.css
+
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+
+.advanced-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 30px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #667eea 0%,
+      #764ba2 100%
+    );
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 10px 30px
+    rgba(0, 0, 0, 0.2);
+}
+
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.advanced-form-container h1 {
+  color: white;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+
+.advanced-form-container > p {
+  color:
+    rgba(255, 255, 255, 0.9);
+
+  text-align: center;
+
+  margin-bottom: 30px;
+}
+
+
+/* ============================================
+   SUCCESS
+   ============================================ */
+
+.success-message {
+  background: #4caf50;
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+
+  animation:
+    slideIn 0.3s ease;
+}
+
+
+/* ============================================
+   FORM
+   ============================================ */
+
+.form {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+
+  box-shadow:
+    0 5px 15px
+    rgba(0, 0, 0, 0.1);
+}
+
+
+/* ============================================
+   GROUP + LABEL
+   ============================================ */
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+
+/* ============================================
+   INPUT
+   ============================================ */
+
+.form-input {
+  width: 100%;
+
+  padding:
+    12px 15px;
+
+  border:
+    2px solid #ddd;
+
+  border-radius: 6px;
+
+  font-size: 1rem;
+
+  font-family: inherit;
+
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    background-color 0.3s ease;
+}
+
+
+.form-input:focus {
+  outline: none;
+
+  border-color:
+    #667eea;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(102, 126, 234, 0.15);
+}
+
+
+/* ============================================
+   ERROR
+   ============================================ */
+
+.form-input.input-error {
+  border-color: #f44336;
+
+  background-color:
+    #ffebee;
+}
+
+
+.error-message {
+  color: #b71c1c;
+
+  font-size: 0.85rem;
+
+  margin-top: 5px;
+
+  font-weight: 500;
+}
+
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.button-group {
+  display: flex;
+
+  gap: 15px;
+
+  margin-top: 30px;
+}
+
+
+.btn-submit,
+.btn-reset {
+  flex: 1;
+
+  padding:
+    12px 20px;
+
+  color: white;
+
+  border: none;
+
+  border-radius: 6px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+
+.btn-submit {
+  background:
+    #667eea;
+}
+
+
+.btn-submit:hover:not(:disabled) {
+  background:
+    #5568d3;
+
+  transform:
+    translateY(-2px);
+}
+
+
+.btn-submit:disabled,
+.btn-reset:disabled {
+  opacity: 0.6;
+
+  cursor:
+    not-allowed;
+}
+
+
+.btn-reset {
+  background:
+    #f44336;
+}
+
+
+.btn-reset:hover:not(:disabled) {
+  background:
+    #d32f2f;
+
+  transform:
+    translateY(-2px);
+}
+
+
+/* ============================================
+   INFO
+   ============================================ */
+
+.info-box {
+  background:
+    #e8f5e9;
+
+  border-left:
+    4px solid #4caf50;
+
+  padding: 20px;
+
+  border-radius: 6px;
+
+  margin-top: 30px;
+}
+
+
+.info-box h3 {
+  color: #2e7d32;
+
+  margin-top: 0;
+}
+
+
+.info-box ul {
+  list-style: none;
+
+  padding: 0;
+
+  margin: 0;
+}
+
+
+.info-box li {
+  color: #333;
+
+  padding:
+    8px 0 8px 25px;
+
+  position: relative;
+}
+
+
+.info-box li::before {
+  content: "✓";
+
+  position: absolute;
+
+  left: 0;
+
+  color: #4caf50;
+
+  font-weight: bold;
+}
+
+
+/* ============================================
+   DEBUG
+   ============================================ */
+
+.debug-info {
+  background: #f5f5f5;
+
+  padding: 20px;
+
+  border-radius: 6px;
+
+  margin-top: 30px;
+}
+
+
+.debug-info h3 {
+  margin-top: 0;
+
+  color: #333;
+}
+
+
+.debug-section {
+  margin-bottom: 20px;
+}
+
+
+.debug-section h4 {
+  color: #666;
+
+  margin-bottom: 10px;
+}
+
+
+.debug-section pre {
+  background: #2d2d2d;
+
+  color: #f8f8f2;
+
+  padding: 15px;
+
+  border-radius: 4px;
+
+  overflow-x: auto;
+
+  font-size: 0.85rem;
+
+  margin: 0;
+}
+
+
+/* ============================================
+   ANIMATION
+   ============================================ */
+
+@keyframes slideIn {
+
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(-10px);
+  }
+
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0);
+  }
+
+}
+
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+
+  .advanced-form-container {
+    padding: 20px;
+  }
+
+
+  .form {
+    padding: 20px;
+  }
+
+
+  .button-group {
+    flex-direction: column;
+  }
+
+}
+
+
+================================================================================
+PART 9: TESTING preventDefault()
+================================================================================
+
+MANUAL TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Submit handler executes
+
+[ ] Native form submission doesn't occur
+
+[ ] Application stays in current UI
+
+[ ] Controlled field values are available
+
+[ ] Validation errors display
+
+[ ] Invalid input can be corrected
+
+[ ] Valid data can be processed
+
+[ ] Submit button disables during async work
+
+[ ] Reset clears controlled state
+
+[ ] Keyboard submission works
+
+[ ] Focus states remain visible
+
+[ ] Browser console checked
+
+[ ] Narrow-screen layout works
+
+
+================================================================================
+SCENARIO 1: VALID FORM
+================================================================================
+
+INPUT:
+--------------------------------------------------------------------------------
+
+Name:
+John
+
+
+Email:
+john@example.com
+
+
+Message:
+Hello from my React form
+
+
+ACTION:
+--------------------------------------------------------------------------------
+
+Submit
+
+
+FLOW:
+--------------------------------------------------------------------------------
+
+submit event
+    ↓
+preventDefault()
+    ↓
+validateForm()
+    ↓
+No errors
+    ↓
+isSubmitting = true
+    ↓
+Async Processing
+    ↓
+Success
+    ↓
+Form Data Reset
+    ↓
+Success Feedback
+
+
+EXPECTED:
+--------------------------------------------------------------------------------
+
+• Native form submission is prevented
+
+• Application validation succeeds
+
+• Async application logic runs
+
+• Success feedback displays
+
+• Controlled fields reset after successful processing
+
+
+================================================================================
+SCENARIO 2: INVALID FORM
+================================================================================
+
+INPUT:
+--------------------------------------------------------------------------------
+
+Name:
+empty
+
+
+Email:
+invalid
+
+
+Message:
+short
+
+
+ACTION:
+--------------------------------------------------------------------------------
+
+Submit
+
+
+EXPECTED:
+--------------------------------------------------------------------------------
+
+• Native form submission prevented
+
+• Validation fails
+
+• Error messages render
+
+• Application remains available for corrections
+
+• No successful submit logic runs
+
+
+================================================================================
+SCENARIO 3: RESET
+================================================================================
+
+Start:
+
+{
+  name: 'John',
+  email: 'john@example.com',
+  message: 'Hello there'
+}
+
+
+Click:
+
+Clear Form
+
+
+Result:
+
+{
+  name: '',
+  email: '',
+  message: ''
+}
+
+
+Errors:
+
+{}
+
+
+================================================================================
+TESTING TABLE
+================================================================================
+
++----------------------+-----------------------------------------------+
+| SCENARIO             | EXPECTED                                      |
++----------------------+-----------------------------------------------+
+| Valid Submit         | Custom submission logic runs                  |
+| Invalid Submit       | Errors display                                |
+| Reset                | Controlled state clears                       |
+| Submit During Async  | Submit button disabled                        |
+| Correct Error        | Relevant error can clear/update               |
+| Keyboard Submit      | Form onSubmit handles event                   |
+| Responsive Layout    | Form remains usable                           |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+AUTOMATED TEST EXAMPLE
+================================================================================
+
+Conceptually, with React Testing Library:
+
+import {
+  render,
+  screen
+} from '@testing-library/react'
+
+import userEvent
+  from '@testing-library/user-event'
+
+import FormWithPreventDefault
+  from './FormWithPreventDefault'
+
+
+test(
+  'processes form without native navigation',
+
+  async () => {
+
+    const user =
+      userEvent.setup()
+
+
+    render(
+      <FormWithPreventDefault />
+    )
+
+
+    await user.type(
+      screen.getByLabelText(/name/i),
+      'John'
+    )
+
+
+    await user.type(
+      screen.getByLabelText(/email/i),
+      'john@example.com'
+    )
+
+
+    await user.click(
+      screen.getByRole(
+        'button',
+        {
+          name: /submit form/i
+        }
+      )
+    )
+
+
+    expect(
+      screen.getByText(
+        /form submitted/i
+      )
+    ).toBeInTheDocument()
+  }
+)
+
+
+TESTING PRINCIPLE:
+--------------------------------------------------------------------------------
+
+Prefer checking:
+
+USER ACTION
+    ↓
+VISIBLE APPLICATION RESULT
+
+
+rather than directly testing the implementation detail:
+
+"Was preventDefault() called?"
+
+
+================================================================================
+PART 10: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE LEARNED
+--------------------------------------------------------------------------------
+
+✓ HTML forms have native submission behavior
+
+✓ React can intercept submit events
+
+✓ onSubmit belongs on the form
+
+✓ type="submit" triggers form submission
+
+✓ preventDefault() can cancel the native submit action
+
+✓ Application code continues after preventDefault()
+
+✓ Controlled form state remains available to the handler
+
+✓ Validation can run before application-level submission
+
+✓ Async API logic can follow successful validation
+
+✓ Loading state can prevent repeat submissions
+
+✓ Reset and submit are different form behaviors
+
+✓ preventDefault() and stopPropagation() solve different problems
+
+✓ Non-submit buttons inside forms should usually use type="button"
+
+✓ Native browser validation and application validation are separate concepts
+
+
+================================================================================
+CRITICAL preventDefault() POINTS
+================================================================================
+
+• FORM HANDLER:
+
+<form
+  onSubmit={handleSubmit}
+>
+
+
+• SUBMIT BUTTON:
+
+<button type="submit">
+  Submit
+</button>
+
+
+• SUBMIT HANDLER:
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+  // Application logic
+}
+
+
+• preventDefault()
+
+Means:
+
+"Cancel this event's default browser action."
+
+
+• It does NOT mean:
+
+"Cancel the event completely."
+
+
+• It does NOT automatically:
+
+Validate
+Send API request
+Update state
+Reset form
+Stop propagation
+
+
+================================================================================
+preventDefault() PATTERN
+================================================================================
+
+1. USER SUBMITS FORM
+--------------------------------------------------------------------------------
+
+<form onSubmit={handleSubmit}>
+
+
+        ↓
+
+
+2. HANDLER RECEIVES EVENT
+--------------------------------------------------------------------------------
+
+const handleSubmit = (
+  event
+) => {
+
+
+        ↓
+
+
+3. PREVENT NATIVE SUBMISSION
+--------------------------------------------------------------------------------
+
+event.preventDefault()
+
+
+        ↓
+
+
+4. VALIDATE
+--------------------------------------------------------------------------------
+
+const errors =
+  validateForm()
+
+
+        ↓
+
+
+5. INVALID?
+--------------------------------------------------------------------------------
+
+YES
+ ↓
+setErrors(errors)
+ ↓
+Render Errors
+
+
+NO
+ ↓
+
+
+6. PROCESS DATA
+--------------------------------------------------------------------------------
+
+await submitForm(formData)
+
+
+        ↓
+
+
+7. UPDATE UI
+--------------------------------------------------------------------------------
+
+Success
+Error
+Loading
+Reset
+
+
+================================================================================
+preventDefault() VS stopPropagation()
+================================================================================
+
+preventDefault()
+      ↓
+Stops Browser's Default Action
+
+
+stopPropagation()
+      ↓
+Stops Event Propagation
+
+
+Example:
+
+FORM SUBMISSION:
+
+preventDefault()
+
+
+NESTED CLICK EVENT:
+
+stopPropagation()
+
+
+Both can be used together only when both behaviors genuinely need to be
+controlled.
+
+
+================================================================================
+KEY DIFFERENCES TABLE
+================================================================================
+
++----------------------+--------------------------+----------------------------+
+| AREA                 | NATIVE FORM SUBMIT       | CUSTOM HANDLER             |
++----------------------+--------------------------+----------------------------+
+| Native action        | Runs                     | Can be prevented           |
+| Browser navigation   | May occur                | App decides                |
+| React validation     | Optional                 | Can be performed           |
+| React state          | Depends on navigation    | Remains in current app     |
+| API processing       | Browser/server workflow  | JS/application workflow    |
+| UI feedback          | Server/new page possible | React can render it        |
++----------------------+--------------------------+----------------------------+
+
+
+================================================================================
+QUICK REVISION - FORM SUBMISSION
+================================================================================
+
+HTML FORM:
+
+<form>
+   ↓
+Submit
+   ↓
+Native Browser Behavior
+
+
+REACT-CONTROLLED SUBMISSION:
+
+<form onSubmit={handleSubmit}>
+       ↓
+Submit
+       ↓
+handleSubmit(event)
+       ↓
+preventDefault()
+       ↓
+Validate
+       ↓
+Process
+       ↓
+Update State/UI
+
+
+================================================================================
+QUICK REVISION - VALIDATION FLOW
+================================================================================
+
+Submit
+  ↓
+preventDefault()
+  ↓
+Validate
+  ↓
++------------------------+
+|                        |
+Invalid                Valid
+|                        |
+↓                        ↓
+Errors               Submit Data
+|                        |
+↓                        ↓
+Render Errors         Loading
+                         |
+                         ↓
+                     Success/Error
+
+
+================================================================================
+QUICK REVISION - BUTTON TYPES
+================================================================================
+
+SUBMIT:
+--------------------------------------------------------------------------------
+
+<button type="submit">
+  Save
+</button>
+
+
+RESET:
+--------------------------------------------------------------------------------
+
+<button type="reset">
+  Reset
+</button>
+
+
+REGULAR BUTTON:
+--------------------------------------------------------------------------------
+
+<button type="button">
+  Open Help
+</button>
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Inside a form, explicitly set the appropriate button type.
+
+This avoids accidental form submission.
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+SUBMIT:
+
+User
+ ↓
+Form
+ ↓
+onSubmit
+ ↓
+Handler
+
+
+PREVENT DEFAULT:
+
+Event
+ ↓
+preventDefault()
+ ↓
+Default Browser Action Cancelled
+
+
+CUSTOM FORM:
+
+Submit
+ ↓
+preventDefault()
+ ↓
+Validate
+ ↓
+Process
+ ↓
+Update React State
+
+
+ERROR:
+
+Submit
+ ↓
+Validation Fails
+ ↓
+setErrors()
+ ↓
+Render Error Messages
+
+
+SUCCESS:
+
+Submit
+ ↓
+Valid
+ ↓
+Async Processing
+ ↓
+Success State
+ ↓
+UI Feedback
+
+
+PROPAGATION:
+
+Event
+ ↓
+stopPropagation()
+ ↓
+Does Not Continue Propagating Beyond That Point
+
+
+MOST IMPORTANT DISTINCTION:
+
+preventDefault()
+=
+STOP THE DEFAULT BROWSER ACTION
+
+stopPropagation()
+=
+STOP EVENT PROPAGATION
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Add stronger client-side validation
+
+2. Create field-level validation
+
+3. Handle async API submissions
+
+4. Display server-side errors
+
+5. Manage submission/loading states
+
+6. Disable forms while requests are running
+
+7. Focus the first invalid field
+
+8. Build reusable field components
+
+9. Learn form libraries when application complexity requires them
+
+10. Build production-style React forms
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The central React form pattern is:
+
+<form onSubmit={handleSubmit}>
+
+        ↓
+
+const handleSubmit = (
+  event
+) => {
+
+  event.preventDefault()
+
+  // Validate
+  // Process
+  // Update UI
+}
+
+
+preventDefault() itself has one focused responsibility:
+
+CANCEL THE EVENT'S DEFAULT BROWSER ACTION.
+
+
+Everything after that:
+
+• Validation
+• API calls
+• Success state
+• Error state
+• Resets
+• Navigation
+
+is application logic that YOU define.
+
+
+================================================================================
+END OF LESSON 3
+FORM AND preventDefault() METHOD
+================================================================================
