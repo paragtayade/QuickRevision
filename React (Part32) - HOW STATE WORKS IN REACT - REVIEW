@@ -1,0 +1,2672 @@
+LESSON 9: HOW STATE WORKS IN REACT - REVIEW
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson reviews and consolidates the React state-management concepts
+covered so far.
+
+You will understand:
+
+• Complete state-management workflow
+
+• How to apply state concepts in real applications
+
+• Common state patterns and best practices
+
+• Troubleshooting state-related issues
+
+• Optimizing state for performance
+
+• State-management anti-patterns to avoid
+
+• Real-world state scenarios
+
+• Testing state changes
+
+• Debugging state issues
+
+• Preparing for advanced state patterns
+
+
+WHY THIS REVIEW LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+Reviewing state concepts is important because:
+
+• Consolidates Learning
+  - Reinforces previously learned concepts
+
+• Identifies Gaps
+  - Reveals concepts needing additional practice
+
+• Builds Confidence
+  - Confirms understanding of core React state concepts
+
+• Prepares for Advanced Patterns
+  - Foundation for useReducer and Context
+
+• Improves Problem-Solving
+  - Applies concepts to real scenarios
+
+• Prevents Common Mistakes
+  - Helps identify and avoid anti-patterns
+
+• Enables Optimization
+  - Builds understanding of rendering and performance
+
+• Supports Professional Development
+  - State management is fundamental to React applications
+
+• Encourages Real-World Application
+  - Connects concepts with realistic scenarios
+
+• Improves Debugging
+  - Helps diagnose state-related issues
+
+
+================================================================================
+PART 2: STATE MANAGEMENT COMPLETE WORKFLOW
+================================================================================
+
+COMPLETE STATE MANAGEMENT WORKFLOW
+--------------------------------------------------------------------------------
+
+STEP 1: DEFINE STATE
+
+• Identify information that must change over time
+
+• Determine the initial value
+
+• Decide the appropriate state shape
+
+        ↓
+
+STEP 2: CREATE STATE
+
+import { useState } from 'react'
+
+const [state, setState] =
+  useState(initialValue)
+
+        ↓
+
+STEP 3: RENDER USING STATE
+
+• Read state during rendering
+
+• Use state in JSX
+
+• Display the current application state
+
+        ↓
+
+STEP 4: HANDLE USER INTERACTION
+
+• Attach event handlers
+
+• Capture user interaction/input
+
+• Determine the next state
+
+        ↓
+
+STEP 5: UPDATE STATE
+
+• Do not mutate existing state
+
+• Create the next value/object/array
+
+• Call the state setter
+
+        ↓
+
+STEP 6: REACT PROCESSES THE UPDATE
+
+• React receives/queues the update
+
+• Determines the next state
+
+• May skip unnecessary work when state is effectively unchanged
+
+        ↓
+
+STEP 7: COMPONENT RE-RENDERS
+
+• Component function executes again when needed
+
+• Updated state is available
+
+• JSX is reevaluated
+
+        ↓
+
+STEP 8: RECONCILIATION
+
+• React compares the previous and new rendered output
+
+• Determines which UI changes are required
+
+        ↓
+
+STEP 9: COMMIT
+
+• Required DOM changes are applied
+
+        ↓
+
+STEP 10: DISPLAY UPDATED
+
+• User sees the resulting UI
+
+• Application is ready for the next interaction
+
+
+WORKFLOW TABLE
+--------------------------------------------------------------------------------
+
++------+--------------------+----------------------+----------------------------+
+| STEP | ACTION             | INPUT                | RESULT                     |
++------+--------------------+----------------------+----------------------------+
+| 1    | Define State       | Requirements         | State plan                 |
+| 2    | Create State       | Initial value        | [state, setter]            |
+| 3    | Render             | Current state        | JSX                        |
+| 4    | Handle Interaction | User action          | Event handler              |
+| 5    | Update State       | Next value           | Setter called              |
+| 6    | Process Update     | State update         | Next state determined      |
+| 7    | Re-render          | Current state        | New rendered output        |
+| 8    | Reconcile          | Previous/new output  | Required differences       |
+| 9    | Commit             | Required changes     | DOM updated as necessary   |
+| 10   | Display            | Updated DOM          | User sees current UI       |
++------+--------------------+----------------------+----------------------------+
+
+
+ONE-LINE FLOW
+--------------------------------------------------------------------------------
+
+User Action
+    ↓
+Event Handler
+    ↓
+State Setter
+    ↓
+React Processes State
+    ↓
+Render
+    ↓
+Reconciliation
+    ↓
+DOM Commit
+    ↓
+Updated UI
+
+
+================================================================================
+PART 3: STATE PATTERNS AND BEST PRACTICES
+================================================================================
+
+PATTERN 1: SIMPLE COUNTER
+--------------------------------------------------------------------------------
+
+const [count, setCount] = useState(0)
+
+
+const increment = () =>
+  setCount(count => count + 1)
+
+
+const decrement = () =>
+  setCount(count => count - 1)
+
+
+const reset = () =>
+  setCount(0)
+
+
+Use Cases:
+
+• Counting
+• Scoring
+• Pagination
+
+
+================================================================================
+PATTERN 2: TOGGLE BOOLEAN
+================================================================================
+
+const [isOpen, setIsOpen] = useState(false)
+
+
+const toggle = () =>
+  setIsOpen(isOpen => !isOpen)
+
+
+Use Cases:
+
+• Modals
+• Dropdowns
+• Menus
+• Visibility
+• Expand/collapse
+
+
+================================================================================
+PATTERN 3: FORM INPUT
+================================================================================
+
+const [input, setInput] = useState('')
+
+
+const handleChange = (e) =>
+  setInput(e.target.value)
+
+
+const handleReset = () =>
+  setInput('')
+
+
+Use Cases:
+
+• Text input
+• Search bar
+• Filter input
+
+
+================================================================================
+PATTERN 4: OBJECT STATE
+================================================================================
+
+const [user, setUser] = useState({
+  name: '',
+  email: '',
+  age: 0
+})
+
+
+const updateUser = (field, value) => {
+
+  setUser(user => ({
+    ...user,
+    value
+  }))
+}
+
+
+Use Cases:
+
+• User profiles
+• Settings
+• Forms
+
+
+================================================================================
+PATTERN 5: ARRAY STATE
+================================================================================
+
+const [items, setItems] = useState([])
+
+
+const addItem = (item) => {
+
+  setItems(items => [
+    ...items,
+    item
+  ])
+}
+
+
+const removeItem = (id) => {
+
+  setItems(items =>
+    items.filter(
+      item => item.id !== id
+    )
+  )
+}
+
+
+Use Cases:
+
+• Lists
+• Todos
+• Shopping carts
+• Collections
+
+
+================================================================================
+PATTERN 6: CONDITIONAL / STATUS STATE
+================================================================================
+
+const [status, setStatus] =
+  useState('idle')
+
+
+// Possible values:
+// idle
+// loading
+// success
+// error
+
+
+const startLoading = () =>
+  setStatus('loading')
+
+
+const setSuccess = () =>
+  setStatus('success')
+
+
+const setError = () =>
+  setStatus('error')
+
+
+Use Cases:
+
+• API requests
+• Async operations
+• Workflows
+
+
+================================================================================
+PATTERN 7: NESTED STATE
+================================================================================
+
+const [data, setData] = useState({
+
+  user: {
+    name: '',
+    email: ''
+  },
+
+  settings: {
+    theme: 'light',
+    notifications: true
+  }
+
+})
+
+
+const updateNested = (section, values) => {
+
+  setData(data => ({
+
+    ...data,
+
+    [section]: {
+      ...data[section],
+      ...values
+    }
+
+  }))
+}
+
+
+Example:
+
+updateNested(
+  'user',
+  {
+    name: 'John'
+  }
+)
+
+
+STATE PATTERNS SUMMARY
+--------------------------------------------------------------------------------
+
++-------------------+---------------------------+------------+
+| PATTERN           | USE CASE                  | COMPLEXITY |
++-------------------+---------------------------+------------+
+| Counter           | Counting/pagination       | Low        |
+| Toggle            | Modals/menus              | Low        |
+| Form Input        | Text input/search         | Low        |
+| Object State      | User/settings/forms       | Medium     |
+| Array State       | Lists/todos/cart          | Medium     |
+| Status State      | Async workflows           | Medium     |
+| Nested State      | Hierarchical structures   | High       |
++-------------------+---------------------------+------------+
+
+
+BEST PRACTICES SUMMARY
+--------------------------------------------------------------------------------
+
+• Keep State Minimal
+  - Store only information that React needs to remember
+
+• Use Descriptive Names
+  - Make state purpose obvious
+
+• Initialize Properly
+  - Provide meaningful initial values
+
+• Update Immutably
+  - Never directly mutate objects/arrays in state
+
+• Use Functional Updates
+  - Especially when the next state depends on previous state
+
+• Group Related State When Helpful
+  - Don't group everything automatically
+
+• Avoid Deeply Nested State Where Practical
+  - Simplifies immutable updates
+
+• Avoid Unnecessary Prop Drilling
+  - Context may help when appropriate
+
+• Validate Input
+  - Validate appropriate values before processing/submission
+
+• Handle Errors
+  - Provide useful failure states
+
+• Test Behavior
+  - Verify UI changes based on state
+
+• Document Complex State
+  - Explain non-obvious state structures
+
+
+================================================================================
+PART 4: REAL-WORLD STATE SCENARIOS
+================================================================================
+
+SCENARIO 1: USER AUTHENTICATION
+================================================================================
+
+import { useState } from 'react'
+
+
+export default function AuthExample() {
+
+  const [auth, setAuth] = useState({
+
+    isLoggedIn: false,
+
+    user: null,
+
+    token: null,
+
+    loading: false,
+
+    error: null
+
+  })
+
+
+  const login =
+    async (email, password) => {
+
+      setAuth(auth => ({
+        ...auth,
+        loading: true,
+        error: null
+      }))
+
+
+      try {
+
+        const response =
+          await fetch('/api/login', {
+
+            method: 'POST',
+
+            headers: {
+              'Content-Type':
+                'application/json'
+            },
+
+            body:
+              JSON.stringify({
+                email,
+                password
+              })
+
+          })
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            'Login failed'
+          )
+        }
+
+
+        const data =
+          await response.json()
+
+
+        setAuth({
+
+          isLoggedIn: true,
+
+          user: data.user,
+
+          token: data.token,
+
+          loading: false,
+
+          error: null
+
+        })
+
+      } catch (error) {
+
+        setAuth(auth => ({
+
+          ...auth,
+
+          loading: false,
+
+          error: error.message
+
+        }))
+
+      }
+    }
+
+
+  const logout = () => {
+
+    setAuth({
+
+      isLoggedIn: false,
+
+      user: null,
+
+      token: null,
+
+      loading: false,
+
+      error: null
+
+    })
+  }
+
+
+  return (
+    <div>
+
+      {auth.loading && (
+        <p>Loading...</p>
+      )}
+
+
+      {auth.error && (
+        <p>
+          Error: {auth.error}
+        </p>
+      )}
+
+
+      {auth.isLoggedIn ? (
+
+        <>
+
+          <p>
+            Welcome, {auth.user?.name}!
+          </p>
+
+          <button onClick={logout}>
+            Logout
+          </button>
+
+        </>
+
+      ) : (
+
+        <button
+          onClick={() =>
+            login(
+              'user@example.com',
+              'password'
+            )
+          }
+        >
+          Login
+        </button>
+
+      )}
+
+    </div>
+  )
+}
+
+
+AUTHENTICATION STATE
+--------------------------------------------------------------------------------
+
++------------------+---------------------------------------------+
+| PROPERTY         | PURPOSE                                     |
++------------------+---------------------------------------------+
+| isLoggedIn       | Tracks authentication state                 |
+| user             | Stores authenticated user data              |
+| token            | Stores token in this simplified example     |
+| loading          | Tracks login request                        |
+| error            | Stores authentication error                 |
++------------------+---------------------------------------------+
+
+
+AUTHENTICATION FLOW
+--------------------------------------------------------------------------------
+
+Login
+  ↓
+set loading = true
+  ↓
+API Request
+  ↓
++------------------------+
+|                        |
+Success                Failure
+|                        |
+↓                        ↓
+Store User             Store Error
+Store Token            loading = false
+isLoggedIn = true
+|
+↓
+Render Logged-In UI
+
+
+NOTE:
+--------------------------------------------------------------------------------
+
+The token handling shown here is a simplified state example.
+
+Production authentication requires additional security considerations
+and should not be designed solely around this teaching example.
+
+
+================================================================================
+SCENARIO 2: SHOPPING CART
+================================================================================
+
+import { useState } from 'react'
+
+
+export default function ShoppingCart() {
+
+  const [cart, setCart] = useState({
+
+    items: [],
+
+    total: 0,
+
+    itemCount: 0
+
+  })
+
+
+  // Add item
+
+  const addItem = (product) => {
+
+    setCart(cart => {
+
+      const existingItem =
+        cart.items.find(
+          item =>
+            item.id === product.id
+        )
+
+
+      if (existingItem) {
+
+        return {
+
+          ...cart,
+
+          items:
+            cart.items.map(item =>
+
+              item.id === product.id
+                ? {
+                    ...item,
+                    quantity:
+                      item.quantity + 1
+                  }
+                : item
+
+            ),
+
+          total:
+            cart.total +
+            product.price,
+
+          itemCount:
+            cart.itemCount + 1
+
+        }
+      }
+
+
+      return {
+
+        ...cart,
+
+        items: [
+          ...cart.items,
+
+          {
+            ...product,
+            quantity: 1
+          }
+        ],
+
+        total:
+          cart.total +
+          product.price,
+
+        itemCount:
+          cart.itemCount + 1
+
+      }
+    })
+  }
+
+
+  // Remove an entire product entry
+
+  const removeItem = (productId) => {
+
+    setCart(cart => {
+
+      const item =
+        cart.items.find(
+          item =>
+            item.id === productId
+        )
+
+
+      if (!item) {
+        return cart
+      }
+
+
+      return {
+
+        ...cart,
+
+        items:
+          cart.items.filter(
+            item =>
+              item.id !== productId
+          ),
+
+        total:
+          cart.total -
+          item.price * item.quantity,
+
+        itemCount:
+          cart.itemCount -
+          item.quantity
+
+      }
+    })
+  }
+
+
+  // Change quantity
+
+  const updateQuantity =
+    (productId, newQuantity) => {
+
+      if (newQuantity <= 0) {
+
+        removeItem(productId)
+
+        return
+      }
+
+
+      setCart(cart => {
+
+        const item =
+          cart.items.find(
+            item =>
+              item.id === productId
+          )
+
+
+        if (!item) {
+          return cart
+        }
+
+
+        const quantityDifference =
+          newQuantity -
+          item.quantity
+
+
+        return {
+
+          ...cart,
+
+          items:
+            cart.items.map(item =>
+
+              item.id === productId
+                ? {
+                    ...item,
+                    quantity:
+                      newQuantity
+                  }
+                : item
+
+            ),
+
+          total:
+            cart.total +
+            item.price *
+            quantityDifference,
+
+          itemCount:
+            cart.itemCount +
+            quantityDifference
+
+        }
+      })
+    }
+
+
+  // Clear cart
+
+  const clearCart = () => {
+
+    setCart({
+      items: [],
+      total: 0,
+      itemCount: 0
+    })
+  }
+
+
+  return (
+    <div>
+
+      <h2>
+        Shopping Cart
+      </h2>
+
+
+      <p>
+        Items: {cart.itemCount}
+      </p>
+
+
+      <p>
+        Total:
+        ${cart.total.toFixed(2)}
+      </p>
+
+
+      {cart.items.length === 0 ? (
+
+        <p>
+          Cart is empty
+        </p>
+
+      ) : (
+
+        <ul>
+
+          {cart.items.map(item => (
+
+            <li key={item.id}>
+
+              {item.name}
+              {' - '}
+              ${item.price}
+              {' x '}
+              {item.quantity}
+
+
+              <button
+                onClick={() =>
+                  updateQuantity(
+                    item.id,
+                    item.quantity + 1
+                  )
+                }
+              >
+                +
+              </button>
+
+
+              <button
+                onClick={() =>
+                  updateQuantity(
+                    item.id,
+                    item.quantity - 1
+                  )
+                }
+              >
+                -
+              </button>
+
+
+              <button
+                onClick={() =>
+                  removeItem(item.id)
+                }
+              >
+                Remove
+              </button>
+
+            </li>
+
+          ))}
+
+        </ul>
+
+      )}
+
+
+      <button onClick={clearCart}>
+        Clear Cart
+      </button>
+
+    </div>
+  )
+}
+
+
+SHOPPING CART OPERATIONS
+--------------------------------------------------------------------------------
+
++-------------------+-----------------------------+----------------------------+
+| OPERATION         | STATE CHANGE                | RESULT                     |
++-------------------+-----------------------------+----------------------------+
+| Add New Item      | Append product              | New cart line              |
+|                   | total + price               | Total increases            |
+|                   | itemCount + 1               | Count increases            |
+| Add Existing      | quantity + 1                | Quantity increases         |
+|                   | total + price               | Total increases            |
+|                   | itemCount + 1               | Count increases            |
+| Remove Item       | filter() item               | Product removed            |
+|                   | subtract price × quantity   | Total decreases            |
+|                   | subtract quantity           | Count decreases            |
+| Update Quantity   | map() matching item         | Quantity changes           |
+|                   | adjust total                | Total recalculated         |
+|                   | adjust itemCount            | Count adjusted             |
+| Clear Cart        | items = []                  | Products removed           |
+|                   | total = 0                   | Total reset                |
+|                   | itemCount = 0               | Count reset                |
++-------------------+-----------------------------+----------------------------+
+
+
+IMPORTANT CART DESIGN NOTE
+--------------------------------------------------------------------------------
+
+The example stores:
+
+• items
+• total
+• itemCount
+
+inside state.
+
+total and itemCount are derived from items and therefore could instead be
+calculated from cart.items.
+
+For a teaching example, keeping all three demonstrates synchronized updates.
+
+For production code, deriving totals from a single source of truth often
+reduces synchronization bugs.
+
+
+================================================================================
+PART 5: COMMON STATE MISTAKES AND HOW TO FIX THEM
+================================================================================
+
+MISTAKE 1: MUTATING STATE DIRECTLY
+================================================================================
+
+WRONG:
+--------------------------------------------------------------------------------
+
+const [user, setUser] =
+  useState({
+    name: 'John'
+  })
+
+
+user.name = newName
+
+
+CORRECT:
+--------------------------------------------------------------------------------
+
+setUser(user => ({
+
+  ...user,
+
+  name: newName
+
+}))
+
+
+WHY?
+--------------------------------------------------------------------------------
+
+Direct mutation modifies the existing object.
+
+Create a replacement object and pass it to the state setter.
+
+
+================================================================================
+MISTAKE 2: NOT USING THE STATE SETTER
+================================================================================
+
+WRONG IDEA:
+--------------------------------------------------------------------------------
+
+count = count + 1
+
+
+CORRECT:
+--------------------------------------------------------------------------------
+
+setCount(count => count + 1)
+
+
+WHY?
+--------------------------------------------------------------------------------
+
+State should be changed through its setter.
+
+
+================================================================================
+MISTAKE 3: EXPECTING CURRENT STATE VARIABLE TO CHANGE IMMEDIATELY
+================================================================================
+
+MISLEADING EXPECTATION:
+--------------------------------------------------------------------------------
+
+const increment = () => {
+
+  setCount(count + 1)
+
+  console.log(count)
+
+  // Still sees count from this render
+}
+
+
+BETTER MENTAL MODEL:
+--------------------------------------------------------------------------------
+
+Each render receives a snapshot of state.
+
+Calling setCount():
+
+• Requests/queues the next state
+
+• Does not rewrite count inside the running handler
+
+
+IF YOU NEED THE CALCULATED NEXT VALUE:
+--------------------------------------------------------------------------------
+
+const increment = () => {
+
+  const newCount =
+    count + 1
+
+  setCount(newCount)
+
+  console.log(newCount)
+}
+
+
+IF NEXT STATE DEPENDS ON PREVIOUS STATE:
+--------------------------------------------------------------------------------
+
+setCount(previous =>
+  previous + 1
+)
+
+
+================================================================================
+MISTAKE 4: MUTATING ARRAYS
+================================================================================
+
+WRONG:
+--------------------------------------------------------------------------------
+
+items.push(item)
+
+setItems(items)
+
+
+CORRECT:
+--------------------------------------------------------------------------------
+
+setItems(items => [
+  ...items,
+  item
+])
+
+
+WHY?
+--------------------------------------------------------------------------------
+
+push() changes the existing array.
+
+Spread creates a new array.
+
+
+================================================================================
+MISTAKE 5: MUTATING NESTED OBJECTS
+================================================================================
+
+WRONG:
+--------------------------------------------------------------------------------
+
+state.user.address.city =
+  'Mumbai'
+
+
+CORRECT:
+--------------------------------------------------------------------------------
+
+setState(state => ({
+
+  ...state,
+
+  user: {
+
+    ...state.user,
+
+    address: {
+
+      ...state.user.address,
+
+      city: 'Mumbai'
+
+    }
+
+  }
+
+}))
+
+
+================================================================================
+COMMON MISTAKES TABLE
+================================================================================
+
++-----------------------+--------------------------+-----------------------------+
+| MISTAKE               | WRONG                    | CORRECT                     |
++-----------------------+--------------------------+-----------------------------+
+| Object mutation       | state.prop = value       | {...state, prop: value}    |
+| No setter             | regular assignment       | setter(nextState)          |
+| Array mutation        | array.push(item)         | [...array, item]           |
+| Same mutated ref      | setArray(array)          | create new array           |
+| Nested mutation       | state.a.b = value        | copy each modified level   |
+| Sort mutation         | array.sort()             | [...array].sort()          |
+| Previous-state update | setCount(count + 1)      | setCount(c => c + 1)       |
+| List identity         | key={index} when unstable| stable unique ID           |
+| Conditional mutation  | if(x) state.prop = y     | if(x) setter(...)          |
++-----------------------+--------------------------+-----------------------------+
+
+
+IMPORTANT CORRECTION:
+--------------------------------------------------------------------------------
+
+Do NOT write:
+
+await setState(value)
+
+useState setters do NOT return a Promise that you await to obtain the
+updated state.
+
+Instead, design code around:
+
+• State snapshots
+• Subsequent renders
+• Effects when synchronization with an external system is truly needed
+
+
+================================================================================
+PART 6: DEBUGGING STATE ISSUES
+================================================================================
+
+TECHNIQUE 1: CONSOLE LOGGING
+--------------------------------------------------------------------------------
+
+const [count, setCount] = useState(0)
+
+
+console.log(
+  'Render count:',
+  count
+)
+
+
+const handleClick = () => {
+
+  console.log(
+    'Handler snapshot:',
+    count
+  )
+
+
+  setCount(count =>
+    count + 1
+  )
+}
+
+
+This helps distinguish:
+
+Current Render State
+
+from:
+
+Next Requested State
+
+
+================================================================================
+TECHNIQUE 2: REACT DEVTOOLS
+================================================================================
+
+Use React DevTools to inspect:
+
+• Component tree
+
+• Props
+
+• State
+
+• Component renders where supported
+
+
+================================================================================
+TECHNIQUE 3: DEBUGGER
+================================================================================
+
+const updateUser = (newUser) => {
+
+  debugger
+
+  setUser(newUser)
+}
+
+
+The debugger can pause execution and allow inspection of:
+
+• Current variables
+• Event data
+• State snapshot
+• Call stack
+
+
+================================================================================
+TECHNIQUE 4: STATE LOGGER COMPONENT
+================================================================================
+
+function StateLogger({
+  state,
+  label
+}) {
+
+  console.log(
+    `${label}:`,
+    state
+  )
+
+  return null
+}
+
+
+Usage:
+
+<StateLogger
+  state={count}
+  label="Count"
+/>
+
+
+DEBUGGING WORKFLOW
+--------------------------------------------------------------------------------
+
++------+---------------------------+-----------------------------------------+
+| STEP | ACTION                    | CHECK                                   |
++------+---------------------------+-----------------------------------------+
+| 1    | Log render values         | Current state snapshot                  |
+| 2    | React DevTools            | Props/state                             |
+| 3    | Search mutations          | Direct assignments                      |
+| 4    | Verify setters            | Setter actually invoked                 |
+| 5    | Check references          | New object/array created                |
+| 6    | Isolate problem           | Build smallest failing example          |
+| 7    | Check state timing        | Snapshot vs next render                 |
+| 8    | Review errors             | Runtime/warning information             |
+| 9    | Inspect console           | Errors and debug output                 |
+| 10   | Use debugger              | Pause and inspect execution             |
++------+---------------------------+-----------------------------------------+
+
+
+================================================================================
+PART 7: STATE PERFORMANCE OPTIMIZATION
+================================================================================
+
+STRATEGY 1: KEEP STATE MINIMAL
+================================================================================
+
+Avoid storing everything simply because it exists.
+
+Store information that:
+
+• Must survive renders
+
+and
+
+• Can change independently
+
+and/or
+
+• Affects rendered behavior
+
+
+Example:
+
+const [user, setUser] = useState({
+  name: '',
+  email: ''
+})
+
+
+const [isOpen, setIsOpen] =
+  useState(false)
+
+
+const [isLoading, setIsLoading] =
+  useState(false)
+
+
+================================================================================
+STRATEGY 2: GROUP OR SPLIT STATE BASED ON HOW IT CHANGES
+================================================================================
+
+There is no universal rule that:
+
+"Grouping state is always better"
+
+or:
+
+"Splitting state is always better."
+
+
+Prefer grouping when fields:
+
+• Belong together
+• Commonly update together
+
+
+Example:
+
+const [form, setForm] = useState({
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: ''
+})
+
+
+Separate unrelated UI status:
+
+const [isSubmitting, setIsSubmitting] =
+  useState(false)
+
+
+const [error, setError] =
+  useState(null)
+
+
+================================================================================
+STRATEGY 3: React.memo
+================================================================================
+
+import React from 'react'
+
+
+const UserCard =
+  React.memo(function UserCard({
+    user
+  }) {
+
+    console.log(
+      'UserCard rendered'
+    )
+
+    return (
+      <div>
+        {user.name}
+      </div>
+    )
+  })
+
+
+React.memo can allow React to skip rendering a component when the relevant
+props compare as unchanged.
+
+Use it when there is a measurable benefit.
+
+
+================================================================================
+STRATEGY 4: useCallback
+================================================================================
+
+import {
+  useCallback,
+  useState
+} from 'react'
+
+
+function App() {
+
+  const [count, setCount] =
+    useState(0)
+
+
+  const handleClick =
+    useCallback(() => {
+
+      setCount(count =>
+        count + 1
+      )
+
+    }, [])
+
+
+  return (
+    <button onClick={handleClick}>
+
+      Count: {count}
+
+    </button>
+  )
+}
+
+
+useCallback can preserve a function reference between renders.
+
+It is most useful when referential stability matters, for example when
+passing callbacks to appropriately memoized children.
+
+Do NOT automatically wrap every function in useCallback.
+
+
+================================================================================
+PERFORMANCE STRATEGIES TABLE
+================================================================================
+
++----------------------+-------------------------+----------------------------------+
+| STRATEGY             | BENEFIT                 | USE WHEN                         |
++----------------------+-------------------------+----------------------------------+
+| Minimal State        | Less synchronization    | Generally                        |
+| Good State Placement | Limits render scope     | State has local ownership        |
+| React.memo           | Can skip child render   | Measured benefit                 |
+| useCallback          | Stable function ref     | Referential stability matters    |
+| useMemo              | Cache calculation       | Expensive calculation            |
+| Lazy Loading         | Defer code/resources    | Large application sections       |
+| Pagination           | Limit displayed data    | Large datasets                   |
+| Virtualizationnder visible rows     | Very large lists                 |
+| Debouncing           | Reduces rapid actions   | Search/input scenarios           |
+| Batching             | Coordinates updates     | React update processing          |
++----------------------+-------------------------+----------------------------------+
+
+
+PERFORMANCE RULE
+--------------------------------------------------------------------------------
+
+MEASURE FIRST.
+
+OPTIMIZE SECOND.
+
+Do not add memoization everywhere by default.
+
+
+================================================================================
+PART 8: STATE TESTING
+================================================================================
+
+TEST 1: BASIC STATE UPDATE
+================================================================================
+
+import {
+  render,
+  screen
+} from '@testing-library/react'
+
+import userEvent
+  from '@testing-library/user-event'
+
+import Counter
+  from './Counter'
+
+
+test(
+  'increments count when button clicked',
+
+  async () => {
+
+    const user =
+      userEvent.setup()
+
+
+    render(
+      <Counter />
+    )
+
+
+    expect(
+      screen.getByText(
+        /count: 0/i
+      )
+    ).toBeInTheDocument()
+
+
+    await user.click(
+      screen.getByRole(
+        'button',
+        {
+          name: /increment/i
+        }
+      )
+    )
+
+
+    expect(
+      screen.getByText(
+        /count: 1/i
+      )
+    ).toBeInTheDocument()
+  }
+)
+
+
+================================================================================
+TEST 2: FORM STATE
+================================================================================
+
+import {
+  render,
+  screen
+} from '@testing-library/react'
+
+import userEvent
+  from '@testing-library/user-event'
+
+import LoginForm
+  from './LoginForm'
+
+
+test(
+  'updates email input',
+
+  async () => {
+
+    const user =
+      userEvent.setup()
+
+
+    render(
+      <LoginForm />
+    )
+
+
+    const emailInput =
+      screen.getByRole(
+        'textbox',
+        {
+          name: /email/i
+        }
+      )
+
+
+    await user.type(
+      emailInput,
+      'test@example.com'
+    )
+
+
+    expect(
+      emailInput
+    ).toHaveValue(
+      'test@example.com'
+    )
+  }
+)
+
+
+================================================================================
+TEST 3: CONDITIONAL RENDERING
+================================================================================
+
+test(
+  'shows modal when opened',
+
+  async () => {
+
+    const user =
+      userEvent.setup()
+
+
+    render(
+      <Modal />
+    )
+
+
+    await user.click(
+      screen.getByRole(
+        'button',
+        {
+          name: /open/i
+        }
+      )
+    )
+
+
+    expect(
+      screen.getByText(
+        /modal content/i
+      )
+    ).toBeInTheDocument()
+  }
+)
+
+
+================================================================================
+TEST 4: SHOPPING CART
+================================================================================
+
+test(
+  'updates cart when item added',
+
+  async () => {
+
+    const user =
+      userEvent.setup()
+
+
+    render(
+      <ShoppingCart />
+    )
+
+
+    await user.click(
+      screen.getByRole(
+        'button',
+        {
+          name: /add/i
+        }
+      )
+    )
+
+
+    expect(
+      screen.getByText(
+        /items: 1/i
+      )
+    ).toBeInTheDocument()
+
+
+    expect(
+      screen.getByText(
+        /total: \$19\.99/i
+      )
+    ).toBeInTheDocument()
+  }
+)
+
+
+TESTING BEST PRACTICES
+--------------------------------------------------------------------------------
+
++--------------------------+-----------------------------------------------+
+| PRACTICE                 | PURPOSE                                       |
++--------------------------+-----------------------------------------------+
+| Test interactions        | Verify behavior from user perspective         |
+| Test visible results     | Confirm state affects UI correctly            |
+| Test conditional UI      | Verify show/hide states                       |
+| Test errors              | Verify failure behavior                       |
+| Test async behavior      | Verify delayed/request-driven updates         |
+| Prefer semantic queries  | Reflect accessible usage                      |
+| Test keyboard behavior   | Verify accessibility/interactions             |
+| Mock external APIs       | Isolate deterministic behavior                |
+| Test edge cases          | Verify empty/error/boundary states            |
+| data-testid              | Use when better semantic selector unavailable |
++--------------------------+-----------------------------------------------+
+
+
+IMPORTANT TESTING PRINCIPLE
+--------------------------------------------------------------------------------
+
+Prefer testing:
+
+USER ACTION
+    ↓
+VISIBLE RESULT
+
+
+Instead of testing:
+
+"Was setState called?"
+
+
+The user cares about application behavior, not the internal Hook call.
+
+
+================================================================================
+PART 9: STATE ANTI-PATTERNS TO AVOID
+================================================================================
+
+ANTI-PATTERN 1: DERIVED DATA IN STATE
+================================================================================
+
+WRONG:
+--------------------------------------------------------------------------------
+
+const [firstName, setFirstName] =
+  useState('John')
+
+const [lastName, setLastName] =
+  useState('Doe')
+
+const [fullName, setFullName] =
+  useState('John Doe')
+
+
+Problem:
+
+fullName duplicates information that can already be calculated.
+
+
+BETTER:
+--------------------------------------------------------------------------------
+
+const fullName =
+  `${firstName} ${lastName}`
+
+
+================================================================================
+ANTI-PATTERN 2: MIRRORING PROPS IN STATE WITHOUT A REASON
+================================================================================
+
+POTENTIALLY WRONG:
+--------------------------------------------------------------------------------
+
+function UserProfile({
+  user
+}) {
+
+  const [userData, setUserData] =
+    useState(user)
+
+}
+
+
+Problem:
+
+userData does not automatically synchronize whenever the user prop changes.
+
+
+BETTER WHEN LOCAL EDITING IS NOT REQUIRED:
+--------------------------------------------------------------------------------
+
+function UserProfile({
+  user
+}) {
+
+  return (
+    <div>
+      {user.name}
+    </div>
+  )
+}
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Copying props into state is not universally wrong.
+
+It can be intentional when you need an independent local draft, for example
+an edit form.
+
+The important question is:
+
+"Should this local state intentionally diverge from the prop?"
+
+
+================================================================================
+ANTI-PATTERN 3: COMPUTED VALUES IN STATE
+================================================================================
+
+POTENTIALLY WRONG:
+--------------------------------------------------------------------------------
+
+const [items, setItems] =
+  useState([])
+
+
+const [total, setTotal] =
+  useState(0)
+
+
+If total always equals the sum of item prices, storing both creates
+duplicate sources of truth.
+
+
+BETTER:
+--------------------------------------------------------------------------------
+
+const total =
+  items.reduce(
+    (sum, item) =>
+      sum + item.price,
+    0
+  )
+
+
+================================================================================
+ANTI-PATTERN 4: TOO MANY UNRELATED OR POORLY STRUCTURED STATE VALUES
+================================================================================
+
+This is NOT automatically wrong:
+
+const [name, setName] = useState('')
+const [email, setEmail] = useState('')
+const [phone, setPhone] = useState('')
+
+
+Separate state can be appropriate.
+
+
+However, a related form can also be grouped:
+
+const [formData, setFormData] =
+  useState({
+
+    name: '',
+
+    email: '',
+
+    phone: '',
+
+    address: '',
+
+    city: '',
+
+    state: '',
+
+    zip: ''
+
+  })
+
+
+RULE:
+--------------------------------------------------------------------------------
+
+Choose a state structure based on how the values logically belong together
+and how they are updated.
+
+
+================================================================================
+ANTI-PATTERN 5: STORING MORE API DATA THAN NEEDED
+================================================================================
+
+RAW:
+--------------------------------------------------------------------------------
+
+const response =
+  await fetch(...)
+
+const body =
+  await response.json()
+
+
+If the UI needs only:
+
+• id
+• name
+
+you can map the API representation into the application's data model.
+
+
+Example:
+
+const user = {
+
+  id:
+    body.data.id,
+
+  name:
+    body.data.name
+
+}
+
+
+This reduces coupling between UI code and external response structure.
+
+
+================================================================================
+ANTI-PATTERNS TABLE
+================================================================================
+
++--------------------------+-------------------------+---------------------------+
+| ANTI-PATTERN             | PROBLEM                 | BETTER APPROACH           |
++--------------------------+-------------------------+---------------------------+
+| Derived data in state    | Can become inconsistent | Calculate from source     |
+| Unneeded prop mirror     | Can become stale        | Use prop directly         |
+| Duplicate computed state | Multiple sources truth  | Derive value              |
+| Poor state structure     | Harder updates          | Group/split thoughtfully  |
+| Raw API coupling         | UI tied to API format   | Map required fields       |
+| State mirrors props      | Synchronization issue   | Keep only when intentional|
+| Functions in state       | Usually unnecessary     | Define function normally  |
+| DOM refs in state        | Causes unnecessary work | useRef                    |
+| Globalizing local state  | Excessive shared state  | Keep state close to owner |
++--------------------------+-------------------------+---------------------------+
+
+
+================================================================================
+PART 10: STATE MANAGEMENT CHECKLIST
+================================================================================
+
+PRE-IMPLEMENTATION CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Identify information that changes
+
+[ ] Decide what must persist across renders
+
+[ ] Determine initial values
+
+[ ] Decide state ownership
+
+[ ] Plan state shape
+
+[ ] Identify update triggers
+
+[ ] Identify derived values that should NOT be state
+
+[ ] Plan immutable update operations
+
+[ ] Plan async loading/error states if required
+
+[ ] Plan testing strategy
+
+
+IMPLEMENTATION CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Import useState
+
+[ ] Create state with meaningful initial values
+
+[ ] Use state in rendering
+
+[ ] Add appropriate event handlers
+
+[ ] Use state setters
+
+[ ] Avoid direct mutation
+
+[ ] Use functional updates where needed
+
+[ ] Handle async states
+
+[ ] Render error/loading/empty states
+
+[ ] Use stable IDs for lists
+
+[ ] Clean up effects/subscriptions where required
+
+
+POST-IMPLEMENTATION CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Verify visible UI changes
+
+[ ] Verify error behavior
+
+[ ] Verify loading behavior
+
+[ ] Verify empty state
+
+[ ] Verify edge cases
+
+[ ] Check console
+
+[ ] Check React DevTools
+
+[ ] Test keyboard accessibility
+
+[ ] Test responsive UI where applicable
+
+[ ] Profile before optimizing
+
+[ ] Review state structure
+
+[ ] Remove unnecessary/derived state
+
+
+COMPREHENSIVE CHECKLIST TABLE
+--------------------------------------------------------------------------------
+
++----------------+--------------------------------------+--------+
+| PHASE          | ITEM                                 | STATUS |
++----------------+--------------------------------------+--------+
+| Planning       | Identify changing data               | [ ]    |
+| Planning       | Determine initial values             | [ ]    |
+| Planning       | Decide state ownership               | [ ]    |
+| Planning       | Plan state structure                 | [ ]    |
+| Planning       | Identify derived values              | [ ]    |
+| Implementation | Import Hook                          | [ ]    |
+| Implementation | Create state                         | [ ]    |
+| Implementation | Render state                        | [ ]    |
+| Implementation | Add handlers                        | [ ]    |
+| Implementation | Use immutable updates               | [ ]    |
+| Testing        | Test user interactions               | [ ]    |
+| Testing        | Test updated UI                      | [ ]    |
+| Testing        | Test loading/error states            | [ ]    |
+| Testing        | Test edge cases                      | [ ]    |
+| Optimization   | Keep state minimal                   | [ ]    |
+| Optimization   | Review render scope                  | [ ]    |
+| Optimization   | Profile performance                  | [ ]    |
+| Maintenance    | Document complex state               | [ ]    |
+| Maintenance    | Review for anti-patterns             | [ ]    |
++----------------+--------------------------------------+--------+
+
+
+================================================================================
+PART 11: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE REVIEWED
+--------------------------------------------------------------------------------
+
+By completing this review lesson, you've:
+
+✓ Reviewed the complete state-management workflow
+
+✓ Reviewed simple state patterns
+
+✓ Reviewed object and array state
+
+✓ Reviewed nested state
+
+✓ Applied state to authentication
+
+✓ Applied state to shopping carts
+
+✓ Identified common mistakes
+
+✓ Learned debugging techniques
+
+✓ Reviewed performance optimization
+
+✓ Learned state-testing principles
+
+✓ Identified state anti-patterns
+
+✓ Built a state-management checklist
+
+✓ Prepared for advanced state-management patterns
+
+
+================================================================================
+CRITICAL STATE MANAGEMENT POINTS
+================================================================================
+
+• useState manages local component state
+
+• State should be treated as read-only
+
+• Use setters to request state updates
+
+• Create new objects/arrays instead of mutating existing ones
+
+• Use functional updates when next state depends on previous state
+
+• Keep state minimal
+
+• Avoid duplicating derived information
+
+• Keep state close to the component that owns it
+
+• Group or split state based on relationships and update behavior
+
+• Handle loading, success, empty, and error states
+
+• Test application behavior from the user's perspective
+
+• Profile before adding performance optimizations
+
+• Use Context when appropriate, not automatically
+
+• Move to useReducer when transitions become complex
+
+
+================================================================================
+STATE MANAGEMENT WORKFLOW SUMMARY
+================================================================================
+
+1. DEFINE
+--------------------------------------------------------------------------------
+
+Identify information React must remember.
+
+
+        ↓
+
+
+2. CREATE
+--------------------------------------------------------------------------------
+
+const [state, setState] =
+  useState(initialValue)
+
+
+        ↓
+
+
+3. RENDER
+--------------------------------------------------------------------------------
+
+Use state in JSX.
+
+
+        ↓
+
+
+4. HANDLE
+--------------------------------------------------------------------------------
+
+Respond to user/application events.
+
+
+        ↓
+
+
+5. UPDATE
+--------------------------------------------------------------------------------
+
+Create next state and call setter.
+
+
+        ↓
+
+
+6. PROCESS
+--------------------------------------------------------------------------------
+
+React processes the update.
+
+
+        ↓
+
+
+7. RE-RENDER
+--------------------------------------------------------------------------------
+
+Component executes with current state.
+
+
+        ↓
+
+
+8. RECONCILE
+--------------------------------------------------------------------------------
+
+React determines necessary UI changes.
+
+
+        ↓
+
+
+9. COMMIT
+--------------------------------------------------------------------------------
+
+Required DOM updates applied.
+
+
+        ↓
+
+
+10. DISPLAY
+--------------------------------------------------------------------------------
+
+User sees updated UI.
+
+
+        ↓
+
+
+11. REPEAT
+--------------------------------------------------------------------------------
+
+Ready for next interaction.
+
+
+================================================================================
+KEY CONCEPTS RECAP
+================================================================================
+
++------------------------+-----------------------------------------------+
+| CONCEPT                | REMEMBER                                      |
++------------------------+-----------------------------------------------+
+| State                  | Data React remembers for component            |
+| useState               | Local state Hook                              |
+| Setter                 | Requests next state                           |
+| State Snapshot         | Each render sees its own current values       |
+| Immutability           | Don't modify existing state                   |
+| Object Reference       | Identity matters for objects/arrays           |
+| Functional Update      | setter(previous => next)                      |
+| Derived State          | Calculate when possible                       |
+| Re-render              | Component executes again                      |
+| Reconciliation         | React determines UI differences               |
+| Commit                 | Necessary DOM changes                         |
+| Batching               | React can process updates together            |
+| State Ownership        | Keep state near its owner                     |
+| State Isolation        | Component instances have independent state    |
+| Props                  | Parent-provided component inputs              |
+| Context                | Share appropriate data deeper in tree         |
+| useReducer             | Useful for complex transitions                |
++------------------------+-----------------------------------------------+
+
+
+================================================================================
+COMMON PATTERNS TO USE
+================================================================================
+
+COUNTER:
+--------------------------------------------------------------------------------
+
+setCount(count =>
+  count + 1
+)
+
+
+TOGGLE:
+--------------------------------------------------------------------------------
+
+setIsOpen(isOpen =>
+  !isOpen
+)
+
+
+FORM:
+--------------------------------------------------------------------------------
+
+setInput(
+  e.target.value
+)
+
+
+OBJECT:
+--------------------------------------------------------------------------------
+
+setUser(user => ({
+
+  ...user,
+
+  name: value
+
+}))
+
+
+ARRAY ADD:
+--------------------------------------------------------------------------------
+
+setItems(items => [
+  ...items,
+  newItem
+])
+
+
+ARRAY REMOVE:
+--------------------------------------------------------------------------------
+
+setItems(items =>
+  items.filter(
+    item =>
+      item.id !== id
+  )
+)
+
+
+ARRAY UPDATE:
+--------------------------------------------------------------------------------
+
+setItems(items =>
+  items.map(item =>
+
+    item.id === id
+      ? {
+          ...item,
+          property: value
+        }
+      : item
+
+  )
+)
+
+
+NESTED STATE:
+--------------------------------------------------------------------------------
+
+setState(state => ({
+
+  ...state,
+
+  nested: {
+
+    ...state.nested,
+
+    property: value
+
+  }
+
+}))
+
+
+STATUS:
+--------------------------------------------------------------------------------
+
+'idle'
+   ↓
+'loading'
+   ↓
+'success'
+
+or:
+
+'error'
+
+
+================================================================================
+ANTI-PATTERNS TO AVOID
+================================================================================
+
+AVOID:
+
+• Direct state mutation
+
+• Mutating arrays with push(), splice(), sort(), reverse()
+
+• Duplicating easily derived values in state
+
+• Mirroring props in state without a clear requirement
+
+• Deeply nesting state without a reason
+
+• Using index as a key when list identity can change
+
+• Expecting the state variable to change inside the current handler
+  immediately after calling its setter
+
+• await setState(...)
+
+• Globalizing state that belongs locally
+
+• Memoizing everything prematurely
+
+• Storing DOM element references in state when useRef is appropriate
+
+
+================================================================================
+QUICK REVISION - STATE DECISION GUIDE
+================================================================================
+
+QUESTION 1:
+
+Does this value need to survive a render?
+
+NO
+ ↓
+Regular variable may be enough
+
+
+YES
+ ↓
+
+QUESTION 2:
+
+Does changing it affect rendered behavior/UI?
+
+YES
+ ↓
+State may be appropriate
+
+
+QUESTION 3:
+
+Can it be calculated from existing state or props?
+
+YES
+ ↓
+Prefer deriving it
+
+
+NO
+ ↓
+
+QUESTION 4:
+
+Who needs the value?
+
+One Component
+ ↓
+Local State
+
+
+Parent + Children
+ ↓
+Lift State to Common Owner
+
+
+Many Deep Components
+ ↓
+Consider Context / Appropriate State Architecture
+
+
+Complex State Transitions
+ ↓
+Consider useReducer
+
+
+================================================================================
+QUICK REVISION - DEBUGGING FLOW
+================================================================================
+
+UI Wrong
+  ↓
+Check Current State
+  ↓
+Check Event Handler
+  ↓
+Check State Setter
+  ↓
+Look for Mutation
+  ↓
+Check State Snapshot Timing
+  ↓
+Check Props
+  ↓
+Check Component Identity/key
+  ↓
+Check Effect/Async Flow
+  ↓
+Use React DevTools
+  ↓
+Reduce to Minimal Reproduction
+
+
+================================================================================
+QUICK REVISION - PERFORMANCE FLOW
+================================================================================
+
+Performance Problem
+       ↓
+Measure/Profile
+       ↓
+Identify Actual Expensive Work
+       ↓
++-----------------------------+
+|                             |
+Render Scope           Expensive Calculation
+|                             |
+↓                             ↓
+Move State            useMemo if useful
+Closer to Owner
+|
+↓
+Expensive Child
+|
+↓
+React.memo if useful
+|
+↓
+Callback Identity Matters
+|
+↓
+useCallback if useful
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+STATE:
+
+Information React must remember across renders
+
+
+CREATE:
+
+const [state, setState] =
+  useState(initialValue)
+
+
+UPDATE:
+
+setState(nextState)
+
+
+PREVIOUS STATE:
+
+setState(previous =>
+  nextState
+)
+
+
+OBJECT:
+
+setState(state => ({
+  ...state,
+  property: value
+}))
+
+
+ARRAY ADD:
+
+setItems(items => [
+  ...items,
+  newItem
+])
+
+
+ARRAY REMOVE:
+
+setItems(items =>
+  items.filter(...)
+)
+
+
+ARRAY UPDATE:
+
+setItems(items =>
+  items.map(...)
+)
+
+
+DERIVED DATA:
+
+Existing State/Props
+       ↓
+Calculate Value
+       ↓
+Do NOT Duplicate Unless Necessary
+
+
+DEBUGGING:
+
+Event
+ ↓
+Handler
+ ↓
+Setter
+ ↓
+State
+ ↓
+Render
+ ↓
+UI
+
+
+PERFORMANCE:
+
+Measure
+ ↓
+Find Bottleneck
+ ↓
+Optimize Specific Problem
+
+
+MOST IMPORTANT RULE:
+
+STATE SHOULD HAVE A CLEAR OWNER
+AND A SINGLE SOURCE OF TRUTH.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Learn useReducer
+
+2. Learn when useReducer is preferable to multiple useState updates
+
+3. Learn lifting state up in greater depth
+
+4. Learn Context API
+
+5. Combine Context with useReducer
+
+6. Build complex forms
+
+7. Handle async server state
+
+8. Improve component architecture
+
+9. Profile React applications
+
+10. Build larger production-style React applications
+
+11. Explore dedicated state-management libraries when application
+    requirements justify them
+
+
+================================================================================
+END OF LESSON 9
+HOW STATE WORKS IN REACT - REVIEW
+================================================================================
