@@ -1,0 +1,2801 @@
+LESSON 10: STYLING OUR COMPONENTS
+OVERVIEW OF CSS FILES IN OUR PROJECT
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on understanding how to organize and manage CSS styling
+inside a React project.
+
+You will understand:
+
+• CSS file organization and structure
+
+• Global vs component-specific styling
+
+• CSS file naming conventions
+
+• Importing and applying CSS in React
+
+• CSS cascade and specificity
+
+• Responsive design with CSS
+
+• CSS best practices in React projects
+
+• Common styling strategies and patterns
+
+• Managing CSS across multiple components
+
+• Preparing for advanced styling techniques
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+Understanding CSS organization is important because:
+
+• Maintainability
+  - Organized CSS is easier to maintain and update
+
+• Scalability
+  - Good structure supports growing projects
+
+• Performance
+  - Removing unnecessary CSS can reduce application assets
+
+• Consistency
+  - Shared variables and patterns create a consistent UI
+
+• Collaboration
+  - Team members can understand where styles belong
+
+• Debugging
+  - Organized CSS is easier to inspect
+
+• Reusability
+  - Common styling patterns can be reused
+
+• Professional Appearance
+  - Consistent styling improves user experience
+
+• Best Practices
+  - Clear responsibilities reduce CSS complexity
+
+• Foundation for Advanced Techniques
+  - Prepares for CSS Modules, Sass, Tailwind CSS, CSS-in-JS, etc.
+
+
+================================================================================
+PART 2: CSS FILE ORGANIZATION IN REACT
+================================================================================
+
+PROJECT CSS STRUCTURE
+--------------------------------------------------------------------------------
+
+my-react-app/
+│
+├── src/
+│   │
+│   ├── components/
+│   │   │
+│   │   ├── Header/
+│   │   │   ├── Header.jsx
+│   │   │   └── Header.css
+│   │   │
+│   │   ├── Footer/
+│   │   │   ├── Footer.jsx
+│   │   │   └── Footer.css
+│   │   │
+│   │   ├── Button/
+│   │   │   ├── Button.jsx
+│   │   │   └── Button.css
+│   │   │
+│   │   └── Card/
+│   │       ├── Card.jsx
+│   │       └── Card.css
+│   │
+│   ├── App.jsx
+│   ├── App.css
+│   ├── main.jsx
+│   └── index.css
+│
+└── index.html
+
+
+CSS FILE ORGANIZATION
+--------------------------------------------------------------------------------
+
++-------------------------------------+----------------------------------------+
+| FILE                                | PURPOSE                                |
++-------------------------------------+----------------------------------------+
+| src/index.css                       | Global/base styles                     |
+|                                     | Reset/normalize                       |
+|                                     | Global variables                      |
+|                                     | Typography                            |
+| src/App.css                         | Application-level layout              |
+|                                     | Main containers                       |
+| src/components/Header/Header.css    | Header-specific styling               |
+| src/components/Footer/Footer.css    | Footer-specific styling               |
+| src/components/Button/Button.css    | Button component styling              |
+| src/components/Card/Card.css        | Card component styling                |
++-------------------------------------+----------------------------------------+
+
+
+CSS ORGANIZATION PRINCIPLES
+--------------------------------------------------------------------------------
+
+• Global CSS
+  - Shared/global styles belong in index.css
+
+• Component CSS
+  - Component-related styles stay near the component
+
+• Clear Naming
+  - Class names should communicate their purpose
+
+• Avoid Conflicts
+  - Use component-oriented naming conventions
+
+• Reusable Patterns
+  - Share genuinely reusable tokens/utilities
+
+• Separation of Concerns
+  - Keep component implementation and styles organized
+
+• Single Responsibility
+  - Each CSS file should have a clear purpose
+
+• Avoid Unnecessary Duplication
+  - Reuse variables and shared patterns
+
+• Maintainability
+  - Styles should be easy to locate and change
+
+• Remove Unused CSS
+  - Avoid carrying unnecessary rules
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Importing a normal .css file from a React component does NOT automatically
+scope those CSS selectors to that component.
+
+Normal CSS remains global after it is included in the application's CSS
+bundle/style graph.
+
+Example:
+
+import './Card.css'
+
+does NOT make:
+
+.card { ... }
+
+technically private to Card.jsx.
+
+Component-specific naming conventions or CSS Modules can prevent accidental
+selector collisions more reliably.
+
+
+================================================================================
+PART 3: GLOBAL CSS FILE - index.css
+================================================================================
+
+GLOBAL CSS FILE PURPOSE
+--------------------------------------------------------------------------------
+
+index.css commonly contains:
+
+• Reset / base styles
+
+• Base typography
+
+• CSS custom properties
+
+• Shared colors
+
+• Shared spacing
+
+• Common utilities
+
+• Shared animations
+
+• Global responsive rules
+
+
+================================================================================
+COMPLETE index.css EXAMPLE
+================================================================================
+
+/* ============================================
+   GLOBAL STYLES - index.css
+   ============================================ */
+
+
+/* ============================================
+   CSS CUSTOM PROPERTIES
+   ============================================ */
+
+:root {
+
+  /* Colors */
+
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --success-color: #43e97b;
+  --danger-color: #fa709a;
+  --warning-color: #fee140;
+  --info-color: #4facfe;
+
+  --light-color: #f8f9fa;
+  --dark-color: #2c3e50;
+
+  --text-color: #333;
+  --text-light: #666;
+
+  --border-color: #ddd;
+
+  --shadow-color:
+    rgba(0, 0, 0, 0.1);
+
+
+  /* Typography */
+
+  --font-family-base:
+    'Segoe UI',
+    Tahoma,
+    Geneva,
+    Verdana,
+    sans-serif;
+
+  --font-family-mono:
+    'Courier New',
+    monospace;
+
+  --font-size-base: 16px;
+  --font-size-small: 14px;
+  --font-size-large: 18px;
+  --font-size-xl: 24px;
+  --font-size-xxl: 32px;
+
+  --line-height-base: 1.6;
+
+  --font-weight-normal: 400;
+  --font-weight-bold: 600;
+  --font-weight-bolder: 700;
+
+
+  /* Spacing */
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+
+
+  /* Border Radius */
+
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+
+
+  /* Shadows */
+
+  --shadow-sm:
+    0 2px 4px
+    var(--shadow-color);
+
+  --shadow-md:
+    0 4px 8px
+    var(--shadow-color);
+
+  --shadow-lg:
+    0 8px 16px
+    var(--shadow-color);
+
+  --shadow-xl:
+    0 12px 24px
+    var(--shadow-color);
+
+
+  /* Transitions */
+
+  --transition-fast:
+    0.2s ease;
+
+  --transition-normal:
+    0.3s ease;
+
+  --transition-slow:
+    0.5s ease;
+
+}
+
+
+/* ============================================
+   RESET / BASE
+   ============================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+html {
+  font-size:
+    var(--font-size-base);
+
+  scroll-behavior: smooth;
+}
+
+
+body {
+  font-family:
+    var(--font-family-base);
+
+  font-size:
+    var(--font-size-base);
+
+  line-height:
+    var(--line-height-base);
+
+  color:
+    var(--text-color);
+
+  background-color: #fff;
+}
+
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight:
+    var(--font-weight-bold);
+
+  line-height: 1.2;
+
+  margin-bottom:
+    var(--spacing-md);
+}
+
+
+h1 {
+  font-size:
+    var(--font-size-xxl);
+}
+
+
+h2 {
+  font-size:
+    var(--font-size-xl);
+}
+
+
+h3 {
+  font-size:
+    var(--font-size-large);
+}
+
+
+h4,
+h5,
+h6 {
+  font-size:
+    var(--font-size-base);
+}
+
+
+p {
+  margin-bottom:
+    var(--spacing-md);
+}
+
+
+a {
+  color:
+    var(--primary-color);
+
+  text-decoration: none;
+
+  transition:
+    color
+    var(--transition-fast);
+}
+
+
+a:hover {
+  color:
+    var(--secondary-color);
+
+  text-decoration: underline;
+}
+
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+input,
+textarea,
+select {
+  font-family:
+    var(--font-family-base);
+
+  font-size:
+    var(--font-size-base);
+
+  padding:
+    var(--spacing-sm)
+    var(--spacing-md);
+
+  border:
+    1px solid
+    var(--border-color);
+
+  border-radius:
+    var(--border-radius-md);
+
+  transition:
+    border-color
+    var(--transition-fast);
+}
+
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+
+  border-color:
+    var(--primary-color);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(102, 126, 234, 0.1);
+}
+
+
+button {
+  font-family:
+    var(--font-family-base);
+
+  cursor: pointer;
+
+  transition:
+    all
+    var(--transition-fast);
+}
+
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  padding:
+    0
+    var(--spacing-md);
+}
+
+
+.flex {
+  display: flex;
+}
+
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+.grid {
+  display: grid;
+}
+
+
+.text-center {
+  text-align: center;
+}
+
+
+.text-right {
+  text-align: right;
+}
+
+
+.text-left {
+  text-align: left;
+}
+
+
+.mt-sm {
+  margin-top:
+    var(--spacing-sm);
+}
+
+
+.mt-md {
+  margin-top:
+    var(--spacing-md);
+}
+
+
+.mt-lg {
+  margin-top:
+    var(--spacing-lg);
+}
+
+
+.mb-sm {
+  margin-bottom:
+    var(--spacing-sm);
+}
+
+
+.mb-md {
+  margin-bottom:
+    var(--spacing-md);
+}
+
+
+.mb-lg {
+  margin-bottom:
+    var(--spacing-lg);
+}
+
+
+.p-sm {
+  padding:
+    var(--spacing-sm);
+}
+
+
+.p-md {
+  padding:
+    var(--spacing-md);
+}
+
+
+.p-lg {
+  padding:
+    var(--spacing-lg);
+}
+
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+
+}
+
+
+@keyframes slideIn {
+
+  from {
+    transform:
+      translateY(20px);
+
+    opacity: 0;
+  }
+
+  to {
+    transform:
+      translateY(0);
+
+    opacity: 1;
+  }
+
+}
+
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+}
+
+
+.animate-fade-in {
+  animation:
+    fadeIn
+    0.3s
+    ease-out;
+}
+
+
+.animate-slide-in {
+  animation:
+    slideIn
+    0.3s
+    ease-out;
+}
+
+
+.animate-pulse {
+  animation:
+    pulse
+    2s
+    ease-in-out
+    infinite;
+}
+
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+
+  html {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size:
+      var(--font-size-xl);
+  }
+
+  h2 {
+    font-size:
+      var(--font-size-large);
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  html {
+    font-size: 13px;
+  }
+
+  .container {
+    padding:
+      0
+      var(--spacing-sm);
+  }
+
+}
+
+
+GLOBAL CSS EXPLANATION
+--------------------------------------------------------------------------------
+
++-----------------------------+------------------------------------------+
+| CSS SECTION                 | PURPOSE                                  |
++-----------------------------+------------------------------------------+
+| :root                       | Defines reusable custom properties       |
+| --primary-color             | Primary brand color                      |
+| --font-family-base          | Default font family                      |
+| --spacing-md                | Shared spacing value                     |
+| *                           | Base reset                               |
+| box-sizing: border-box      | Simplifies sizing calculations           |
+| html                        | Root font and document behavior           |
+| body                        | Global typography/colors                  |
+| Heading rules               | Shared heading styles                    |
+| a / a:hover                 | Link styles                              |
+| Form rules                  | Shared controls                          |
+| :focus                      | Keyboard/focus feedback                  |
+| Utility classes             | Reusable layout/spacing helpers          |
+| @keyframes                  | Reusable animations                      |
+| @media                      | Responsive adjustments                   |
++-----------------------------+------------------------------------------+
+
+
+IMPORTANT NOTE ABOUT BREAKPOINT VARIABLES
+--------------------------------------------------------------------------------
+
+The original lesson listed CSS variables such as:
+
+--breakpoint-mobile: 480px;
+
+and then expected them to be usable in normal media queries.
+
+For traditional CSS, custom properties cannot generally be used directly
+as media-query conditions like this:
+
+@media (max-width: var(--breakpoint-mobile))
+
+Therefore, the examples use literal breakpoint values:
+
+@media (max-width: 480px)
+
+@media (max-width: 768px)
+
+
+================================================================================
+PART 4: COMPONENT-SPECIFIC CSS FILES
+================================================================================
+
+COMPONENT CSS FILE PURPOSE
+--------------------------------------------------------------------------------
+
+Component CSS files contain styles primarily intended for that component.
+
+Benefits:
+
+• Related JSX and CSS stay together
+
+• Easier maintenance
+
+• Easier navigation
+
+• Styling can be removed together with component
+
+• Makes component responsibilities clear
+
+• Supports component-oriented organization
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Normal .css files are NOT truly component-scoped.
+
+For true automatic class scoping, consider:
+
+Component.module.css
+
+with CSS Modules.
+
+
+================================================================================
+EXAMPLE 1: HEADER COMPONENT
+================================================================================
+
+File:
+
+src/components/Header/Header.jsx
+
+
+import './Header.css'
+
+
+export default function Header() {
+
+  return (
+    <header className="header">
+
+      <div className="header-container">
+
+
+        <div className="header-logo">
+
+          <h1>My App</h1>
+
+        </div>
+
+
+        <nav className="header-nav">
+
+          <ul className="nav-list">
+
+            <li>
+              <a href="#home">
+                Home
+              </a>
+            </li>
+
+            <li>
+              <a href="#about">
+                About
+              </a>
+            </li>
+
+            <li>
+              <a href="#services">
+                Services
+              </a>
+            </li>
+
+            <li>
+              <a href="#contact">
+                Contact
+              </a>
+            </li>
+
+          </ul>
+
+        </nav>
+
+
+        <div className="header-actions">
+
+          <button className="btn btn-primary">
+            Login
+          </button>
+
+          <button className="btn btn-secondary">
+            Sign Up
+          </button>
+
+        </div>
+
+      </div>
+
+    </header>
+  )
+}
+
+
+================================================================================
+Header.css
+================================================================================
+
+.header {
+  background:
+    linear-gradient(
+      135deg,
+      #667eea 0%,
+      #764ba2 100%
+    );
+
+  color: white;
+
+  padding:
+    var(--spacing-md)
+    0;
+
+  box-shadow:
+    var(--shadow-md);
+
+  position: sticky;
+
+  top: 0;
+
+  z-index: 100;
+}
+
+
+.header-container {
+  max-width: 1200px;
+
+  margin: 0 auto;
+
+  padding:
+    0
+    var(--spacing-md);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content:
+    space-between;
+
+  gap:
+    var(--spacing-lg);
+}
+
+
+.header-logo h1 {
+  font-size:
+    var(--font-size-xl);
+
+  margin: 0;
+
+  font-weight:
+    var(--font-weight-bolder);
+}
+
+
+.header-nav {
+  flex: 1;
+}
+
+
+.nav-list {
+  list-style: none;
+
+  display: flex;
+
+  gap:
+    var(--spacing-lg);
+
+  margin: 0;
+
+  padding: 0;
+}
+
+
+.nav-list a {
+  color: white;
+
+  font-weight:
+    var(--font-weight-bold);
+
+  transition:
+    opacity
+    var(--transition-fast);
+
+  position: relative;
+}
+
+
+.nav-list a:hover {
+  opacity: 0.8;
+
+  text-decoration: none;
+}
+
+
+.nav-list a::after {
+  content: '';
+
+  position: absolute;
+
+  bottom: -5px;
+
+  left: 0;
+
+  width: 0;
+
+  height: 2px;
+
+  background: white;
+
+  transition:
+    width
+    var(--transition-fast);
+}
+
+
+.nav-list a:hover::after {
+  width: 100%;
+}
+
+
+.header-actions {
+  display: flex;
+
+  gap:
+    var(--spacing-md);
+}
+
+
+.btn {
+  padding:
+    var(--spacing-sm)
+    var(--spacing-lg);
+
+  border: none;
+
+  border-radius:
+    var(--border-radius-md);
+
+  font-weight:
+    var(--font-weight-bold);
+
+  cursor: pointer;
+
+  transition:
+    all
+    var(--transition-fast);
+}
+
+
+.btn-primary {
+  background: white;
+
+  color: #667eea;
+}
+
+
+.btn-primary:hover {
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    var(--shadow-lg);
+}
+
+
+.btn-secondary {
+  background: transparent;
+
+  color: white;
+
+  border:
+    2px solid white;
+}
+
+
+.btn-secondary:hover {
+  background: white;
+
+  color: #667eea;
+}
+
+
+@media (max-width: 768px) {
+
+  .header-container {
+    flex-direction: column;
+
+    gap:
+      var(--spacing-md);
+  }
+
+
+  .nav-list {
+    flex-direction: column;
+
+    gap:
+      var(--spacing-md);
+  }
+
+
+  .header-actions {
+    width: 100%;
+  }
+
+
+  .btn {
+    flex: 1;
+  }
+
+}
+
+
+HEADER CSS SUMMARY
+--------------------------------------------------------------------------------
+
++------------------------+-----------------------------------------------+
+| SELECTOR               | PURPOSE                                       |
++------------------------+-----------------------------------------------+
+| .header                | Main Header component                         |
+| .header-container      | Header flex layout                            |
+| .header-logo           | Logo area                                     |
+| .header-nav            | Navigation section                            |
+| .nav-list              | Navigation list layout                        |
+| .nav-list a::after     | Animated link underline                       |
+| .header-actions        | Button group                                  |
+| .btn                   | Shared button base                            |
+| .btn-primary           | Primary button variation                      |
+| .btn-secondary         | Secondary button variation                    |
+| @media                 | Responsive Header layout                      |
++------------------------+-----------------------------------------------+
+
+
+================================================================================
+EXAMPLE 2: CARD COMPONENT
+================================================================================
+
+File:
+
+src/components/Card/Card.jsx
+
+
+import './Card.css'
+
+
+export default function Card({
+  title,
+  description,
+  image,
+  onClick
+}) {
+
+  return (
+    <div className="card">
+
+
+      {image && (
+
+        <div className="card-image">
+
+          <img
+            src={image}
+            alt={title}
+          />
+
+        </div>
+
+      )}
+
+
+      <div className="card-content">
+
+        <h3 className="card-title">
+          {title}
+        </h3>
+
+        <p className="card-description">
+          {description}
+        </p>
+
+      </div>
+
+
+      <div className="card-footer">
+
+        <button
+          onClick={onClick}
+          className="card-button"
+        >
+          Learn More
+        </button>
+
+      </div>
+
+    </div>
+  )
+}
+
+
+================================================================================
+Card.css
+================================================================================
+
+.card {
+  background: white;
+
+  border-radius:
+    var(--border-radius-lg);
+
+  box-shadow:
+    var(--shadow-md);
+
+  overflow: hidden;
+
+  transition:
+    all
+    var(--transition-normal);
+
+  display: flex;
+
+  flex-direction: column;
+
+  height: 100%;
+}
+
+
+.card:hover {
+  transform:
+    translateY(-8px);
+
+  box-shadow:
+    var(--shadow-xl);
+}
+
+
+.card-image {
+  width: 100%;
+
+  height: 200px;
+
+  overflow: hidden;
+
+  background:
+    var(--light-color);
+}
+
+
+.card-image img {
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+  transition:
+    transform
+    var(--transition-normal);
+}
+
+
+.card:hover .card-image img {
+  transform:
+    scale(1.05);
+}
+
+
+.card-content {
+  padding:
+    var(--spacing-lg);
+
+  flex: 1;
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.card-title {
+  font-size:
+    var(--font-size-large);
+
+  color:
+    var(--text-color);
+
+  margin-bottom:
+    var(--spacing-md);
+
+  font-weight:
+    var(--font-weight-bold);
+}
+
+
+.card-description {
+  color:
+    var(--text-light);
+
+  font-size:
+    var(--font-size-small);
+
+  line-height:
+    var(--line-height-base);
+
+  margin-bottom: 0;
+
+  flex: 1;
+}
+
+
+.card-footer {
+  padding:
+    var(--spacing-md)
+    var(--spacing-lg);
+
+  border-top:
+    1px solid
+    var(--border-color);
+
+  background:
+    var(--light-color);
+}
+
+
+.card-button {
+  width: 100%;
+
+  padding:
+    var(--spacing-sm)
+    var(--spacing-md);
+
+  background:
+    var(--primary-color);
+
+  color: white;
+
+  border: none;
+
+  border-radius:
+    var(--border-radius-md);
+
+  font-weight:
+    var(--font-weight-bold);
+
+  cursor: pointer;
+
+  transition:
+    all
+    var(--transition-fast);
+}
+
+
+.card-button:hover {
+  background:
+    var(--secondary-color);
+
+  transform:
+    scale(1.02);
+}
+
+
+.card-button:active {
+  transform:
+    scale(0.98);
+}
+
+
+@media (max-width: 768px) {
+
+  .card {
+    margin-bottom:
+      var(--spacing-lg);
+  }
+
+
+  .card-image {
+    height: 150px;
+  }
+
+
+  .card-content {
+    padding:
+      var(--spacing-md);
+  }
+
+
+  .card-title {
+    font-size:
+      var(--font-size-base);
+  }
+
+}
+
+
+================================================================================
+PART 5: CSS NAMING CONVENTIONS
+================================================================================
+
+BEM - BLOCK ELEMENT MODIFIER
+--------------------------------------------------------------------------------
+
+BEM is a CSS naming methodology.
+
+BEM means:
+
+B = Block
+E = Element
+M = Modifier
+
+
+BLOCK
+--------------------------------------------------------------------------------
+
+Standalone component:
+
+.card { }
+
+
+ELEMENT
+--------------------------------------------------------------------------------
+
+Part of the block:
+
+.card__title { }
+
+.card__description { }
+
+.card__footer { }
+
+
+MODIFIER
+--------------------------------------------------------------------------------
+
+Variation/state:
+
+.card--featured { }
+
+.card--small { }
+
+.card--large { }
+
+
+ELEMENT MODIFIER
+--------------------------------------------------------------------------------
+
+.card__title--highlight { }
+
+.card__button--disabled { }
+
+
+BEM TABLE
+--------------------------------------------------------------------------------
+
++--------------------------+--------------------------------------------+
+| PATTERN                  | EXAMPLE                                    |
++--------------------------+--------------------------------------------+
+| Block                    | .card                                      |
+| Block__Element           | .card__title                               |
+|                          | .card__description                         |
+| Block--Modifier          | .card--featured                            |
+|                          | .card--small                               |
+| Block__Element--Modifier | .card__title--highlight                    |
+|                          | .card__button--disabled                    |
++--------------------------+--------------------------------------------+
+
+
+IMPORTANT BEM CORRECTION
+--------------------------------------------------------------------------------
+
+For a modifier applied to an element, use:
+
+.card__button--disabled
+
+
+For a modifier applied to the block:
+
+.card--featured
+
+
+A class such as:
+
+.card--featured__title
+
+is not the usual BEM structure.
+
+A more typical combination is:
+
+<div className="card card--featured">
+
+  <h2 className="card__title">
+    ...
+  </h2>
+
+</div>
+
+
+================================================================================
+NAMING BEST PRACTICES
+================================================================================
+
+• Use meaningful names
+
+• Prefer names describing purpose/role
+
+• Stay consistent
+
+• Avoid unnecessary abbreviations
+
+• Use one naming convention consistently
+
+• Use BEM when it helps manage larger CSS structures
+
+• Avoid highly generic names when collisions are likely
+
+
+GOOD VS BAD NAMING
+--------------------------------------------------------------------------------
+
++----------------------+----------------------+----------------------------+
+| ISSUE                | LESS CLEAR           | CLEARER                    |
++----------------------+----------------------+----------------------------+
+| Generic              | .box                 | .product-card              |
+| Unclear              | .item-1              | .navigation-item           |
+| Abbreviation         | .btn-prim            | .button-primary            |
+| BEM inconsistency    | .card_title          | .card__title               |
+| Generic state        | .active              | .navigation__item--active  |
+| Appearance-driven    | .blue-button         | .button--primary           |
+| Vague modifier       | .card-new            | .card--featured            |
++----------------------+----------------------+----------------------------+
+
+
+================================================================================
+PART 6: IMPORTING CSS IN REACT
+================================================================================
+
+METHOD 1: IMPORT COMPONENT CSS
+--------------------------------------------------------------------------------
+
+File:
+
+src/components/Header/Header.jsx
+
+
+import './Header.css'
+
+
+export default function Header() {
+
+  return (
+    <header className="header">
+
+      {/* Component JSX */}
+
+    </header>
+  )
+}
+
+
+WHAT HAPPENS?
+--------------------------------------------------------------------------------
+
+• CSS becomes part of the application's imported styles
+
+• Header JSX uses Header-related class names
+
+• Keeping the CSS beside Header improves file organization
+
+• The CSS is NOT automatically technically scoped to Header
+
+
+================================================================================
+METHOD 2: GLOBAL CSS IN main.jsx
+================================================================================
+
+import React from 'react'
+
+import ReactDOM
+  from 'react-dom/client'
+
+import App
+  from './App.jsx'
+
+import './index.css'
+
+
+ReactDOM.createRoot(
+  document.getElementById('root')
+).render(
+
+  <React.StrictMode>
+
+    <App />
+
+  </React.StrictMode>
+
+)
+
+
+PURPOSE:
+--------------------------------------------------------------------------------
+
+index.css can supply:
+
+• Global reset
+
+• CSS variables
+
+• Typography
+
+• Base element styling
+
+• Global utilities
+
+
+================================================================================
+METHOD 3: APP-LEVEL CSS
+================================================================================
+
+import './App.css'
+
+import Header
+  from './components/Header/Header'
+
+import Footer
+  from './components/Footer/Footer'
+
+
+export default function App() {
+
+  return (
+    <div className="app">
+
+      <Header />
+
+      <main className="app-main">
+
+        {/* Content */}
+
+      </main>
+
+      <Footer />
+
+    </div>
+  )
+}
+
+
+Use App.css for:
+
+• Application shell
+
+• Main layout
+
+• App-level containers
+
+• Page composition
+
+
+================================================================================
+CSS IMPORT / STYLING METHODS
+================================================================================
+
++----------------------+------------------------+-------------------------------+
+| METHOD               | LOCATION               | BEHAVIOR                      |
++----------------------+------------------------+-------------------------------+
+| Normal CSS Import    | Component              | Global selectors once loaded  |
+| index.css            | Entry point            | Global/base styles            |
+| App.css              | App component          | App-oriented styles           |
+| Inline Style         | JSX style prop         | Individual element values     |
+| CSS Modules          | *.module.css           | Locally generated class names |
+| CSS-in-JS            | Component/code         | Library-dependent             |
++----------------------+------------------------+-------------------------------+
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+In a Vite React project, Vite handles the CSS import/build pipeline.
+
+Do not describe normal component CSS as "truly scoped."
+
+True class scoping is available with approaches such as CSS Modules.
+
+
+================================================================================
+PART 7: CSS CASCADE AND SPECIFICITY
+================================================================================
+
+CSS CASCADE
+--------------------------------------------------------------------------------
+
+When multiple declarations affect the same CSS property, the browser
+determines the winning declaration using the cascade.
+
+Important factors include:
+
+• Origin and importance
+
+• Cascade layers, when used
+
+• Specificity
+
+• Scoping proximity where applicable in modern CSS
+
+• Source order
+
+
+For basic React/CSS learning, remember:
+
+1. Higher-priority cascade rules win
+
+2. Specificity matters when competing declarations are otherwise comparable
+
+3. When specificity is equal, later applicable declarations generally win
+
+
+================================================================================
+SPECIFICITY - BEGINNER MENTAL MODEL
+================================================================================
+
+A useful simplified model:
+
++-------------------+----------------------+-----------------------------+
+| SELECTOR TYPE     | RELATIVE WEIGHT      | EXAMPLE                     |
++-------------------+----------------------+-----------------------------+
+| Type/Element      | Lowest               | p                           |
+| Class             | Higher               | .card                       |
+| ID                | Higher               | #main-card                  |
+| Inline Style      | Very High            | style={{...}}               |
++-------------------+----------------------+-----------------------------+
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Specificity is more accurately treated as a tuple/category comparison,
+not as a literal universal "1 / 10 / 100 / 1000 point system."
+
+The points model is useful only as a beginner shortcut.
+
+
+================================================================================
+SPECIFICITY EXAMPLE 1
+================================================================================
+
+p {
+  color: blue;
+}
+
+
+.card-title {
+  color: red;
+}
+
+
+If the paragraph also has class="card-title", the class selector has
+greater specificity for the color declaration.
+
+
+================================================================================
+SPECIFICITY EXAMPLE 2
+================================================================================
+
+div.card {
+  background: white;
+}
+
+
+.card-container .card {
+  background: lightgray;
+}
+
+
+The second selector has greater class specificity.
+
+
+================================================================================
+SPECIFICITY EXAMPLE 3
+================================================================================
+
+.card {
+  color: blue;
+}
+
+
+#main-card {
+  color: red;
+}
+
+
+The ID selector has greater specificity.
+
+
+================================================================================
+CASCADE / SPECIFICITY SUMMARY
+================================================================================
+
++----------------------+-----------------------------------------------+
+| SCENARIO             | GENERAL RESULT                                |
++----------------------+-----------------------------------------------+
+| Element vs Class     | Class is more specific                        |
+| Class vs ID          | ID is more specific                           |
+| Same specificity     | Later applicable declaration usually wins     |
+| Inline vs Class      | Inline style normally has priority            |
+| !important           | Changes cascade importance                    |
++----------------------+-----------------------------------------------+
+
+
+IMPORTANT ABOUT !important
+--------------------------------------------------------------------------------
+
+Do NOT think of !important simply as:
+
+"Overrides absolutely everything."
+
+It participates in the cascade's importance rules.
+
+Practical lesson:
+
+Avoid unnecessary use of !important because it makes CSS harder to override,
+reason about, and maintain.
+
+
+================================================================================
+PART 8: RESPONSIVE DESIGN WITH CSS
+================================================================================
+
+RESPONSIVE DESIGN PRINCIPLES
+--------------------------------------------------------------------------------
+
+Responsive design includes:
+
+• Flexible Layouts
+
+• Flexbox
+
+• CSS Grid
+
+• Relative sizing
+
+• Media queries
+
+• Appropriate breakpoints
+
+• Responsive typography
+
+• Touch-friendly controls
+
+
+================================================================================
+COMMON BREAKPOINT EXAMPLES
+================================================================================
+
+These are example project breakpoints, NOT universal device standards.
+
++-------------------------+--------------------------------------------+
+| RANGE / TARGET          | EXAMPLE                                   |
++-------------------------+--------------------------------------------+
+| Small screens           | Up to ~480px                              |
+| Medium screens          | Around 768px                              |
+| Desktop layout change   | Around 1024px                             |
+| Wide layout change      | Around 1440px                             |
++-------------------------+--------------------------------------------+
+
+
+Choose breakpoints based on where YOUR layout needs to change rather than
+trying to target every specific device model.
+
+
+================================================================================
+MOBILE-FIRST RESPONSIVE EXAMPLE
+================================================================================
+
+/* Base: Small screens */
+
+.card-grid {
+  display: grid;
+
+  grid-template-columns:
+    1fr;
+
+  gap:
+    var(--spacing-md);
+}
+
+
+.card {
+  padding:
+    var(--spacing-md);
+}
+
+
+.card-title {
+  font-size:
+    var(--font-size-base);
+}
+
+
+/* Tablet / Medium */
+
+@media (min-width: 768px) {
+
+  .card-grid {
+
+    grid-template-columns:
+      repeat(2, 1fr);
+
+  }
+
+
+  .card {
+    padding:
+      var(--spacing-lg);
+  }
+
+
+  .card-title {
+    font-size:
+      var(--font-size-large);
+  }
+
+}
+
+
+/* Desktop */
+
+@media (min-width: 1024px) {
+
+  .card-grid {
+
+    grid-template-columns:
+      repeat(3, 1fr);
+
+  }
+
+
+  .card {
+    padding:
+      var(--spacing-xl);
+  }
+
+
+  .card-title {
+    font-size:
+      var(--font-size-xl);
+  }
+
+}
+
+
+/* Wide Desktop */
+
+@media (min-width: 1440px) {
+
+  .card-grid {
+
+    grid-template-columns:
+      repeat(4, 1fr);
+
+  }
+
+}
+
+
+RESPONSIVE TECHNIQUES
+--------------------------------------------------------------------------------
+
++-----------------------+--------------------------+-----------------------------+
+| TECHNIQUE             | PURPOSE                  | EXAMPLE                     |
++-----------------------+--------------------------+-----------------------------+
+| Flexbox               | Flexible 1D layouts      | display: flex               |
+| CSS Grid              | Grid/2D layouts          | display: grid               |
+| Media Queries         | Conditional CSS          | @media (...)                |
+| Percentage Width      | Relative sizing          | width: 100%                 |
+| max-width             | Limit content size       | max-width: 1200px           |
+| Viewport Units        | Viewport-relative sizing | 100vw, 100vh                |
+| clamp()               | Fluid constrained values | clamp(...)                  |
+| Mobile First          | Start small              | Base + min-width queries    |
++-----------------------+--------------------------+-----------------------------+
+
+
+================================================================================
+FLUID TYPOGRAPHY EXAMPLE
+================================================================================
+
+.title {
+
+  font-size:
+    clamp(
+      1.5rem,
+      4vw,
+      3rem
+    );
+
+}
+
+
+Meaning:
+
+Minimum:
+1.5rem
+
+Preferred responsive value:
+4vw
+
+Maximum:
+3rem
+
+
+================================================================================
+PART 9: CSS BEST PRACTICES IN REACT
+================================================================================
+
+CSS BEST PRACTICES
+--------------------------------------------------------------------------------
+
+• Organize Files Logically
+  - Co-locate component CSS when useful
+
+• Use CSS Variables
+  - Centralize frequently reused design tokens
+
+• Keep Specificity Manageable
+  - Prefer classes over IDs for component styling
+
+• Use Semantic Class Names
+  - Describe purpose rather than appearance
+
+• Group Related Rules
+  - Keep component rules together
+
+• Maintain Consistent Spacing
+  - Reuse spacing variables
+
+• Design Responsively
+  - Design from small screens upward when appropriate
+
+• Remove Unused Styles
+  - Keep CSS focused
+
+• Document Complex Rules
+  - Explain non-obvious selectors
+
+• Avoid Deep Selector Chains
+  - Keep rules understandable
+
+• Add Visible Focus States
+  - Important for keyboard accessibility
+
+• Respect Reduced Motion Where Appropriate
+  - Animations should not become an accessibility barrier
+
+
+================================================================================
+GOOD CSS EXAMPLE
+================================================================================
+
+:root {
+
+  --card-bg: white;
+
+  --card-shadow:
+    0 4px 8px
+    rgba(0, 0, 0, 0.1);
+
+  --card-radius: 8px;
+
+  --card-padding: 16px;
+
+}
+
+
+.card {
+  background:
+    var(--card-bg);
+
+  border-radius:
+    var(--card-radius);
+
+  box-shadow:
+    var(--card-shadow);
+
+  padding:
+    var(--card-padding);
+
+  transition:
+    all 0.3s ease;
+}
+
+
+.card:hover {
+  transform:
+    translateY(-4px);
+
+  box-shadow:
+    0 8px 16px
+    rgba(0, 0, 0, 0.15);
+}
+
+
+.card__title {
+  font-size: 1.25rem;
+
+  font-weight: 600;
+
+  margin-bottom: 8px;
+}
+
+
+.card__description {
+  font-size: 0.95rem;
+
+  color: #666;
+
+  line-height: 1.6;
+}
+
+
+.card__button {
+  background: #667eea;
+
+  color: white;
+
+  border: none;
+
+  padding:
+    8px 16px;
+
+  border-radius: 4px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.3s ease;
+}
+
+
+.card__button:hover {
+  background: #5568d3;
+}
+
+
+@media (max-width: 768px) {
+
+  .card {
+    padding: 12px;
+  }
+
+
+  .card__title {
+    font-size: 1.1rem;
+  }
+
+}
+
+
+================================================================================
+LESS MAINTAINABLE EXAMPLE
+================================================================================
+
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+
+.card h2 {
+  font-size: 1.25rem;
+}
+
+
+.card p {
+  font-size: 0.95rem;
+  color: #666;
+}
+
+
+#card-button {
+  background: #667eea;
+}
+
+
+.card button {
+  background:
+    #667eea !important;
+}
+
+
+Problems:
+
+• ID selector increases specificity
+
+• !important complicates overriding
+
+• Element selectors tightly couple CSS to markup structure
+
+• Shared values aren't centralized
+
+
+================================================================================
+BEST PRACTICES COMPARISON
+================================================================================
+
++----------------------+---------------------------+-----------------------------+
+| PRACTICE             | LESS MAINTAINABLE         | PREFERRED                   |
++----------------------+---------------------------+-----------------------------+
+| Naming               | .box                      | .product-card               |
+| Specificity          | #card-button              | .card__button               |
+| !important           | Routine usage             | Avoid unless justified      |
+| Inline styles        | All static styles inline  | Class for static styles     |
+| CSS Variables        | Repeated hardcoded values | var(--primary-color)        |
+| Organization         | Random rule order         | Component/grouped styles    |
+| Comments             | None for complex CSS      | Explain non-obvious rules   |
+| Responsive           | Fixed-only layout         | Flexible + media queries    |
+| Duplication          | Repeated values           | Shared variables/patterns   |
++----------------------+---------------------------+-----------------------------+
+
+
+IMPORTANT ABOUT INLINE STYLES
+--------------------------------------------------------------------------------
+
+Inline style is not automatically bad in React.
+
+Inline styles can be useful for values that are genuinely dynamic.
+
+Example:
+
+<div
+  style={{
+    borderColor: color
+  }}
+/>
+
+
+For mostly static visual rules, CSS classes are generally easier to manage.
+
+
+================================================================================
+PART 10: CSS FILE ORGANIZATION SUMMARY
+================================================================================
+
+HOW CSS FILES WORK TOGETHER
+--------------------------------------------------------------------------------
+
+main.jsx
+   │
+   └── index.css
+        │
+        ├── Reset
+        ├── Variables
+        ├── Typography
+        └── Global Utilities
+
+
+App.jsx
+   │
+   └── App.css
+        │
+        ├── Application Layout
+        └── Page Containers
+
+
+Components
+   │
+   ├── Header.jsx
+   │    └── Header.css
+   │
+   ├── Footer.jsx
+   │    └── Footer.css
+   │
+   ├── Button.jsx
+   │    └── Button.css
+   │
+   └── Card.jsx
+        └── Card.css
+
+
+================================================================================
+CSS FILE RESPONSIBILITIES
+================================================================================
+
++------------------------------+-------------------------------------------+
+| FILE                         | PURPOSE                                   |
++------------------------------+-------------------------------------------+
+| index.css                    | Global reset, variables, base styles     |
+| App.css                      | App/page layout                           |
+| Header.css                   | Header-specific conventions              |
+| Footer.css                   | Footer-specific conventions              |
+| Button.css                   | Button component conventions             |
+| Card.css                     | Card component conventions               |
+| *.module.css                 | Locally scoped component classes         |
++------------------------------+-------------------------------------------+
+
+
+CSS ORGANIZATION CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Global reset/base styles are centralized
+
+[ ] Shared CSS custom properties are defined
+
+[ ] Component-related CSS is co-located where appropriate
+
+[ ] Class naming convention is consistent
+
+[ ] Selector specificity remains manageable
+
+[ ] IDs aren't being used unnecessarily for styling
+
+[ ] !important isn't being used unnecessarily
+
+[ ] Repeated values are centralized where useful
+
+[ ] Responsive behavior is tested
+
+[ ] Keyboard focus is visible
+
+[ ] Hover and active interactions are understandable
+
+[ ] Unused CSS has been removed
+
+[ ] Complex selectors/rules are documented
+
+[ ] CSS collisions have been considered
+
+[ ] Normal CSS vs CSS Modules distinction is understood
+
+
+================================================================================
+CSS ORGANIZATION PRINCIPLES
+================================================================================
+
++-----------------------+-----------------------------------------------+
+| PRINCIPLE             | IMPLEMENTATION                                |
++-----------------------+-----------------------------------------------+
+| Separation            | Clear global/component responsibilities      |
+| Reuse                 | Variables and shared utilities                |
+| Responsibility        | Files have clear purpose                      |
+| Scalability           | Predictable directory structure              |
+| Maintainability       | Clear naming + manageable specificity        |
+| Consistency           | Shared design tokens                         |
+| Collaboration         | Documented patterns                          |
+| Accessibility         | Focus, contrast, reduced motion considered   |
++-----------------------+-----------------------------------------------+
+
+
+================================================================================
+PART 11: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE LEARNED
+--------------------------------------------------------------------------------
+
+✓ CSS file organization
+
+✓ Global vs component-oriented CSS
+
+✓ CSS custom properties
+
+✓ Component-specific styling patterns
+
+✓ CSS naming conventions
+
+✓ BEM fundamentals
+
+✓ Importing CSS into React
+
+✓ Normal CSS vs CSS Modules
+
+✓ CSS cascade
+
+✓ CSS specificity
+
+✓ Responsive design
+
+✓ Media queries
+
+✓ Flexbox and Grid
+
+✓ CSS utilities
+
+✓ CSS animations
+
+✓ Styling best practices
+
+✓ Accessibility-related styling considerations
+
+
+================================================================================
+CRITICAL CSS ORGANIZATION PRINCIPLES
+================================================================================
+
+• index.css
+  - Global/reset/base/shared variables
+
+• App.css
+  - App layout and page composition
+
+• Component.css
+  - Component-related styles
+
+• Normal CSS Is Global
+  - Directory location does not create automatic scoping
+
+• CSS Modules Provide Local Class Scoping
+  - Use *.module.css where useful
+
+• CSS Variables
+  - Useful for colors, spacing, shadows, sizing, etc.
+
+• Keep Specificity Manageable
+  - Prefer class-oriented styling
+
+• Semantic Naming
+  - Describe purpose rather than visual color alone
+
+• Responsive Design
+  - Adapt based on layout needs
+
+• Mobile First
+  - Useful strategy when appropriate
+
+• Accessibility
+  - Preserve visible focus and support comfortable motion
+
+
+================================================================================
+CSS ORGANIZATION WORKFLOW
+================================================================================
+
+1. DEFINE GLOBAL FOUNDATION
+--------------------------------------------------------------------------------
+
+index.css
+
+Contains:
+
+• Reset
+• Shared variables
+• Base typography
+• Global rules
+
+
+        ↓
+
+
+2. DEFINE APPLICATION LAYOUT
+--------------------------------------------------------------------------------
+
+App.css
+
+Contains:
+
+• Application shell
+• Main layout
+• Page containers
+
+
+        ↓
+
+
+3. CREATE COMPONENT CSS
+--------------------------------------------------------------------------------
+
+Component/
+├── Component.jsx
+└── Component.css
+
+
+        ↓
+
+
+4. IMPORT COMPONENT CSS
+--------------------------------------------------------------------------------
+
+import './Component.css'
+
+
+        ↓
+
+
+5. APPLY MEANINGFUL CLASS NAMES
+--------------------------------------------------------------------------------
+
+className="card__title"
+
+
+        ↓
+
+
+6. TEST STATES
+--------------------------------------------------------------------------------
+
+• Default
+• Hover
+• Focus
+• Active
+• Disabled
+
+
+        ↓
+
+
+7. TEST RESPONSIVENESS
+--------------------------------------------------------------------------------
+
+• Small screen
+• Medium screen
+• Desktop
+• Wide screen if required
+
+
+        ↓
+
+
+8. REVIEW SPECIFICITY
+--------------------------------------------------------------------------------
+
+Avoid unnecessary:
+
+• IDs
+• !important
+• deeply nested selectors
+
+
+        ↓
+
+
+9. REFACTOR
+--------------------------------------------------------------------------------
+
+• Remove unused rules
+• Consolidate duplicated tokens
+• Simplify selectors
+
+
+        ↓
+
+
+10. MAINTAIN CONSISTENCY
+--------------------------------------------------------------------------------
+
+Follow the project's naming and styling conventions.
+
+
+================================================================================
+KEY FILES
+================================================================================
+
++-------------------+---------------------------+------------------------------+
+| FILE              | PURPOSE                   | KEY CONTENT                  |
++-------------------+---------------------------+------------------------------+
+| index.css         | Global foundation         | Variables, reset, typography|
+| App.css           | Application layout        | Containers, page layout     |
+| Component.css     | Component styling         | Component-oriented rules    |
+| Component.module  | Scoped component styling  | Local class names           |
+| .css              |                           |                              |
++-------------------+---------------------------+------------------------------+
+
+
+================================================================================
+QUICK REVISION - GLOBAL VS COMPONENT CSS
+================================================================================
+
+GLOBAL CSS:
+
+index.css
+   ↓
+Reset
+Variables
+Typography
+Shared Utilities
+
+
+COMPONENT CSS:
+
+Card.jsx
+   ↓
+imports
+   ↓
+Card.css
+   ↓
+Card-related class conventions
+
+
+IMPORTANT:
+
+Card.css
+   ≠
+Automatic Scope
+
+
+For automatic class scoping:
+
+Card.module.css
+   ↓
+CSS Modules
+
+
+================================================================================
+QUICK REVISION - CASCADE
+================================================================================
+
+Multiple Rules Target Same Property
+              ↓
+Cascade Determines Priority
+              ↓
+Specificity Considered
+              ↓
+If Otherwise Equal
+              ↓
+Later Applicable Rule Wins
+
+
+================================================================================
+QUICK REVISION - BEM
+================================================================================
+
+BLOCK:
+
+.card
+
+
+ELEMENT:
+
+.card__title
+
+
+MODIFIER:
+
+.card--featured
+
+
+ELEMENT MODIFIER:
+
+.card__button--disabled
+
+
+MEMORY:
+
+Block
+  ↓
+Block__Element
+  ↓
+Block--Modifier
+  ↓
+Block__Element--Modifier
+
+
+================================================================================
+QUICK REVISION - RESPONSIVE DESIGN
+================================================================================
+
+Small Screen Base
+      ↓
+Flexible Layout
+      ↓
+Content Needs More Space
+      ↓
+Media Query
+      ↓
+2 Columns
+      ↓
+Larger Screen
+      ↓
+3 / 4 Columns
+
+
+Example:
+
+1 Column
+   ↓
+@media (min-width: 768px)
+   ↓
+2 Columns
+   ↓
+@media (min-width: 1024px)
+   ↓
+3 Columns
+
+
+================================================================================
+QUICK REFERENCE TABLE
+================================================================================
+
++-------------------------+----------------------------------------------+
+| CONCEPT                 | REMEMBER                                     |
++-------------------------+----------------------------------------------+
+| index.css               | Global foundation                            |
+| App.css                 | App-level layout                             |
+| Component.css           | Component-related styles                     |
+| CSS Module              | Locally scoped class names                   |
+| :root                   | Global CSS custom properties                 |
+| var(...)                | Reads CSS custom property                    |
+| className               | React's CSS class attribute                  |
+| BEM                     | Block__Element--Modifier                     |
+| Cascade                 | Determines winning declaration               |
+| Specificity             | Selector priority within cascade             |
+| Flexbox                 | One-dimensional layout                       |
+| Grid                    | Grid/two-dimensional layout                  |
+| @media                  | Conditional responsive styling               |
+| clamp()                 | Fluid constrained sizing                     |
+| @keyframes              | Defines CSS animation                        |
+| :hover                  | Pointer hover state                          |
+| :focus                  | Focus styling                                |
+| :active                 | Active interaction state                     |
+| !important              | Alters importance in cascade                 |
++-------------------------+----------------------------------------------+
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+CSS ORGANIZATION:
+
+index.css
+   ↓
+Global Foundation
+
+App.css
+   ↓
+Application Layout
+
+Component.css
+   ↓
+Component-Oriented Styling
+
+
+CSS VARIABLES:
+
+:root
+  ↓
+--primary-color
+  ↓
+var(--primary-color)
+
+
+BEM:
+
+Block
+  ↓
+Element
+  ↓
+Modifier
+
+.card
+.card__title
+.card--featured
+.card__button--disabled
+
+
+RESPONSIVE DESIGN:
+
+Base Styles
+   ↓
+Flexible Layout
+   ↓
+Media Query
+   ↓
+Larger-Screen Enhancement
+
+
+CASCADE:
+
+Importance
+   ↓
+Specificity
+   ↓
+Source Order
+   ↓
+Winning Declaration
+
+
+COMPONENT STYLING:
+
+Component.jsx
+     ↓
+import './Component.css'
+     ↓
+className
+     ↓
+CSS Selector
+     ↓
+Browser Styling
+
+
+MOST IMPORTANT RULE:
+
+ORGANIZE CSS BY RESPONSIBILITY,
+KEEP SPECIFICITY MANAGEABLE,
+AND DO NOT CONFUSE FILE ORGANIZATION
+WITH TRUE CSS SCOPING.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+After mastering CSS organization, you're ready to:
+
+1. Build more complex professionally styled components
+
+2. Create responsive page layouts
+
+3. Practice CSS Grid and Flexbox deeply
+
+4. Add accessible interaction states
+
+5. Learn CSS Modules
+
+6. Learn Sass/SCSS if required by the project
+
+7. Explore Tailwind CSS
+
+8. Explore CSS-in-JS approaches where appropriate
+
+9. Build reusable design tokens
+
+10. Create a component/design system
+
+11. Maintain CSS across larger React applications
+
+
+================================================================================
+END OF LESSON 10
+STYLING OUR COMPONENTS - OVERVIEW OF CSS FILES IN OUR PROJECT
+================================================================================
