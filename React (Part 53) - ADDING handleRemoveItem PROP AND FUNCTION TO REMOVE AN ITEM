@@ -1,0 +1,2649 @@
+LESSON 19: ADDING handleRemoveItem PROP
+AND FUNCTION TO REMOVE AN ITEM
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on removing grocery items from the list.
+
+You will understand:
+
+• Creating handleRemoveItem in the parent
+
+• Passing a delete handler as a prop
+
+• Forwarding the handler through GroceryList
+
+• Receiving the handler in GroceryItem
+
+• Passing an item ID back to the parent
+
+• Removing an item with filter()
+
+• Updating arrays immutably
+
+• Connecting a Delete button
+
+• Optionally confirming destructive actions
+
+• Updating the UI after deletion
+
+• Updating filters and statistics automatically
+
+• Testing the complete deletion workflow
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+The application already supports:
+
+CREATE:
+AddGroceryForm
+
+
+READ:
+GroceryList
+
+
+UPDATE:
+toggleBought
+
+
+Now we add:
+
+DELETE:
+handleRemoveItem
+
+
+The workflow becomes:
+
+USER CLICKS DELETE
+        ↓
+GroceryItem
+        ↓
+Optional Confirmation
+        ↓
+onRemoveItem(item.id)
+        ↓
+App.handleRemoveItem(id)
+        ↓
+filter()
+        ↓
+New groceryItems Array
+        ↓
+React Renders
+        ↓
+Item Disappears
+
+
+================================================================================
+PART 2: UNDERSTANDING ITEM DELETION
+================================================================================
+
+WHAT IS ITEM DELETION?
+--------------------------------------------------------------------------------
+
+Deleting an item means removing one grocery record from the state array.
+
+Suppose:
+
+groceryItems = [
+
+  Milk,
+
+  Bread,
+
+  Apples
+
+]
+
+
+Delete:
+
+Bread
+
+
+New state:
+
+groceryItems = [
+
+  Milk,
+
+  Apples
+
+]
+
+
+The original array should NOT be changed directly.
+
+
+================================================================================
+DELETE OPERATION
+================================================================================
+
+Suppose Bread has:
+
+id:
+'bread-1'
+
+
+We want to KEEP every item whose ID is NOT:
+
+'bread-1'
+
+
+Code:
+
+items.filter(
+  item =>
+    item.id !== id
+)
+
+
+For each item:
+
+Milk:
+
+milk-1 !== bread-1
+
+=
+true
+
+KEEP
+
+
+Bread:
+
+bread-1 !== bread-1
+
+=
+false
+
+REMOVE
+
+
+Apples:
+
+apples-1 !== bread-1
+
+=
+true
+
+KEEP
+
+
+================================================================================
+DELETE FLOW
+================================================================================
+
+User Clicks Delete
+        ↓
+Button onClick
+        ↓
+GroceryItem.handleDelete()
+        ↓
+Optional Confirmation
+        ↓
+onRemoveItem(item.id)
+        ↓
+App.handleRemoveItem(id)
+        ↓
+previousItems.filter(...)
+        ↓
+Matching Item Excluded
+        ↓
+New Array
+        ↓
+setGroceryItems(...)
+        ↓
+React Renders
+        ↓
+Item No Longer Rendered
+
+
+================================================================================
+DELETE FLOW TABLE
+================================================================================
+
++------+-----------------------+---------------------------------------+
+| STEP | LOCATION              | ACTION                                |
++------+-----------------------+---------------------------------------+
+| 1    | GroceryItem           | User clicks Delete                    |
+| 2    | GroceryItem           | handleDelete executes                 |
+| 3    | GroceryItem           | Optional confirmation                 |
+| 4    | GroceryItem           | Calls onRemoveItem(item.id)           |
+| 5    | App                   | handleRemoveItem receives ID          |
+| 6    | App                   | filter() processes array              |
+| 7    | App                   | Matching record excluded              |
+| 8    | App                   | State receives new array              |
+| 9    | React                 | Components render current state       |
+| 10   | GroceryList           | Removed record is absent             |
+| 11   | UI                    | Card disappears                       |
++------+-----------------------+---------------------------------------+
+
+
+================================================================================
+PART 3: CREATING THE handleRemoveItem HANDLER
+================================================================================
+
+The grocery state already lives in:
+
+App
+
+
+Therefore the delete handler should also live in:
+
+App
+
+
+Why?
+
+The component that owns the state should perform the state update.
+
+
+================================================================================
+App.jsx
+================================================================================
+
+import { useState } from 'react'
+
+import Navigation
+  from './components/Navigation'
+
+import AddGroceryForm
+  from './components/AddGroceryForm'
+
+import GroceryList
+  from './components/GroceryList'
+
+import Footer
+  from './components/Footer'
+
+import {
+  FAKE_GROCERIES
+} from './data/fakeGroceries'
+
+import './App.css'
+
+
+export default function App() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [
+    groceryItems,
+    setGroceryItems
+  ] = useState(
+    FAKE_GROCERIES
+  )
+
+
+  // ============================================
+  // ADD
+  // ============================================
+
+  const handleAddItem = (
+    newItem
+  ) => {
+
+    setGroceryItems(
+      previousItems => [
+
+        newItem,
+
+        ...previousItems
+
+      ]
+    )
+  }
+
+
+  // ============================================
+  // TOGGLE BOUGHT
+  // ============================================
+
+  const handleToggleBought = (
+    id
+  ) => {
+
+    setGroceryItems(
+      previousItems =>
+
+        previousItems.map(
+          item =>
+
+            item.id === id
+              ? {
+                  ...item,
+
+                  purchased:
+                    !item.purchased
+                }
+              : item
+
+        )
+    )
+  }
+
+
+  // ============================================
+  // REMOVE ITEM
+  // ============================================
+
+  const handleRemoveItem = (
+    id
+  ) => {
+
+    setGroceryItems(
+      previousItems =>
+
+        previousItems.filter(
+          item =>
+            item.id !== id
+        )
+    )
+  }
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="app">
+
+      <Navigation />
+
+
+      <main className="app-main">
+
+        <div className="app-container">
+
+
+          <header className="app-header">
+
+            <h1>
+              Grocery List App
+            </h1>
+
+            <p>
+              Manage your shopping list
+            </p>
+
+          </header>
+
+
+          <section className="form-section">
+
+            <AddGroceryForm
+              onAddItem={
+                handleAddItem
+              }
+            />
+
+          </section>
+
+
+          <section
+            id="grocery-list"
+            className="list-section"
+          >
+
+            <GroceryList
+              items={
+                groceryItems
+              }
+              onToggleBought={
+                handleToggleBought
+              }
+              onRemoveItem={
+                handleRemoveItem
+              }
+            />
+
+          </section>
+
+        </div>
+
+      </main>
+
+
+      <Footer />
+
+    </div>
+  )
+}
+
+
+================================================================================
+THE CORE DELETE HANDLER
+================================================================================
+
+const handleRemoveItem = (
+  id
+) => {
+
+  setGroceryItems(
+    previousItems =>
+
+      previousItems.filter(
+        item =>
+          item.id !== id
+      )
+  )
+}
+
+
+MEMORY:
+
+DELETE FROM ARRAY
+      ↓
+filter()
+
+
+================================================================================
+LINE-BY-LINE EXPLANATION
+================================================================================
+
++-------------------------------+---------------------------------------+
+| CODE                          | PURPOSE                               |
++-------------------------------+---------------------------------------+
+| handleRemoveItem(id)          | Receive target ID                     |
+| setGroceryItems(...)          | Request state update                  |
+| previousItems =>              | Access previous array                 |
+| previousItems.filter(...)     | Create filtered array                 |
+| item.id !== id                | Keep every non-target item            |
++-------------------------------+---------------------------------------+
+
+
+================================================================================
+WHY USE A FUNCTIONAL SETTER?
+================================================================================
+
+Prefer:
+
+setGroceryItems(
+  previousItems =>
+    previousItems.filter(...)
+)
+
+
+instead of:
+
+setGroceryItems(
+  groceryItems.filter(...)
+)
+
+
+because the next list depends directly on the previous list.
+
+
+This keeps Add, Toggle, and Delete consistent:
+
+ADD:
+--------------------------------------------------------------------------------
+
+setGroceryItems(previous => [
+
+  newItem,
+
+  ...previous
+
+])
+
+
+TOGGLE:
+--------------------------------------------------------------------------------
+
+setGroceryItems(previous =>
+
+  previous.map(...)
+
+)
+
+
+DELETE:
+--------------------------------------------------------------------------------
+
+setGroceryItems(previous =>
+
+  previous.filter(...)
+
+)
+
+
+================================================================================
+TEMPORARY DEBUGGING VERSION
+================================================================================
+
+While learning:
+
+const handleRemoveItem = (
+  id
+) => {
+
+  setGroceryItems(
+    previousItems => {
+
+      const itemToRemove =
+        previousItems.find(
+          item =>
+            item.id === id
+        )
+
+
+      console.log(
+        'Removing:',
+        itemToRemove
+      )
+
+
+      const nextItems =
+        previousItems.filter(
+          item =>
+            item.id !== id
+        )
+
+
+      console.log(
+        'Before count:',
+        previousItems.length
+      )
+
+
+      console.log(
+        'After count:',
+        nextItems.length
+      )
+
+
+      return nextItems
+    }
+  )
+}
+
+
+Use this only while debugging.
+
+The final handler can remain short.
+
+
+================================================================================
+PART 4: UNDERSTANDING filter()
+================================================================================
+
+WHAT DOES filter() DO?
+--------------------------------------------------------------------------------
+
+filter() examines each array element and returns a new array containing only
+the elements for which the callback returns:
+
+true
+
+
+Example:
+
+const items = [
+
+  {
+    id: 1,
+    name: 'Milk'
+  },
+
+  {
+    id: 2,
+    name: 'Bread'
+  },
+
+  {
+    id: 3,
+    name: 'Apples'
+  }
+
+]
+
+
+const remainingItems =
+  items.filter(
+    item =>
+      item.id !== 2
+  )
+
+
+Result:
+
+[
+  {
+    id: 1,
+    name: 'Milk'
+  },
+
+  {
+    id: 3,
+    name: 'Apples'
+  }
+]
+
+
+Original:
+
+items
+
+
+remains unchanged.
+
+
+================================================================================
+HOW filter() PROCESSES THE ARRAY
+================================================================================
+
+Target:
+
+id = 2
+
+
+Milk:
+
+1 !== 2
+
+true
+
+KEEP
+
+
+Bread:
+
+2 !== 2
+
+false
+
+REMOVE
+
+
+Apples:
+
+3 !== 2
+
+true
+
+KEEP
+
+
+Result:
+
+Milk
+
+Apples
+
+
+================================================================================
+filter() DOES NOT MEAN "DELETE"
+================================================================================
+
+filter() does not directly delete an array element.
+
+It creates:
+
+A NEW ARRAY
+
+
+containing only items satisfying the condition.
+
+
+For deletion, we design the condition so the unwanted item is excluded.
+
+
+MEMORY:
+
+filter()
+ ↓
+KEEP WHAT MATCHES THE CONDITION
+
+
+Therefore:
+
+item.id !== id
+
+
+means:
+
+KEEP EVERYTHING EXCEPT THE ITEM
+WE WANT TO REMOVE.
+
+
+================================================================================
+filter() VS splice()
+================================================================================
+
++----------------------+----------------------+------------------------------+
+| ASPECT               | filter()             | splice()                     |
++----------------------+----------------------+------------------------------+
+| Original Modified?   | No                   | Yes                          |
+| Result               | New array            | Mutates source + returns     |
+|                      |                      | removed elements             |
+| State Update Pattern | Natural fit          | Avoid direct state mutation  |
+| Intent Here          | Keep non-targets     | Remove by array position     |
++----------------------+----------------------+------------------------------+
+
+
+================================================================================
+WHY NOT splice() DIRECTLY ON STATE?
+================================================================================
+
+Avoid:
+
+groceryItems.splice(
+  index,
+  1
+)
+
+
+because this directly modifies the array stored in React state.
+
+
+Instead:
+
+const remaining =
+  groceryItems.filter(
+    item =>
+      item.id !== id
+  )
+
+
+creates the next array without modifying the existing one.
+
+
+================================================================================
+DELETE BY ID VS DELETE BY INDEX
+================================================================================
+
+Prefer targeting:
+
+item.id
+
+
+rather than:
+
+array index
+
+
+Why?
+
+An item can move because of:
+
+• Filtering
+
+• Sorting
+
+• Adding items
+
+• Removing items
+
+
+Its identity should remain:
+
+item.id
+
+
+not:
+
+its current visual array position.
+
+
+================================================================================
+PART 5: RECEIVING onRemoveItem IN GroceryList
+================================================================================
+
+The handler travels:
+
+App
+ ↓
+GroceryList
+ ↓
+GroceryItem
+
+
+================================================================================
+GroceryList.jsx
+================================================================================
+
+import { useState } from 'react'
+
+import GroceryItem
+  from './GroceryItem'
+
+import './GroceryList.css'
+
+
+export default function GroceryList({
+
+  items,
+
+  onToggleBought,
+
+  onRemoveItem
+
+}) {
+
+  const [filter, setFilter] =
+    useState('ALL')
+
+
+  const filteredItems =
+    items.filter(item => {
+
+      if (
+        filter ===
+        'PURCHASED'
+      ) {
+
+        return item.purchased
+      }
+
+
+      if (
+        filter ===
+        'UNPURCHASED'
+      ) {
+
+        return !item.purchased
+      }
+
+
+      return true
+    })
+
+
+  return (
+    <section className="grocery-list-container">
+
+      <h2>
+
+        Grocery Items
+        {' '}
+        ({filteredItems.length})
+
+      </h2>
+
+
+      {/* Filter Controls */}
+
+      <div className="filter-buttons">
+
+
+        <button
+          type="button"
+          onClick={() =>
+            setFilter('ALL')
+          }
+        >
+          All
+        </button>
+
+
+        <button
+          type="button"
+          onClick={() =>
+            setFilter(
+              'UNPURCHASED'
+            )
+          }
+        >
+          To Buy
+        </button>
+
+
+        <button
+          type="button"
+          onClick={() =>
+            setFilter(
+              'PURCHASED'
+            )
+          }
+        >
+          Purchased
+        </button>
+
+      </div>
+
+
+      {filteredItems.length === 0 ? (
+
+        <p className="empty-message">
+
+          {items.length === 0
+            ? 'No items in your grocery list.'
+            : 'No items match the current filter.'}
+
+        </p>
+
+      ) : (
+
+        <div className="items-grid">
+
+          {filteredItems.map(
+            item => (
+
+              <GroceryItem
+                key={item.id}
+                item={item}
+                onToggleBought={
+                  onToggleBought
+                }
+                onRemoveItem={
+                  onRemoveItem
+                }
+              />
+
+            )
+          )}
+
+        </div>
+
+      )}
+
+    </section>
+  )
+}
+
+
+================================================================================
+WHAT GroceryList DOES
+================================================================================
+
+GroceryList receives:
+
+onRemoveItem
+
+
+Then forwards:
+
+onRemoveItem={
+  onRemoveItem
+}
+
+
+to each GroceryItem.
+
+
+GroceryList does NOT delete anything itself.
+
+
+It simply connects:
+
+App's handler
+
+to:
+
+the GroceryItem that needs it.
+
+
+================================================================================
+PROP FLOW
+================================================================================
+
+App:
+
+handleRemoveItem
+
+
+        ↓
+
+
+GroceryList:
+
+onRemoveItem
+
+
+        ↓
+
+
+GroceryItem:
+
+onRemoveItem
+
+
+        ↓
+
+
+Delete Button:
+
+onRemoveItem(
+  item.id
+)
+
+
+================================================================================
+PASS VS CALL
+================================================================================
+
+PASS:
+
+<GroceryItem
+  onRemoveItem={
+    onRemoveItem
+  }
+/>
+
+
+CALL:
+
+onRemoveItem(
+  item.id
+)
+
+
+MEMORY:
+
+PARENT/LIST:
+PASS FUNCTION
+
+
+ACTUAL USER EVENT:
+CALL FUNCTION
+
+
+================================================================================
+PART 6: USING onRemoveItem IN GroceryItem
+================================================================================
+
+File:
+
+src/components/GroceryItem.jsx
+
+
+import './GroceryItem.css'
+
+
+export default function GroceryItem({
+
+  item,
+
+  onToggleBought,
+
+  onRemoveItem
+
+}) {
+
+  // ============================================
+  // TOGGLE
+  // ============================================
+
+  const handleCheckboxChange = () => {
+
+    onToggleBought(
+      item.id
+    )
+  }
+
+
+  // ============================================
+  // DELETE
+  // ============================================
+
+  const handleDelete = () => {
+
+    const confirmed =
+      window.confirm(
+        `Delete "${item.name}"?`
+      )
+
+
+    if (!confirmed) {
+
+      return
+    }
+
+
+    onRemoveItem(
+      item.id
+    )
+  }
+
+
+  // ============================================
+  // DISPLAY VALUE
+  // ============================================
+
+  const lineCost =
+    item.price *
+    item.quantity
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <article
+      className={
+        `item-card ${
+          item.purchased
+            ? 'purchased'
+            : ''
+        }`
+      }
+    >
+
+
+      {/* Purchased Checkbox */}
+
+      <div className="item-checkbox-wrapper">
+
+        <input
+          type="checkbox"
+          checked={
+            item.purchased
+          }
+          onChange={
+            handleCheckboxChange
+          }
+          className="item-checkbox"
+          aria-label={
+            `Mark ${item.name} as ${
+              item.purchased
+                ? 'not purchased'
+                : 'purchased'
+            }`
+          }
+        />
+
+      </div>
+
+
+      {/* Details */}
+
+      <div className="item-details">
+
+        <h3 className="item-name">
+
+          {item.name}
+
+        </h3>
+
+
+        <div className="item-meta">
+
+          <span className="item-category">
+
+            <i
+              className="bi bi-tag"
+              aria-hidden="true"
+            ></i>
+
+            {item.category}
+
+          </span>
+
+
+          <span className="item-quantity">
+
+            <i
+              className="bi bi-box"
+              aria-hidden="true"
+            ></i>
+
+            Qty:
+            {' '}
+            {item.quantity}
+
+          </span>
+
+
+          <span className="item-total-price">
+
+            ${lineCost.toFixed(2)}
+
+          </span>
+
+        </div>
+
+
+        <p className="item-unit-price">
+
+          ${item.price.toFixed(2)}
+          {' '}
+          each
+
+        </p>
+
+      </div>
+
+
+      {/* Actions */}
+
+      <div className="item-actions">
+
+        <button
+          type="button"
+          onClick={
+            handleDelete
+          }
+          className="btn-action btn-delete"
+          title="Delete item"
+          aria-label={
+            `Delete ${item.name}`
+          }
+        >
+
+          <i
+            className="bi bi-trash"
+            aria-hidden="true"
+          ></i>
+
+        </button>
+
+      </div>
+
+    </article>
+  )
+}
+
+
+================================================================================
+CORRUPTED JSX FIX
+================================================================================
+
+The supplied lesson contained:
+
+className={�13�}
+
+
+Correct:
+
+className={
+  `item-card ${
+    item.purchased
+      ? 'purchased'
+      : ''
+  }`
+}
+
+
+================================================================================
+DELETE BUTTON
+================================================================================
+
+<button
+  type="button"
+  onClick={
+    handleDelete
+  }
+  aria-label={
+    `Delete ${item.name}`
+  }
+>
+
+  <i
+    className="bi bi-trash"
+    aria-hidden="true"
+  ></i>
+
+</button>
+
+
+Important:
+
+type="button"
+
+
+prevents the button from accidentally behaving as a form submit button if the
+component is ever rendered within a form.
+
+
+================================================================================
+WHY PASS ONLY THE ID?
+================================================================================
+
+For deletion, App only needs to know:
+
+WHICH ITEM?
+
+
+Therefore:
+
+onRemoveItem(
+  item.id
+)
+
+
+is generally simpler than passing the whole object:
+
+onRemoveItem(
+  item
+)
+
+
+The state owner can identify the record using its stable ID.
+
+
+================================================================================
+CONFIRMATION
+================================================================================
+
+This lesson uses:
+
+window.confirm(
+  `Delete "${item.name}"?`
+)
+
+
+Possible results:
+
+true
+
+or:
+
+false
+
+
+If true:
+
+onRemoveItem(
+  item.id
+)
+
+
+If false:
+
+return
+
+
+================================================================================
+IS CONFIRMATION REQUIRED?
+================================================================================
+
+No.
+
+Confirmation is a product/UX decision.
+
+
+Useful when:
+
+• Deletion is destructive
+
+• Recovery is difficult
+
+• Accidentally deleting has meaningful consequences
+
+
+It may be unnecessary when:
+
+• Deletion is easily undoable
+
+• The data is low consequence
+
+• Confirmation causes excessive friction
+
+
+An Undo pattern can sometimes provide a smoother UX.
+
+For this learning lesson, `window.confirm()` keeps the workflow simple.
+
+
+================================================================================
+PART 7: COMPLETE DELETION FLOW
+================================================================================
+
+STEP 1: INITIAL STATE
+--------------------------------------------------------------------------------
+
+[
+  {
+    id:
+      'milk-1',
+
+    name:
+      'Milk'
+  },
+
+  {
+    id:
+      'bread-1',
+
+    name:
+      'Bread'
+  },
+
+  {
+    id:
+      'apples-1',
+
+    name:
+      'Apples'
+  }
+]
+
+
+================================================================================
+STEP 2: USER CHOOSES DELETE ON BREAD
+================================================================================
+
+GroceryItem:
+
+item.id:
+
+'bread-1'
+
+
+handleDelete()
+
+executes.
+
+
+================================================================================
+STEP 3: CONFIRMATION
+================================================================================
+
+Prompt:
+
+Delete "Bread"?
+
+
+If:
+
+Cancel
+
+
+Flow stops.
+
+
+If:
+
+Confirm
+
+
+continue.
+
+
+================================================================================
+STEP 4: CALLBACK
+================================================================================
+
+onRemoveItem(
+  'bread-1'
+)
+
+
+================================================================================
+STEP 5: HANDLER IN App
+================================================================================
+
+handleRemoveItem(
+  'bread-1'
+)
+
+
+================================================================================
+STEP 6: filter()
+================================================================================
+
+previousItems.filter(
+  item =>
+    item.id !==
+    'bread-1'
+)
+
+
+Milk:
+
+KEEP
+
+
+Bread:
+
+REMOVE
+
+
+Apples:
+
+KEEP
+
+
+================================================================================
+STEP 7: NEW ARRAY
+================================================================================
+
+[
+  {
+    id:
+      'milk-1',
+
+    name:
+      'Milk'
+  },
+
+  {
+    id:
+      'apples-1',
+
+    name:
+      'Apples'
+  }
+]
+
+
+================================================================================
+STEP 8: RE-RENDER
+================================================================================
+
+App:
+
+2 records
+
+
+        ↓
+
+GroceryList:
+
+Receives 2 records
+
+
+        ↓
+
+map():
+
+Milk
+
+Apples
+
+
+        ↓
+
+No GroceryItem for Bread
+
+
+        ↓
+
+Bread disappears from UI
+
+
+================================================================================
+STEP 9: DERIVED VALUES UPDATE
+================================================================================
+
+Suppose before deletion:
+
+totalItems:
+
+3
+
+
+After deletion:
+
+totalItems:
+
+2
+
+
+If Bread was purchased:
+
+purchasedCount
+
+also changes because it is recalculated from the current array.
+
+
+If Bread contributed:
+
+$2.50
+
+
+to the total cost, then the derived total cost also recalculates from the
+remaining records.
+
+
+No separate:
+
+setTotalItems()
+
+setPurchasedCount()
+
+setTotalCost()
+
+
+is required when those values are derived from:
+
+items
+
+
+================================================================================
+COMPLETE FLOW
+================================================================================
+
+DELETE BUTTON
+      ↓
+handleDelete()
+      ↓
+Confirm?
+   /       \
+ NO        YES
+ ↓          ↓
+Stop    onRemoveItem(id)
+             ↓
+      App.handleRemoveItem(id)
+             ↓
+          filter()
+             ↓
+       New Items Array
+             ↓
+      setGroceryItems()
+             ↓
+           Render
+             ↓
+      Removed Card Gone
+
+
+================================================================================
+PART 8: TESTING ITEM DELETION
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Delete button renders
+
+[ ] Button has type="button"
+
+[ ] Delete button has accessible name
+
+[ ] Trash icon is decorative
+
+[ ] Clicking Delete requests confirmation
+
+[ ] Cancel keeps item
+
+[ ] Confirm calls onRemoveItem
+
+[ ] Correct ID is supplied
+
+[ ] Parent removes matching record
+
+[ ] Other records remain unchanged
+
+[ ] Item disappears from list
+
+[ ] Item count recalculates
+
+[ ] Purchased count recalculates
+
+[ ] Total cost recalculates
+
+[ ] Filtered list recalculates
+
+[ ] Deleting last item shows empty state
+
+[ ] Multiple items can be removed independently
+
+[ ] No runtime errors occur
+
+
+================================================================================
+SCENARIO 1: DELETE ONE ITEM
+================================================================================
+
+Initial:
+
+Milk
+
+Bread
+
+Apples
+
+
+Count:
+
+3
+
+
+Delete:
+
+Milk
+
+
+Confirm:
+
+Yes
+
+
+Expected:
+
+Bread
+
+Apples
+
+
+Count:
+
+2
+
+
+================================================================================
+SCENARIO 2: CANCEL
+================================================================================
+
+Initial:
+
+Milk
+
+Bread
+
+Apples
+
+
+Click:
+
+Delete Bread
+
+
+Confirmation:
+
+Cancel
+
+
+Expected:
+
+Milk
+
+Bread
+
+Apples
+
+
+Count:
+
+3
+
+
+No state change occurs.
+
+
+================================================================================
+SCENARIO 3: DELETE MULTIPLE
+================================================================================
+
+Initial:
+
+Milk
+
+Bread
+
+Apples
+
+
+Delete Milk:
+
+Bread
+
+Apples
+
+
+Delete Apples:
+
+Bread
+
+
+Expected:
+
+One item remains.
+
+
+================================================================================
+SCENARIO 4: DELETE LAST ITEM
+================================================================================
+
+Before:
+
+[
+  Bread
+]
+
+
+Delete Bread.
+
+
+After:
+
+[]
+
+
+Expected empty UI:
+
+No items in your grocery list.
+
+
+================================================================================
+SCENARIO 5: DELETE PURCHASED ITEM
+================================================================================
+
+Before:
+
+Milk:
+purchased = true
+
+
+Bread:
+purchased = false
+
+
+Purchased Count:
+
+1
+
+
+Delete Milk.
+
+
+After:
+
+Bread only
+
+
+Purchased Count:
+
+0
+
+
+The count is derived from the remaining items.
+
+
+================================================================================
+SCENARIO 6: DELETE WHILE FILTERED
+================================================================================
+
+Filter:
+
+PURCHASED
+
+
+Visible:
+
+Milk
+
+Bread
+
+
+Delete Milk.
+
+
+Expected:
+
+• Milk disappears
+
+• Bread remains
+
+• Source items array also loses Milk
+
+• Switching to All does not bring Milk back
+
+
+This confirms deletion affects the source collection, not only the filtered
+view.
+
+
+================================================================================
+AUTOMATED TEST - GroceryItem
+================================================================================
+
+Conceptual React Testing Library example:
+
+
+import {
+  render,
+  screen
+} from '@testing-library/react'
+
+import userEvent
+  from '@testing-library/user-event'
+
+import {
+  vi
+} from 'vitest'
+
+import GroceryItem
+  from './GroceryItem'
+
+
+test(
+  'removes the item after confirmation',
+
+  async () => {
+
+    const user =
+      userEvent.setup()
+
+
+    const item = {
+
+      id:
+        'milk-1',
+
+      name:
+        'Milk',
+
+      quantity:
+        2,
+
+      category:
+        'Dairy',
+
+      price:
+        3.99,
+
+      purchased:
+        false
+
+    }
+
+
+    const onRemoveItem =
+      vi.fn()
+
+
+    const confirmSpy =
+      vi.spyOn(
+        window,
+        'confirm'
+      )
+      .mockReturnValue(true)
+
+
+    render(
+      <GroceryItem
+        item={item}
+        onToggleBought={
+          vi.fn()
+        }
+        onRemoveItem={
+          onRemoveItem
+        }
+      />
+    )
+
+
+    await user.click(
+      screen.getByRole(
+        'button',
+        {
+          name:
+            /delete milk/i
+        }
+      )
+    )
+
+
+    expect(
+      confirmSpy
+    ).toHaveBeenCalled()
+
+
+    expect(
+      onRemoveItem
+    ).toHaveBeenCalledWith(
+      'milk-1'
+    )
+
+
+    confirmSpy
+      .mockRestore()
+  }
+)
+
+
+================================================================================
+TEST CANCELLATION
+================================================================================
+
+Conceptually:
+
+window.confirm
+ ↓
+false
+
+
+Expected:
+
+onRemoveItem
+
+NOT called.
+
+
+This is as important as testing successful deletion.
+
+
+================================================================================
+MANUAL DEBUGGING
+================================================================================
+
+During development you may temporarily log:
+
+console.log(
+  'Delete requested:',
+  item.id
+)
+
+
+and in App:
+
+console.log(
+  'Removing:',
+  id
+)
+
+
+But the important verification is:
+
+BEFORE ARRAY
+      ↓
+DELETE
+      ↓
+AFTER ARRAY
+      ↓
+CORRECT ITEM ABSENT
+      ↓
+UI MATCHES ARRAY
+
+
+Remove unnecessary logs after debugging.
+
+
+================================================================================
+PART 9: UNDERSTANDING IMMUTABLE DELETION
+================================================================================
+
+CORRECT
+--------------------------------------------------------------------------------
+
+setGroceryItems(
+  previousItems =>
+
+    previousItems.filter(
+      item =>
+        item.id !== id
+    )
+)
+
+
+This creates the next array.
+
+
+================================================================================
+AVOID DIRECT MUTATION
+================================================================================
+
+Avoid:
+
+const index =
+  groceryItems.findIndex(
+    item =>
+      item.id === id
+  )
+
+
+groceryItems.splice(
+  index,
+  1
+)
+
+
+setGroceryItems(
+  groceryItems
+)
+
+
+Problem:
+
+splice() modifies:
+
+groceryItems
+
+
+directly.
+
+
+================================================================================
+REFERENCE PICTURE
+================================================================================
+
+BEFORE:
+
+Array A
+│
+├── Milk Object
+├── Bread Object
+└── Apples Object
+
+
+DELETE Bread
+
+
+AFTER:
+
+Array B
+│
+├── Milk Object
+└── Apples Object
+
+
+Array A:
+
+unchanged
+
+
+Array B:
+
+new array
+
+
+The surviving item objects can remain the same objects because they themselves
+were not changed.
+
+
+================================================================================
+IMPORTANT CLARIFICATION
+================================================================================
+
+Avoid saying:
+
+"React compares every old and new state value and therefore detects the
+change."
+
+
+For application code, use the practical rule:
+
+DON'T MUTATE EXISTING STATE.
+
+CREATE THE NEXT STATE VALUE.
+
+
+For deletion:
+
+OLD ARRAY
+   ↓
+filter()
+   ↓
+NEW ARRAY
+
+
+================================================================================
+WHY filter() IS A GOOD FIT
+================================================================================
+
+Deletion asks:
+
+"Which records should remain?"
+
+
+filter() answers exactly that.
+
+
+Condition:
+
+item.id !== id
+
+
+means:
+
+KEEP EVERY ITEM
+WHOSE ID IS NOT
+THE TARGET ID.
+
+
+================================================================================
+filter() EDGE CASE: ID NOT FOUND
+================================================================================
+
+Suppose:
+
+items:
+
+[
+  Milk,
+  Bread
+]
+
+
+Delete request:
+
+'id-that-does-not-exist'
+
+
+Then:
+
+items.filter(
+  item =>
+    item.id !== id
+)
+
+
+keeps both items.
+
+
+Result logically contains the same records.
+
+
+Nothing is deleted.
+
+
+For the current local UI, this is acceptable behavior.
+
+
+================================================================================
+ID CONSISTENCY
+================================================================================
+
+Be consistent with ID types.
+
+
+Example problem:
+
+item.id:
+
+1
+
+
+delete id:
+
+'1'
+
+
+Strict comparison:
+
+1 !== '1'
+
+=
+true
+
+
+So the item would be retained.
+
+
+Use consistent IDs throughout the application.
+
+
+Our newer records use:
+
+crypto.randomUUID()
+
+
+which returns string IDs.
+
+
+================================================================================
+IMMUTABILITY TABLE
+================================================================================
+
++--------------------------+-----------------------+--------------------------+
+| ASPECT                   | filter()              | Direct splice()          |
++--------------------------+-----------------------+--------------------------+
+| Creates New Array        | Yes                   | No                       |
+| Mutates Existing Array   | No                    | Yes                      |
+| Clear State Pattern      | Yes                   | Avoid for direct state   |
+| Target By ID             | Easy                  | Requires index lookup    |
++--------------------------+-----------------------+--------------------------+
+
+
+================================================================================
+PART 10: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE ACCOMPLISHED
+--------------------------------------------------------------------------------
+
+✓ Created handleRemoveItem
+
+✓ Kept the handler with the state owner
+
+✓ Passed onRemoveItem to GroceryList
+
+✓ Forwarded onRemoveItem to GroceryItem
+
+✓ Passed the selected item's ID
+
+✓ Used filter() for deletion
+
+✓ Created a new state array
+
+✓ Avoided direct array mutation
+
+✓ Connected a Delete button
+
+✓ Added optional deletion confirmation
+
+✓ Added an accessible Delete action
+
+✓ Updated the UI automatically
+
+✓ Allowed derived counts and totals to recalculate
+
+✓ Tested confirmation and cancellation
+
+✓ Tested deleting the last item
+
+
+================================================================================
+CRITICAL DELETE PATTERN
+================================================================================
+
+PARENT STATE:
+
+const [
+  items,
+  setItems
+] = useState(...)
+
+
+DELETE HANDLER:
+
+const handleRemoveItem = (
+  id
+) => {
+
+  setItems(
+    previousItems =>
+
+      previousItems.filter(
+        item =>
+          item.id !== id
+      )
+  )
+}
+
+
+PASS:
+
+<GroceryList
+  items={items}
+  onRemoveItem={
+    handleRemoveItem
+  }
+/>
+
+
+FORWARD:
+
+<GroceryItem
+  item={item}
+  onRemoveItem={
+    onRemoveItem
+  }
+/>
+
+
+CALL:
+
+onRemoveItem(
+  item.id
+)
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++-------------------------+---------------------------------------------+
+| CONCEPT                 | REMEMBER                                    |
++-------------------------+---------------------------------------------+
+| handleRemoveItem       | Parent deletion handler                     |
+| onRemoveItem           | Callback prop                               |
+| item.id                | Identifies record                           |
+| filter()               | Builds array of records to keep             |
+| item.id !== id         | Excludes target item                        |
+| Functional Setter      | Uses previous state                         |
+| window.confirm         | Optional destructive-action confirmation    |
+| type="button"          | Prevent accidental form submit              |
+| aria-label             | Accessible icon-only action                 |
+| Empty State            | Appears after final deletion                |
++-------------------------+---------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - DELETE FLOW
+================================================================================
+
+GroceryItem
+    ↓
+Delete Button
+    ↓
+handleDelete()
+    ↓
+Confirm?
+    ↓
+onRemoveItem(item.id)
+    ↓
+App
+    ↓
+handleRemoveItem(id)
+    ↓
+filter()
+    ↓
+New Array
+    ↓
+setGroceryItems()
+    ↓
+React Render
+    ↓
+Item Removed
+
+
+================================================================================
+QUICK REVISION - filter()
+================================================================================
+
+ARRAY:
+
+[
+  Milk,
+  Bread,
+  Apples
+]
+
+
+TARGET:
+
+Bread
+
+
+CONDITION:
+
+item.id !== breadId
+
+
+RESULT:
+
+[
+  Milk,
+  Apples
+]
+
+
+================================================================================
+QUICK REVISION - CRUD
+================================================================================
+
+CREATE:
+
+AddGroceryForm
+ ↓
+newItem
+ ↓
+[newItem, ...previous]
+
+
+READ:
+
+items
+ ↓
+map()
+ ↓
+GroceryItem
+
+
+UPDATE:
+
+toggleBought
+ ↓
+map()
+ ↓
+Updated Item
+
+
+DELETE:
+
+removeItem
+ ↓
+filter()
+ ↓
+Remaining Items
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+DELETE:
+
+ID
+ ↓
+filter()
+ ↓
+New Array
+
+
+FILTER CONDITION:
+
+item.id !== id
+
+
+CHILD ACTION:
+
+Delete Button
+     ↓
+onRemoveItem(item.id)
+
+
+PARENT UPDATE:
+
+previousItems
+     ↓
+filter()
+     ↓
+nextItems
+
+
+CONFIRMATION:
+
+Delete Click
+    ↓
+Confirm?
+  /       \
+No       Yes
+↓         ↓
+Stop     Delete
+
+
+IMMUTABLE DELETE:
+
+DO:
+
+items.filter(...)
+
+
+DON'T:
+
+items.splice(...)
+
+
+COMPLETE FLOW:
+
+USER
+ ↓
+DELETE BUTTON
+ ↓
+CALLBACK
+ ↓
+PARENT
+ ↓
+filter()
+ ↓
+NEW STATE
+ ↓
+RENDER
+ ↓
+ITEM GONE
+
+
+MOST IMPORTANT RULE:
+
+DELETE THE ITEM FROM THE SOURCE STATE ARRAY.
+
+DO NOT JUST HIDE THE CARD VISUALLY.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Add Edit functionality
+
+2. Add a Clear Purchased action
+
+3. Add Undo Delete if desired
+
+4. Add persistence with localStorage
+
+5. Connect deletion to an API later
+
+6. Add integration tests for add, toggle, and delete
+
+7. Continue completing CRUD functionality
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+Deletion follows the same React communication pattern as toggleBought:
+
+PARENT OWNS STATE
+        ↓
+PARENT PROVIDES HANDLER
+        ↓
+HANDLER PASSES THROUGH PROPS
+        ↓
+CHILD REPORTS USER ACTION
+        ↓
+PARENT CREATES NEW STATE
+        ↓
+UPDATED DATA FLOWS DOWN
+        ↓
+UI REFLECTS THE CHANGE
+
+
+For deletion, the key operation is:
+
+previousItems.filter(
+  item =>
+    item.id !== id
+)
+
+
+It means:
+
+KEEP EVERY ITEM
+EXCEPT THE ONE
+THE USER CHOSE TO REMOVE.
+
+
+================================================================================
+END OF LESSON 19
+ADDING handleRemoveItem PROP
+AND FUNCTION TO REMOVE AN ITEM
+================================================================================
