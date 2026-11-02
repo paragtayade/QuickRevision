@@ -1,0 +1,2489 @@
+LESSON 15: ADDING BOOTSTRAP ICONS
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on adding Bootstrap Icons to the Grocery List App.
+
+You will understand:
+
+• What Bootstrap Icons are
+
+• Installing Bootstrap Icons
+
+• Importing Bootstrap Icons into React
+
+• Using icon-font classes
+
+• Adding icons to GroceryItem
+
+• Adding icons to AddGroceryForm
+
+• Adding icons to Navigation
+
+• Adding icons to Footer
+
+• Styling icon size and color
+
+• Using decorative icons correctly
+
+• Making icon-only buttons accessible
+
+• Creating optional icon animations
+
+• Supporting reduced-motion preferences
+
+• Testing icons
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+Icons can improve an interface when they reinforce the meaning of an action.
+
+Examples:
+
+Add Item
+   +
+Plus Icon
+
+
+Delete
+   +
+Trash Icon
+
+
+Edit
+   +
+Pencil Icon
+
+
+Success
+   +
+Check Icon
+
+
+Search
+   +
+Search Icon
+
+
+However:
+
+ICONS SHOULD SUPPORT MEANING
+
+NOT REPLACE CLEAR MEANING
+
+
+The main pattern is:
+
+INSTALL ICON LIBRARY
+        ↓
+IMPORT ICON CSS
+        ↓
+USE bi + bi-* CLASSES
+        ↓
+STYLE WITH CSS
+        ↓
+ADD ACCESSIBILITY
+
+
+================================================================================
+PART 2: UNDERSTANDING BOOTSTRAP ICONS
+================================================================================
+
+WHAT ARE BOOTSTRAP ICONS?
+--------------------------------------------------------------------------------
+
+Bootstrap Icons is an open-source icon library.
+
+It can be used through several approaches:
+
+• Icon font
+
+• Inline SVG
+
+• SVG sprite
+
+• Individual SVG files
+
+
+For this lesson, we use the:
+
+ICON FONT + CSS CLASS
+
+approach.
+
+
+Example:
+
+<i
+  className="bi bi-trash"
+  aria-hidden="true"
+></i>
+
+
+================================================================================
+IMPORTANT: BOOTSTRAP ICONS != BOOTSTRAP CSS
+================================================================================
+
+You do NOT need to install the complete Bootstrap CSS framework merely to use
+Bootstrap Icons.
+
+Bootstrap Icons can be used independently.
+
+
+For this lesson:
+
+React
+   +
+Our Custom CSS
+   +
+Bootstrap Icons
+
+
+We are NOT automatically adding:
+
+Bootstrap Grid
+
+Bootstrap Buttons
+
+Bootstrap Forms
+
+Bootstrap JavaScript
+
+
+================================================================================
+ICON CLASS PATTERN
+================================================================================
+
+Bootstrap Icons normally use:
+
+bi
++
+bi-ICON-NAME
+
+
+Example:
+
+bi bi-trash
+
+
+Another:
+
+bi bi-pencil-square
+
+
+Another:
+
+bi bi-plus-circle
+
+
+Conceptually:
+
+bi
+ ↓
+Base Bootstrap Icon class
+
+
+bi-trash
+ ↓
+Specific glyph
+
+
+================================================================================
+COMMON ICONS FOR OUR GROCERY APP
+================================================================================
+
++----------------------+--------------------------+
+| PURPOSE              | CLASS                    |
++----------------------+--------------------------+
+| Add                  | bi-plus-circle           |
+| Delete               | bi-trash                 |
+| Edit                 | bi-pencil-square         |
+| Success              | bi-check-circle          |
+| Close                | bi-x                     |
+| Search               | bi-search                |
+| Settings             | bi-gear                  |
+| Home                 | bi-house                 |
+| Menu                 | bi-list                  |
+| Information          | bi-info-circle           |
+| Warning              | bi-exclamation-triangle  |
+| Loading/Refresh      | bi-arrow-repeat          |
+| Category             | bi-tag                   |
+| Quantity             | bi-box                   |
+| Price                | bi-currency-dollar       |
+| Email                | bi-envelope              |
+| Phone                | bi-telephone             |
+| Location             | bi-geo-alt               |
+| Calculator           | bi-calculator            |
++----------------------+--------------------------+
+
+
+================================================================================
+PART 3: INSTALLING BOOTSTRAP ICONS
+================================================================================
+
+STEP 1: INSTALL
+--------------------------------------------------------------------------------
+
+Run:
+
+npm i bootstrap-icons
+
+
+The package becomes a project dependency.
+
+
+================================================================================
+STEP 2: IMPORT THE ICON FONT CSS
+================================================================================
+
+A good approach is to import it once at the application's entry point.
+
+For Vite:
+
+src/main.jsx
+
+
+Example:
+
+import { StrictMode } from 'react'
+
+import {
+  createRoot
+} from 'react-dom/client'
+
+import 'bootstrap-icons/font/bootstrap-icons.css'
+
+import App
+  from './App.jsx'
+
+import './index.css'
+
+
+createRoot(
+  document.getElementById(
+    'root'
+  )
+).render(
+
+  <StrictMode>
+
+    <App />
+
+  </StrictMode>
+
+)
+
+
+================================================================================
+WHY IMPORT IT ONCE?
+================================================================================
+
+Avoid repeatedly importing:
+
+bootstrap-icons/font/bootstrap-icons.css
+
+
+inside:
+
+GroceryItem.jsx
+
+AddGroceryForm.jsx
+
+Navigation.jsx
+
+Footer.jsx
+
+
+if Bootstrap Icons are used throughout the application.
+
+
+A single global import makes the dependency clear:
+
+main.jsx
+   ↓
+Bootstrap Icons CSS
+   ↓
+Available Throughout App
+
+
+================================================================================
+STEP 3: USE AN ICON
+================================================================================
+
+Example:
+
+<i
+  className="bi bi-trash"
+  aria-hidden="true"
+></i>
+
+
+================================================================================
+STEP 4: VERIFY
+================================================================================
+
+You can verify the package installation with:
+
+npm list bootstrap-icons
+
+
+Do not hard-code an expected version number into learning notes unless your
+project intentionally pins that version.
+
+The installed version can change as the package is updated.
+
+
+================================================================================
+INSTALLATION FLOW
+================================================================================
+
+npm i bootstrap-icons
+        ↓
+node_modules
+        ↓
+Import Icons CSS
+        ↓
+Use bi Classes
+        ↓
+Browser Renders Icon Font
+
+
+================================================================================
+INSTALLATION TABLE
+================================================================================
+
++----------------------+-------------------------------------------+
+| STEP                 | PURPOSE                                   |
++----------------------+-------------------------------------------+
+| npm install          | Add dependency                            |
+| CSS import           | Load Bootstrap icon-font styles           |
+| bi class             | Base icon class                           |
+| bi-* class           | Select icon glyph                         |
+| npm list             | Inspect installed package                 |
++----------------------+-------------------------------------------+
+
+
+================================================================================
+PART 4: USING BOOTSTRAP ICONS IN GroceryItem
+================================================================================
+
+File:
+
+src/components/GroceryItem.jsx
+
+
+import './GroceryItem.css'
+
+
+export default function GroceryItem({
+
+  item,
+
+  onTogglePurchased,
+
+  onEditItem,
+
+  onDeleteItem
+
+}) {
+
+  const lineCost =
+    item.price *
+    item.quantity
+
+
+  return (
+    <article
+      className={
+        `item-card ${
+          item.purchased
+            ? 'purchased'
+            : ''
+        }`
+      }
+    >
+
+
+      {/* Purchased Checkbox */}
+
+      <div className="item-checkbox-wrapper">
+
+        <input
+          type="checkbox"
+          checked={
+            item.purchased
+          }
+          onChange={() =>
+            onTogglePurchased(
+              item.id
+            )
+          }
+          className="item-checkbox"
+          aria-label={
+            `Mark ${item.name} as ${
+              item.purchased
+                ? 'not purchased'
+                : 'purchased'
+            }`
+          }
+        />
+
+      </div>
+
+
+      {/* Item Details */}
+
+      <div className="item-details">
+
+        <h3 className="item-name">
+
+          {item.name}
+
+        </h3>
+
+
+        <div className="item-meta">
+
+
+          {/* Category */}
+
+          <span className="item-category">
+
+            <i
+              className="bi bi-tag"
+              aria-hidden="true"
+            ></i>
+
+            {item.category}
+
+          </span>
+
+
+          {/* Quantity */}
+
+          <span className="item-quantity">
+
+            <i
+              className="bi bi-box"
+              aria-hidden="true"
+            ></i>
+
+            Qty:
+            {' '}
+            {item.quantity}
+
+          </span>
+
+
+          {/* Total Price */}
+
+          <span className="item-total-price">
+
+            <i
+              className="bi bi-currency-dollar"
+              aria-hidden="true"
+            ></i>
+
+            {lineCost.toFixed(2)}
+
+          </span>
+
+        </div>
+
+
+        {/* Unit Price */}
+
+        <p className="item-unit-price">
+
+          <i
+            className="bi bi-tag-fill"
+            aria-hidden="true"
+          ></i>
+
+          ${item.price.toFixed(2)}
+          {' '}
+          each
+
+        </p>
+
+      </div>
+
+
+      {/* Actions */}
+
+      <div className="item-actions">
+
+
+        {/* Edit */}
+
+        <button
+          type="button"
+          onClick={() =>
+            onEditItem(item)
+          }
+          className="btn-action btn-edit"
+          title="Edit item"
+          aria-label={
+            `Edit ${item.name}`
+          }
+        >
+
+          <i
+            className="bi bi-pencil-square"
+            aria-hidden="true"
+          ></i>
+
+        </button>
+
+
+        {/* Delete */}
+
+        <button
+      *   type="button"
+          onClick*{() =>
+            onDeleteItem(
+ *            item.id
+            )
+*         }
+          className="bt*-action btn-delete"
+          titl*="Delete item"
+          aria-labe*={
+            `Delete ${item.name*`
+          }
+        >
+
+          <i
+            className="bi bi-trash"
+            aria-hidden="true"
+          ></i>
+
+        </button>
+
+      </div>
+
+    </article>
+  )
+}
+
+
+================================================================================
+IMPORTANT CORRECTION: CORRUPTED JSX
+================================================================================
+
+The supplied content contained:
+
+className={�3�}
+
+
+The intended class is:
+
+className={
+  `item-card ${
+    item.purchased
+      ? 'purchased'
+      : ''
+  }`
+}
+
+
+================================================================================
+IMPORTANT PRICE FIX
+================================================================================
+
+If using:
+
+bi-currency-dollar
+
+
+the icon itself visually represents the currency symbol.
+
+Therefore:
+
+<i className="bi bi-currency-dollar"></i>
+{lineCost.toFixed(2)}
+
+
+is enough.
+
+
+Avoid:
+
+<i className="bi bi-currency-dollar"></i>
+${lineCost.toFixed(2)}
+
+
+if the visual result unnecessarily becomes:
+
+$ $7.98
+
+
+Another perfectly valid option is:
+
+NO CURRENCY ICON
+
+and simply:
+
+${lineCost.toFixed(2)}
+
+
+Use one clear currency presentation.
+
+
+================================================================================
+DECORATIVE ICONS
+================================================================================
+
+Example:
+
+<span className="item-category">
+
+  <i
+    className="bi bi-tag"
+    aria-hidden="true"
+  ></i>
+
+  Dairy
+
+</span>
+
+
+The word:
+
+Dairy
+
+
+already communicates the information.
+
+
+Therefore the tag icon is decorative:
+
+aria-hidden="true"
+
+
+================================================================================
+ICON-ONLY BUTTON
+================================================================================
+
+Example:
+
+<button
+  type="button"
+  aria-label="Delete Milk"
+>
+
+  <i
+    className="bi bi-trash"
+    aria-hidden="true"
+  ></i>
+
+</button>
+
+
+The icon is hidden from assistive technology.
+
+The BUTTON supplies the accessible name.
+
+
+MEMORY:
+
+ICON-ONLY CONTROL
+       ↓
+CONTROL NEEDS ACCESSIBLE NAME
+
+
+================================================================================
+PART 5: STYLING BOOTSTRAP ICONS
+================================================================================
+
+Bootstrap icon-font icons inherit:
+
+currentColor
+
+
+and commonly size with:
+
+font-size
+
+
+This makes them easy to style with normal CSS.
+
+
+================================================================================
+GroceryItem.css - ICON STYLES
+================================================================================
+
+.item-meta i,
+.item-unit-price i {
+
+  margin-right:
+    6px;
+}
+
+
+.item-meta i {
+
+  color:
+    #667eea;
+
+  font-size:
+    1rem;
+}
+
+
+.item-unit-price i {
+
+  color:
+    #666;
+
+  font-size:
+    0.9rem;
+}
+
+
+.btn-action i {
+
+  font-size:
+    1.15rem;
+
+  line-height:
+    1;
+}
+
+
+.btn-edit i {
+
+  color:
+    currentColor;
+}
+
+
+.btn-delete i {
+
+  color:
+    currentColor;
+}
+
+
+/* Hover */
+
+.btn-action:hover i {
+
+  transform:
+    scale(1.1);
+}
+
+
+/* Icon Transition */
+
+.btn-action i {
+
+  transition:
+    transform 0.2s ease;
+}
+
+
+/* Purchased */
+
+.item-card.purchased
+.item-meta i {
+
+  color:
+    #666;
+}
+
+
+================================================================================
+WHY currentColor?
+================================================================================
+
+Suppose:
+
+.btn-delete {
+
+  color:
+    #b71c1c;
+}
+
+
+The icon can inherit:
+
+currentColor
+
+
+This avoids repeating the same color declaration for:
+
+button
++
+icon
+
+
+Conceptually:
+
+BUTTON COLOR
+     ↓
+currentColor
+     ↓
+ICON
+
+
+================================================================================
+ICON SIZE
+================================================================================
+
+Bootstrap icon-font icons can be sized using:
+
+font-size
+
+
+Example:
+
+.bi {
+
+  font-size:
+    1rem;
+}
+
+
+Large action icon:
+
+.btn-action i {
+
+  font-size:
+    1.2rem;
+}
+
+
+================================================================================
+RESPONSIVE SIZING
+================================================================================
+
+Usually icons do NOT need dramatically different sizes at every breakpoint.
+
+Example:
+
+@media (
+  max-width: 480px
+) {
+
+  .btn-action i {
+
+    font-size:
+      1.05rem;
+  }
+
+}
+
+
+The important requirement is that the complete interactive control remains
+large enough and easy to use.
+
+Don't shrink a button merely because the viewport is smaller.
+
+
+================================================================================
+ICON STYLING TABLE
+================================================================================
+
++---------------------------+------------------------------------------+
+| SELECTOR                  | PURPOSE                                  |
++---------------------------+------------------------------------------+
+| .item-meta i              | Metadata icons                           |
+| .item-unit-price i        | Unit-price icon                          |
+| .btn-action i             | Action icons                             |
+| .btn-action:hover i       | Hover feedback                           |
+| .item-card.purchased i    | Purchased visual state                   |
++---------------------------+------------------------------------------+
+
+
+================================================================================
+PART 6: USING ICONS IN AddGroceryForm
+================================================================================
+
+Bootstrap Icons can reinforce form labels and actions.
+
+However, avoid adding icons merely for decoration everywhere.
+
+Use them where they improve scanning or reinforce meaning.
+
+
+================================================================================
+FORM HEADER
+================================================================================
+
+<h2>
+
+  <i
+    className="bi bi-plus-circle"
+    aria-hidden="true"
+  ></i>
+
+  <span>
+    Add New Item
+  </span>
+
+</h2>
+
+
+================================================================================
+ITEM NAME LABEL
+================================================================================
+
+<label
+  htmlFor="name"
+  className="form-label"
+>
+
+  <i
+    className="bi bi-pencil"
+    aria-hidden="true"
+  ></i>
+
+  Item Name
+
+  <span
+    className="required"
+    aria-hidden="true"
+  >
+    *
+  </span>
+
+</label>
+
+
+================================================================================
+QUANTITY LABEL
+================================================================================
+
+<label
+  htmlFor="quantity"
+  className="form-label"
+>
+
+  <i
+    className="bi bi-box"
+    aria-hidden="true"
+  ></i>
+
+  Quantity
+
+</label>
+
+
+================================================================================
+CATEGORY LABEL
+================================================================================
+
+<label
+  htmlFor="category"
+  className="form-label"
+>
+
+  <i
+    className="bi bi-tag"
+    aria-hidden="true"
+  ></i>
+
+  Category
+
+</label>
+
+
+================================================================================
+PRICE LABEL
+================================================================================
+
+<label
+  htmlFor="price"
+  className="form-label"
+>
+
+  <i
+    className="bi bi-currency-dollar"
+    aria-hidden="true"
+  ></i>
+
+  Unit Price
+
+</label>
+
+
+================================================================================
+ERROR MESSAGE
+================================================================================
+
+{errors.name && (
+
+  <p
+    id="name-error"
+    className="error-message"
+  >
+
+    <i
+      className="bi bi-exclamation-circle"
+      aria-hidden="true"
+    ></i>
+
+    {errors.name}
+
+  </p>
+
+)}
+
+
+================================================================================
+SUCCESS STATUS
+================================================================================
+
+{successMessage && (
+
+  <p
+    className="success-message"
+    role="status"
+  >
+
+    <i
+      className="bi bi-check-circle"
+      aria-hidden="true"
+    ></i>
+
+    {successMessage}
+
+  </p>
+
+)}
+
+
+================================================================================
+LINE-COST SUMMARY
+================================================================================
+
+<div className="form-summary">
+
+  <span className="summary-label">
+
+    <i
+      className="bi bi-calculator"
+      aria-hidden="true"
+    ></i>
+
+    Estimated Line Cost:
+
+  </span>
+
+
+  <output className="summary-value">
+
+    ${lineCost.toFixed(2)}
+
+  </output>
+
+</div>
+
+
+================================================================================
+SUBMIT BUTTON
+================================================================================
+
+<button
+  type="submit"
+  className="btn btn-primary"
+>
+
+  <i
+    className="bi bi-plus-circle"
+    aria-hidden="true"
+  ></i>
+
+  <span>
+    Add Item
+  </span>
+
+</button>
+
+
+================================================================================
+RESET BUTTON
+================================================================================
+
+<button
+  type="reset"
+  className="btn btn-secondary"
+>
+
+  <i
+    className="bi bi-arrow-clockwise"
+    aria-hidden="true"
+  ></i>
+
+  <span>
+    Clear Form
+  </span>
+
+</button>
+
+
+================================================================================
+FORM ICON CSS
+================================================================================
+
+.form-header h2,
+.form-label,
+.error-message,
+.success-message,
+.summary-label,
+.btn {
+
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  gap:
+    8px;
+}
+
+
+.form-group
+.form-label {
+
+  display:
+    flex;
+}
+
+
+.error-message {
+
+  display:
+    flex;
+}
+
+
+.form-header h2 i {
+
+  color:
+    #667eea;
+}
+
+
+.error-message i {
+
+  color:
+    #b71c1c;
+}
+
+
+.success-message i {
+
+  color:
+    #2e7d32;
+}
+
+
+.summary-label i {
+
+  color:
+    #667eea;
+}
+
+
+================================================================================
+FORM ICONS TABLE
+================================================================================
+
++----------------------+---------------------------+------------------------+
+| LOCATION             | ICON                      | PURPOSE                |
++----------------------+---------------------------+------------------------+
+| Header               | bi-plus-circle            | Add/create context     |
+| Item Name            | bi-pencil                 | Text-entry context     |
+| Quantity             | bi-box                    | Quantity context       |
+| Category             | bi-tag                    | Category context       |
+| Price                | bi-currency-dollar        | Price context          |
+| Error                | bi-exclamation-circle     | Error emphasis         |
+| Success              | bi-check-circle           | Success emphasis       |
+| Line Cost            | bi-calculator             | Calculation context    |
+| Add Button           | bi-plus-circle            | Add action             |
+| Reset Button         | bi-arrow-clockwise        | Reset action           |
++----------------------+---------------------------+------------------------+
+
+
+================================================================================
+PART 7: ICONS IN NAVIGATION AND FOOTER
+================================================================================
+
+NAVIGATION DATA
+--------------------------------------------------------------------------------
+
+const NAV_LINKS = [
+
+  {
+    id:
+      'home',
+
+    label:
+      'Home',
+
+    href:
+      '#home',
+
+    icon:
+      'bi-house'
+  },
+
+  {
+    id:
+      'grocery-list',
+
+    label:
+      'Grocery List',
+
+    href:
+      '#grocery-list',
+
+    icon:
+      'bi-bag'
+  },
+
+  {
+    id:
+      'about',
+
+    label:
+      'About',
+
+    href:
+      '#about',
+
+    icon:
+      'bi-info-circle'
+  },
+
+  {
+    id:
+      'contact',
+
+    label:
+      'Contact',
+
+    href:
+      '#contact',
+
+    icon:
+      'bi-envelope'
+  }
+
+]
+
+
+================================================================================
+NAVIGATION BRAND
+================================================================================
+
+<a
+  href="#home"
+  className="brand-link"
+>
+
+  <i
+    className="bi bi-bag-check"
+    aria-hidden="true"
+  ></i>
+
+  <span className="brand-text">
+
+    GroceryList
+
+  </span>
+
+</a>
+
+
+================================================================================
+DYNAMIC NAVIGATION ICON
+================================================================================
+
+{NAV_LINKS.map(link => (
+
+  <li
+    key={link.id}
+    className="navbar-item"
+  >
+
+    <a
+      href={link.href}
+      className="navbar-link"
+    >
+
+      <i
+        className={`bi ${link.icon}`}
+        aria-hidden="true"
+      ></i>
+
+      <span>
+        {link.label}
+      </span>
+
+    </a>
+
+  </li>
+
+))}
+
+
+================================================================================
+CORRUPTED JSX FIX
+================================================================================
+
+The original lesson contained:
+
+className={�11�}
+
+
+The intended expression is:
+
+className={
+  `bi ${link.icon}`
+}
+
+
+Example result:
+
+bi bi-house
+
+
+================================================================================
+FOOTER SOCIAL DATA
+================================================================================
+
+Use only actual destinations in a real application.
+
+Example structure:
+
+const SOCIAL_LINKS = [
+
+  {
+    id:
+      'github',
+
+    label:
+      'GitHub',
+
+    icon:
+      'bi-github',
+
+    href:
+      '#github'
+  },
+
+  {
+    id:
+      'linkedin',
+
+    label:
+      'LinkedIn',
+
+    icon:
+      'bi-linkedin',
+
+    href:
+      '#linkedin'
+  }
+
+]
+
+
+================================================================================
+SOCIAL ICON
+================================================================================
+
+{SOCIAL_LINKS.map(
+  social => (
+
+    <a
+      key={social.id}
+      href={social.href}
+      className="social-link"
+      aria-label={
+        social.label
+      }
+    >
+
+      <i
+        className={
+          `bi ${social.icon}`
+        }
+        aria-hidden="true"
+      ></i>
+
+    </a>
+
+  )
+)}
+
+
+================================================================================
+ANOTHER CORRUPTED JSX FIX
+================================================================================
+
+The original content contained:
+
+className={�13�}
+
+
+Correct:
+
+className={
+  `bi ${social.icon}`
+}
+
+
+================================================================================
+IMPORTANT PLACEHOLDER DATA NOTE
+================================================================================
+
+Avoid presenting invented contact information such as:
+
+info@grocerylist.com
+
++1 (234) 567-890
+
+123 Main Street
+
+
+as if it were real business information.
+
+
+If the application is only a learning demo:
+
+• Omit the contact data
+
+or
+
+• Clearly mark it as sample/demo content
+
+
+The same applies to social links.
+
+A hash such as:
+
+#linkedin
+
+
+is not an actual LinkedIn profile.
+
+
+================================================================================
+NAVIGATION + FOOTER ICON TABLE
+================================================================================
+
++----------------------+-----------------------+
+| PURPOSE              | CLASS                 |
++----------------------+-----------------------+
+| Brand                | bi-bag-check          |
+| Home                 | bi-house              |
+| Grocery List         | bi-bag                |
+| About                | bi-info-circle        |
+| Contact              | bi-envelope           |
+| GitHub               | bi-github             |
+| LinkedIn             | bi-linkedin           |
++----------------------+-----------------------+
+
+
+================================================================================
+PART 8: ICON ACCESSIBILITY
+================================================================================
+
+ACCESSIBILITY RULE 1:
+DECORATIVE ICON + VISIBLE TEXT
+--------------------------------------------------------------------------------
+
+Example:
+
+<button type="submit">
+
+  <i
+    className="bi bi-plus-circle"
+    aria-hidden="true"
+  ></i>
+
+  Add Item
+
+</button>
+
+
+The visible text already describes the control.
+
+Therefore:
+
+aria-hidden="true"
+
+
+on the decorative icon is appropriate.
+
+
+================================================================================
+ACCESSIBILITY RULE 2:
+ICON-ONLY BUTTON
+================================================================================
+
+Example:
+
+<button
+  type="button"
+  aria-label="Delete Milk"
+>
+
+  <i
+    className="bi bi-trash"
+    aria-hidden="true"
+  ></i>
+
+</button>
+
+
+The BUTTON needs the accessible name.
+
+
+================================================================================
+ACCESSIBILITY RULE 3:
+DECORATIVE METADATA ICON
+================================================================================
+
+Example:
+
+<span>
+
+  <i
+    className="bi bi-tag"
+    aria-hidden="true"
+  ></i>
+
+  Dairy
+
+</span>
+
+
+The visible word:
+
+Dairy
+
+
+already supplies meaning.
+
+
+================================================================================
+ACCESSIBILITY RULE 4:
+DO NOT RELY ON title ALONE
+================================================================================
+
+title="Delete item"
+
+
+can provide a pointer tooltip in some environments.
+
+But it should not replace a proper accessible name.
+
+
+Use:
+
+aria-label="Delete Milk"
+
+
+for an icon-only button.
+
+
+================================================================================
+ACCESSIBILITY RULE 5:
+KEEP THE INTERACTIVE ELEMENT SEMANTIC
+================================================================================
+
+GOOD:
+
+<button>
+  icon
+</button>
+
+
+NOT:
+
+<i
+  onClick={...}
+></i>
+
+
+Why?
+
+
+button provides built-in:
+
+• Keyboard semantics
+
+• Focus behavior
+
+• Activation behavior
+
+• Button role
+
+
+================================================================================
+DO YOU NEED sr-only?
+================================================================================
+
+Not always.
+
+
+If using:
+
+<button
+  aria-label="Delete Milk"
+>
+
+  <i
+    aria-hidden="true"
+  ></i>
+
+</button>
+
+
+the accessible name already comes from:
+
+aria-label
+
+
+Adding another screen-reader-only:
+
+Delete
+
+
+can become redundant.
+
+
+Use one clear accessible naming strategy.
+
+
+================================================================================
+ACCESSIBILITY PATTERN TABLE
+================================================================================
+
++-------------------------+--------------------------------------------+
+| SITUATION               | PATTERN                                    |
++-------------------------+--------------------------------------------+
+| Icon + Visible Text     | aria-hidden on icon                        |
+| Icon-only Button        | aria-label on button                       |
+| Decorative Icon         | aria-hidden="true"                         |
+| Meaningful Standalone   | Provide accessible name                    |
+| Interactive Action      | Use button/link semantics                  |
+| Keyboard User           | Visible :focus-visible style               |
++-------------------------+--------------------------------------------+
+
+
+================================================================================
+PART 9: ICON ANIMATIONS AND EFFECTS
+================================================================================
+
+Animations are optional.
+
+Use them only when they communicate something useful.
+
+
+================================================================================
+SPIN - LOADING
+================================================================================
+
+<i
+  className="
+    bi
+    bi-arrow-repeat
+    icon-spin
+  "
+  aria-hidden="true"
+></i>
+
+
+CSS:
+
+@keyframes iconSpin {
+
+  to {
+
+    transform:
+      rotate(360deg);
+  }
+
+}
+
+
+.icon-spin {
+
+  animation:
+    iconSpin
+    1s
+    linear
+    infinite;
+}
+
+
+Potential use:
+
+Loading / processing indicator
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+A spinning decorative icon alone should NOT be the only indication that
+something is loading.
+
+Use accompanying status text/state.
+
+
+================================================================================
+PULSE - ATTENTION
+================================================================================
+
+@keyframes iconPulse {
+
+  0%,
+  100% {
+
+    opacity:
+      1;
+  }
+
+
+  50% {
+
+    opacity:
+      0.55;
+  }
+
+}
+
+
+.icon-pulse {
+
+  animation:
+    iconPulse
+    2s
+    ease-in-out
+    infinite;
+}
+
+
+Use sparingly.
+
+Continuous movement can become distracting.
+
+
+================================================================================
+FADE IN - STATUS CHANGE
+================================================================================
+
+@keyframes iconFadeIn {
+
+  from {
+
+    opacity:
+      0;
+  }
+
+
+  to {
+
+    opacity:
+      1;
+  }
+
+}
+
+
+.icon-fade-in {
+
+  animation:
+    iconFadeIn
+    0.3s
+    ease;
+}
+
+
+This can be appropriate for:
+
+• Success confirmation
+
+• Newly displayed status
+
+
+================================================================================
+HOVER SCALE
+================================================================================
+
+.btn-action i {
+
+  transition:
+    transform 0.2s ease;
+}
+
+
+.btn-action:hover i {
+
+  transform:
+    scale(1.1);
+}
+
+
+This gives subtle feedback without continuous animation.
+
+
+================================================================================
+REDUCED MOTION
+================================================================================
+
+Always consider:
+
+prefers-reduced-motion
+
+
+Example:
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .icon-spin,
+  .icon-pulse,
+  .icon-fade-in {
+
+    animation:
+      none;
+  }
+
+
+  .btn-action i {
+
+    transition:
+      none;
+  }
+
+
+  .btn-action:hover i {
+
+    transform:
+      none;
+  }
+
+}
+
+
+================================================================================
+ANIMATION TABLE
+================================================================================
+
++----------------------+---------------------------+
+| EFFECT               | POTENTIAL USE             |
++----------------------+---------------------------+
+| Spin                 | Loading/processing        |
+| Pulse                | Limited attention cue     |
+| Fade                 | Status appearance         |
+| Hover Scale          | Interactive feedback      |
++----------------------+---------------------------+
+
+
+MEMORY:
+
+ANIMATE WITH PURPOSE
+
+NOT:
+
+ANIMATE EVERYTHING
+
+
+================================================================================
+PART 10: TESTING BOOTSTRAP ICONS
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] bootstrap-icons package installed
+
+[ ] CSS imported once
+
+[ ] GroceryItem icons render
+
+[ ] Form icons render
+
+[ ] Navigation icons render
+
+[ ] Footer icons render
+
+[ ] Dynamic icon class names are correct
+
+[ ] No corrupted JSX remains
+
+[ ] Icons align with text correctly
+
+[ ] Icon color inherits/styling works
+
+[ ] Decorative icons are hidden from assistive technology
+
+[ ] Icon-only buttons have accessible names
+
+[ ] Action controls use buttons/links
+
+[ ] Keyboard focus remains visible
+
+[ ] Icon animations are purposeful
+
+[ ] Reduced-motion preference is respected
+
+[ ] No duplicate monetary symbol appears
+
+
+================================================================================
+SCENARIO 1: ICON DISPLAY
+================================================================================
+
+Check:
+
+Edit button
+
+Expected:
+
+Pencil icon visible
+
+
+Delete button
+
+Expected:
+
+Trash icon visible
+
+
+Category
+
+Expected:
+
+Tag icon visible
+
+
+Quantity
+
+Expected:
+
+Box icon visible
+
+
+================================================================================
+SCENARIO 2: ACTION ACCESSIBILITY
+================================================================================
+
+Delete Milk button:
+
+Visual UI:
+
+Trash Icon
+
+
+Accessible name:
+
+Delete Milk
+
+
+Expected:
+
+Screen reader receives the button action meaning, not meaningless duplicated
+icon-font text.
+
+
+================================================================================
+SCENARIO 3: ICON + TEXT
+================================================================================
+
+Button:
+
+[ + icon ] Add Item
+
+
+Expected:
+
+Visible text:
+
+Add Item
+
+
+Icon:
+
+Decorative
+
+
+ARIA:
+
+icon has:
+
+aria-hidden="true"
+
+
+================================================================================
+SCENARIO 4: DYNAMIC NAV ICON
+================================================================================
+
+Data:
+
+{
+  label:
+    'Home',
+
+  icon:
+    'bi-house'
+}
+
+
+JSX:
+
+className={
+  `bi ${link.icon}`
+}
+
+
+Rendered classes:
+
+bi bi-house
+
+
+Expected:
+
+Home icon visible.
+
+
+================================================================================
+SCENARIO 5: RESPONSIVE DISPLAY
+================================================================================
+
+Resize viewport.
+
+
+Check:
+
+• Icons stay aligned
+
+• Buttons remain large enough to operate
+
+• Icons do not overlap text
+
+• Metadata remains readable
+
+
+================================================================================
+SCENARIO 6: REDUCED MOTION
+================================================================================
+
+Enable reduced-motion preference.
+
+
+Expected:
+
+• Continuous custom icon animations stop
+
+• Hover transforms can be removed
+
+• Functionality remains available
+
+
+================================================================================
+TESTING TABLE
+================================================================================
+
++--------------------------+-------------------------------------------+
+| SCENARIO                 | EXPECTED                                  |
++--------------------------+-------------------------------------------+
+| Package Setup            | Icon CSS loads                            |
+| Static Icon              | Correct glyph appears                     |
+| Dynamic Icon             | Data-generated class works                |
+| Icon + Text              | Icon decorative                          |
+| Icon-only Action         | Control has accessible name               |
+| Hover                    | Subtle feedback                           |
+| Mobile                   | Layout remains usable                     |
+| Reduced Motion           | Optional motion removed                   |
+| Currency Icon            | No duplicate $ symbol                     |
++--------------------------+-------------------------------------------+
+
+
+================================================================================
+PART 11: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE ACCOMPLISHED
+--------------------------------------------------------------------------------
+
+✓ Installed Bootstrap Icons
+
+✓ Imported the icon stylesheet
+
+✓ Used Bootstrap Icon font classes
+
+✓ Added icons to GroceryItem
+
+✓ Added icons to AddGroceryForm
+
+✓ Added icons to Navigation
+
+✓ Added icons to Footer
+
+✓ Styled icons using normal CSS
+
+✓ Used currentColor
+
+✓ Added dynamic icon classes
+
+✓ Distinguished decorative from meaningful icons
+
+✓ Added accessible icon-only controls
+
+✓ Created optional animations
+
+✓ Added reduced-motion handling
+
+✓ Fixed corrupted JSX icon expressions
+
+✓ Avoided unnecessary duplicate Bootstrap Icons imports
+
+
+================================================================================
+CRITICAL ICON CONCEPTS
+================================================================================
+
+INSTALL:
+--------------------------------------------------------------------------------
+
+npm i bootstrap-icons
+
+
+IMPORT:
+--------------------------------------------------------------------------------
+
+import 'bootstrap-icons/font/bootstrap-icons.css'
+
+
+USE:
+--------------------------------------------------------------------------------
+
+<i
+  className="bi bi-trash"
+  aria-hidden="true"
+></i>
+
+
+================================================================================
+ICON CLASS FORMULA
+================================================================================
+
+bi
++
+bi-ICON
+
+
+Examples:
+
+bi bi-trash
+
+bi bi-pencil-square
+
+bi bi-plus-circle
+
+bi bi-tag
+
+bi bi-box
+
+
+================================================================================
+DYNAMIC ICON
+================================================================================
+
+Data:
+
+icon:
+'bi-house'
+
+
+JSX:
+
+<i
+  className={
+    `bi ${link.icon}`
+  }
+  aria-hidden="true"
+></i>
+
+
+Result:
+
+bi bi-house
+
+
+================================================================================
+DECORATIVE ICON
+================================================================================
+
+Icon + visible text:
+
+<i
+  className="bi bi-plus-circle"
+  aria-hidden="true"
+></i>
+
+Add Item
+
+
+The text already communicates the meaning.
+
+
+================================================================================
+ICON-ONLY BUTTON
+================================================================================
+
+<button
+  type="button"
+  aria-label="Delete Milk"
+>
+
+  <i
+    className="bi bi-trash"
+    aria-hidden="true"
+  ></i>
+
+</button>
+
+
+Accessible name belongs to:
+
+BUTTON
+
+
+not the decorative icon.
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++------------------------+---------------------------------------------+
+| CONCEPT                | REMEMBER                                    |
++------------------------+---------------------------------------------+
+| bootstrap-icons        | Icon library package                        |
+| bi                     | Base icon class                             |
+| bi-*                   | Specific icon                              |
+| CSS Import             | Load icon font                             |
+| currentColor           | Icon inherits surrounding color             |
+| font-size              | Icon-font size                             |
+| aria-hidden            | Hide decorative icon                       |
+| aria-label             | Name icon-only control                     |
+| Semantic Button        | Use for actions                            |
+| Semantic Link          | Use for navigation                         |
+| Reduced Motion         | Disable optional animation when requested   |
++------------------------+---------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - INSTALLATION
+================================================================================
+
+npm install
+     ↓
+bootstrap-icons
+     ↓
+CSS Import
+     ↓
+bi Classes
+     ↓
+Icons
+
+
+================================================================================
+QUICK REVISION - ACCESSIBILITY
+================================================================================
+
+ICON + TEXT:
+
+Icon
+ ↓
+aria-hidden=true
+
+Visible Text
+ ↓
+Supplies Meaning
+
+
+ICON-ONLY BUTTON:
+
+Icon
+ ↓
+aria-hidden=true
+
+Button
+ ↓
+aria-label
+ ↓
+Supplies Meaning
+
+
+================================================================================
+QUICK REVISION - STYLING
+================================================================================
+
+Bootstrap Icon
+      ↓
+currentColor
+      ↓
+CSS color
+
+
+Bootstrap Icon
+      ↓
+font-size
+      ↓
+Visual Size
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+INSTALL:
+
+npm i bootstrap-icons
+
+
+IMPORT:
+
+bootstrap-icons/font/bootstrap-icons.css
+
+
+ICON:
+
+bi
++
+bi-name
+
+
+DYNAMIC ICON:
+
+`bi ${icon}`
+
+
+SIZE:
+
+font-size
+
+
+COLOR:
+
+color
+ ↓
+currentColor
+
+
+DECORATIVE:
+
+aria-hidden="true"
+
+
+ICON-ONLY CONTROL:
+
+aria-label
+on
+button/link
+
+
+ANIMATION:
+
+Icon
+ ↓
+Useful State
+ ↓
+CSS Animation
+
+
+REDUCED MOTION:
+
+prefers-reduced-motion
+ ↓
+Remove Optional Motion
+
+
+MOST IMPORTANT RULE:
+
+AN ICON SHOULD REINFORCE THE INTERFACE.
+
+IT SHOULD NOT MAKE THE INTERFACE
+DEPEND ON GUESSING WHAT THE ICON MEANS.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Replace text-only actions with carefully chosen icon-enhanced controls
+
+2. Add icons consistently across GroceryItem and AddGroceryForm
+
+3. Add navigation icons
+
+4. Add footer icons where real destinations exist
+
+5. Use an animated icon when a real loading state is introduced
+
+6. Keep decorative icons hidden from assistive technology
+
+7. Test keyboard and screen-reader behavior
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The Bootstrap Icons workflow is:
+
+INSTALL PACKAGE
+      ↓
+IMPORT CSS
+      ↓
+USE bi CLASSES
+      ↓
+STYLE WITH CSS
+      ↓
+ADD ACCESSIBILITY
+      ↓
+TEST
+
+
+For ordinary text + icon UI:
+
+ICON
++
+VISIBLE TEXT
+
+
+For icon-only controls:
+
+ICON
++
+ACCESSIBLE CONTROL NAME
+
+
+Used carefully, Bootstrap Icons can make GroceryList easier to scan without
+making functionality depend entirely on visual symbols.
+
+
+================================================================================
+END OF LESSON 15
+ADDING BOOTSTRAP ICONS
+================================================================================
