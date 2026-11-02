@@ -1,0 +1,2430 @@
+LESSON 18: CHANGING THE CHECKBOX COLOR AND ITEM TEXT WHEN CLICKED
+STRIKETHROUGH FOR PURCHASED ITEMS
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on providing visual feedback when a grocery item is
+marked as purchased.
+
+You will understand:
+
+• Styling UI based on React state
+
+• Applying conditional CSS classes
+
+• Creating a purchased visual state
+
+• Adding strikethrough text
+
+• Changing item-name color
+
+• Changing card background
+
+• Reducing visual emphasis for purchased items
+
+• Styling a checked checkbox
+
+• Using accent-color
+
+• Adding hover and focus feedback
+
+• Using multiple visual indicators
+
+• Keeping visual state synchronized with React state
+
+• Supporting reduced-motion preferences
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+The toggle logic from Lessons 16-17 already changes:
+
+item.purchased
+
+
+Now the UI should clearly communicate that state.
+
+The complete flow becomes:
+
+USER CLICKS CHECKBOX
+        ↓
+onToggleBought(item.id)
+        ↓
+App Updates State
+        ↓
+item.purchased Changes
+        ↓
+GroceryItem Re-renders
+        ↓
+Conditional Class Changes
+        ↓
+CSS Changes Appearance
+        ↓
+User Sees Purchased State
+
+
+Without visual feedback:
+
+State Changed
+   ↓
+User May Not Notice
+
+
+With visual feedback:
+
+State Changed
+   ↓
+Checkbox Checked
+   +
+Strikethrough
+   +
+Background Change
+   +
+Reduced Emphasis
+   ↓
+State Is Obvious
+
+
+================================================================================
+PART 2: UNDERSTANDING VISUAL STATE CHANGES
+================================================================================
+
+WHAT IS A VISUAL STATE?
+--------------------------------------------------------------------------------
+
+A visual state is how the UI represents application state.
+
+For the Grocery List:
+
+STATE:
+
+item.purchased
+
+
+has two values:
+
+false
+
+or:
+
+true
+
+
+These can produce two visual presentations.
+
+
+================================================================================
+UNPURCHASED
+================================================================================
+
+item.purchased:
+
+false
+
+
+Visual state:
+
+• Checkbox unchecked
+
+• Item name normal
+
+• Darker text
+
+• White card
+
+• Full emphasis
+
+
+================================================================================
+PURCHASED
+================================================================================
+
+item.purchased:
+
+true
+
+
+Visual state:
+
+• Checkbox checked
+
+• Item name crossed out
+
+• Softer text
+
+• Softer background
+
+• Reduced emphasis
+
+
+================================================================================
+VISUAL STATE TABLE
+================================================================================
+
++----------------------+-------------------------+--------------------------+
+| PROPERTY             | UNPURCHASED             | PURCHASED                |
++----------------------+-------------------------+--------------------------+
+| Checkbox             | Unchecked               | Checked                  |
+| Checkbox Accent      | Browser/default state   | Green accent             |
+| Name Decoration      | Normal                  | Line-through             |
+| Name Color           | Dark                    | Softer gray              |
+| Background           | White                   | Light gray/green-gray     |
+| Border               | Neutral                 | Softer purchased border  |
+| Emphasis             | Full                    | Reduced                   |
++----------------------+-------------------------+--------------------------+
+
+
+================================================================================
+IMPORTANT ACCESSIBILITY PRINCIPLE
+================================================================================
+
+Do NOT communicate purchased state using color alone.
+
+For example:
+
+BAD:
+
+Purchased
+ ↓
+Green only
+
+
+BETTER:
+
+Purchased
+ ↓
+Checked Checkbox
++
+Strikethrough
++
+Background Change
++
+Color Change
+
+
+The checked state remains meaningful even if the user cannot distinguish
+the color difference.
+
+
+================================================================================
+STATE VS STYLE
+================================================================================
+
+React owns:
+
+item.purchased
+
+
+React/JSX decides:
+
+Which CSS class should be present?
+
+
+CSS decides:
+
+What should that class look like?
+
+
+FLOW:
+
+React State
+    ↓
+Conditional Class
+    ↓
+CSS Selector
+    ↓
+Visual Appearance
+
+
+================================================================================
+PART 3: IMPLEMENTING STRIKETHROUGH TEXT
+================================================================================
+
+The key CSS property is:
+
+text-decoration:
+  line-through;
+
+
+Example:
+
+.item-card.purchased
+.item-name {
+
+  text-decoration:
+    line-through;
+}
+
+
+================================================================================
+BASE ITEM
+================================================================================
+
+.item-name {
+
+  margin:
+    0;
+
+  color:
+    #222;
+
+  font-size:
+    1.1rem;
+
+  font-weight:
+    650;
+}
+
+
+Result:
+
+Milk
+
+
+================================================================================
+PURCHASED ITEM
+================================================================================
+
+.item-card.purchased
+.item-name {
+
+  text-decoration:
+    line-through;
+
+  color:
+    #686868;
+}
+
+
+Result conceptually:
+
+Milk
+^^^^
+line through text
+
+
+================================================================================
+HOW DOES CSS KNOW IT IS PURCHASED?
+================================================================================
+
+It comes from React:
+
+className={
+  `item-card ${
+    item.purchased
+      ? 'purchased'
+      : ''
+  }`
+}
+
+
+If:
+
+item.purchased === false
+
+
+HTML class effectively becomes:
+
+item-card
+
+
+If:
+
+item.purchased === true
+
+
+it becomes:
+
+item-card purchased
+
+
+Then this selector matches:
+
+.item-card.purchased
+.item-name
+
+
+================================================================================
+STRIKETHROUGH FORMULA
+================================================================================
+
+item.purchased
+      ↓
+true
+      ↓
+"purchased" class
+      ↓
+.item-card.purchased .item-name
+      ↓
+text-decoration: line-through
+
+
+================================================================================
+PART 4: COMPLETE GroceryItem COMPONENT
+================================================================================
+
+File:
+
+src/components/GroceryItem.jsx
+
+
+import './GroceryItem.css'
+
+
+export default function GroceryItem({
+
+  item,
+
+  onToggleBought,
+
+  onDeleteItem
+
+}) {
+
+  // ============================================
+  // HANDLERS
+  // ============================================
+
+  const handleCheckboxChange = () => {
+
+    onToggleBought(
+      item.id
+    )
+  }
+
+
+  const handleDelete = () => {
+
+    onDeleteItem(
+      item.id
+    )
+  }
+
+
+  // ============================================
+  // DERIVED DISPLAY VALUE
+  // ============================================
+
+  const lineCost =
+    item.price *
+    item.quantity
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <article
+      className={
+        `item-card ${
+          item.purchased
+            ? 'purchased'
+            : ''
+        }`
+      }
+    >
+
+
+      {/* Purchase Status */}
+
+      <div className="item-checkbox-wrapper">
+
+        <input
+          type="checkbox"
+          checked={
+            item.purchased
+          }
+          onChange={
+            handleCheckboxChange
+          }
+          className="item-checkbox"
+          aria-label={
+            `Mark ${item.name} as ${
+              item.purchased
+                ? 'not purchased'
+                : 'purchased'
+            }`
+          }
+        />
+
+      </div>
+
+
+      {/* Item Details */}
+
+      <div className="item-details">
+
+
+        <h3 className="item-name">
+
+          {item.name}
+
+        </h3>
+
+
+        <div className="item-meta">
+
+
+          <span className="item-category">
+
+            <i
+              className="bi bi-tag"
+              aria-hidden="true"
+            ></i>
+
+            {item.category}
+
+          </span>
+
+
+          <span className="item-quantity">
+
+            <i
+              className="bi bi-box"
+              aria-hidden="true"
+            ></i>
+
+            Qty:
+            {' '}
+            {item.quantity}
+
+          </span>
+
+
+          <span className="item-total-price">
+
+            ${lineCost.toFixed(2)}
+
+          </span>
+
+        </div>
+
+
+        <p className="item-unit-price">
+
+          ${item.price.toFixed(2)}
+          {' '}
+          each
+
+        </p>
+
+      </div>
+
+
+      {/* Actions */}
+
+      <div className="item-actions">
+
+        <button
+          type="button"
+          onClick={
+            handleDelete
+          }
+          className="btn-action btn-delete"
+          title="Delete item"
+          aria-label={
+            `Delete ${item.name}`
+          }
+        >
+
+          <i
+            className="bi bi-trash"
+            aria-hidden="true"
+          ></i>
+
+        </button>
+
+      </div>
+
+    </article>
+  )
+}
+
+
+================================================================================
+IMPORTANT CORRUPTED JSX FIX
+================================================================================
+
+The supplied lesson contained:
+
+className={�10�}
+
+
+Correct:
+
+className={
+  `item-card ${
+    item.purchased
+      ? 'purchased'
+      : ''
+  }`
+}
+
+
+================================================================================
+NO STRIKETHROUGH LOGIC IS NEEDED IN JSX
+================================================================================
+
+You do NOT need:
+
+if (
+  item.purchased
+) {
+  // manually modify text
+}
+
+
+You also do not need:
+
+item.purchased
+  ? <del>{item.name}</del>
+  : item.name
+
+
+for this design.
+
+
+Keep JSX simple:
+
+<h3 className="item-name">
+
+  {item.name}
+
+</h3>
+
+
+CSS handles the visual state:
+
+.item-card.purchased
+.item-name {
+
+  text-decoration:
+    line-through;
+}
+
+
+================================================================================
+PART 5: HOW STRIKETHROUGH WORKS
+================================================================================
+
+STEP 1: INITIAL STATE
+--------------------------------------------------------------------------------
+
+item.purchased:
+
+false
+
+
+Rendered class:
+
+item-card
+
+
+CSS:
+
+.item-name {
+
+  color:
+    #222;
+}
+
+
+Visual:
+
+Milk
+
+
+================================================================================
+STEP 2: USER CLICKS CHECKBOX
+================================================================================
+
+<input
+  checked={
+    false
+  }
+  onChange={
+    handleCheckboxChange
+  }
+/>
+
+
+User clicks.
+
+        ↓
+
+handleCheckboxChange()
+
+        ↓
+
+onToggleBought(
+  item.id
+)
+
+
+================================================================================
+STEP 3: PARENT UPDATES
+================================================================================
+
+Parent:
+
+setGroceryItems(
+  previousItems =>
+
+    previousItems.map(
+      item =>
+
+        item.id === id
+          ? {
+              ...item,
+
+              purchased:
+                !item.purchased
+            }
+          : item
+
+    )
+)
+
+
+State:
+
+false
+ ↓
+true
+
+
+================================================================================
+STEP 4: GroceryItem RECEIVES NEW PROP
+================================================================================
+
+item.purchased:
+
+true
+
+
+Therefore:
+
+className:
+
+item-card purchased
+
+
+================================================================================
+STEP 5: PURCHASED CSS MATCHES
+================================================================================
+
+.item-card.purchased
+.item-name {
+
+  text-decoration:
+    line-through;
+
+  color:
+    #686868;
+}
+
+
+Visual:
+
+Milk
+with line-through styling
+
+
+================================================================================
+STEP 6: TOGGLE BACK
+================================================================================
+
+User clicks again.
+
+true
+ ↓
+false
+
+
+Class becomes:
+
+item-card
+
+
+Purchased selector no longer matches.
+
+
+Text returns to:
+
+Normal
+
+
+================================================================================
+COMPLETE STRIKETHROUGH FLOW
+================================================================================
+
+item.purchased = false
+       ↓
+item-card
+       ↓
+Normal Name
+       ↓
+User Click
+       ↓
+toggleBought
+       ↓
+item.purchased = true
+       ↓
+item-card purchased
+       ↓
+Purchased CSS
+       ↓
+Line-through Name
+       ↓
+User Click
+       ↓
+item.purchased = false
+       ↓
+Normal Style Returns
+
+
+================================================================================
+PART 6: CHANGING CHECKBOX COLOR
+================================================================================
+
+Native checkboxes can use:
+
+accent-color
+
+
+Example:
+
+.item-checkbox {
+
+  accent-color:
+    #4caf50;
+}
+
+
+This customizes the checkbox's accent.
+
+For our purchased state, green provides clear visual reinforcement.
+
+
+================================================================================
+IMPORTANT CORRECTION
+================================================================================
+
+The original lesson described:
+
+Unchecked:
+Blue
+
+
+Checked:
+Green
+
+
+using:
+
+.item-checkbox {
+
+  accent-color:
+    #667eea;
+}
+
+
+.item-checkbox:checked {
+
+  accent-color:
+    #4caf50;
+}
+
+
+But `accent-color` primarily affects the native control's accent presentation.
+
+It does NOT mean browsers will always draw an unchecked checkbox as a blue
+circle.
+
+
+The exact native checkbox appearance depends on the browser/platform.
+
+
+A safer description is:
+
+UNCHECKED:
+--------------------------------------------------------------------------------
+
+Native/browser checkbox appearance
+
+
+CHECKED:
+--------------------------------------------------------------------------------
+
+Green accent where supported by the native control
+
+
+================================================================================
+CHECKBOX CSS
+================================================================================
+
+.item-checkbox {
+
+  width:
+    20px;
+
+  height:
+    20px;
+
+  cursor:
+    pointer;
+
+  accent-color:
+    #4caf50;
+}
+
+
+.item-checkbox:hover {
+
+  transform:
+    scale(1.08);
+}
+
+
+.item-checkbox:focus-visible {
+
+  outline:
+    3px solid #667eea;
+
+  outline-offset:
+    3px;
+}
+
+
+================================================================================
+DO WE NEED :checked accent-color?
+================================================================================
+
+Not necessarily.
+
+This is enough:
+
+.item-checkbox {
+
+  accent-color:
+    #4caf50;
+}
+
+
+The browser applies the accent to the native checked state.
+
+
+If you intentionally want state-specific CSS:
+
+.item-checkbox:checked {
+
+  accent-color:
+    #4caf50;
+}
+
+
+is valid.
+
+
+But don't assume the unchecked native appearance can be completely redesigned
+through accent-color alone.
+
+
+================================================================================
+CHECKBOX STATE
+================================================================================
+
+React controls:
+
+checked={
+  item.purchased
+}
+
+
+CSS controls:
+
+accent-color
+
+
+So:
+
+item.purchased
+      ↓
+checked
+      ↓
+Native Checked State
+      ↓
+Accent Presentation
+
+
+================================================================================
+CHECKBOX ACCESSIBILITY
+================================================================================
+
+Do not remove the native checkbox just to make styling easier unless you are
+prepared to recreate all required interaction and accessibility behavior.
+
+
+The native checkbox already provides:
+
+• Checkbox semantics
+
+• Checked/unchecked state
+
+• Keyboard operation
+
+• Focus support
+
+
+For this app:
+
+NATIVE CHECKBOX
++
+accent-color
++
+visible focus
+
+
+is a simple and robust approach.
+
+
+================================================================================
+PART 7: COMPLETE VISUAL FEEDBACK CSS
+================================================================================
+
+File:
+
+src/components/GroceryItem.css
+
+
+/* ============================================
+   ITEM CARD
+   ============================================ */
+
+.item-card {
+
+  background:
+    #ffffff;
+
+  border:
+    2px solid #e5e7eb;
+
+  border-radius:
+    10px;
+
+  padding:
+    20px;
+
+  display:
+    flex;
+
+  gap:
+    15px;
+
+  align-items:
+    flex-start;
+
+  box-shadow:
+    0 2px 6px
+    rgba(0, 0, 0, 0.06);
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+
+/* Hover */
+
+.item-card:hover {
+
+  border-color:
+    #667eea;
+
+  box-shadow:
+    0 5px 14px
+    rgba(102, 126, 234, 0.18);
+
+  transform:
+    translateY(-2px);
+}
+
+
+/* ============================================
+   PURCHASED CARD
+   ============================================ */
+
+.item-card.purchased {
+
+  background:
+    #f4f7f4;
+
+  border-color:
+    #c8ddca;
+
+  opacity:
+    0.78;
+}
+
+
+.item-card.purchased:hover {
+
+  border-color:
+    #88ad8b;
+
+  box-shadow:
+    0 3px 10px
+    rgba(0, 0, 0, 0.08);
+}
+
+
+/* ============================================
+   CHECKBOX
+   ============================================ */
+
+.item-checkbox-wrapper {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  flex-shrink:
+    0;
+
+  padding-top:
+    2px;
+}
+
+
+.item-checkbox {
+
+  width:
+    20px;
+
+  height:
+    20px;
+
+  cursor:
+    pointer;
+
+  accent-color:
+    #4caf50;
+
+  transition:
+    transform 0.2s ease;
+}
+
+
+.item-checkbox:hover {
+
+  transform:
+    scale(1.08);
+}
+
+
+.item-checkbox:focus-visible {
+
+  outline:
+    3px solid #667eea;
+
+  outline-offset:
+    3px;
+}
+
+
+/* ============================================
+   DETAILS
+   ============================================ */
+
+.item-details {
+
+  flex:
+    1;
+
+  min-width:
+    0;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  gap:
+    8px;
+}
+
+
+/* ============================================
+   ITEM NAME
+   ============================================ */
+
+.item-name {
+
+  margin:
+    0;
+
+  color:
+    #222;
+
+  font-size:
+    1.1rem;
+
+  font-weight:
+    650;
+
+  overflow-wrap:
+    anywhere;
+
+  transition:
+    color 0.2s ease;
+}
+
+
+/* PURCHASED = STRIKETHROUGH */
+
+.item-card.purchased
+.item-name {
+
+  color:
+    #606860;
+
+  text-decoration:
+    line-through;
+
+  text-decoration-thickness:
+    2px;
+}
+
+
+/* ============================================
+   METADATA
+   ============================================ */
+
+.item-meta {
+
+  display:
+    flex;
+
+  gap:
+    10px 15px;
+
+  flex-wrap:
+    wrap;
+
+  align-items:
+    center;
+
+  color:
+    #555;
+
+  font-size:
+    0.9rem;
+
+  transition:
+    color 0.2s ease;
+}
+
+
+.item-card.purchased
+.item-meta {
+
+  color:
+    #6d746d;
+}
+
+
+/* ============================================
+   CATEGORY
+   ============================================ */
+
+.item-category {
+
+  background:
+    #eef0ff;
+
+  color:
+    #4254b8;
+
+  padding:
+    4px 8px;
+
+  border-radius:
+    999px;
+
+  font-size:
+    0.8rem;
+
+  font-weight:
+    650;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    0.04em;
+}
+
+
+.item-card.purchased
+.item-category {
+
+  background:
+    #e4ebe4;
+
+  color:
+    #596659;
+}
+
+
+/* ============================================
+   QUANTITY / PRICE
+   ============================================ */
+
+.item-quantity {
+
+  font-weight:
+    600;
+}
+
+
+.item-total-price {
+
+  color:
+    #4355ba;
+
+  font-size:
+    1rem;
+
+  font-weight:
+    700;
+}
+
+
+.item-card.purchased
+.item-total-price {
+
+  color:
+    #5c685c;
+}
+
+
+/* ============================================
+   UNIT PRICE
+   ============================================ */
+
+.item-unit-price {
+
+  margin:
+    0;
+
+  color:
+    #666;
+
+  font-size:
+    0.85rem;
+}
+
+
+.item-card.purchased
+.item-unit-price {
+
+  color:
+    #777;
+}
+
+
+/* ============================================
+   ICONS
+   ============================================ */
+
+.item-meta i {
+
+  margin-right:
+    6px;
+
+  color:
+    #667eea;
+}
+
+
+.item-card.purchased
+.item-meta i {
+
+  color:
+    #667267;
+}
+
+
+/* ============================================
+   ACTIONS
+   ============================================ */
+
+.item-actions {
+
+  display:
+    flex;
+
+  gap:
+    8px;
+
+  flex-shrink:
+    0;
+}
+
+
+.btn-action {
+
+  border:
+    1px solid transparent;
+
+  border-radius:
+    6px;
+
+  padding:
+    8px 10px;
+
+  cursor:
+    pointer;
+
+  font:
+    inherit;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.btn-delete {
+
+  color:
+    #a71919;
+
+  background:
+    #fff0f0;
+}
+
+
+.btn-delete:hover {
+
+  background:
+    #ffe0e0;
+
+  transform:
+    translateY(-1px);
+}
+
+
+.btn-action:focus-visible {
+
+  outline:
+    3px solid #667eea;
+
+  outline-offset:
+    2px;
+}
+
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+
+  .item-card {
+
+    padding:
+      15px;
+
+    gap:
+      12px;
+  }
+
+
+  .item-name {
+
+    font-size:
+      1rem;
+  }
+
+
+  .item-meta {
+
+    font-size:
+      0.85rem;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .item-card {
+
+    display:
+      grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    padding:
+      14px;
+
+    gap:
+      12px;
+  }
+
+
+  .item-details {
+
+    grid-column:
+      2;
+  }
+
+
+  .item-actions {
+
+    grid-column:
+      1 / -1;
+
+    justify-content:
+      flex-end;
+
+    border-top:
+      1px solid #eee;
+
+    padding-top:
+      12px;
+  }
+
+
+  .item-meta {
+
+    flex-direction:
+      column;
+
+    align-items:
+      flex-start;
+
+    gap:
+      6px;
+  }
+
+}
+
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .item-card,
+  .item-checkbox,
+  .item-name,
+  .item-meta,
+  .btn-action {
+
+    transition:
+      none;
+  }
+
+
+  .item-card:hover,
+  .item-checkbox:hover,
+  .btn-action:hover {
+
+    transform:
+      none;
+  }
+
+}
+
+
+================================================================================
+CSS STATE TABLE
+================================================================================
+
++-----------------------------+-----------------------------------------+
+| SELECTOR                    | PURPOSE                                 |
++-----------------------------+-----------------------------------------+
+| .item-card                  | Normal grocery card                     |
+| .item-card:hover            | Hover feedback                          |
+| .item-card.purchased        | Purchased card state                    |
+| .item-checkbox              | Native checkbox styling                 |
+| .item-checkbox:focus-visible| Keyboard focus                          |
+| .item-name                  | Normal item name                        |
+| .purchased .item-name       | Strikethrough name                      |
+| .item-meta                  | Normal metadata                         |
+| .purchased .item-meta       | Softer purchased metadata               |
+| .item-category              | Category badge                          |
+| .purchased .item-category   | Purchased category badge                |
+| .item-total-price           | Line price                              |
+| .item-unit-price            | Unit price                              |
++-----------------------------+-----------------------------------------+
+
+
+================================================================================
+WHY REDUCE THE OPACITY LESS AGGRESSIVELY?
+================================================================================
+
+The original CSS used:
+
+opacity:
+0.6
+
+
+on the entire purchased card.
+
+
+This also fades:
+
+• Text
+
+• Checkbox
+
+• Delete button
+
+• Focus/interaction visuals
+
+
+A very low parent opacity can make readable/actionable content unnecessarily
+weak.
+
+
+This cleaned version uses:
+
+opacity:
+0.78
+
+
+plus targeted:
+
+• Color changes
+
+• Background changes
+
+• Strikethrough
+
+• Border changes
+
+
+This keeps the purchased state visually different while retaining useful
+contrast and interaction visibility.
+
+
+================================================================================
+WHY REMOVE fadeOut ANIMATION?
+================================================================================
+
+The original lesson used:
+
+@keyframes fadeOut
+
+
+on every purchased item.
+
+
+But no explicit animation is required for a strikethrough state.
+
+The existing transitions already provide gentle feedback.
+
+
+Simpler:
+
+State Changes
+     ↓
+CSS Properties Transition
+
+
+instead of:
+
+State Changes
+     ↓
+Extra Keyframe Animation
+     ↓
+Opacity Animation
+
+
+This also reduces unnecessary motion.
+
+
+================================================================================
+PART 8: VISUAL FEEDBACK EXAMPLES
+================================================================================
+
+EXAMPLE 1: UNPURCHASED
+--------------------------------------------------------------------------------
+
++------------------------------------------------------+
+| [ ] Milk                                   [Delete]  |
+|     DAIRY        Qty: 2        $7.98                 |
+|     $3.99 each                                      |
++------------------------------------------------------+
+
+
+State:
+
+purchased:
+false
+
+
+Class:
+
+item-card
+
+
+Visual:
+
+• Unchecked checkbox
+
+• Normal item name
+
+• White background
+
+• Normal metadata
+
+
+================================================================================
+EXAMPLE 2: PURCHASED
+================================================================================
+
++------------------------------------------------------+
+| [x] Milk                                   [Delete]  |
+|     DAIRY        Qty: 2        $7.98                 |
+|     $3.99 each                                      |
++------------------------------------------------------+
+
+
+State:
+
+purchased:
+true
+
+
+Class:
+
+item-card purchased
+
+
+Visual:
+
+• Checkbox checked
+
+• Green checkbox accent
+
+• Milk name has line-through
+
+• Softer name color
+
+• Softer background
+
+• Softer metadata
+
+
+================================================================================
+EXAMPLE 3: HOVER
+================================================================================
+
+Unpurchased card:
+
+• Accent border
+
+• Slight shadow
+
+• Small upward movement
+
+
+Purchased card:
+
+• Purchased state remains visible
+
+• Border strengthens slightly
+
+• Subtle shadow
+
+
+================================================================================
+IMPORTANT: THE CARD ITSELF IS NOT A BUTTON
+================================================================================
+
+The item card has a hover style, but clicking anywhere on the card does NOT
+toggle the item.
+
+
+The real interactive controls are:
+
+• Checkbox
+
+• Edit button, when present
+
+• Delete button
+
+
+Therefore avoid making the whole card display:
+
+cursor:
+pointer
+
+
+unless the entire card genuinely performs an action.
+
+
+================================================================================
+VISUAL STATE SUMMARY
+================================================================================
+
+UNPURCHASED:
+
+Unchecked Checkbox
+        +
+Normal Name
+        +
+Normal Background
+
+
+PURCHASED:
+
+Checked Checkbox
+        +
+Green Accent
+        +
+Strikethrough
+        +
+Softer Background
+        +
+Softer Metadata
+
+
+================================================================================
+PART 9: TESTING VISUAL FEEDBACK
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Unpurchased item renders normally
+
+[ ] Purchased item receives purchased class
+
+[ ] Checkbox reflects item.purchased
+
+[ ] Checkbox checked presentation uses accent color
+
+[ ] Item name receives line-through
+
+[ ] Item name remains readable
+
+[ ] Background changes
+
+[ ] Metadata remains readable
+
+[ ] Toggle false → true works
+
+[ ] Toggle true → false restores normal style
+
+[ ] Multiple items maintain independent styles
+
+[ ] Keyboard focus remains visible
+
+[ ] State isn't represented by color alone
+
+[ ] Narrow/mobile layout remains usable
+
+[ ] Reduced-motion preference is respected
+
+[ ] No runtime errors appear
+
+
+================================================================================
+SCENARIO 1: TOGGLE MILK
+================================================================================
+
+Before:
+
+purchased:
+false
+
+
+Expected:
+
+Checkbox:
+Unchecked
+
+
+Name:
+Normal
+
+
+Class:
+
+item-card
+
+
+ACTION:
+
+Click Checkbox
+
+
+After:
+
+purchased:
+true
+
+
+Expected:
+
+Checkbox:
+Checked
+
+
+Name:
+Line-through
+
+
+Class:
+
+item-card purchased
+
+
+Background:
+Purchased appearance
+
+
+================================================================================
+SCENARIO 2: TOGGLE BACK
+================================================================================
+
+Before:
+
+purchased:
+true
+
+
+ACTION:
+
+Click checkbox
+
+
+After:
+
+purchased:
+false
+
+
+Expected:
+
+• Checkbox unchecked
+
+• Strikethrough removed
+
+• Normal background restored
+
+• Normal text color restored
+
+
+================================================================================
+SCENARIO 3: MULTIPLE ITEMS
+================================================================================
+
+Start:
+
+Milk:
+false
+
+
+Bread:
+false
+
+
+Apples:
+false
+
+
+Toggle:
+
+Milk
+
+
+Result:
+
+Milk:
+Purchased styling
+
+
+Bread:
+Normal
+
+
+Apples:
+Normal
+
+
+Toggle:
+
+Bread
+
+
+Result:
+
+Milk:
+Purchased
+
+
+Bread:
+Purchased
+
+
+Apples:
+Normal
+
+
+Each card gets its visual state from:
+
+its own:
+
+item.purchased
+
+
+================================================================================
+SCENARIO 4: KEYBOARD
+================================================================================
+
+1. Tab to Milk checkbox
+
+2. Verify visible focus indicator
+
+3. Press Space
+
+4. Verify Milk toggles
+
+5. Verify checked state changes
+
+6. Verify strikethrough changes
+
+
+This verifies both:
+
+INTERACTION
+
+and:
+
+VISUAL FEEDBACK
+
+
+================================================================================
+SCENARIO 5: FILTER INTERACTION
+================================================================================
+
+Current filter:
+
+To Buy
+
+
+Milk:
+
+purchased:
+false
+
+
+Milk appears.
+
+
+Toggle Milk.
+
+
+Milk:
+
+purchased:
+true
+
+
+Expected:
+
+Milk no longer appears under:
+
+To Buy
+
+
+Switch to:
+
+Purchased
+
+
+Expected:
+
+Milk appears there with purchased styling.
+
+
+================================================================================
+TESTING TABLE
+================================================================================
+
++-------------------------+--------------------------------------------+
+| SCENARIO                | EXPECTED                                   |
++-------------------------+--------------------------------------------+
+| Initial                 | Normal item                                |
+| Toggle On               | Checked + line-through                    |
+| Toggle Off              | Original appearance returns                |
+| Purchased Card          | Softer visual state                        |
+| Multiple Items          | Independent visual states                  |
+| Keyboard Toggle         | Space toggles native checkbox              |
+| Filter                  | Item moves to proper view                  |
+| Reduced Motion          | Optional transformations removed           |
++-------------------------+--------------------------------------------+
+
+
+================================================================================
+PART 10: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE ACCOMPLISHED
+--------------------------------------------------------------------------------
+
+✓ Connected application state to CSS styling
+
+✓ Applied a conditional purchased class
+
+✓ Added strikethrough styling
+
+✓ Changed purchased text appearance
+
+✓ Changed purchased background
+
+✓ Added checkbox accent styling
+
+✓ Preserved a native accessible checkbox
+
+✓ Used multiple state indicators
+
+✓ Added hover feedback
+
+✓ Added keyboard focus styling
+
+✓ Preserved responsive behavior
+
+✓ Added reduced-motion handling
+
+✓ Tested toggle-on and toggle-off states
+
+
+================================================================================
+CRITICAL IMPLEMENTATION POINTS
+================================================================================
+
+STATE:
+--------------------------------------------------------------------------------
+
+item.purchased
+
+
+CONDITIONAL CLASS:
+--------------------------------------------------------------------------------
+
+className={
+  `item-card ${
+    item.purchased
+      ? 'purchased'
+      : ''
+  }`
+}
+
+
+STRIKETHROUGH:
+--------------------------------------------------------------------------------
+
+.item-card.purchased
+.item-name {
+
+  text-decoration:
+    line-through;
+}
+
+
+CHECKBOX:
+--------------------------------------------------------------------------------
+
+checked={
+  item.purchased
+}
+
+
+CHECKBOX COLOR:
+--------------------------------------------------------------------------------
+
+.item-checkbox {
+
+  accent-color:
+    #4caf50;
+}
+
+
+PURCHASED CARD:
+--------------------------------------------------------------------------------
+
+.item-card.purchased {
+
+  background:
+    #f4f7f4;
+
+  border-color:
+    #c8ddca;
+
+  opacity:
+    0.78;
+}
+
+
+================================================================================
+STATE TO STYLE FLOW
+================================================================================
+
+item.purchased
+      ↓
+Boolean
+      ↓
+Conditional class
+      ↓
+item-card / item-card purchased
+      ↓
+CSS Selector
+      ↓
+Visual State
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++------------------------+---------------------------------------------+
+| CONCEPT                | REMEMBER                                    |
++------------------------+---------------------------------------------+
+| item.purchased         | Source of visual state                      |
+| Conditional Class      | Adds purchased class                        |
+| line-through           | Marks item name completed                   |
+| accent-color           | Styles native accent                        |
+| checked                | Controlled checkbox state                   |
+| background             | Reinforces purchased state                  |
+| opacity                | Reduces emphasis                            |
+| :focus-visible         | Keyboard feedback                           |
+| :hover                 | Pointer feedback                            |
+| Reduced Motion         | Respect motion preference                   |
++------------------------+---------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - STRIKETHROUGH
+================================================================================
+
+item.purchased
+     ↓
+true
+     ↓
+purchased class
+     ↓
+.item-card.purchased
+.item-name
+     ↓
+text-decoration:
+line-through
+
+
+================================================================================
+QUICK REVISION - CHECKBOX
+================================================================================
+
+React:
+
+item.purchased
+      ↓
+checked
+
+
+CSS:
+
+accent-color
+      ↓
+Native Checkbox Accent
+
+
+Together:
+
+React State
+     +
+Native Checkbox
+     +
+CSS
+     ↓
+Visual Feedback
+
+
+================================================================================
+QUICK REVISION - PURCHASED ITEM
+================================================================================
+
+PURCHASED
+
+=
+Checked Checkbox
++
+Strikethrough
++
+Softer Text
++
+Softer Background
++
+Softer Metadata
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+STATE-BASED CSS:
+
+State
+ ↓
+Class
+ ↓
+CSS
+ ↓
+UI
+
+
+TOGGLE:
+
+false
+ ↓
+true
+ ↓
+Purchased Style
+
+
+TOGGLE BACK:
+
+true
+ ↓
+false
+ ↓
+Normal Style
+
+
+STRIKETHROUGH:
+
+purchased
+ ↓
+line-through
+
+
+CHECKBOX:
+
+item.purchased
+ ↓
+checked
+
+
+VISUAL ACCESSIBILITY:
+
+DO NOT USE COLOR ALONE
+
+
+Use:
+
+CHECKED STATE
++
+TEXT DECORATION
++
+COLOR/BACKGROUND
+
+
+MOST IMPORTANT RULE:
+
+REACT DETERMINES THE STATE.
+
+CSS REPRESENTS THAT STATE VISUALLY.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Add purchased/unpurchased filters
+
+2. Update shopping statistics from purchased state
+
+3. Add a Clear Purchased action
+
+4. Improve edit/delete visual feedback
+
+5. Add automated tests for purchased CSS state
+
+6. Continue the Grocery List workflow
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The complete visual-feedback cycle is:
+
+USER CLICKS CHECKBOX
+        ↓
+toggleBought
+        ↓
+item.purchased CHANGES
+        ↓
+GroceryItem RECEIVES UPDATED PROP
+        ↓
+purchased CLASS ADDED/REMOVED
+        ↓
+CSS APPLIES THE CORRECT STYLE
+        ↓
+USER SEES THE NEW STATE
+
+
+The important separation is:
+
+REACT:
+--------------------------------------------------------------------------------
+
+Controls the actual purchased state.
+
+
+JSX:
+--------------------------------------------------------------------------------
+
+Converts state into a CSS class.
+
+
+CSS:
+--------------------------------------------------------------------------------
+
+Controls the visual presentation.
+
+
+This keeps the implementation simple, predictable, accessible, and easy to
+maintain.
+
+
+================================================================================
+END OF LESSON 18
+CHANGING CHECKBOX COLOR AND ITEM TEXT
+STRIKETHROUGH FOR PURCHASED ITEMS
+================================================================================
