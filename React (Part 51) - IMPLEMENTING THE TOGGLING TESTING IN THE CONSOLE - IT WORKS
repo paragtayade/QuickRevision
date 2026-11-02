@@ -1,0 +1,2602 @@
+LESSON 17: IMPLEMENTING THE TOGGLING
+TESTING IN THE CONSOLE - IT WORKS
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson completes the toggleBought functionality introduced in Lesson 16.
+
+You will understand:
+
+• Implementing toggleBought completely
+
+• Connecting checkbox events to parent state
+
+• Toggling purchased true / false
+
+• Updating one item inside an array
+
+• Using immutable state updates
+
+• Verifying the correct item ID
+
+• Understanding controlled checkboxes
+
+• Testing the interaction in the browser
+
+• Using console logging for temporary debugging
+
+• Verifying UI changes
+
+• Debugging common toggle problems
+
+• Removing debugging code after verification
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+Lesson 16 established the communication pattern:
+
+App
+ ↓
+GroceryList
+ ↓
+GroceryItem
+
+
+Now we verify the complete interaction:
+
+USER CLICKS CHECKBOX
+        ↓
+GroceryItem onChange
+        ↓
+onToggleBought(item.id)
+        ↓
+App.handleToggleBought(id)
+        ↓
+setGroceryItems(...)
+        ↓
+map()
+        ↓
+Matching Item Found
+        ↓
+purchased Flipped
+        ↓
+New State
+        ↓
+React Renders
+        ↓
+Updated Props
+        ↓
+Checkbox + Styling Update
+
+
+This confirms that:
+
+STATE
++
+PROPS
++
+CALLBACKS
++
+EVENTS
++
+IMMUTABLE UPDATES
+
+are working together.
+
+
+================================================================================
+PART 2: UNDERSTANDING THE TOGGLE IMPLEMENTATION
+================================================================================
+
+WHAT DOES "TOGGLE" MEAN?
+--------------------------------------------------------------------------------
+
+Toggle means switching between two states.
+
+For purchased:
+
+false
+ ↓
+true
+ ↓
+false
+ ↓
+true
+
+
+JavaScript:
+
+!value
+
+
+Example:
+
+!false
+
+=
+true
+
+
+!true
+
+=
+false
+
+
+================================================================================
+GROCERY EXAMPLE
+================================================================================
+
+Before:
+
+{
+  id:
+    'milk-1',
+
+  name:
+    'Milk',
+
+  purchased:
+    false
+}
+
+
+Toggle:
+
+purchased:
+!item.purchased
+
+
+After:
+
+{
+  id:
+    'milk-1',
+
+  name:
+    'Milk',
+
+  purchased:
+    true
+}
+
+
+================================================================================
+COMPONENTS INVOLVED
+================================================================================
+
+App
+--------------------------------------------------------------------------------
+
+Owns:
+
+groceryItems
+
+
+Defines:
+
+handleToggleBought
+
+
+Updates:
+
+groceryItems state
+
+
+GroceryList
+--------------------------------------------------------------------------------
+
+Receives:
+
+items
+
+onToggleBought
+
+
+Passes them to:
+
+GroceryItem
+
+
+GroceryItem
+--------------------------------------------------------------------------------
+
+Receives:
+
+item
+
+onToggleBought
+
+
+Provides:
+
+checkbox
+
+
+Calls:
+
+onToggleBought(item.id)
+
+
+================================================================================
+COMPLETE FLOW
+================================================================================
+
+1. User changes checkbox
+
+        ↓
+
+2. onChange executes
+
+        ↓
+
+3. GroceryItem calls:
+
+   onToggleBought(item.id)
+
+        ↓
+
+4. App receives item ID
+
+        ↓
+
+5. App executes:
+
+   handleToggleBought(id)
+
+        ↓
+
+6. setGroceryItems() executes
+
+        ↓
+
+7. map() processes every item
+
+        ↓
+
+8. Matching item is copied
+
+        ↓
+
+9. purchased is inverted
+
+        ↓
+
+10. New items array is returned
+
+        ↓
+
+11. React processes state update
+
+        ↓
+
+12. Updated values render again
+
+        ↓
+
+13. Checkbox receives new checked value
+
+        ↓
+
+14. Purchased CSS class updates
+
+
+================================================================================
+PART 3: COMPLETE TOGGLE IMPLEMENTATION
+================================================================================
+
+File:
+
+src/App.jsx
+
+
+import { useState } from 'react'
+
+import Navigation
+  from './components/Navigation'
+
+import GroceryList
+  from './components/GroceryList'
+
+import AddGroceryForm
+  from './components/AddGroceryForm'
+
+import Footer
+  from './components/Footer'
+
+import {
+  FAKE_GROCERIES
+} from './data/fakeGroceries'
+
+import './App.css'
+
+
+export default function App() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [
+    groceryItems,
+    setGroceryItems
+  ] = useState(
+    FAKE_GROCERIES
+  )
+
+
+  // ============================================
+  // TOGGLE BOUGHT
+  // ============================================
+
+  const handleToggleBought = (
+    id
+  ) => {
+
+    setGroceryItems(
+      previousItems =>
+
+        previousItems.map(
+          item => {
+
+            if (
+              item.id !== id
+            ) {
+
+              return item
+            }
+
+
+            return {
+
+              ...item,
+
+              purchased:
+                !item.purchased
+
+            }
+          }
+        )
+    )
+  }
+
+
+  // ============================================
+  // ADD ITEM
+  // ============================================
+
+  const handleAddItem = (
+    newItem
+  ) => {
+
+    setGroceryItems(
+      previousItems => [
+
+        newItem,
+
+        ...previousItems
+
+      ]
+    )
+  }
+
+
+  // ============================================
+  // DELETE ITEM
+  // ============================================
+
+  const handleDeleteItem = (
+    id
+  ) => {
+
+    setGroceryItems(
+      previousItems =>
+
+        previousItems.filter(
+          item =>
+            item.id !== id
+        )
+    )
+  }
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="app">
+
+      <Navigation />
+
+
+      <main className="app-main">
+
+        <div className="app-container">
+
+
+          <header className="app-header">
+
+            <h1>
+              Grocery List App
+            </h1>
+
+            <p>
+              Manage your shopping list
+            </p>
+
+          </header>
+
+
+          <section className="form-section">
+
+            <AddGroceryForm
+              onAddItem={
+                handleAddItem
+              }
+            />
+
+          </section>
+
+
+          <section
+            id="grocery-list"
+            className="list-section"
+          >
+
+            <GroceryList
+              items={
+                groceryItems
+              }
+              onToggleBought={
+                handleToggleBought
+              }
+              onDeleteItem={
+                handleDeleteItem
+              }
+            />
+
+          </section>
+
+        </div>
+
+      </main>
+
+
+      <Footer />
+
+    </div>
+  )
+}
+
+
+================================================================================
+TOGGLE HANDLER - SHORT VERSION
+================================================================================
+
+The same handler can be written more compactly:
+
+const handleToggleBought = (
+  id
+) => {
+
+  setGroceryItems(
+    previousItems =>
+
+      previousItems.map(
+        item =>
+
+          item.id === id
+            ? {
+                ...item,
+
+                purchased:
+                  !item.purchased
+              }
+            : item
+
+      )
+  )
+}
+
+
+================================================================================
+HOW map() UPDATES ONE ITEM
+================================================================================
+
+Suppose:
+
+id = 'milk-1'
+
+
+Array:
+
+[
+  Milk,
+  Bread,
+  Apples
+]
+
+
+map() processes:
+
+Milk
+ ↓
+Does ID match?
+
+YES
+ ↓
+Create NEW Milk object
+ ↓
+Toggle purchased
+
+
+Bread
+ ↓
+Does ID match?
+
+NO
+ ↓
+Return existing Bread
+
+
+Apples
+ ↓
+Does ID match?
+
+NO
+ ↓
+Return existing Apples
+
+
+Result:
+
+NEW ARRAY
+│
+├── NEW Milk
+├── Bread
+└── Apples
+
+
+================================================================================
+WHY USE THE FUNCTIONAL SETTER?
+================================================================================
+
+Use:
+
+setGroceryItems(
+  previousItems => ...
+)
+
+
+because the next array depends on the existing array.
+
+
+This is preferable to:
+
+setGroceryItems(
+  groceryItems.map(...)
+)
+
+
+for this type of update.
+
+
+MEMORY:
+
+NEXT STATE DEPENDS ON PREVIOUS STATE
+              ↓
+        FUNCTIONAL SETTER
+
+
+================================================================================
+TEMPORARY DEBUGGING VERSION
+================================================================================
+
+While learning/debugging, you can temporarily inspect the transformation.
+
+const handleToggleBought = (
+  id
+) => {
+
+  setGroceryItems(
+    previousItems => {
+
+      console.log(
+        'Toggle requested for:',
+        id
+      )
+
+
+      const target =
+        previousItems.find(
+          item =>
+            item.id === id
+        )
+
+
+      console.log(
+        'Target item:',
+        target
+      )
+
+
+      const nextItems =
+        previousItems.map(
+          item =>
+
+            item.id === id
+              ? {
+                  ...item,
+
+                  purchased:
+                    !item.purchased
+                }
+              : item
+
+        )
+
+
+      console.log(
+        'Previous items:',
+        previousItems
+      )
+
+
+      console.log(
+        'Next items:',
+        nextItems
+      )
+
+
+      return nextItems
+    }
+  )
+}
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+This is DEBUGGING code.
+
+The final application does not need all these console logs.
+
+
+================================================================================
+PART 4: COMPLETE GroceryItem WITH TOGGLE
+================================================================================
+
+File:
+
+src/components/GroceryItem.jsx
+
+
+import './GroceryItem.css'
+
+
+export default function GroceryItem({
+
+  item,
+
+  onToggleBought,
+
+  onDeleteItem
+
+}) {
+
+  // ============================================
+  // CHECKBOX
+  // ============================================
+
+  const handleCheckboxChange = () => {
+
+    onToggleBought(
+      item.id
+    )
+  }
+
+
+  // ============================================
+  // DELETE
+  // ============================================
+
+  const handleDelete = () => {
+
+    onDeleteItem(
+      item.id
+    )
+  }
+
+
+  // ============================================
+  // DERIVED DISPLAY VALUE
+  // ============================================
+
+  const lineCost =
+    item.price *
+    item.quantity
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <article
+      className={
+        `item-card ${
+          item.purchased
+            ? 'purchased'
+            : ''
+        }`
+      }
+    >
+
+
+      {/* Purchased Checkbox */}
+
+      <div className="item-checkbox-wrapper">
+
+        <input
+          type="checkbox"
+          checked={
+            item.purchased
+          }
+          onChange={
+            handleCheckboxChange
+          }
+          className="item-checkbox"
+          aria-label={
+            `Mark ${item.name} as ${
+              item.purchased
+                ? 'not purchased'
+                : 'purchased'
+            }`
+          }
+        />
+
+      </div>
+
+
+      {/* Item Details */}
+
+      <div className="item-details">
+
+        <h3 className="item-name">
+
+          {item.name}
+
+        </h3>
+
+
+        <div className="item-meta">
+
+          <span className="item-category">
+
+            <i
+              className="bi bi-tag"
+              aria-hidden="true"
+            ></i>
+
+            {item.category}
+
+          </span>
+
+
+          <span className="item-quantity">
+
+            <i
+              className="bi bi-box"
+              aria-hidden="true"
+            ></i>
+
+            Qty:
+            {' '}
+            {item.quantity}
+
+          </span>
+
+
+          <span className="item-total-price">
+
+            ${lineCost.toFixed(2)}
+
+          </span>
+
+        </div>
+
+
+        <p className="item-unit-price">
+
+          ${item.price.toFixed(2)}
+          {' '}
+          each
+
+        </p>
+
+      </div>
+
+
+      {/* Delete */}
+
+      <div className="item-actions">
+
+        <button
+          type="button"
+          onClick={
+            handleDelete
+          }
+          className="btn-action btn-delete"
+          title="Delete item"
+          aria-label={
+            `Delete ${item.name}`
+          }
+        >
+
+          <i
+            className="bi bi-trash"
+            aria-hidden="true"
+          ></i>
+
+        </button>
+
+      </div>
+
+    </article>
+  )
+}
+
+
+================================================================================
+CORRUPTED JSX FIX
+================================================================================
+
+The original content contained:
+
+className={�21�}
+
+
+Correct:
+
+className={
+  `item-card ${
+    item.purchased
+      ? 'purchased'
+      : ''
+  }`
+}
+
+
+================================================================================
+CONTROLLED CHECKBOX
+================================================================================
+
+The critical code is:
+
+<input
+  type="checkbox"
+  checked={
+    item.purchased
+  }
+  onChange={
+    handleCheckboxChange
+  }
+/>
+
+
+Two responsibilities:
+
+checked:
+--------------------------------------------------------------------------------
+
+Reads the current value.
+
+
+onChange:
+--------------------------------------------------------------------------------
+
+Requests a change.
+
+
+MEMORY:
+
+checked
+   ↓
+STATE → UI
+
+
+onChange
+   ↓
+UI → CALLBACK
+
+
+================================================================================
+DO NOT CREATE DUPLICATE CHECKBOX STATE
+================================================================================
+
+Avoid:
+
+const [
+  checked,
+  setChecked
+] = useState(false)
+
+
+inside every GroceryItem when the actual value already exists as:
+
+item.purchased
+
+
+Otherwise there could be:
+
+App purchased state
+
+AND
+
+GroceryItem checked state
+
+
+These could become inconsistent.
+
+
+Use:
+
+checked={
+  item.purchased
+}
+
+
+as the one source of truth.
+
+
+================================================================================
+PART 5: TESTING IN THE BROWSER CONSOLE
+================================================================================
+
+CONSOLE TESTING PURPOSE
+--------------------------------------------------------------------------------
+
+The browser console is useful while developing because you can temporarily
+inspect:
+
+• Event execution
+
+• Item IDs
+
+• Current data
+
+• Next data
+
+• JavaScript errors
+
+
+However:
+
+CONSOLE LOGGING IS A DEBUGGING AID.
+
+IT IS NOT A REPLACEMENT FOR AUTOMATED TESTING.
+
+
+================================================================================
+OPENING DEVELOPER TOOLS
+================================================================================
+
+Common browser approaches include:
+
+• Use the browser's developer-tools menu
+
+• Right-click the page and choose Inspect
+
+• Open the Console panel
+
+
+Keyboard shortcuts vary by:
+
+• Browser
+
+• Operating system
+
+• Keyboard configuration
+
+
+A common Windows/Linux shortcut is:
+
+F12
+
+
+Many Chromium-based environments also support:
+
+Ctrl + Shift + J
+
+
+On macOS Chromium-based browsers:
+
+Command + Option + J
+
+
+================================================================================
+STEP 1: ADD A TEMPORARY CHILD LOG
+================================================================================
+
+During debugging:
+
+const handleCheckboxChange = () => {
+
+  console.log(
+    'Checkbox changed:',
+    item.id,
+    item.name,
+    item.purchased
+  )
+
+
+  onToggleBought(
+    item.id
+  )
+}
+
+
+================================================================================
+STEP 2: ADD A TEMPORARY PARENT LOG
+================================================================================
+
+const handleToggleBought = (
+  id
+) => {
+
+  console.log(
+    'Parent received ID:',
+    id
+  )
+
+
+  setGroceryItems(
+    previousItems =>
+
+      previousItems.map(
+        item =>
+
+          item.id === id
+            ? {
+                ...item,
+
+                purchased:
+                  !item.purchased
+              }
+            : item
+
+      )
+  )
+}
+
+
+================================================================================
+STEP 3: CLICK MILK
+================================================================================
+
+Before:
+
+Milk:
+
+purchased:
+false
+
+
+Click Milk checkbox.
+
+
+Possible debugging output:
+
+Checkbox changed:
+milk-1
+Milk
+false
+
+
+Parent received ID:
+milk-1
+
+
+Expected UI after state update:
+
+Milk:
+
+purchased:
+true
+
+
+Checkbox:
+
+checked
+
+
+Card:
+
+purchased class applied
+
+
+================================================================================
+STEP 4: CLICK MILK AGAIN
+================================================================================
+
+Before:
+
+purchased:
+true
+
+
+After:
+
+purchased:
+false
+
+
+Expected:
+
+• Checkbox unchecked
+
+• Purchased styling removed
+
+
+================================================================================
+STEP 5: TEST ANOTHER ITEM
+================================================================================
+
+Toggle:
+
+Bread
+
+
+Verify:
+
+• Bread changes
+
+• Milk retains its current value
+
+• Apples retains its current value
+
+
+================================================================================
+IMPORTANT: DON'T LOG DURING JSX RENDER
+================================================================================
+
+The supplied lesson used:
+
+{console.log(
+  `Checkbox rendered...`
+)}
+
+
+inside JSX.
+
+
+Avoid this pattern.
+
+
+Why?
+
+Rendering should primarily calculate UI.
+
+A render may occur more than once during development.
+
+Console output from render is therefore noisy and can be misleading if you
+treat every log as proof of one user interaction.
+
+
+Prefer temporary logs in:
+
+• Event handlers
+
+• Explicit debugging code
+
+
+rather than:
+
+JSX rendering expressions.
+
+
+================================================================================
+IMPORTANT: STATE UPDATES ARE REQUESTS
+================================================================================
+
+Consider:
+
+setGroceryItems(
+  nextItems
+)
+
+console.log(
+  groceryItems
+)
+
+
+Do NOT assume the second statement immediately contains the new React state.
+
+The setter requests a state update.
+
+React applies the update and renders again.
+
+
+If you need to inspect what you are about to return inside a functional setter:
+
+setGroceryItems(
+  previousItems => {
+
+    const nextItems =
+      previousItems.map(...)
+
+
+    console.log(
+      nextItems
+    )
+
+
+    return nextItems
+  }
+)
+
+
+For normal production code, remove such debugging afterward.
+
+
+================================================================================
+CONSOLE DEBUGGING TABLE
+================================================================================
+
++---------------------------+-------------------------------------------+
+| DEBUG VALUE               | WHAT IT HELPS VERIFY                      |
++---------------------------+-------------------------------------------+
+| item.id                   | Correct item requested                    |
+| item.name                 | Human-readable item                       |
+| item.purchased            | Current prop value                        |
+| target item               | ID lookup result                          |
+| previousItems             | State used to calculate next value       |
+| nextItems                 | Proposed next state                       |
+| JavaScript error          | Runtime/code problem                      |
++---------------------------+-------------------------------------------+
+
+
+================================================================================
+PART 6: VERIFYING THE TOGGLE WORKS
+================================================================================
+
+STEP 1: INITIAL UI
+--------------------------------------------------------------------------------
+
+Example initial data:
+
+Milk:
+
+false
+
+
+Bread:
+
+false
+
+
+Apples:
+
+false
+
+
+Expected checkboxes:
+
+[ ] Milk
+
+[ ] Bread
+
+[ ] Apples
+
+
+================================================================================
+STEP 2: CLICK MILK
+================================================================================
+
+User:
+
+Clicks Milk checkbox
+
+
+Expected:
+
+Milk:
+
+false
+ ↓
+true
+
+
+Visual:
+
+[x] Milk
+
+
+Purchased class:
+
+item-card purchased
+
+
+================================================================================
+STEP 3: VERIFY OTHER ITEMS
+================================================================================
+
+Expected:
+
+Milk:
+
+true
+
+
+Bread:
+
+false
+
+
+Apples:
+
+false
+
+
+Only Milk changed.
+
+
+================================================================================
+STEP 4: CLICK BREAD
+================================================================================
+
+Expected:
+
+Milk:
+
+true
+
+
+Bread:
+
+true
+
+
+Apples:
+
+false
+
+
+================================================================================
+STEP 5: TOGGLE MILK BACK
+================================================================================
+
+Expected:
+
+Milk:
+
+false
+
+
+Bread:
+
+true
+
+
+Apples:
+
+false
+
+
+================================================================================
+VERIFICATION CHECKLIST
+================================================================================
+
+[ ] Checkbox renders
+
+[ ] checked uses item.purchased
+
+[ ] onChange fires
+
+[ ] Correct ID reaches parent
+
+[ ] Matching item is toggled
+
+[ ] Other items remain unchanged
+
+[ ] false → true works
+
+[ ] true → false works
+
+[ ] Purchased styling applies
+
+[ ] Purchased styling is removed on toggle-back
+
+[ ] Filtering responds to purchased changes
+
+[ ] Derived statistics respond to purchased changes
+
+[ ] No runtime errors appear
+
+
+================================================================================
+VERIFY WITH STATE DISPLAY
+================================================================================
+
+During learning, another useful debugging aid is:
+
+<details className="debug-section">
+
+  <summary>
+    Current Grocery State
+  </summary>
+
+  <pre>
+    {JSON.stringify(
+      groceryItems,
+      null,
+      2
+    )}
+  </pre>
+
+</details>
+
+
+Before toggle:
+
+{
+  "name": "Milk",
+  "purchased": false
+}
+
+
+After toggle:
+
+{
+  "name": "Milk",
+  "purchased": true
+}
+
+
+This is useful for learning, but it normally should not be part of the final
+production UI.
+
+
+================================================================================
+PART 7: UNDERSTANDING THE DEBUG OUTPUT
+================================================================================
+
+USEFUL LOG 1:
+CHILD EVENT
+--------------------------------------------------------------------------------
+
+console.log(
+  'Checkbox changed:',
+  item.id
+)
+
+
+Meaning:
+
+The checkbox event handler executed.
+
+
+================================================================================
+USEFUL LOG 2:
+PARENT RECEIVED ID
+================================================================================
+
+console.log(
+  'Parent received ID:',
+  id
+)
+
+
+Meaning:
+
+The callback chain worked:
+
+GroceryItem
+ ↓
+GroceryList
+ ↓
+App
+
+
+================================================================================
+USEFUL LOG 3:
+MATCHING ITEM
+================================================================================
+
+const target =
+  previousItems.find(
+    item =>
+      item.id === id
+  )
+
+
+console.log(
+  'Target:',
+  target
+)
+
+
+If target contains Milk:
+
+ID matching works.
+
+
+If:
+
+target === undefined
+
+
+then investigate:
+
+• Wrong ID
+
+• Missing record
+
+• ID type mismatch
+
+
+================================================================================
+USEFUL LOG 4:
+NEXT STATE
+================================================================================
+
+const nextItems =
+  previousItems.map(...)
+
+
+console.log(
+  'Next items:',
+  nextItems
+)
+
+
+Expected:
+
+Only one item's:
+
+purchased
+
+
+property changes.
+
+
+================================================================================
+WHAT THE CONSOLE DOES NOT PROVE BY ITSELF
+================================================================================
+
+Seeing:
+
+"Parent received ID"
+
+
+proves the function executed.
+
+It does NOT by itself prove:
+
+• UI visually changed correctly
+
+• CSS is correct
+
+• Accessibility works
+
+• Other records remained correct
+
+• Filtering remains correct
+
+
+Verify observable behavior too.
+
+
+================================================================================
+DEVELOPMENT RENDER LOGS
+================================================================================
+
+If messages appear more often than expected:
+
+DO NOT AUTOMATICALLY ASSUME:
+
+"toggleBought executed multiple times."
+
+
+First identify where the log is placed.
+
+
+A log inside:
+
+render / JSX
+
+
+may execute whenever React renders that component.
+
+
+A log inside:
+
+handleCheckboxChange
+
+
+is tied more directly to that user-event handler invocation.
+
+
+================================================================================
+BETTER DEBUGGING QUESTION
+================================================================================
+
+Instead of asking:
+
+"How many console logs appeared?"
+
+
+Ask:
+
+1. Did the checkbox event run?
+
+2. Which ID was passed?
+
+3. Did the parent receive that ID?
+
+4. Did the matching object's Boolean change?
+
+5. Did the DOM reflect the current state?
+
+
+================================================================================
+PART 8: COMMON ISSUES AND TROUBLESHOOTING
+================================================================================
+
+ISSUE 1: CHECKBOX DOESN'T CHANGE
+--------------------------------------------------------------------------------
+
+Check:
+
+1. Is checked bound correctly?
+
+2. Is onChange attached?
+
+3. Is onToggleBought passed?
+
+4. Is the ID correct?
+
+
+Expected:
+
+<input
+  type="checkbox"
+  checked={
+    item.purchased
+  }
+  onChange={() =>
+    onToggleBought(
+      item.id
+    )
+  }
+/>
+
+
+================================================================================
+ISSUE 2: onToggleBought IS NOT A FUNCTION
+================================================================================
+
+Possible problem:
+
+GroceryItem expects:
+
+onToggleBought
+
+
+but parent passes:
+
+onTogglePurchased
+
+
+Example mismatch:
+
+<GroceryItem
+  onTogglePurchased={
+    handler
+  }
+/>
+
+
+Child:
+
+onToggleBought(
+  item.id
+)
+
+
+These are different prop names.
+
+
+Choose one naming convention and use it consistently.
+
+
+For this lesson:
+
+onToggleBought
+
+
+================================================================================
+ISSUE 3: WRONG ITEM TOGGLES
+================================================================================
+
+Check:
+
+• IDs are unique
+
+• Correct ID passed
+
+• Comparison is correct
+
+
+Expected:
+
+item.id === id
+
+
+Debug:
+
+console.log(
+  'Received:',
+  id
+)
+
+
+================================================================================
+ISSUE 4: NOTHING MATCHES
+================================================================================
+
+Example:
+
+item.id:
+
+1
+
+
+handler id:
+
+'1'
+
+
+Strict equality:
+
+1 === '1'
+
+=
+false
+
+
+This can happen if ID types are inconsistent.
+
+
+Use a consistent ID type throughout the application.
+
+
+Our newer items use:
+
+crypto.randomUUID()
+
+
+which produces string IDs.
+
+
+Fixture IDs should ideally use a compatible identity strategy where
+consistency matters.
+
+
+================================================================================
+ISSUE 5: STATE MUTATED DIRECTLY
+================================================================================
+
+Wrong:
+
+const target =
+  groceryItems.find(
+    item =>
+      item.id === id
+  )
+
+
+target.purchased =
+  !target.purchased
+
+
+setGroceryItems(
+  groceryItems
+)
+
+
+Correct:
+
+setGroceryItems(
+  previousItems =>
+
+    previousItems.map(
+      item =>
+
+        item.id === id
+          ? {
+              ...item,
+
+              purchased:
+                !item.purchased
+            }
+          : item
+
+    )
+)
+
+
+================================================================================
+ISSUE 6: UI DOESN'T SHOW PURCHASED STYLE
+================================================================================
+
+State may be correct while CSS/class logic is wrong.
+
+
+Verify:
+
+className={
+  `item-card ${
+    item.purchased
+      ? 'purchased'
+      : ''
+  }`
+}
+
+
+And CSS:
+
+.item-card.purchased
+.item-name {
+
+  text-decoration:
+    line-through;
+}
+
+
+================================================================================
+ISSUE 7: CHECKBOX HAS LOCAL STATE TOO
+================================================================================
+
+Avoid duplicate state:
+
+const [
+  checked,
+  setChecked
+] = useState(false)
+
+
+if:
+
+item.purchased
+
+
+already represents the authoritative value.
+
+
+Use:
+
+checked={
+  item.purchased
+}
+
+
+================================================================================
+ISSUE 8: LOG SHOWS OLD VALUE AFTER setState
+================================================================================
+
+Problem:
+
+setGroceryItems(
+  ...
+)
+
+console.log(
+  groceryItems
+)
+
+
+then the log seems old.
+
+
+Reason:
+
+The current function still has values from the render in which it was created,
+while the state setter schedules/requests the next state.
+
+
+Do not use an immediate old variable log as proof the update failed.
+
+
+================================================================================
+ISSUE 9: TOO MANY LOGS
+================================================================================
+
+Check whether logging exists:
+
+• In JSX
+
+• At the component function's top level
+
+• In frequently rendering children
+
+
+Move temporary interaction logging into:
+
+event handlers
+
+
+and remove it once debugging is complete.
+
+
+================================================================================
+TROUBLESHOOTING TABLE
+================================================================================
+
++--------------------------+--------------------------------------------+
+| ISSUE                    | CHECK                                      |
++--------------------------+--------------------------------------------+
+| Checkbox won't change    | checked + onChange + callback              |
+| Handler undefined        | Prop name chain                            |
+| Wrong item changes       | ID supplied to callback                    |
+| Nothing changes          | ID value/type match                        |
+| Style doesn't change     | Conditional class + CSS                    |
+| State behaves oddly      | Direct mutation                            |
+| Log appears stale        | State timing/render snapshot               |
+| Too many logs            | Logging during render                      |
++--------------------------+--------------------------------------------+
+
+
+================================================================================
+PART 9: CONFIRMING IT WORKS
+================================================================================
+
+THE TOGGLE IS COMPLETE WHEN:
+--------------------------------------------------------------------------------
+
+[ ] User can check an unpurchased item
+
+[ ] `purchased` changes false → true
+
+[ ] Checkbox becomes checked
+
+[ ] Purchased styling appears
+
+[ ] User can toggle the same item back
+
+[ ] `purchased` changes true → false
+
+[ ] Checkbox becomes unchecked
+
+[ ] Purchased styling disappears
+
+[ ] Each item works independently
+
+[ ] Filters react correctly
+
+[ ] Statistics react correctly
+
+[ ] No runtime exception occurs
+
+
+================================================================================
+WHAT "IT WORKS" REALLY MEANS
+================================================================================
+
+"It works" should not mean only:
+
+A console message appeared.
+
+
+A better verification is:
+
+EVENT
+  ↓
+CORRECT ID
+  ↓
+CORRECT STATE TRANSFORMATION
+  ↓
+CORRECT UI
+  ↓
+CORRECT RELATED DERIVED UI
+
+
+For example:
+
+Milk:
+
+false
+
+
+Click
+
+
+Milk:
+
+true
+
+
+Then verify:
+
+• checkbox
+
+• card style
+
+• To Buy filter
+
+• Purchased filter
+
+• purchased count
+
+
+================================================================================
+MANUAL TEST
+================================================================================
+
+START:
+
+Milk:
+false
+
+Bread:
+false
+
+
+ACTION 1:
+
+Toggle Milk
+
+
+EXPECTED:
+
+Milk:
+true
+
+Bread:
+false
+
+
+ACTION 2:
+
+Toggle Bread
+
+
+EXPECTED:
+
+Milk:
+true
+
+Bread:
+true
+
+
+ACTION 3:
+
+Toggle Milk
+
+
+EXPECTED:
+
+Milk:
+false
+
+Bread:
+true
+
+
+If all three behave correctly:
+
+The basic toggle logic is functioning as expected.
+
+
+================================================================================
+AUTOMATED TEST
+================================================================================
+
+Manual console verification is useful while learning.
+
+A stronger regression check is an automated test.
+
+
+Conceptual React Testing Library example:
+
+
+import {
+  render,
+  screen
+} from '@testing-library/react'
+
+import userEvent
+  from '@testing-library/user-event'
+
+import {
+  vi
+} from 'vitest'
+
+import GroceryItem
+  from './GroceryItem'
+
+
+test(
+  'requests toggle for selected grocery',
+
+  async () => {
+
+    const user =
+      userEvent.setup()
+
+
+    const item = {
+
+      id:
+        'milk-1',
+
+      name:
+        'Milk',
+
+      quantity:
+        2,
+
+      category:
+        'Dairy',
+
+      price:
+        3.99,
+
+      purchased:
+        false
+
+    }
+
+
+    const onToggleBought =
+      vi.fn()
+
+
+    render(
+      <GroceryItem
+        item={item}
+        onToggleBought={
+          onToggleBought
+        }
+        onDeleteItem={
+          vi.fn()
+        }
+      />
+    )
+
+
+    await user.click(
+      screen.getByRole(
+        'checkbox',
+        {
+          name:
+            /mark milk as purchased/i
+        }
+      )
+    )
+
+
+    expect(
+      onToggleBought
+    ).toHaveBeenCalledWith(
+      'milk-1'
+    )
+  }
+)
+
+
+================================================================================
+MANUAL DEBUGGING VS AUTOMATED TEST
+================================================================================
+
++----------------------+-----------------------------------------------+
+| APPROACH             | BEST FOR                                      |
++----------------------+-----------------------------------------------+
+| Console Logging      | Understanding/debugging current problem       |
+| Visual Testing       | Confirming appearance/interactions            |
+| Automated Test       | Repeatable regression verification            |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+REMOVE TEMPORARY DEBUGGING
+================================================================================
+
+Once verified, simplify:
+
+const handleCheckboxChange = () => {
+
+  onToggleBought(
+    item.id
+  )
+}
+
+
+Or even:
+
+onChange={() =>
+  onToggleBought(
+    item.id
+  )
+}
+
+
+And keep the parent handler focused:
+
+const handleToggleBought = (
+  id
+) => {
+
+  setGroceryItems(
+    previousItems =>
+
+      previousItems.map(
+        item =>
+
+          item.id === id
+            ? {
+                ...item,
+
+                purchased:
+                  !item.purchased
+              }
+            : item
+
+      )
+  )
+}
+
+
+================================================================================
+PART 10: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE ACCOMPLISHED
+--------------------------------------------------------------------------------
+
+✓ Implemented complete toggle behavior
+
+✓ Connected checkbox to parent state
+
+✓ Passed an item ID through the callback
+
+✓ Found the matching grocery item
+
+✓ Toggled a Boolean property
+
+✓ Used map() for an immutable array update
+
+✓ Used object spread for an immutable object update
+
+✓ Kept checkbox state controlled from props
+
+✓ Verified the UI changes
+
+✓ Used console logs for temporary debugging
+
+✓ Learned why render-time logs can be misleading
+
+✓ Learned why state isn't necessarily readable as "new" immediately after a
+  setter call
+
+✓ Tested multiple independent items
+
+✓ Identified common toggle problems
+
+✓ Distinguished debugging from automated testing
+
+
+================================================================================
+CRITICAL IMPLEMENTATION
+================================================================================
+
+PARENT:
+--------------------------------------------------------------------------------
+
+const handleToggleBought = (
+  id
+) => {
+
+  setGroceryItems(
+    previousItems =>
+
+      previousItems.map(
+        item =>
+
+          item.id === id
+            ? {
+                ...item,
+
+                purchased:
+                  !item.purchased
+              }
+            : item
+
+      )
+  )
+}
+
+
+PASS:
+--------------------------------------------------------------------------------
+
+<GroceryList
+  items={
+    groceryItems
+  }
+  onToggleBought={
+    handleToggleBought
+  }
+/>
+
+
+FORWARD:
+--------------------------------------------------------------------------------
+
+<GroceryItem
+  item={item}
+  onToggleBought={
+    onToggleBought
+  }
+/>
+
+
+CALL:
+--------------------------------------------------------------------------------
+
+onToggleBought(
+  item.id
+)
+
+
+CONTROL:
+--------------------------------------------------------------------------------
+
+checked={
+  item.purchased
+}
+
+
+STYLE:
+--------------------------------------------------------------------------------
+
+className={
+  `item-card ${
+    item.purchased
+      ? 'purchased'
+      : ''
+  }`
+}
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++-------------------------+---------------------------------------------+
+| CONCEPT                 | REMEMBER                                    |
++-------------------------+---------------------------------------------+
+| checked                 | Current Boolean prop                        |
+| onChange                | Checkbox interaction                        |
+| item.id                 | Identify target grocery                     |
+| onToggleBought          | Callback prop                              |
+| handleToggleBought      | State-owner handler                         |
+| map()                   | Build next items array                      |
+| ...item                 | Copy item before changing property          |
+| !item.purchased         | Flip Boolean                               |
+| Functional Setter       | Calculate next state from previous state    |
+| Console                 | Temporary debugging tool                    |
+| Automated Test          | Repeatable behavior check                   |
++-------------------------+---------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - COMPLETE FLOW
+================================================================================
+
+Checkbox
+   ↓
+onChange
+   ↓
+onToggleBought(item.id)
+   ↓
+App
+   ↓
+handleToggleBought(id)
+   ↓
+setGroceryItems(previous => ...)
+   ↓
+map()
+   ↓
+Match ID
+   ↓
+{
+  ...item,
+  purchased:
+    !item.purchased
+}
+   ↓
+New Array
+   ↓
+React Render
+   ↓
+New Props
+   ↓
+checked={item.purchased}
+   ↓
+Purchased CSS
+   ↓
+Updated UI
+
+
+================================================================================
+QUICK REVISION - DEBUGGING
+================================================================================
+
+DEBUG:
+
+User Action
+    ↓
+Event Handler Log
+    ↓
+Correct ID?
+    ↓
+Parent Handler Log
+    ↓
+Correct Item?
+    ↓
+Correct Next Array?
+    ↓
+UI Correct?
+
+
+AFTER DEBUGGING:
+
+REMOVE UNNECESSARY LOGS
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+TOGGLE:
+
+false
+ ↓
+true
+
+
+true
+ ↓
+false
+
+
+BOOLEAN:
+
+!value
+
+
+FIND TARGET DURING UPDATE:
+
+item.id === id
+
+
+IMMUTABLE ITEM UPDATE:
+
+{
+  ...item,
+  purchased:
+    !item.purchased
+}
+
+
+IMMUTABLE ARRAY UPDATE:
+
+previousItems.map(...)
+
+
+CONTROLLED CHECKBOX:
+
+STATE
+ ↓
+checked
+
+
+USER ACTION:
+
+onChange
+ ↓
+callback
+
+
+DEBUG:
+
+Event
+ ↓
+ID
+ ↓
+State Transformation
+ ↓
+UI
+
+
+MOST IMPORTANT RULE:
+
+DON'T JUDGE SUCCESS ONLY FROM A CONSOLE MESSAGE.
+
+VERIFY:
+
+CORRECT EVENT
++
+CORRECT ITEM
++
+CORRECT STATE
++
+CORRECT UI
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Add purchased filtering
+
+2. Verify statistics update after toggling
+
+3. Implement Delete using the same parent-handler pattern
+
+4. Add Edit using the same callback architecture
+
+5. Replace temporary debugging logs with automated tests
+
+6. Continue building the Grocery List CRUD workflow
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The final toggle cycle is:
+
+USER
+ ↓
+CHECKBOX
+ ↓
+onChange
+ ↓
+CHILD CALLBACK
+ ↓
+PARENT HANDLER
+ ↓
+IMMUTABLE STATE UPDATE
+ ↓
+RENDER
+ ↓
+UPDATED PROPS
+ ↓
+UPDATED CHECKBOX + STYLING
+
+
+Console logging is useful for seeing parts of this flow while debugging.
+
+But the real confirmation is that:
+
+THE CORRECT ITEM'S STATE CHANGES
+AND THE UI CONSISTENTLY REFLECTS THAT STATE.
+
+
+================================================================================
+END OF LESSON 17
+IMPLEMENTING THE TOGGLING
+TESTING IN THE CONSOLE - IT WORKS
+================================================================================
