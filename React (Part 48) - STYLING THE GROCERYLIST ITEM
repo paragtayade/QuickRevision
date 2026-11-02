@@ -1,0 +1,2697 @@
+LESSON 12: STYLING THE GROCERYLIST ITEM
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on creating and styling a reusable GroceryItem component.
+
+You will understand:
+
+• Creating a reusable GroceryItem component
+
+• Designing an item-card layout
+
+• Passing item data through props
+
+• Passing event-handler callbacks through props
+
+• Styling purchased and unpurchased states
+
+• Creating category badges
+
+• Displaying quantity and prices
+
+• Styling Edit and Delete actions
+
+• Adding hover and focus feedback
+
+• Creating responsive item cards
+
+• Improving keyboard accessibility
+
+• Respecting reduced-motion preferences
+
+• Keeping presentation separate from list-management logic
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+Each grocery item is one of the most frequently viewed and interacted-with
+parts of the Grocery List App.
+
+A well-designed item component should make it easy to understand:
+
+• What the item is
+
+• How many units are required
+
+• Which category it belongs to
+
+• What one unit costs
+
+• What the total line cost is
+
+• Whether it has been purchased
+
+• How to edit it
+
+• How to delete it
+
+
+The overall component flow is:
+
+GroceryList
+    ↓
+item + callbacks
+    ↓
+GroceryItem
+    ↓
+Styled Card
+    ↓
+User Interaction
+    ↓
+Callback to Parent
+    ↓
+State Update
+    ↓
+Updated GroceryItem
+
+
+================================================================================
+PART 2: UNDERSTANDING ITEM STYLING
+================================================================================
+
+WHAT IS ITEM STYLING?
+--------------------------------------------------------------------------------
+
+Item styling controls the visual presentation of one grocery record.
+
+It includes:
+
+• Layout
+
+• Spacing
+
+• Typography
+
+• Colors
+
+• Borders
+
+• Status indicators
+
+• Buttons
+
+• Focus states
+
+• Hover states
+
+• Responsive behavior
+
+• Motion/transition behavior
+
+
+================================================================================
+GOALS OF GOOD ITEM STYLING
+================================================================================
+
+A good GroceryItem should provide:
+
+1. CLEAR HIERARCHY
+
+   Item name should be easy to identify.
+
+
+2. STATUS VISIBILITY
+
+   Purchased items should visibly differ from active items.
+
+
+3. READABLE METADATA
+
+   Category, quantity, and price should be easy to scan.
+
+
+4. CLEAR ACTIONS
+
+   Edit and Delete should be distinguishable.
+
+
+5. RESPONSIVE BEHAVIOR
+
+   The card should remain usable when horizontal space becomes limited.
+
+
+6. KEYBOARD FEEDBACK
+
+   Interactive controls should have visible focus indicators.
+
+
+7. MOTION CONTROL
+
+   Animations should respect users who prefer reduced motion.
+
+
+================================================================================
+ITEM STYLING COMPONENTS
+================================================================================
+
+GroceryItem
+│
+├── Purchased Checkbox
+│
+├── Item Details
+│   ├── Item Name
+│   ├── Category Badge
+│   ├── Quantity
+│   ├── Line Cost
+│   └── Unit Price
+│
+└── Actions
+    ├── Edit
+    └── Delete
+
+
+================================================================================
+PART 3: ITEM CARD STRUCTURE
+================================================================================
+
+DESKTOP CONCEPT
+--------------------------------------------------------------------------------
+
++----------------------------------------------------------------+
+| [ ]  Milk                                      [Edit] [Delete]  |
+|      DAIRY      Qty: 2      $7.98                              |
+|      $3.99 each                                                   |
++----------------------------------------------------------------+
+
+
+PURCHASED CONCEPT
+--------------------------------------------------------------------------------
+
++----------------------------------------------------------------+
+| [x]  Milk                                      [Edit] [Delete]  |
+|      DAIRY      Qty: 2      $7.98                              |
+|      $3.99 each                                                   |
++----------------------------------------------------------------+
+
+Purchased styling:
+
+• Softer background
+
+• Reduced emphasis
+
+• Item name uses line-through
+
+• Checkbox remains checked
+
+
+================================================================================
+ITEM CARD STRUCTURE TABLE
+================================================================================
+
++---------------------+-------------------+------------------------------+
+| COMPONENT           | POSITION          | PURPOSE                      |
++---------------------+-------------------+------------------------------+
+| Checkbox            | Start             | Change purchase status       |
+| Item Name           | Main content      | Identify item                |
+| Category            | Metadata          | Show classification          |
+| Quantity            | Metadata          | Show units                   |
+| Line Cost           | Metadata          | quantity × unit price        |
+| Unit Price          | Supporting text   | Price for one unit           |
+| Edit                | Actions           | Request edit                 |
+| Delete              | Actions           | Request deletion             |
++---------------------+-------------------+------------------------------+
+
+
+================================================================================
+COMPONENT RESPONSIBILITY
+================================================================================
+
+GroceryItem should primarily:
+
+• Display one item
+
+• Calculate simple presentation values
+
+• Notify parent when the user interacts
+
+
+The parent should own operations such as:
+
+• Updating groceryItems
+
+• Deleting records
+
+• Editing records
+
+• Persisting data
+
+
+MEMORY:
+
+PARENT
+  ↓
+OWNS STATE
+
+
+CHILD
+  ↓
+DISPLAYS DATA
++
+REPORTS ACTIONS
+
+
+================================================================================
+PART 4: COMPLETE GroceryItem COMPONENT
+================================================================================
+
+File:
+
+src/components/GroceryItem.jsx
+
+
+import './GroceryItem.css'
+
+
+export default function GroceryItem({
+
+  item,
+
+  onTogglePurchased,
+
+  onEditItem,
+
+  onDeleteItem
+
+}) {
+
+  // ============================================
+  // DERIVED DISPLAY VALUE
+  // ============================================
+
+  const lineCost =
+    item.price *
+    item.quantity
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <article
+      className={
+        `item-card ${
+          item.purchased
+            ? 'purchased'
+            : ''
+        }`
+      }
+    >
+
+
+      {/* ========================================
+          PURCHASE STATUS
+          ======================================== */}
+
+      <div className="item-checkbox-wrapper">
+
+        <input
+          type="checkbox"
+          checked={
+            item.purchased
+          }
+          onChange={() =>
+            onTogglePurchased(
+              item.id
+            )
+          }
+          className="item-checkbox"
+          aria-label={
+            `Mark ${item.name} as ${
+              item.purchased
+                ? 'not purchased'
+                : 'purchased'
+            }`
+          }
+        />
+
+      </div>
+
+
+      {/* ========================================
+          ITEM DETAILS
+          ======================================== */}
+
+      <div className="item-details">
+
+
+        {/* Name */}
+
+        <h3 className="item-name">
+
+          {item.name}
+
+        </h3>
+
+
+        {/* Metadata */}
+
+        <div className="item-meta">
+
+
+          <span className="item-category">
+
+            {item.category}
+
+          </span>
+
+
+          <span className="item-quantity">
+
+            Qty:
+            {' '}
+            {item.quantity}
+
+          </span>
+
+
+          <span className="item-total-price">
+
+            ${lineCost.toFixed(2)}
+
+          </span>
+
+        </div>
+
+
+        {/* Unit Price */}
+
+        <p className="item-unit-price">
+
+          ${item.price.toFixed(2)}
+          {' '}
+          each
+
+        </p>
+
+      </div>
+
+
+      {/* ========================================
+          ACTIONS
+          ======================================== */}
+
+      <div className="it*m-actions">
+
+
+        <button
+    *     type="button"
+          onCli*k={() =>
+            onEditItem(it*m)
+          }
+          className*"btn-action btn-edit"
+          ar*a-label={
+            `Edit ${item*name}`
+          }
+          title*"Edit item"
+        >
+
+          <*pan aria-hidden="true">
+          * Edit
+          </span>
+
+        <*button>
+
+
+        <button
+        * type="button"
+          onClick={*) =>
+            onDeleteItem(
+   *          item.id
+            )
+  *       }
+          className="btn-*ction btn-delete"
+          aria-l*bel={
+            `Delete ${item.n*me}`
+          }
+          title="*elete item"
+        >
+
+          <*pan aria-hidden="true">
+          * Delete
+          </span>
+
+       *</button>
+
+      </div>
+
+    </art*cle>
+  )
+}
+
+
+=====================*==================================*=======================
+IMPORTANT *IX: CORRUPTED className
+==========*==================================*==================================*
+The supplied lesson contained cor*upted markup:
+
+className={�13�}
+
+
+*he intended React code is:
+
+classN*me={
+  `item-card ${
+    item.purc*ased
+      ? 'purchased'
+      : '*
+  }`
+}
+
+
+When:
+
+item.purchased ==* false
+
+
+Result:
+
+item-card
+
+
+When*
+
+item.purchased === true
+
+
+Result*
+
+item-card purchased
+
+
+==========*==================================*==================================*PROPS
+============================*==================================*================
+
+GroceryItem rece*ves:
+
+item
+
+onTogglePurchased
+
+onE*itItem
+
+onDeleteItem
+
+
+===========*==================================*=================================
+*ROP RESPONSIBILITIES
+=============*==================================*===============================
+
++*----------------------+-----------*----------------------------------*
+| PROP                  | PURPOSE*                                  *  |
++-----------------------+-----*----------------------------------*-----+
+| item                  | G*ocery record to display           *        |
+| onTogglePurchased     * Parent callback for status       *           |
+| onEditItem         *  | Parent callback for editing   *              |
+| onDeleteItem    *     | Parent callback for deletio*                 |
++--------------*--------+-------------------------*--------------------+
+
+
+==========*==================================*==================================*CALLBACK FLOW
+====================*==================================*========================
+
+TOGGLE:
+*----------------------------------*----------------------------------*---------
+
+Checkbox
+   ↓
+onChange
+*  ↓
+onTogglePurchased(item.id)
+   *
+Parent Handler
+   ↓
+Update grocer*Items
+   ↓
+Render
+
+
+EDIT:
+--------*----------------------------------*----------------------------------*-
+
+Edit Button
+   ↓
+onEditItem(ite*)
+   ↓
+Parent loads selected item *nto edit form
+
+
+DELETE:
+----------*----------------------------------*----------------------------------*
+Delete Button
+   ↓
+onDeleteItem(i*em.id)
+   ↓
+Parent filters item fr*m array
+
+
+========================*==================================*====================
+DERIVED LINE *OST
+==============================*==================================*==============
+
+Instead of writing*repeatedly:
+
+item.price *
+item.qua*tity
+
+
+create:
+
+const lineCost =
+ *item.price *
+  item.quantity
+
+
+Exa*ple:
+
+price:
+
+3.99
+
+
+quantity:
+
+2
+*
+lineCost:
+
+7.98
+
+
+Display:
+
+$7.98*
+
+================================*==================================*============
+IMPORTANT PRICE FIX
+=*==================================*==================================*========
+
+The original lesson had:*
+JSX:
+
+${(item.price * item.quanti*y).toFixed(2)}
+
+
+AND CSS:
+
+.item-t*tal-price::before {
+  content: '$'*
+}
+
+
+That would visually produce:
+*$$7.98
+
+
+Use ONE approach.
+
+
+RECOMMENDED:
+--------------------------------------------------------------------------------
+
+Keep monetary content in JSX:
+
+<span className="item-total-price">
+
+  ${lineCost.toFixed(2)}
+
+</span>
+
+
+Then CSS should NOT add another currency symbol.
+
+
+================================================================================
+PART 5: COMPLETE GroceryItem CSS
+================================================================================
+
+File:
+
+src/components/GroceryItem.css
+
+
+/* ============================================
+   ITEM CARD
+   ============================================ */
+
+.item-card {
+
+  background:
+    #ffffff;
+
+  border:
+    2px solid #e5e7eb;
+
+  border-radius:
+    10px;
+
+  padding:
+    20px;
+
+  display:
+    flex;
+
+  gap:
+    15px;
+
+  align-items:
+    flex-start;
+
+  box-shadow:
+    0 2px 6px
+    rgba(0, 0, 0, 0.06);
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+
+/* Hover */
+
+.item-card:hover {
+
+  border-color:
+    #667eea;
+
+  box-shadow:
+    0 5px 14px
+    rgba(102, 126, 234, 0.18);
+
+  transform:
+    translateY(-2px);
+}
+
+
+/* Purchased */
+
+.item-card.purchased {
+
+  background:
+    #f7f7f8;
+
+  opacity:
+    0.72;
+}
+
+
+/* ============================================
+   CHECKBOX
+   ============================================ */
+
+.item-checkbox-wrapper {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  flex-shrink:
+    0;
+
+  padding-top:
+    2px;
+}
+
+
+.item-checkbox {
+
+  width:
+    20px;
+
+  height:
+    20px;
+
+  cursor:
+    pointer;
+
+  accent-color:
+    #667eea;
+}
+
+
+.item-checkbox:focus-visible {
+
+  outline:
+    3px solid
+    #667eea;
+
+  outline-offset:
+    3px;
+}
+
+
+/* ============================================
+   DETAILS
+   ============================================ */
+
+.item-details {
+
+  flex:
+    1;
+
+  min-width:
+    0;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  gap:
+    8px;
+}
+
+
+/* Item Name */
+
+.item-name {
+
+  margin:
+    0;
+
+  color:
+    #222;
+
+  font-size:
+    1.1rem;
+
+  font-weight:
+    650;
+
+  overflow-wrap:
+    anywhere;
+}
+
+
+/* Purchased Name */
+
+.item-card.purchased
+.item-name {
+
+  text-decoration:
+    line-through;
+
+  color:
+    #666;
+}
+
+
+/* ============================================
+   METADATA
+   ============================================ */
+
+.item-meta {
+
+  display:
+    flex;
+
+  gap:
+    10px 15px;
+
+  flex-wrap:
+    wrap;
+
+  align-items:
+    center;
+
+  font-size:
+    0.9rem;
+
+  color:
+    #555;
+}
+
+
+/* Category */
+
+.item-category {
+
+  background:
+    #eef0ff;
+
+  color:
+    #4254b8;
+
+  padding:
+    4px 8px;
+
+  border-radius:
+    999px;
+
+  font-weight:
+    650;
+
+  font-size:
+    0.8rem;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    0.04em;
+}
+
+
+/* Quantity */
+
+.item-quantity {
+
+  color:
+    #444;
+
+  font-weight:
+    600;
+}
+
+
+/* Total Price */
+
+.item-total-price {
+
+  color:
+    #4355ba;
+
+  font-weight:
+    700;
+
+  font-size:
+    1rem;
+}
+
+
+/* Unit Price */
+
+.item-unit-price {
+
+  margin:
+    0;
+
+  color:
+    #666;
+
+  font-size:
+    0.85rem;
+}
+
+
+/* ============================================
+   ACTIONS
+   ============================================ */
+
+.item-actions {
+
+  display:
+    flex;
+
+  gap:
+    8px;
+
+  flex-shrink:
+    0;
+}
+
+
+.btn-action {
+
+  border:
+    1px solid transparent;
+
+  cursor:
+    pointer;
+
+  padding:
+    8px 10px;
+
+  border-radius:
+    6px;
+
+  font: inherit;
+
+  font-size:
+    0.85rem;
+
+  font-weight:
+    650;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+/* Edit */
+
+.btn-edit {
+
+  color:
+    #3446a8;
+
+  background:
+    #eef0ff;
+
+  border-color:
+    #d8dcff;
+}
+
+
+.btn-edit:hover {
+
+  background:
+    #dde1ff;
+
+  transform:
+    translateY(-1px);
+}
+
+
+/* Delete */
+
+.btn-delete {
+
+  color:
+    #a71919;
+
+  background:
+    #fff0f0;
+
+  border-color:
+    #ffd6d6;
+}
+
+
+.btn-delete:hover {
+
+  background:
+    #ffe0e0;
+
+  transform:
+    translateY(-1px);
+}
+
+
+/* Active */
+
+.btn-action:active {
+
+  transform:
+    translateY(0);
+}
+
+
+/* Keyboard Focus */
+
+.btn-action:focus-visible {
+
+  outline:
+    3px solid
+    #667eea;
+
+  outline-offset:
+    2px;
+}
+
+
+/* ============================================
+   TABLET / SMALLER LAYOUT
+   ============================================ */
+
+@media (max-width: 768px) {
+
+  .item-card {
+
+    padding:
+      15px;
+
+    gap:
+      12px;
+  }
+
+
+  .item-name {
+
+    font-size:
+      1rem;
+  }
+
+
+  .item-meta {
+
+    font-size:
+      0.85rem;
+  }
+
+
+  .item-category {
+
+    font-size:
+      0.75rem;
+  }
+
+}
+
+
+/* ============================================
+   MOBILE
+   ============================================ */
+
+@media (max-width: 480px) {
+
+  *item-card {
+
+    display:
+      grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    gap:
+      12px;
+
+    padding:
+      14px;
+  }
+
+
+  .item-checkbox-wrapper {
+
+    grid-column:
+      1;
+  }
+
+
+  .item-details {
+
+    grid-column:
+      2;
+  }
+
+
+  .item-actions {
+
+    grid-column:
+      1 / -1;
+
+    justify-content:
+      flex-end;
+
+    border-top:
+      1px solid #eee;
+
+    padding-top:
+      12px;
+  }
+
+
+  .item-meta {
+
+    flex-direction:
+      column;
+
+    align-items:
+      flex-start;
+
+    gap:
+      6px;
+  }
+
+}
+
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (
+  prefers-reduc*d-motion:
+  reduce
+) {
+
+  .item-ca*d,
+  .btn-action {
+
+    transition*
+      none;
+
+    animation:
+     *none;
+  }
+
+
+  .item-card:hover,
+  *btn-action:hover,
+  .btn-action:ac*ive {
+
+    transform:
+      none;
+* }
+
+}
+
+
+==========================*==================================*==================
+CSS CLASSES TAB*E
+================================*==================================*============
+
++-------------------*----+-----------------------------*---------------+
+| CSS CLASS      *       | PURPOSE                  *                  |
++-------------*----------+-----------------------*---------------------+
+| .item-car*             | Main item container*                        |
+| .item-*ard:hover       | Pointer-hover fe*dback                      |
+| .it*m-card.purchased   | Purchased sta*e                             |
+| *item-checkbox-wrapper | Checkbox p*sitioning                        |*| .item-checkbox         | Purchas* checkbox                         * |
+| .item-details          | Main*information area                  *    |
+| .item-name             | G*ocery name                        *       |
+| .item-meta             * Metadata row                     *          |
+| .item-category      *  | Category badge                *             |
+| .item-quantity   *     | Quantity                   *                |
+| .item-total-pr*ce      | Line cost               *                   |
+| .item-unit-*rice       | Unit cost            *                      |
+| .item-ac*ions          | Edit/Delete action*                         |
+| .btn-*ction            | Shared button s*yling                       |
+| .b*n-edit              | Edit styling*                               |
+|*.btn-delete            | Delete st*ling                              *
+| :focus-visible         | Keyboa*d focus                           *  |
++------------------------+----*----------------------------------*-----+
+
+
+=========================*==================================*===================
+WHY AVOID tran*ition: all?
+======================*==================================*======================
+
+The suppli*d CSS repeatedly used:
+
+transition*
+all 0.3s ease
+
+
+That works, but i* means every animatable property m*y be considered for
+transition.
+
+
+*ore intentional:
+
+transition:
+  bo*der-color 0.2s ease,
+  box-shadow *.2s ease,
+  transform 0.2s ease;
+
+*Benefits:
+
+• Easier to understand
+*• More predictable
+
+• Avoids accid*ntally animating unwanted properti*s
+
+
+==============================*==================================*==============
+PART 6: STYLING STA*ES AND INTERACTIONS
+==============*==================================*==============================
+
+ST*TE 1: DEFAULT
+--------------------*----------------------------------*------------------------
+
++-------*----------------------------------*-------------------+
+| [ ]  Milk  *                               [Edit] [Delete]   |
+|      DAIRY      *Qty: 2       $7.98                *         |
+|      $3.99 each      *                                  *   |
++----------------------------*---------------------------------+*
+
+Styling:
+
+• White background
+
+• *ormal opacity
+
+• Dark text
+
+• Neut*al border
+
+• Purchase checkbox unc*ecked
+
+
+==========================*==================================*==================
+STATE 2: PURCHA*ED
+===============================*==================================*=============
+
++------------------*----------------------------------*--------+
+| [x]  Milk             *                    [Edit] [Delete]   |
+|      DAIRY       Qty: 2    *  $7.98                          |*|      $3.99 each                 *                           |
++----*----------------------------------*----------------------+
+
+
+Visual c*anges:
+
+• Softer background
+
+• Red*ced emphasis
+
+• Name has line-thro*gh
+
+• Checkbox checked
+
+
+CSS:
+
+.it*m-card.purchased {
+
+  background:
+*   #f7f7f8;
+
+  opacity:
+    0.72;
+*
+
+
+.item-card.purchased
+.item-name*{
+
+  text-decoration:
+    line-thr*ugh;
+}
+
+
+=========================*==================================*===================
+IMPORTANT PURC*ASED-STATE DESIGN NOTE
+===========*==================================*=================================
+*Do not rely only on:
+
+opacity
+
+or:*
+color
+
+
+to communicate completion*
+
+
+This implementation also uses:
+*• Checked checkbox
+
+• Line-through*name
+
+
+That gives multiple visual *ndicators.
+
+
+=====================*==================================*=======================
+STATE 3: H*VER
+==============================*==================================*==============
+
+Hover effect:
+
+• B*rder becomes accent color
+
+• Shado* increases
+
+• Card moves upward sl*ghtly
+
+
+CSS:
+
+.item-card:hover {
+
+* border-color:
+    #667eea;
+
+  box*shadow:
+    0 5px 14px
+    rgba(10*, 126, 234, 0.18);
+
+  transform:
+ *  translateY(-2px);
+}
+
+
+==========*==================================*==================================*STATE 4: KEYBOARD FOCUS
+==========*==================================*==================================*
+Interactive controls need visible*focus.
+
+Example:
+
+.btn-action:focu*-visible {
+
+  outline:
+    3px sol*d #667eea;
+
+  outline-offset:
+    *px;
+}
+
+
+Checkbox:
+
+.item-checkbox:*ocus-visible {
+
+  outline:
+    3px*solid #667eea;
+
+  outline-offset:
+*   3px;
+}
+
+
+======================*==================================*======================
+INTERACTION*SUMMARY
+==========================*==================================*==================
+
++-------------*---------+------------------------*---------------------+
+| INTERACTI*N           | FEEDBACK            *                        |
++-------*---------------+------------------*---------------------------+
+| Car* Hover            | Border + shado* + slight lift                |
+| *urchased             | Checked + l*ne-through + softer card         |*| Edit Hover            | Stronger*edit background                   * |
+| Delete Hover          | Stron*er danger background              *    |
+| Button Active         | Re*urns from hover lift              *       |
+| Keyboard Focus        |*Visible outline                   *          |
+| Reduced Motion      * | Transform/transitions removed  *             |
++------------------*----+-----------------------------*----------------+
+
+
+==============*==================================*==============================
+PAR* 7: RESPONSIVE DESIGN BREAKDOWN
+==*==================================*==================================*=======
+
+BREAKPOINTS USED
+--------*----------------------------------*----------------------------------*-
+
+768px
+
+480px
+
+
+These are exampl* layout breakpoints.
+
+They are NOT*universal definitions of tablets a*d phones.
+
+
+======================*==================================*======================
+WIDE LAYOUT*==================================*==================================*==========
+
++---------------------*----------------------------------*-------+
+| [ ] | Item Details     *                   | Edit | Delete*      |
++-------------------------*----------------------------------*---+
+
+
+Uses:
+
+display:
+flex
+
+
+Stru*ture:
+
+Checkbox
+   +
+Details
+   +
+*ctions
+
+
+=========================*==================================*===================
+MEDIUM LAYOUT
+*==================================*==================================*=========
+
+At:
+
+768px and below
+
+
+*hanges:
+
+• Smaller card padding
+
+•*Smaller typography
+
+• Reduced spac*ng
+
+
+The horizontal structure can *ontinue while enough room exists.
+*
+=================================*==================================*===========
+SMALL LAYOUT
+=========*==================================*==================================*
+
+At:
+
+480px and below
+
+
+This less*n uses:
+
+CSS Grid
+
+
+Structure:
+
+Co*umn 1:
+Checkbox
+
+
+Column 2:
+Detail*
+
+
+Bottom Row:
+Actions
+
+
+Conceptua*ly:
+
++----------------------------*---+
+| [ ] | Milk                 *   |
+|     | DAIRY                *   |
+|     | Qty: 2               *   |
+|     | $7.98                *   |
+|     | $3.99 each           *   |
++----------------------------*---+
+|              Edit   Delete *   |
++----------------------------*---+
+
+
+===========================*==================================*=================
+WHY NOT FORCE EV*RYTHING INTO ONE COLUMN?
+=========*==================================*==================================*
+
+The original mobile version used*
+
+flex-direction:
+column
+
+
+That is*valid, but it caused the checkbox *o occupy its own row.
+
+Using a sma*l grid allows:
+
+Checkbox
++
+Item De*ails
+
+
+to remain visually connecte* while moving actions below.
+
+
+===*==================================*==================================*======
+RESPONSIVE TABLE
+==========*==================================*==================================*
++-------------------+------------*-----+------------------+---------*--------+
+| ASPECT            | WI*E             | <= 768px         |*<= 480px         |
++--------------*----+------------------+----------*-------+------------------+
+| Layo*t            | Flex             | *lex             | Grid            *|
+| Padding           | 20px      *      | 15px             | 14px   *         |
+| Name Size         | 1*1rem           | 1rem             * 1rem             |
+| Metadata    *     | Row/wrap         | Row/wrap*        | Column           |
+| Act*ons           | Right            |*Right            | Bottom         * |
+| Checkbox          | Left     *       | Left             | Left o* details  |
++-------------------+-*----------------+-----------------*+------------------+
+
+
+===========*==================================*=================================
+*ESPONSIVE DESIGN PRINCIPLE
+=======*==================================*==================================*==
+
+Choose breakpoints based on:
+
+*HEN THE COMPONENT STOPS FITTING WE*L
+
+
+rather than assuming fixed dev*ce categories.
+
+
+=================*==================================*===========================
+PART 8* STYLING DETAILS AND FEATURES
+====*==================================*==================================*=====
+
+CATEGORY BADGE
+------------*----------------------------------*--------------------------------
+
+*item-category {
+
+  background:
+   *#eef0ff;
+
+  color:
+    #4254b8;
+
+ *padding:
+    4px 8px;
+
+  border-ra*ius:
+    999px;
+
+  font-weight:
+  * 650;
+
+  font-size:
+    0.8rem;
+
+ *text-transform:
+    uppercase;
+
+  *etter-spacing:
+    0.04em;
+}
+
+
+Res*lt:
+
+[ DAIRY ]
+
+
+Purpose:
+
+• Visua*ly separate category metadata
+
+• K*ep category information scannable
+*• Establish hierarchy
+
+
+==========*==================================*==================================*SHOULD THE CATEGORY BADGE HAVE A H*VER EFFECT?
+======================*==================================*======================
+
+The origin*l lesson inverted the category col*rs on hover.
+
+However:
+
+The badge *tself is NOT interactive.
+
+
+An int*ractive-looking hover state on a n*n-clickable element can imply that*the user can click it.
+
+
+Therefore*this cleaned version keeps the cat*gory badge visually stable.
+
+MEMOR*:
+
+INTERACTIVE-LOOKING FEEDBACK
+  *     ↓
+SHOULD USUALLY REPRESENT
+A *EAL INTERACTION
+
+
+================*==================================*============================
+TOTAL*PRICE
+============================*==================================*================
+
+.item-total-pric* {
+
+  color:
+    #4355ba;
+
+  font-*eight:
+    700;
+
+  font-size:
+    *rem;
+}
+
+
+Displayed value:
+
+$7.98
+
+*Keep the `$` in JSX rather than in*erting essential information throu*h CSS.
+
+
+=========================*==================================*===================
+WHY KEEP CURRE*CY TEXT IN JSX?
+==================*==================================*==========================
+
+CSS ps*udo-content such as:
+
+::before {
+ *content: '$';
+}
+
+
+is primarily pre*entation.
+
+For meaningful price in*ormation, placing the currency mar*er directly in the
+rendered conten* is easier to reason about.
+
+
+Exam*le:
+
+<span className="item-total-p*ice">
+
+  ${lineCost.toFixed(2)}
+
+<*span>
+
+
+==========================*==================================*==================
+UNIT PRICE
+====*==================================*==================================*=====
+
+.item-unit-price {
+
+  color*
+    #666;
+
+  font-size:
+    0.85r*m;
+}
+
+
+Example:
+
+$3.99 each
+
+
+Hier*rchy:
+
+TOTAL LINE COST
+      ↓
+Str*ng
+
+
+UNIT PRICE
+      ↓
+Supporting*information
+
+
+====================*==================================*========================
+BUTTON DE*IGN
+==============================*==================================*==============
+
+EDIT:
+------------*----------------------------------*--------------------------------
+
+*lue/purple family
+
+Meaning:
+
+Modif* existing information
+
+
+DELETE:
+--*----------------------------------*----------------------------------*-------
+
+Red family
+
+Meaning:
+
+Des*ructive operation
+
+
+This provides *isual differentiation while the bu*tons also retain explicit
+accessib*e labels.
+
+
+======================*==================================*======================
+BUTTON TYPE*
+=================================*==================================*===========
+
+Always use:
+
+type="bu*ton"
+
+
+for these controls:
+
+<butto*
+  type="button"
+>
+  Edit
+</button*
+
+
+Why?
+
+If GroceryItem is ever pl*ced inside a form, a button withou* an explicit
+type can act as a sub*it button.
+
+
+=====================*==================================*=======================
+PART 9: AC*ESSIBILITY AND PERFORMANCE
+=======*==================================*==================================*==
+
+ACCESSIBILITY FEATURES
+-------*----------------------------------*----------------------------------*--
+
+The GroceryItem uses:
+
+• Seman*ic article element
+
+• Native check*ox
+
+• Native buttons
+
+• aria-label*on checkbox
+
+• aria-label on edit/*elete actions
+
+• Visible keyboard *ocus
+
+• More than color alone for *urchased status
+
+• Responsive read*ble layout
+
+• Reduced-motion suppo*t
+
+
+==============================*==================================*==============
+CHECKBOX LABEL
+====*==================================*==================================*=====
+
+<input
+  type="checkbox"
+  *hecked={item.purchased}
+  onChange*{() =>
+    onTogglePurchased(
+    * item.id
+    )
+  }
+  aria-label={
+*   `Mark ${item.name} as ${
+      *tem.purchased
+        ? 'not purch*sed'
+        : 'purchased'
+    }`
+* }
+/>
+
+
+Notice the text changes wi*h state.
+
+
+Not purchased:
+
+Mark Mi*k as purchased
+
+
+Purchased:
+
+Mark *ilk as not purchased
+
+
+This better*describes the action that will hap*en next.
+
+
+=======================*==================================*=====================
+EDIT BUTTON
+*==================================*==================================*=========
+
+<button
+  type="button"*  onClick={() =>
+    onEditItem(it*m)
+  }
+  aria-label={
+    `Edit ${*tem.name}`
+  }
+>
+  Edit
+</button>
+*
+=================================*==================================*===========
+DELETE BUTTON
+========*==================================*==================================*=
+
+<button
+  type="button"
+  onCli*k={() =>
+    onDeleteItem(
+      i*em.id
+    )
+  }
+  aria-label={
+   *`Delete ${item.name}`
+  }
+>
+  Dele*e
+</button>
+
+
+====================*==================================*========================
+ICON ACCE*SIBILITY
+=========================*==================================*===================
+
+If emoji or d*corative icons are used:
+
+<span ar*a-hidden="true">
+  ...
+</span>
+
+
+a*d the button should still have an *ccessible name.
+
+
+Example pattern:*
+<button
+  type="button"
+  aria-la*el="Edit Milk"
+>
+  <span aria-hidd*n="true">
+    [icon]
+  </span>
+</b*tton>
+
+
+==========================*==================================*==================
+FOCUS
+=========*==================================*==================================*
+
+Hover feedback only helps users *sing a pointing device.
+
+Keyboard *sers need:
+
+:focus-visible
+
+
+Examp*e:
+
+.btn-action:focus-visible {
+
+ *outline:
+    3px solid #667eea;
+
+ *outline-offset:
+    2px;
+}
+
+
+=====*==================================*==================================*====
+REDUCED MOTION
+==============*==================================*==============================
+
+So*e users prefer reduced motion.
+
+CS*:
+
+@media (
+  prefers-reduced-moti*n:
+  reduce
+) {
+
+  .item-card,
+  .*tn-action {
+
+    transition:
+     *none;
+  }
+
+
+  .item-card:hover,
+  *btn-action:hover {
+
+    transform:*      none;
+  }
+
+}
+
+
+=============*==================================*===============================
+PE*FORMANCE REALITY CHECK
+===========*==================================*=================================
+*The original lesson claimed severa* optimizations such as:
+
+• Hardwar* acceleration
+
+• Faster CSS select*r matching
+
+• Performance optimiza*ion from Flexbox
+
+
+Those claims ar* too broad for this example.
+
+
+A m*re accurate description:
+
+• CSS ha*dles presentation without React st*te changes
+
+• transform-based hove* effects avoid changing layout dim*nsions
+
+• The component contains n* continuous animation loop
+
+• The *urrent component is small enough t*at CSS performance is unlikely to
+* be the dominant concern
+
+
+For a normal GroceryItem component:
+
+READABILITY
++
+ACCESSIBILITY
++
+MAINTAINABILITY
+
+matter more than speculative micro-optimization.
+
+
+================================================================================
+PART 10: TESTING AND IMPLEMENTATION
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Item name displays
+
+[ ] Category displays
+
+[ ] Quantity displays
+
+[ ] Unit price displays
+
+[ ] Line cost calculates correctly
+
+[ ] $ symbol appears only once
+
+[ ] Checkbox reflects purchased state
+
+[ ] Checkbox callback receives correct ID
+
+[ ] Edit callback receives correct item
+
+[ ] Delete callback receives correct ID
+
+[ ] Purchased class applies correctly
+
+[ ] Purchased name uses line-through
+
+[ ] Button types are "button"
+
+[ ] Keyboard focus is visible
+
+[ ] Checkbox has accessible action label
+
+[ ] Edit button has accessible name
+
+[ ] Delete button has accessible name
+
+[ ] Card works at narrow widths
+
+[ ] Text does not overflow badly
+
+[ ] Reduced-motion preference is respected
+
+
+================================================================================
+SCENARIO 1: DEFAULT ITEM
+================================================================================
+
+ITEM:
+
+{
+  name:
+    'Milk',
+
+  quantity:
+    2,
+
+  category:
+    'Dairy',
+
+  price:
+    3.99,
+
+  purchased:
+    false
+}
+
+
+Expected:
+
+Name:
+
+Milk
+
+
+Category:
+
+DAIRY
+
+
+Quantity:
+
+2
+
+
+Unit Price:
+
+$3.99
+
+
+Line Cost:
+
+2 × 3.99
+
+=
+$7.98
+
+
+Checkbox:
+
+Unchecked
+
+
+================================================================================
+SCENARIO 2: PURCHASED ITEM
+================================================================================
+
+Change:
+
+purchased:
+false
+
+to:
+
+purchased:
+true
+
+
+Expected class:
+
+item-card purchased
+
+
+Expected UI:
+
+• Checkbox checked
+
+• Name line-through
+
+• Card visually softened
+
+
+================================================================================
+SCENARIO 3: TOGGLE PURCHASED
+================================================================================
+
+User checks:
+
+Milk
+
+
+GroceryItem:
+
+onTogglePurchased(
+  item.id
+)
+
+
+Parent:
+
+map()
+ ↓
+Find Milk
+ ↓
+Toggle purchased
+ ↓
+New groceryItems array
+ ↓
+GroceryItem re-renders
+
+
+================================================================================
+SCENARIO 4: EDIT
+================================================================================
+
+User selects:
+
+Edit Milk
+
+
+Expected callback:
+
+onEditItem(item)
+
+
+Parent can then:
+
+• Set editingId
+
+• Load item into form
+
+• Display Update Item mode
+
+
+================================================================================
+SCENARIO 5: DELETE
+================================================================================
+
+User selects:
+
+Delete Milk
+
+
+Expected callback:
+
+onDeleteItem(
+  milkId
+)
+
+
+Parent:
+
+filter()
+ ↓
+Remove Milk
+ ↓
+Render remaining items
+
+
+================================================================================
+SCENARIO 6: MOBILE
+================================================================================
+
+At narrow width:
+
+• Checkbox remains near item details
+
+• Metadata stacks
+
+• Actions move below item details
+
+• No major horizontal overflow
+
+• Buttons remain usable
+
+
+================================================================================
+SCENARIO 7: KEYBOARD
+================================================================================
+
+Using Tab:
+
+1. Focus checkbox
+
+2. Focus Edit
+
+3. Focus Delete
+
+
+Expected:
+
+• Obvious focus indicator
+
+• Space activates checkbox/button as appropriate
+
+• Enter activates buttons
+
+
+================================================================================
+AUTOMATED TEST EXAMPLE
+================================================================================
+
+Conceptual React Testing Library example:
+
+
+import {
+  render,
+  screen
+} from '@testing-library/react'
+
+import userEvent
+  from '@testing-library/user-event'
+
+import GroceryItem
+  from './GroceryItem'
+
+
+test(
+  'requests purchase toggle',
+
+  async () => {
+
+    const user =
+      userEvent.setup()
+
+
+    const item = {
+
+      id:
+        'milk-1',
+
+      name:
+        'Milk',
+
+      quantity:
+        2,
+
+      category:
+        'Dairy',
+
+      price:
+        3.99,
+
+      purchased:
+        false
+
+    }
+
+
+    const onTogglePurchased =
+      vi.fn()
+
+
+    render(
+      <GroceryItem
+        item={item}
+        onTogglePurchased={
+          onTogglePurchased
+        }
+        onEditItem={
+          vi.fn()
+        }
+        onDeleteItem={
+          vi.fn()
+        }
+      />
+    )
+
+
+    await user.click(
+      screen.getByRole(
+        'checkbox',
+        {
+          name:
+            /mark milk as purchased/i
+        }
+      )
+    )
+
+
+    expect(
+      onTogglePurchased
+    ).toHaveBeenCalledWith(
+      'milk-1'
+    )
+  }
+)
+
+
+================================================================================
+TESTING PRINCIPLE
+================================================================================
+
+Test what the user can observe and do.
+
+Examples:
+
+User Checks Item
+       ↓
+Correct Callback Requested
+
+
+User Clicks Edit
+       ↓
+Correct Item Sent
+
+
+User Clicks Delete
+       ↓
+Correct ID Sent
+
+
+Avoid testing styling implementation details unnecessarily unless visual state
+is itself part of the requirement.
+
+
+================================================================================
+PART 11: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE ACCOMPLISHED
+--------------------------------------------------------------------------------
+
+✓ Created a reusable GroceryItem component
+
+✓ Passed item data through props
+
+✓ Passed action callbacks through props
+
+✓ Created a professional item-card structure
+
+✓ Added conditional purchased styling
+
+✓ Created metadata hierarchy
+
+✓ Created a category badge
+
+✓ Calculated line cost
+
+✓ Displayed unit cost
+
+✓ Added Edit and Delete controls
+
+✓ Added explicit button types
+
+✓ Added accessible action labels
+
+✓ Added visible keyboard focus
+
+✓ Added responsive layouts
+
+✓ Added reduced-motion behavior
+
+✓ Separated child presentation from parent state management
+
+
+================================================================================
+CRITICAL COMPONENT CONCEPTS
+================================================================================
+
+PROPS:
+--------------------------------------------------------------------------------
+
+GroceryItem({
+
+  item,
+
+  onTogglePurchased,
+
+  onEditItem,
+
+  onDeleteItem
+
+})
+
+
+PURCHASED CLASS:
+--------------------------------------------------------------------------------
+
+className={
+  `item-card ${
+    item.purchased
+      ? 'purchased'
+      : ''
+  }`
+}
+
+
+TOGGLE:
+--------------------------------------------------------------------------------
+
+onTogglePurchased(
+  item.id
+)
+
+
+EDIT:
+--------------------------------------------------------------------------------
+
+onEditItem(
+  item
+)
+
+
+DELETE:
+--------------------------------------------------------------------------------
+
+onDeleteItem(
+  item.id
+)
+
+
+LINE COST:
+--------------------------------------------------------------------------------
+
+const lineCost =
+  item.price *
+  item.quantity
+
+
+================================================================================
+PARENT-CHILD ARCHITECTURE
+================================================================================
+
+GroceryList
+    │
+    │ item
+    ↓
+GroceryItem
+    │
+    ├── Display
+    │
+    ├── Checkbox
+    │
+    ├── Edit
+    │
+    └── Delete
+          │
+          ↓
+       Callbacks
+          │
+          ↓
+     GroceryList
+          │
+          ↓
+       setState()
+          │
+          ↓
+       New Props
+          │
+          ↓
+     GroceryItem
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++------------------------+----------------------------------------------+
+| CONCEPT                | REMEMBER                                     |
++------------------------+----------------------------------------------+
+| GroceryItem            | Displays one grocery record                  |
+| item                   | Grocery data                                 |
+| Callback Props         | Request parent operations                    |
+| Conditional Class      | Visual state from purchased                  |
+| lineCost               | price × quantity                             |
+| Category Badge         | Secondary metadata                           |
+| type="button"          | Prevent accidental form submission           |
+| aria-label             | Accessible action name                       |
+| :focus-visible         | Keyboard feedback                            |
+| Media Query            | Adjust layout when required                  |
+| Reduced Motion         | Respect motion preference                    |
++------------------------+----------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - PURCHASED STATE
+================================================================================
+
+item.purchased
+     ↓
+true / false
+     ↓
+Conditional CSS Class
+     ↓
+item-card purchased
+     ↓
+Visual State
+
+
+================================================================================
+QUICK REVISION - ACTION FLOW
+================================================================================
+
+GroceryItem
+   ↓
+User Action
+   ↓
+Callback Prop
+   ↓
+Parent Handler
+   ↓
+Update State
+   ↓
+New Props
+   ↓
+Updated UI
+
+
+================================================================================
+QUICK REVISION - PRICE
+================================================================================
+
+Unit Price:
+
+item.price
+
+
+Quantity:
+
+item.quantity
+
+
+Line Cost:
+
+item.price
+    ×
+item.quantity
+
+
+Example:
+
+3.99 × 2
+
+=
+7.98
+
+
+Rendered:
+
+$7.98
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+CHILD COMPONENT:
+
+Props
+ ↓
+Render
+
+
+PURCHASED STATE:
+
+Boolean
+ ↓
+Conditional Class
+ ↓
+Visual Feedback
+
+
+TOGGLE:
+
+Checkbox
+ ↓
+Callback(ID)
+
+
+EDIT:
+
+Edit Button
+ ↓
+Callback(Item)
+
+
+DELETE:
+
+Delete Button
+ ↓
+Callback(ID)
+
+
+PRICE:
+
+Unit Price
+    ×
+Quantity
+    ↓
+Line Cost
+
+
+RESPONSIVE UI:
+
+Available Width
+      ↓
+Media Query
+      ↓
+Layout Adjustment
+
+
+ACCESSIBILITY:
+
+Native Control
+      +
+Accessible Name
+      +
+Visible Focus
+
+
+MOST IMPORTANT COMPONENT RULE:
+
+GroceryItem SHOULD DISPLAY ONE ITEM
+AND REPORT USER ACTIONS.
+
+THE PARENT SHOULD OWN THE GROCERY-LIST STATE.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Replace inline item markup in GroceryList with GroceryItem
+
+2. Pass toggle/delete/edit handlers as props
+
+3. Add the edit form
+
+4. Create GroceryStats as a separate component
+
+5. Add category-specific presentation if useful
+
+6. Add confirmation UX for destructive deletion if required
+
+7. Test GroceryItem independently
+
+8. Continue building the complete Grocery List application
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+A reusable GroceryItem follows this flow:
+
+ITEM DATA
+   ↓
+PROPS
+   ↓
+GroceryItem
+   ↓
+STYLED CARD
+   ↓
+USER ACTION
+   ↓
+CALLBACK PROP
+   ↓
+PARENT STATE UPDATE
+   ↓
+UPDATED ITEM
+
+
+The important ideas are:
+
+PRESENTATION
++
+STATE-BASED STYLING
++
+RESPONSIVE DESIGN
++
+ACCESSIBLE INTERACTION
++
+CLEAR COMPONENT RESPONSIBILITY
+
+
+================================================================================
+END OF LESSON 12
+STYLING THE GROCERYLIST ITEM
+================================================================================
