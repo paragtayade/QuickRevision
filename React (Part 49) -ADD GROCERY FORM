@@ -1,0 +1,3804 @@
+LESSON 13: ADD GROCERY FORM
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on creating a reusable form for adding grocery items to
+the Grocery List App.
+
+You will understand:
+
+• Creating an AddGroceryForm component
+
+• Managing multiple controlled inputs
+
+• Handling text, number, and select controls
+
+• Validating form values
+
+• Displaying field-level errors
+
+• Calculating a live line-cost preview
+
+• Handling form submission
+
+• Normalizing submitted values
+
+• Resetting the controlled form
+
+• Passing submitted data to a parent component
+
+• Adding a new item to grocery-list state
+
+• Connecting the form, list, and item components
+
+• Providing accessible user feedback
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+The Grocery List currently displays and manages existing items.
+
+The Add Grocery Form introduces the create operation:
+
+USER ENTERS DATA
+        ↓
+FORM STATE
+        ↓
+VALIDATION
+        ↓
+NORMALIZATION
+        ↓
+NEW GROCERY ITEM
+        ↓
+PARENT CALLBACK
+        ↓
+GROCERY LIST STATE
+        ↓
+UPDATED LIST
+
+
+The same pattern is used in:
+
+• Todo forms
+
+• Product forms
+
+• Contact forms
+
+• Expense forms
+
+• Inventory forms
+
+• Order-entry forms
+
+• Task-creation forms
+
+
+================================================================================
+PART 2: UNDERSTANDING THE ADD GROCERY FORM
+================================================================================
+
+WHAT IS THE ADD GROCERY FORM?
+--------------------------------------------------------------------------------
+
+The Add Grocery Form is a controlled React form that captures:
+
+• Item Name
+
+• Quantity
+
+• Category
+
+• Unit Price
+
+
+After validation, it creates a new grocery record and reports it to its parent
+through a callback prop.
+
+
+================================================================================
+FORM REQUIREMENTS
+================================================================================
+
+ITEM NAME:
+--------------------------------------------------------------------------------
+
+• Required
+
+• Minimum 2 characters
+
+• Maximum 50 characters
+
+
+QUANTITY:
+--------------------------------------------------------------------------------
+
+• Required
+
+• Whole number
+
+• Minimum 1
+
+• Maximum 999
+
+
+CATEGORY:
+--------------------------------------------------------------------------------
+
+• Required
+
+• Must be one of the supported categories
+
+
+PRICE:
+--------------------------------------------------------------------------------
+
+• Required
+
+• Numeric
+
+• Cannot be negative
+
+• Maximum 9999
+
+• Supports decimal values
+
+
+================================================================================
+FORM STRUCTURE
+================================================================================
+
+AddGroceryForm
+│
+├── Header
+│
+├── Success Feedback
+│
+├── Form
+│   ├── Item Name
+│   ├── Quantity
+│   ├── Category
+│   ├── Unit Price
+│   ├── Line-Cost Preview
+│   ├── Add Item
+│   └── Clear Form
+│
+└── Optional Debug Information
+
+
+================================================================================
+FORM STRUCTURE TABLE
+================================================================================
+
++----------------------+------------------+------------------------------+
+| COMPONENT            | TYPE             | PURPOSE                      |
++----------------------+------------------+------------------------------+
+| Form                 | form             | Handles submission           |
+| Item Name            | text input       | Grocery name                 |
+| Quantity             | number input     | Number of units              |
+| Category             | select           | Grocery category             |
+| Unit Price           | number input     | Price per unit               |
+| Error Message        | paragraph        | Field validation feedback    |
+| Summary              | output           | Live line-cost preview       |
+| Submit               | submit button    | Add grocery item             |
+| Reset                | reset button     | Restore initial values       |
+| Status Message       | status region    | Submission confirmation      |
++----------------------+------------------+------------------------------+
+
+
+================================================================================
+EDITING STATE VS STORED ITEM
+================================================================================
+
+While the user is editing, number-input values are kept as strings.
+
+FORM STATE:
+
+{
+  name:
+    'Milk',
+
+  quantity:
+    '2',
+
+  category:
+    'Dairy',
+
+  price:
+    '3.99'
+}
+
+
+After successful validation, the submitted item contains numbers:
+
+{
+  name:
+    'Milk',
+
+  quantity:
+    2,
+
+  category:
+    'Dairy',
+
+  price:
+    3.99
+}
+
+
+Why?
+
+HTML number controls generally provide:
+
+event.target.value
+
+
+as a string.
+
+
+Keeping strings during editing supports temporary states such as:
+
+quantity:
+''
+
+
+price:
+''
+
+
+Conversion happens only after validation.
+
+
+================================================================================
+PART 3: CREATING THE AddGroceryForm COMPONENT
+================================================================================
+
+FILE STRUCTURE
+--------------------------------------------------------------------------------
+
+src/
+│
+├── components/
+│   ├── AddGroceryForm.jsx
+│   ├── AddGroceryForm.css
+│   ├── GroceryList.jsx
+│   └── GroceryItem.jsx
+│
+└── data/
+    └── fakeGroceries.js
+
+
+================================================================================
+FORM CONSTANTS
+================================================================================
+
+const CATEGORIES = [
+
+  'Produce',
+
+  'Dairy',
+
+  'Bakery',
+
+  'Meat',
+
+  'Frozen',
+
+  'Pantry',
+
+  'Beverages',
+
+  'Snacks'
+
+]
+
+
+const INITIAL_FORM = {
+
+  name: '',
+
+  quantity: '1',
+
+  category: 'Produce',
+
+  price: ''
+
+}
+
+
+================================================================================
+COMPLETE AddGroceryForm.jsx
+================================================================================
+
+File:
+
+src/components/AddGroceryForm.jsx
+
+
+import { useState } from 'react'
+
+import './AddGroceryForm.css'
+
+
+const CATEGORIES = [
+
+  'Produce',
+
+  'Dairy',
+
+  'Bakery',
+
+  'Meat',
+
+  'Frozen',
+
+  'Pantry',
+
+  'Beverages',
+
+  'Snacks'
+
+]
+
+
+const INITIAL_FORM = {
+
+  name: '',
+
+  quantity: '1',
+
+  category: 'Produce',
+
+  price: ''
+
+}
+
+
+export default function AddGroceryForm({
+
+  onAddItem
+
+}) {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [formData, setFormData] =
+    useState(INITIAL_FORM)
+
+
+  const [errors, setErrors] =
+    useState({})
+
+
+  const [
+    successMessage,
+    setSuccessMessage
+  ] = useState('')
+
+
+  // ============================================
+  // DERIVED PREVIEW
+  // ============================================
+
+  const numericQuantity =
+    Number(formData.quantity)
+
+
+  const numericPrice =
+    Number(formData.price)
+
+
+  const lineCost =
+    Number.isFinite(
+      numericQuantity
+    ) &&
+    Number.isFinite(
+      numericPrice
+    )
+      ? numericQuantity *
+        numericPrice
+      : 0
+
+
+  // ============================================
+  // VALIDATION
+  // ============================================
+
+  const validateForm = () => {
+
+    const newErrors = {}
+
+
+    const itemName =
+      formData.name.trim()
+
+
+    const quantity =
+      Number(formData.quantity)
+
+
+    const price =
+      Number(formData.price)
+
+
+    // Item Name
+
+    if (!itemName) {
+
+      newErrors.name =
+        'Item name is required'
+
+    } else if (
+      itemName.length < 2
+    ) {
+
+      newErrors.name =
+        'Item name must contain at least 2 characters'
+
+    } else if (
+      itemName.length > 50
+    ) {
+
+      newErrors.name =
+        'Item name must not exceed 50 characters'
+    }
+
+
+    // Quantity
+
+    if (
+      formData.quantity === ''
+    ) {
+
+      newErrors.quantity =
+        'Quantity is required'
+
+    } else if (
+      !Number.isInteger(
+        quantity
+      )
+    ) {
+
+      newErrors.quantity =
+        'Quantity must be a whole number'
+
+    } else if (
+      quantity < 1
+    ) {
+
+      newErrors.quantity =
+        'Quantity must be at least 1'
+
+    } else if (
+      quantity > 999
+    ) {
+
+      newErrors.quantity =
+        'Quantity must not exceed 999'
+    }
+
+
+    // Category
+
+    if (
+      !CATEGORIES.includes(
+        formData.category
+      )
+    ) {
+
+      newErrors.category =
+        'Select a valid category'
+    }
+
+
+    // Price
+
+    if (
+      formData.price === ''
+    ) {
+
+      newErrors.price =
+        'Price is required'
+
+    } else if (
+      !Number.isFinite(price)
+    ) {
+
+      newErrors.price =
+        'Price must be a number'
+
+    } else if (
+      price < 0
+    ) {
+
+      newErrors.price =
+        'Price cannot be negative'
+
+    } else if (
+      price > 9999
+    ) {
+
+      newErrors.price =
+        'Price must not exceed 9999'
+    }
+
+
+    return newErrors
+  }
+
+
+  // ============================================
+  // CHANGE HANDLER
+  // ============================================
+
+  const handleChange = (
+    event
+  ) => {
+
+    const {
+      name,
+      value
+    } = event.target
+
+
+    setFormData(
+      previousData => ({
+
+        ...previousData,
+
+        [name]:
+          value
+
+      })
+    )
+
+
+    // Clear the old error for this field.
+
+    setErrors(
+      previousErrors => {
+
+        if (
+          !previousErrors[name]
+        ) {
+
+          return previousErrors
+        }
+
+
+        return {
+
+          ...previousErrors,
+
+          [name]:
+            ''
+
+        }
+      }
+    )
+
+
+    setSuccessMessage('')
+  }
+
+
+  // ============================================
+  // SUBMIT HANDLER
+  // ============================================
+
+  const handleSubmit = (
+    event
+  ) => {
+
+    event.preventDefault()
+
+
+    const validationErrors =
+      validateForm()
+
+
+    if (
+      Object.keys(
+        validationErrors
+      ).length > 0
+    ) {
+
+      setErrors(
+        validationErrors
+      )
+
+      setSuccessMessage('')
+
+      return
+    }
+
+
+    const newItem = {
+
+      id:
+        crypto.randomUUID(),
+
+      name:
+        formData.name.trim(),
+
+      quantity:
+        Number(
+          formData.quantity
+        ),
+
+      category:
+        formData.category,
+
+      price:
+        Number(
+          formData.price
+        ),
+
+      purchased:
+        false,
+
+      createdAt:
+        new Date()
+          .toISOString()
+
+    }
+
+
+    onAddItem(newItem)
+
+
+    setFormData(
+      INITIAL_FORM
+    )
+
+
+    setErrors({})
+
+
+    setSuccessMessage(
+      `${newItem.name} was added successfully.`
+    )
+  }
+
+
+  // ============================================
+  // RESET HANDLER
+  // ============================================
+
+  const handleReset = () => {
+
+    setFormData(
+      INITIAL_FORM
+    )
+
+    setErrors({})
+
+    setSuccessMessage('')
+  }
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <section
+      className="add-grocery-form-container"
+      aria-labelledby="add-grocery-title"
+    >
+
+
+      {/* Header */}
+
+      <header className="form-header">
+
+        <h2 id="add-grocery-title">
+
+          Add New Item
+
+        </h2>
+
+        <p className="form-subtitle">
+
+          Add an item to your grocery list
+
+        </p>
+
+      </header>
+
+
+      {/* Success */}
+
+      {successMessage && (
+
+        <p
+          className="success-message"
+          role="status"
+        >
+
+          {successMessage}
+
+        </p>
+
+      )}
+
+
+      {/* Form */}
+
+      <form
+        onSubmit={handleSubmit}
+        onReset={handleReset}
+        className="grocery-form"
+        noValidate
+      >
+
+
+        {/* ======================================
+            ITEM NAME
+            ====================================== */}
+
+        <div className="form-group">
+
+          <label
+            htmlFor="name"
+            className="form-label"
+          >
+
+            Item Name
+
+            <span
+              className="required"
+              aria-hidden="true"
+            >
+              *
+            </span>
+
+          </label>
+
+
+          <input
+            id="name"
+            type="text"
+            name="name"
+            value={
+              formData.name
+            }
+            onChange={
+              handleChange
+            }
+            placeholder="e.g. Milk"
+            className={
+              `form-input ${
+                errors.name
+                  ? 'input-error'
+                  : ''
+              }`
+            }
+            aria-invalid={
+              Boolean(
+                errors.name
+              )
+            }
+            aria-describedby={
+              [
+                'name-hint',
+                errors.name
+                  ? 'name-error'
+                  : null
+              ]
+                .filter(Boolean)
+                .join(' ')
+            }
+          />
+
+
+          {errors.name && (
+
+            <p
+              id="name-error"
+              className="error-message"
+            >
+              {errors.name}
+            </p>
+
+          )}
+
+
+          <p
+            id="name-hint"
+            className="form-hint"
+          >
+
+            Enter the item you want to buy.
+
+          </p>
+
+        </div>
+
+
+        {/* ======================================
+            QUANTITY + CATEGORY
+            ====================================== */}
+
+        <div className="form-row">
+
+
+          {/* Quantity */}
+
+          <div className="form-group">
+
+            <label
+              htmlFor="quantity"
+              className="form-label"
+            >
+
+              Quantity
+
+              <span
+                className="required"
+                aria-hidden="true"
+              >
+                *
+              </span>
+
+            </label>
+
+
+            <input
+              id="quantity"
+              type="number"
+              name="quantity"
+              value={
+                formData.quantity
+              }
+              onChange={
+                handleChange
+              }
+              min="1"
+              max="999"
+              step="1"
+              className={
+                `form-input ${
+                  errors.quantity
+                    ? 'input-error'
+                    : ''
+                }`
+              }
+              aria-invalid={
+                Boolean(
+                  errors.quantity
+                )
+              }
+              aria-describedby={
+                [
+                  'quantity-hint',
+                  errors.quantity
+                    ? 'quantity-error'
+                    : null
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+              }
+            />
+
+
+            {errors.quantity && (
+
+              <p
+                id="quantity-error"
+                className="error-message"
+              >
+                {errors.quantity}
+              </p>
+
+            )}
+
+
+            <p
+              id="quantity-hint"
+              className="form-hint"
+            >
+
+              Enter a whole number from 1 to 999.
+
+            </p>
+
+          </div>
+
+
+          {/* Category */}
+
+          <div className="form-group">
+
+            <label
+              htmlFor="category"
+              className="form-label"
+            >
+
+              Category
+
+              <span
+                className="required"
+                aria-hidden="true"
+              >
+                *
+              </span>
+
+            </label>
+
+
+            <select
+              id="category"
+              name="category"
+              value={
+                formData.category
+              }
+              onChange={
+                handleChange
+              }
+              className={
+                `form-select ${
+                  errors.category
+                    ? 'input-error'
+                    : ''
+                }`
+              }
+              aria-invalid={
+                Boolean(
+                  errors.category
+                )
+              }
+              aria-describedby={
+                errors.category
+                  ? 'category-error'
+                  : undefined
+              }
+            >
+
+              {CATEGORIES.map(
+                category => (
+
+                  <option
+                    key={category}
+                    value={category}
+                  >
+                    {category}
+                  </option>
+
+                )
+              )}
+
+            </select>
+
+
+            {errors.category && (
+
+              <p
+                id="category-error"
+                className="error-message"
+              >
+                {errors.category}
+              </p>
+
+            )}
+
+          </div>
+
+        </div>
+
+
+        {/* ======================================
+            PRICE
+            ====================================== */}
+
+        <div className="form-group">
+
+          <label
+            htmlFor="price"
+            className="form-label"
+          >
+
+            Unit Price
+
+            <span
+              className="required"
+              aria-hidden="true"
+            >
+              *
+            </span>
+
+          </label>
+
+
+          <div className="price-input-wrapper">
+
+            <span
+              className="price-currency"
+              aria-hidden="true"
+            >
+              $
+            </span>
+
+
+            <input
+              id="price"
+              type="number"
+              name="price"
+              value={
+                formData.price
+              }
+              onChange={
+                handleChange
+              }
+              min="0"
+              max="9999"
+              step="0.01"
+              placeholder="0.00"
+              className={
+                `form-input price-input ${
+                  errors.price
+                    ? 'input-error'
+                    : ''
+                }`
+              }
+              aria-invalid={
+                Boolean(
+                  errors.price
+                )
+              }
+              aria-describedby={
+                [
+                  'price-hint',
+                  errors.price
+                    ? 'price-error'
+                    : null
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+              }
+            />
+
+          </div>
+
+
+          {errors.price && (
+
+            <p
+              id="price-error"
+              className="error-message"
+            >
+              {errors.price}
+            </p>
+
+          )}
+
+
+          <p
+            id="price-hint"
+            className="form-hint"
+          >
+
+            Enter the price for one item.
+
+          </p>
+
+        </div>
+
+
+        {/* ======================================
+            LIVE SUMMARY
+            ====================================== */}
+
+        <div className="form-summary">
+
+          <span className="summary-label">
+
+            Estimated Line Cost:
+
+          </span>
+
+
+          <output className="summary-value">
+
+            ${lineCost.toFixed(2)}
+
+          </output>
+
+        </div>
+
+
+        {/* ======================================
+            BUTTONS
+            ====================================== */}
+
+        <div className="form-buttons">
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+          >
+            Add Item
+          </button>
+
+
+          <button
+            type="reset"
+            className="btn btn-secondary"
+          >
+            Clear Form
+          </button>
+
+        </div>
+
+      </form>
+
+
+      {/* Information */}
+
+      <div className="form-info">
+
+        <p className="info-text">
+
+          Fields marked with * are required.
+
+        </p>
+
+      </div>
+
+
+      {/* Educational Debug Output */}
+
+      <details className="debug-section">
+
+        <summary>
+          Current Form Data
+        </summary>
+
+        <pre>
+          {JSON.stringify(
+            formData,
+            null,
+            2
+          )}
+        </pre>
+
+      </details>
+
+    </section>
+  )
+}
+
+
+================================================================================
+CRITICAL COMPUTED-PROPERTY PATTERN
+================================================================================
+
+The reusable handler must update the property identified by `name`.
+
+Correct:
+
+setFormData(
+  previousData => ({
+
+    ...previousData,
+
+    [name]:
+      value
+
+  })
+)
+
+
+If:
+
+name = 'price'
+
+value = '3.99'
+
+
+Then:
+
+[name]: value
+
+
+becomes:
+
+price:
+'3.99'
+
+
+Do NOT accidentally write:
+
+{
+  ...previousData,
+  value
+}
+
+
+That would create or update a property literally named:
+
+value
+
+
+instead of updating:
+
+name
+
+quantity
+
+category
+
+or:
+
+price
+
+
+================================================================================
+WHY NOT parseFloat() ON EVERY CHANGE?
+================================================================================
+
+The original example used:
+
+parseFloat(value) || 0
+
+
+This causes a problem.
+
+Suppose a user clears the Price input.
+
+value:
+
+''
+
+
+parseFloat(''):
+
+NaN
+
+
+NaN || 0:
+
+0
+
+
+The input immediately becomes:
+
+0
+
+
+This makes a temporary empty editing state difficult.
+
+
+BETTER:
+--------------------------------------------------------------------------------
+
+Keep the raw input string during editing:
+
+[name]:
+value
+
+
+Then convert after validation:
+
+price:
+Number(formData.price)
+
+
+================================================================================
+FORM SUBMISSION FLOW
+================================================================================
+
+User Submits
+     ↓
+preventDefault()
+     ↓
+validateForm()
+     ↓
+Errors?
+     │
+     ├── YES
+     │     ↓
+     │   setErrors()
+     │     ↓
+     │   Stop
+     │
+     └── NO
+           ↓
+         Normalize Values
+           ↓
+         Create newItem
+           ↓
+         onAddItem(newItem)
+           ↓
+         Reset Form
+           ↓
+         Show Status Message
+
+
+================================================================================
+PART 4: STYLING THE ADD GROCERY FORM
+================================================================================
+
+File:
+
+src/components/AddGroceryForm.css
+
+
+/* ============================================
+   FORM CONTAINER
+   ============================================ */
+
+.add-grocery-form-container {
+
+  background:
+    #ffffff;
+
+  padding:
+    30px;
+
+  border-radius:
+    12px;
+
+  box-shadow:
+    0 2px 10px
+    rgba(0, 0, 0, 0.1);
+
+  max-width:
+    650px;
+
+  margin:
+    0 auto;
+}
+
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.form-header {
+
+  margin-bottom:
+    25px;
+
+  text-align:
+    center;
+}
+
+
+.form-header h2 {
+
+  color:
+    #222;
+
+  font-size:
+    1.8rem;
+
+  margin:
+    0 0 10px;
+
+  font-weight:
+    700;
+}
+
+
+.form-subtitle {
+
+  color:
+    #666;
+
+  font-size:
+    1rem;
+
+  margin:
+    0;
+}
+
+
+/* ============================================
+   SUCCESS
+   ============================================ */
+
+.success-message {
+
+  background:
+    #e8f5e9;
+
+  color:
+    #1b5e20;
+
+  border-left:
+    4px solid #4caf50;
+
+  padding:
+    14px 16px;
+
+  border-radius:
+    6px;
+
+  margin:
+    0 0 20px;
+
+  font-weight:
+    600;
+}
+
+
+/* ============================================
+   FORM
+   ============================================ */
+
+.grocery-form {
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  gap:
+    24px;
+}
+
+
+.form-group {
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  gap:
+    8px;
+}
+
+
+.form-row {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:
+    20px;
+}
+
+
+.form-label {
+
+  font-weight:
+    650;
+
+  color:
+    #333;
+
+  font-size:
+    0.95rem;
+}
+
+
+.required {
+
+  color:
+    #b71c1c;
+
+  margin-left:
+    4px;
+}
+
+
+/* ============================================
+   CONTROLS
+   ============================================ */
+
+.form-input,
+.form-select {
+
+  width:
+    100%;
+
+  box-sizing:
+    border-box;
+
+  padding:
+    12px 15px;
+
+  border:
+    2px solid #d7d7d7;
+
+  border-radius:
+    6px;
+
+  font-size:
+    1rem;
+
+  font-family:
+    inherit;
+
+  background:
+    #ffffff;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+
+.form-input:focus,
+.form-select:focus {
+
+  outline:
+    none;
+
+  border-color:
+    #667eea;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(102, 126, 234, 0.16);
+
+  background:
+    #f8f9ff;
+}
+
+
+.form-input.input-error,
+.form-select.input-error {
+
+  border-color:
+    #d32f2f;
+
+  background:
+    #fff5f5;
+}
+
+
+.form-input.input-error:focus,
+.form-select.input-error:focus {
+
+  box-shadow:
+    0 0 0 3px
+    rgba(211, 47, 47, 0.15);
+}
+
+
+/* ============================================
+   PRICE
+   ============================================ */
+
+.price-input-wrapper {
+
+  position:
+    relative;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+}
+
+
+.price-currency {
+
+  position:
+    absolute;
+
+  left:
+    15px;
+
+  color:
+    #4355ba;
+
+  font-weight:
+    700;
+
+  pointer-events:
+    none;
+}
+
+
+.price-input {
+
+  padding-left:
+    34px;
+}
+
+
+/* ============================================
+   ERROR + HINT
+   ============================================ */
+
+.error-message {
+
+  color:
+    #b71c1c;
+
+  font-size:
+    0.85rem;
+
+  margin:
+    0;
+
+  font-weight:
+    600;
+}
+
+
+.form-hint {
+
+  color:
+    #666;
+
+  font-size:
+    0.85rem;
+
+  margin:
+    0;
+}
+
+
+/* ============================================
+   SUMMARY
+   ============================================ */
+
+.form-summary {
+
+  background:
+    #f4f5ff;
+
+  padding:
+    15px 20px;
+
+  border-radius:
+    8px;
+
+  border-left:
+    4px solid #667eea;
+
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    center;
+
+  gap:
+    20px;
+}
+
+
+.summary-label {
+
+  color:
+    #555;
+
+  font-weight:
+    600;
+}
+
+
+.summary-value {
+
+  color:
+    #4355ba;
+
+  font-size:
+    1.2rem;
+
+  font-weight:
+    750;
+}
+
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.form-buttons {
+
+  display:
+    flex;
+
+  gap:
+    15px;
+}
+
+
+.btn {
+
+  flex:
+    1;
+
+  padding:
+    12px 20px;
+
+  border-radius:
+    6px;
+
+  font:
+    inherit;
+
+  font-weight:
+    650;
+
+  cursor:
+    pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.btn-primary {
+
+  border:
+    2px solid #667eea;
+
+  background:
+    #667eea;
+
+  color:
+    white;
+}
+
+
+.btn-primary:hover {
+
+  background:
+    #5568d3;
+
+  border-color:
+    #5568d3;
+
+  transform:
+    translateY(-1px);
+}
+
+
+.btn-secondary {
+
+  border:
+    2px solid #ccc;
+
+  background:
+    #f5f5f5;
+
+  color:
+    #333;
+}
+
+
+.btn-secondary:hover {
+
+  background:
+    #ebebeb;
+
+  border-color:
+    #999;
+}
+
+
+.btn:focus-visible {
+
+  outline:
+    3px solid #667eea;
+
+  outline-offset:
+    3px;
+}
+
+
+/* ============================================
+   INFORMATION
+   ============================================ */
+
+.form-info {
+
+  background:
+    #e3f2fd;
+
+  border-left:
+    4px solid #1976d2;
+
+  padding:
+    14px 16px;
+
+  border-radius:
+    6px;
+
+  margin-top:
+    20px;
+}
+
+
+.info-text {
+
+  color:
+    #0d47a1;
+
+  margin:
+    0;
+
+  font-size:
+    0.9rem;
+}
+
+
+/* ============================================
+   DEBUG
+   ============================================ */
+
+.debug-section {
+
+  background:
+    #f5f5f5;
+
+  padding:
+    15px;
+
+  border-radius:
+    6px;
+
+  margin-top:
+    20px;
+
+  border:
+    1px solid #ddd;
+}
+
+
+.debug-section summary {
+
+  cursor:
+    pointer;
+
+  font-weight:
+    600;
+}
+
+
+.debug-section pre {
+
+  background:
+    #2d2d2d;
+
+  color:
+    #f8f8f2;
+
+  padding:
+    10px;
+
+  border-radius:
+    4px;
+
+  overflow-x:
+    auto;
+
+  font-size:
+    0.8rem;
+}
+
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+
+  .add-grocery-form-container {
+
+    padding:
+      20px;
+  }
+
+
+  .form-header h2 {
+
+    font-size:
+      1.5rem;
+  }
+
+
+  .form-row {
+
+    grid-template-columns:
+      1fr;
+
+    gap:
+      18px;
+  }
+
+
+  .form-buttons {
+
+    flex-direction:
+      column;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .add-grocery-form-container {
+
+    padding:
+      16px;
+  }
+
+
+  .form-header h2 {
+
+    font-size:
+      1.3rem;
+  }
+
+
+  .form-input,
+  .form-select {
+
+    font-size:
+      16px;
+  }
+
+
+  .form-summary {
+
+    align-items:
+      flex-start;
+
+    flex-direction:
+      column;
+
+    gap:
+      6px;
+  }
+
+}
+
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .form-input,
+  .form-select,
+  .btn {
+
+    transition:
+      none;
+  }
+
+
+  .btn:hover {
+
+    transform:
+      none;
+  }
+
+}
+
+
+================================================================================
+CSS CLASSES TABLE
+============================================================================----------+
+| CSS CLASS                   | PURPOSE                                 |
++-----------------------------+-----------------------------------------+
+| .add-grocery-form-container | Main form card                          |
+| .form-header                | Form heading                            |
+| .form-subtitle              | Supporting heading text                 |
+| .success-message            | Successful submission feedback          |
+| .grocery-form               | Form layout                             |
+| .form-group                 | Label/control/error group               |
+| .form-row                   | Two-column field layout                 |
+| .form-label                 | Field label                             |
+| .required                   | Required indicator                      |
+| .form-input                 | Input control                           |
+| .form-select                | Select control                          |
+| .input-error                | Invalid control state                   |
+| .price-input-wrapper        | Currency/input positioning              |
+| .price-currency             | Visual currency prefix                 |
+| .error-message              | Validation error                        |
+| .form-hint                  | Supporting guidance                     |
+| .form-summary               | Live line-cost preview                  |
+| .form-buttons               | Form action layout                      |
+| .btn-primary                | Submit action                           |
+| .btn-secondary              | Reset action                            |
+| .form-info                  | Supporting information                  |
+| .debug-section              | Educational state output               |
++-----------------------------+-----------------------------------------+
+
+
+================================================================================
+IMPORTANT BOOTSTRAP CORRECTION
+================================================================================
+
+The original JSX used classes such as:
+
+alert
+
+btn
+
+btn-primary
+
+bi bi-plus-circle
+
+me-2
+
+
+These resemble Bootstrap and Bootstrap Icons classes.
+
+However, the lesson did not import or configure Bootstrap or Bootstrap Icons.
+
+This cleaned version uses:
+
+• Component CSS
+
+• Text button labels
+
+• No undeclared icon dependency
+
+
+If Bootstrap is intentionally added later, it should be installed/imported and
+used consistently.
+
+
+================================================================================
+PART 5: FORM VALIDATION
+================================================================================
+
+VALIDATION RULES
+--------------------------------------------------------------------------------
+
++------------+--------------------------------+------------------------------+
+| FIELD      | RULE                           | ERROR                        |
++------------+--------------------------------+------------------------------+
+| Name       | Required                       | Item name is required        |
+|            | Minimum 2 chars                | At least 2 characters        |
+|            | Maximum 50 chars               | Must not exceed 50           |
+| Quantity   | Required                       | Quantity is required         |
+|            | Whole number                   | Must be a whole number       |
+|            | Minimum 1                      | Must be at least 1           |
+|            | Maximum 999                    | Must not exceed 999          |
+| Category   | Supported category             | Select a valid category      |
+| Price      | Required                       | Price is required            |
+|            | Numeric                        | Price must be a number       |
+|            | Minimum 0                      | Cannot be negative           |
+|            | Maximum 9999                   | Must not exceed 9999         |
++------------+--------------------------------+------------------------------+
+
+
+================================================================================
+VALIDATION FLOW
+================================================================================
+
+User Clicks Add Item
+        ↓
+handleSubmit(event)
+        ↓
+event.preventDefault()
+        ↓
+validateForm()
+        ↓
++----------------------------+
+|                            |
+Errors                     Valid
+|                            |
+↓                            ↓
+setErrors()               Normalize Values
+|                            |
+↓                            ↓
+Render Errors             Create newItem
+                             |
+                             ↓
+                       onAddItem(newItem)
+                             |
+                             ↓
+                         Reset Form
+                             |
+                             ↓
+                       Success Feedback
+
+
+================================================================================
+HTML CONSTRAINTS VS APPLICATION VALIDATION
+================================================================================
+
+HTML provides constraints such as:
+
+min="1"
+
+max="999"
+
+step="1"
+
+
+Application validation also checks the values.
+
+Why both?
+
+HTML constraints:
+--------------------------------------------------------------------------------
+
+• Browser-level guidance
+
+• Useful native behavior
+
+
+Application validation:
+--------------------------------------------------------------------------------
+
+• Application-specific error messages
+
+• Explicit business-rule processing
+
+• Consistent validation logic
+
+
+Server-side validation is still required if data is sent to a backend.
+
+
+================================================================================
+PRICE DECIMAL NOTE
+================================================================================
+
+The input uses:
+
+step="0.01"
+
+
+This guides the user toward two-decimal increments.
+
+However, a production currency model may require more deliberate handling.
+
+Common approaches include:
+
+• Store minor currency units as integers
+
+  Example:
+
+  $3.99
+      ↓
+  399 cents
+
+
+• Use a decimal-safe money type in the backend
+
+
+JavaScript floating-point values can produce precision surprises in some
+calculations.
+
+
+For this learning application:
+
+Number + toFixed(2)
+
+
+is acceptable for display-oriented practice.
+
+
+================================================================================
+ERROR CLEARING
+================================================================================
+
+This lesson clears the old error when the user changes that field.
+
+Example:
+
+errors.quantity:
+
+'Quantity must be at least 1'
+
+
+User changes Quantity.
+
+
+Then:
+
+errors.quantity
+
+becomes:
+
+''
+
+
+IMPORTANT:
+--------------------------------------------------------------------------------
+
+Clearing an error does not prove that the new value is valid.
+
+Alternative strategies:
+
+• Revalidate on change
+
+• Validate on blur
+
+• Validate again on submission
+
+
+The chosen behavior should be consistent.
+
+
+================================================================================
+PART 6: INTEGRATING THE FORM WITH THE GROCERY LIST
+================================================================================
+
+STATE OWNERSHIP
+--------------------------------------------------------------------------------
+
+The AddGroceryForm and GroceryList both need access to the grocery collection.
+
+Therefore the shared grocery state should be owned by their nearest common
+parent:
+
+App
+
+
+Architecture:
+
+App
+│
+├── groceryItems State
+│
+├── AddGroceryForm
+│   └── onAddItem
+│
+└── GroceryList
+    ├── items
+    ├── onTogglePurchased
+    └── onDeleteItem
+
+
+================================================================================
+IMPORTANT CHANGE FROM LESSON 10
+================================================================================
+
+In Lesson 10, GroceryList owned its own local grocery state.
+
+Now the AddGroceryForm must add items to the same collection.
+
+Therefore state is lifted to App.
+
+
+BEFORE:
+--------------------------------------------------------------------------------
+
+GroceryList
+└── groceryItems State
+
+
+AFTER:
+--------------------------------------------------------------------------------
+
+App
+└── groceryItems State
+    ├── AddGroceryForm
+    └── GroceryList
+
+
+There should be only one authoritative grocery-items array.
+
+
+================================================================================
+App.jsx
+================================================================================
+
+import { useState } from 'react'
+
+import Navigation
+  from './components/Navigation'
+
+import AddGroceryForm
+  from './components/AddGroceryForm'
+
+import GroceryList
+  from './components/GroceryList'
+
+import Footer
+  from './components/Footer'
+
+import {
+  FAKE_GROCERIES
+} from './data/fakeGroceries'
+
+import './App.css'
+
+
+export default function App() {
+
+  // ============================================
+  // SHARED STATE
+  // ============================================
+
+  const [
+    groceryItems,
+    setGroceryItems
+  ] = useState(
+    FAKE_GROCERIES
+  )
+
+
+  // ============================================
+  // ADD
+  // ============================================
+
+  const handleAddItem = (
+    newItem
+  ) => {
+
+    setGroceryItems(
+      previousItems => [
+
+        newItem,
+
+        ...previousItems
+
+      ]
+    )
+  }
+
+
+  // ============================================
+  // TOGGLE
+  // ============================================
+
+  const handleTogglePurchased = (
+    id
+  ) => {
+
+    setGroceryItems(
+      previousItems =>
+
+        previousItems.map(
+          item =>
+
+            item.id === id
+              ? {
+                  ...item,
+
+                  purchased:
+                    !item.purchased
+                }
+              : item
+        )
+    )
+  }
+
+
+  // ============================================
+  // DELETE
+  // ============================================
+
+  const handleDeleteItem = (
+    id
+  ) => {
+
+    setGroceryItems(
+      previousItems =>
+
+        previousItems.filter(
+          item =>
+            item.id !== id
+        )
+    )
+  }
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="app">
+
+      <Navigation />
+
+
+      <main className="app-main">
+
+        <div className="app-container">
+
+
+          <header className="app-header">
+
+            <h1>
+              Grocery List App
+            </h1>
+
+            <p>
+              Manage your shopping list
+            </p>
+
+          </header>
+
+
+          <section
+            className="form-section"
+            aria-label="Add grocery item"
+          >
+
+            <AddGroceryForm
+              onAddItem={
+                handleAddItem
+              }
+            />
+
+          </section>
+
+
+          <section
+            id="grocery-list"
+            className="list-section"
+            aria-label="Grocery items"
+          >
+
+            <GroceryList
+              items={
+                groceryItems
+              }
+              onTogglePurchased={
+                handleTogglePurchased
+              }
+              onDeleteItem={
+                handleDeleteItem
+              }
+            />
+
+          </section>
+
+        </div>
+
+      </main>
+
+
+      <Footer />
+
+    </div>
+  )
+}
+
+
+================================================================================
+UPDATED GroceryList SIGNATURE
+================================================================================
+
+Because App now owns the state:
+
+export default function GroceryList({
+
+  items,
+
+  onTogglePurchased,
+
+  onDeleteItem
+
+}) {
+
+  const [filter, setFilter] =
+    useState('ALL')
+
+
+  const filteredItems =
+    items.filter(...)
+
+
+  return (
+    // Render items
+  )
+}
+
+
+GroceryList should no longer create another independent:
+
+const [
+  groceryItems,
+  setGroceryItems
+] = useState(...)
+
+
+================================================================================
+GroceryList WITH GroceryItem
+================================================================================
+
+import { useState } from 'react'
+
+import GroceryItem
+  from './GroceryItem'
+
+
+export default function GroceryList({
+
+  items,
+
+  onTogglePurchased,
+
+  onDeleteItem,
+
+  onEditItem
+
+}) {
+
+  const [filter, setFilter] =
+    useState('ALL')
+
+
+  const filteredItems =
+    items.filter(item => {
+
+      if (
+        filter ===
+        'PURCHASED'
+      ) {
+
+        return item.purchased
+      }
+
+
+      if (
+        filter ===
+        'UNPURCHASED'
+      ) {
+
+        return !item.purchased
+      }
+
+
+      return true
+    })
+
+
+  return (
+    <div className="items-list">
+
+      {filteredItems.map(
+        item => (
+
+          <GroceryItem
+            key={item.id}
+            item={item}
+            onTogglePurchased={
+              onTogglePurchased
+            }
+            onEditItem={
+              onEditItem
+            }
+            onDeleteItem={
+              onDeleteItem
+            }
+          />
+
+        )
+      )}
+
+    </div>
+  )
+}
+
+
+================================================================================
+INTEGRATION FLOW
+================================================================================
+
+AddGroceryForm
+       ↓
+User Submits
+       ↓
+Validation
+       ↓
+onAddItem(newItem)
+       ↓
+App.handleAddItem
+       ↓
+setGroceryItems(previous => [
+  newItem,
+  ...previous
+])
+       ↓
+App Re-renders
+       ↓
+GroceryList Receives New items Prop
+       ↓
+map()
+       ↓
+New GroceryItem Appears
+
+
+================================================================================
+COMPONENT RESPONSIBILITIES
+================================================================================
+
++----------------------+-----------------------------------------------+
+| COMPONENT            | RESPONSIBILITY                                |
++----------------------+-----------------------------------------------+
+| AddGroceryForm       | Capture, validate, create item                |
+| App                  | Own shared grocery-items state                |
+| GroceryList          | Filter and render grocery records             |
+| GroceryItem          | Display one record and report actions         |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+PART 7: FORM STATES AND USER FEEDBACK
+================================================================================
+
+STATE 1: INITIAL FORM
+--------------------------------------------------------------------------------
+
+Item Name:
+empty
+
+
+Quantity:
+1
+
+
+Category:
+Produce
+
+
+Price:
+empty
+
+
+Estimated Line Cost:
+
+$0.00
+
+
+================================================================================
+STATE 2: FILLED FORM
+================================================================================
+
+Item Name:
+
+Milk
+
+
+Quantity:
+
+2
+
+
+Category:
+
+Dairy
+
+
+Price:
+
+3.99
+
+
+Estimated Line Cost:
+
+$7.98
+
+
+================================================================================
+STATE 3: INVALID FORM
+================================================================================
+
+Example:
+
+Item Name:
+empty
+
+
+Quantity:
+0
+
+
+Price:
+-1
+
+
+Possible errors:
+
+Item name is required
+
+Quantity must be at least 1
+
+Price cannot be negative
+
+
+Expected:
+
+• Invalid controls receive error styling
+
+• Error messages render
+
+• No new item is sent to the parent
+
+• Existing form values remain available for correction
+
+
+================================================================================
+STATE 4: SUCCESS
+================================================================================
+
+After valid submission:
+
+• onAddItem(newItem) executes
+
+• Form returns to INITIAL_FORM
+
+• Errors clear
+
+• Status message appears
+
+• Grocery list displays the new item
+
+
+================================================================================
+SUCCESS FEEDBACK DESIGN
+================================================================================
+
+The original component used:
+
+setTimeout(..., 3000)
+
+
+to hide the message automatically.
+
+
+Automatic dismissal is not always necessary.
+
+This cleaned version keeps the message until:
+
+• The user begins editing again
+
+• The user resets the form
+
+• Another submission updates it
+
+
+Benefits:
+
+• No timer cleanup required
+
+• User controls how long the message remains
+
+• Fewer timing-related state concerns
+
+
+If timed dismissal is intentionally required later, use cleanup so stale timers
+do not update an unmounted component.
+
+
+================================================================================
+CLAIMED STATES VS IMPLEMENTED STATES
+================================================================================
+
+The original lesson mentioned:
+
+• Validating spinner
+
+• Disabled buttons
+
+• Loading state
+
+• API submission
+
+
+But the supplied implementation is synchronous and local.
+
+Therefore it actually implements:
+
+• Initial
+
+• Filled
+
+• Invalid
+
+• Success
+
+• Reset
+
+
+It does NOT yet implement:
+
+• isSubmitting
+
+• Loading spinner
+
+• Disabled async-submission state
+
+• API failure handling
+
+
+Those belong to a later asynchronous version.
+
+
+================================================================================
+FORM STATES TABLE
+================================================================================
+
++----------------------+----------------------------------------------+
+| STATE                | USER EXPERIENCE                              |
++----------------------+----------------------------------------------+
+| Initial              | Default controlled values                    |
+| Filled               | Live values and line-cost preview            |
+| Invalid              | Field errors and retained input              |
+| Success              | New item displayed and form reset            |
+| Reset                | Initial values restored                      |
++----------------------+----------------------------------------------+
+
+
+================================================================================
+PART 8: TESTING THE FORM
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Form renders
+
+[ ] Item Name accepts text
+
+[ ] Quantity can temporarily be empty
+
+[ ] Category choices render
+
+[ ] Price can temporarily be empty
+
+[ ] Controlled values update correctly
+
+[ ] Item-name validation works
+
+[ ] Quantity required validation works
+
+[ ] Quantity whole-number validation works
+
+[ ] Quantity range validation works
+
+[ ] Category membership validation works
+
+[ ] Price required validation works
+
+[ ] Negative-price validation works
+
+[ ] Maximum-price validation works
+
+[ ] Live line-cost preview works
+
+[ ] Valid submit calls onAddItem once
+
+[ ] Submitted quantity is a number
+
+[ ] Submitted price is a number
+
+[ ] Submitted item gets a stable ID
+
+[ ] Submitted item gets an ISO timestamp
+
+[ ] Submitted item starts unpurchased
+
+[ ] Form resets after successful submission
+
+[ ] Errors clear after successful submission
+
+[ ] Manual reset restores INITIAL_FORM
+
+[ ] Keyboard focus is visible
+
+[ ] Errors are associated with controls
+
+[ ] Form works at narrow viewport widths
+
+
+================================================================================
+SCENARIO 1: VALID SUBMISSION
+================================================================================
+
+INPUT:
+
+Item Name:
+Milk
+
+
+Quantity:
+2
+
+
+Category:
+Dairy
+
+
+Price:
+3.99
+
+
+PREVIEW:
+
+2 × 3.99
+
+=
+$7.98
+
+
+SUBMITTED ITEM:
+
+{
+  id:
+    'generated ID',
+
+  name:
+    'Milk',
+
+  quantity:
+    2,
+
+  category:
+    'Dairy',
+
+  price:
+    3.99,
+
+  purchased:
+    false,
+
+  createdAt:
+    'ISO timestamp'
+}
+
+
+EXPECTED:
+
+• onAddItem called once
+
+• New item appears in list
+
+• Form resets
+
+• Success status displays
+
+
+================================================================================
+SCENARIO 2: EMPTY NAME
+================================================================================
+
+INPUT:
+
+name:
+''
+
+
+EXPECTED:
+
+errors.name:
+
+'Item name is required'
+
+
+AND:
+
+• onAddItem is not called
+
+• Other entered values remain
+
+
+================================================================================
+SCENARIO 3: WHITESPACE NAME
+================================================================================
+
+INPUT:
+
+name:
+'   '
+
+
+After:
+
+trim()
+
+
+Result:
+
+''
+
+
+EXPECTED:
+
+Item name is required
+
+
+================================================================================
+SCENARIO 4: INVALID QUANTITY
+================================================================================
+
+QUANTITY:
+
+''
+
+
+Expected:
+
+Quantity is required
+
+
+QUANTITY:
+
+1.5
+
+
+Expected:
+
+Quantity must be a whole number
+
+
+QUANTITY:
+
+0
+
+
+Expected:
+
+Quantity must be at least 1
+
+
+QUANTITY:
+
+1000
+
+
+Expected:
+
+Quantity must not exceed 999
+
+
+================================================================================
+SCENARIO 5: INVALID PRICE
+================================================================================
+
+PRICE:
+
+''
+
+
+Expected:
+
+Price is required
+
+
+PRICE:
+
+-1
+
+
+Expected:
+
+Price cannot be negative
+
+
+PRICE:
+
+10000
+
+
+Expected:
+
+Price must not exceed 9999
+
+
+================================================================================
+SCENARIO 6: RESET
+================================================================================
+
+Before:
+
+{
+  name:
+    'Milk',
+
+  quantity:
+    '2',
+
+  category:
+    'Dairy',
+
+  price:
+    '3.99'
+}
+
+
+Click:
+
+Clear Form
+
+
+After:
+
+{
+  name:
+    '',
+
+  quantity:
+    '1',
+
+  category:
+    'Produce',
+
+  price:
+    ''
+}
+
+
+Errors:
+
+{}
+
+
+Success Message:
+
+empty
+
+
+================================================================================
+SCENARIO 7: PARENT INTEGRATION
+================================================================================
+
+Initial parent items:
+
+[
+  Bread
+]
+
+
+Submit:
+
+Milk
+
+
+Parent update:
+
+setGroceryItems(previous => [
+
+  Milk,
+
+  ...previous
+
+])
+
+
+Result:
+
+[
+  Milk,
+  Bread
+]
+
+
+================================================================================
+TESTING TABLE
+================================================================================
+
++-------------------------+--------------------------------------------+
+| SCENARIO                | EXPECTED                                   |
++-------------------------+--------------------------------------------+
+| Valid Submission        | Item added and form reset                  |
+| Empty Name              | Required-name error                        |
+| Short Name              | Minimum-length error                      |
+| Invalid Quantity        | Quantity error                             |
+| Decimal Quantity        | Whole-number error                         |
+| Negative Price          | Price error                                |
+| Valid Category          | Accepted                                  |
+| Invalid Category        | Category error                             |
+| Reset                   | INITIAL_FORM restored                      |
+| Live Cost               | price × quantity                          |
+| Narrow Layout           | Fields and buttons stack                   |
++-------------------------+--------------------------------------------+
+
+
+================================================================================
+AUTOMATED TEST EXAMPLE
+================================================================================
+
+Conceptual React Testing Library example:
+
+
+import {
+  render,
+  screen
+} from '@testing-library/react'
+
+import userEvent
+  from '@testing-library/user-event'
+
+import {
+  vi
+} from 'vitest'
+
+import AddGroceryForm
+  from './AddGroceryForm'
+
+
+test(
+  'submits a valid grocery item',
+
+  async () => {
+
+    const user =
+      userEvent.setup()
+
+
+    const onAddItem =
+      vi.fn()
+
+
+    render(
+      <AddGroceryForm
+        onAddItem={
+          onAddItem
+        }
+      />
+    )
+
+
+    await user.type(
+      screen.getByLabelText(
+        /item name/i
+      ),
+      'Milk'
+    )
+
+
+    const quantityInput =
+      screen.getByLabelText(
+        /quantity/i
+      )
+
+
+    await user.clear(
+      quantityInput
+    )
+
+
+    await user.type(
+      quantityInput,
+      '2'
+    )
+
+
+    await user.selectOptions(
+      screen.getByLabelText(
+        /category/i
+      ),
+      'Dairy'
+    )
+
+
+    await user.type(
+      screen.getByLabelText(
+        /unit price/i
+      ),
+      '3.99'
+    )
+
+
+    await user.click(
+      screen.getByRole(
+        'button',
+        {
+          name:
+            /add item/i
+        }
+      )
+    )
+
+
+    expect(
+      onAddItem
+    ).toHaveBeenCalledTimes(
+      1
+    )
+
+
+    expect(
+      onAddItem
+    ).toHaveBeenCalledWith(
+
+      expect.objectContaining({
+
+        name:
+          'Milk',
+
+        quantity:
+          2,
+
+        category:
+          'Dairy',
+
+        price:
+          3.99,
+
+        purchased:
+          false
+
+      })
+    )
+  }
+)
+
+
+================================================================================
+TESTING PRINCIPLE
+================================================================================
+
+Test the user's workflow:
+
+Enter Grocery Data
+       ↓
+Submit
+       ↓
+Receive Error or New Item
+
+
+Focus on observable behavior rather than internal implementation details.
+
+
+================================================================================
+PART 9: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE ACCOMPLISHED
+--------------------------------------------------------------------------------
+
+✓ Created a reusable AddGroceryForm component
+
+✓ Managed multiple controlled inputs
+
+✓ Used one generic change handler
+
+✓ Used computed property names correctly
+
+✓ Kept number inputs as strings during editing
+
+✓ Converted numeric values after validation
+
+✓ Created field-specific validation
+
+✓ Displayed accessible error messages
+
+✓ Calculated a live line-cost preview
+
+✓ Created a normalized grocery object
+
+✓ Generated a stable client-side ID
+
+✓ Created an ISO timestamp
+
+✓ Passed the item to a parent callback
+
+✓ Reset the controlled form
+
+✓ Displayed success feedback
+
+✓ Lifted grocery-list state to App
+
+✓ Connected AddGroceryForm to GroceryList
+
+
+================================================================================
+CRITICAL FORM CONCEPTS
+================================================================================
+
+FORM STATE:
+--------------------------------------------------------------------------------
+
+const [formData, setFormData] =
+  useState(INITIAL_FORM)
+
+
+ERROR STATE:
+--------------------------------------------------------------------------------
+
+const [errors, setErrors] =
+  useState({})
+
+
+GENERIC CHANGE:
+--------------------------------------------------------------------------------
+
+setFormData(previous => ({
+
+  ...previous,
+
+  value
+
+}))
+
+
+VALIDATE:
+--------------------------------------------------------------------------------
+
+const validationErrors =
+  validateForm()
+
+
+STOP IF INVALID:
+--------------------------------------------------------------------------------
+
+if (
+  Object.keys(
+    validationErrors
+  ).length > 0
+) {
+
+  setErrors(
+    validationErrors
+  )
+
+  return
+}
+
+
+NORMALIZE:
+--------------------------------------------------------------------------------
+
+const newItem = {
+
+  id:
+    crypto.randomUUID(),
+
+  name:
+    formData.name.trim(),
+
+  quantity:
+    Number(
+      formData.quantity
+    ),
+
+  category:
+    formData.category,
+
+  price:
+    Number(
+      formData.price
+    ),
+
+  purchased:
+    false,
+
+  createdAt:
+    new Date()
+      .toISOString()
+
+}
+
+
+CALL PARENT:
+--------------------------------------------------------------------------------
+
+onAddItem(
+  newItem
+)
+
+
+RESET:
+--------------------------------------------------------------------------------
+
+setFormData(
+  INITIAL_FORM
+)
+
+
+================================================================================
+COMPLETE ADD-ITEM FLOW
+================================================================================
+
+Controlled Inputs
+       ↓
+formData
+       ↓
+Submit
+       ↓
+preventDefault()
+       ↓
+Validation
+       ↓
++--------------------------+
+|                          |
+Invalid                  Valid
+|                          |
+↓                          ↓
+setErrors()             Normalize
+|                          |
+↓                          ↓
+Show Errors             newItem
+                           |
+                           ↓
+                    onAddItem(newItem)
+                           |
+                           ↓
+                     Parent State
+                           |
+                           ↓
+                     GroceryList
+                           |
+                           ↓
+                    GroceryItem Card
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++------------------------+----------------------------------------------+
+| CONCEPT                | REMEMBER                                     |
++------------------------+----------------------------------------------+
+| INITIAL_FORM           | Default/reset values                         |
+| formData               | Current editable values                      |
+| errors                 | Field validation feedback                    |
+| [name]                 | Dynamic property update                      |
+| Number()               | Convert after validation                     |
+| trim()                 | Normalize item name                          |
+| validateForm()         | Return errors object                         |
+| onAddItem              | Child-to-parent communication                |
+| crypto.randomUUID()    | Client-side identity                         |
+| ISO timestamp          | JSON-friendly date representation           |
+| onReset                | Restore controlled state                     |
+| role="status"          | Announce success feedback                    |
+| aria-invalid           | Communicate invalid control                  |
+| aria-describedby       | Associate hints and errors                   |
++------------------------+----------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - STATE OWNERSHIP
+================================================================================
+
+App
+│
+├── groceryItems
+│
+├── handleAddItem
+├── handleTogglePurchased
+├── handleDeleteItem
+│
+├── AddGroceryForm
+│   └── onAddItem
+│
+└── GroceryList
+    ├── items
+    ├── onTogglePurchased
+    └── onDeleteItem
+
+
+ONE SHARED COLLECTION
+
+NOT:
+
+App groceryItems
++
+GroceryList groceryItems
+
+
+================================================================================
+QUICK REVISION - NUMERIC INPUTS
+================================================================================
+
+User Types:
+
+"3.99"
+
+
+Editing State:
+
+price:
+'3.99'
+
+
+Validation:
+
+Number(
+  formData.price
+)
+
+
+Submitted Record:
+
+price:
+3.99
+
+
+MEMORY:
+
+EDIT AS STRING
+      ↓
+VALIDATE
+      ↓
+CONVERT
+      ↓
+STORE AS NUMBER
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+CONTROLLED FORM:
+
+State
+ ↓
+value
+ ↓
+Input
+ ↓
+onChange
+ ↓
+State
+
+
+GENERIC UPDATE:
+
+Input name
+    +
+Input value
+    ↓
+value
+
+
+VALIDATION:
+
+formData
+   ↓
+validateForm()
+   ↓
+errors
+
+
+ADD ITEM:
+
+Valid Form
+    ↓
+Normalize
+    ↓
+Create Object
+    ↓
+Parent Callback
+    ↓
+Array State
+
+
+LINE COST:
+
+Unit Price
+    ×
+Quantity
+    ↓
+Estimated Cost
+
+
+RESET:
+
+INITIAL_FORM
+     ↓
+setFormData()
+     ↓
+Default Values
+
+
+CHILD TO PARENT:
+
+AddGroceryForm
+      ↓
+onAddItem(newItem)
+      ↓
+App
+      ↓
+setGroceryItems()
+      ↓
+GroceryList
+
+
+MOST IMPORTANT RULE:
+
+KEEP EDITABLE FORM VALUES EASY TO EDIT.
+
+VALIDATE AND CONVERT THEM BEFORE CREATING
+THE FINAL GROCERY RECORD.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Add edit mode to the same form
+
+2. Reuse validation for add and edit
+
+3. Add duplicate-item detection
+
+4. Add category filtering
+
+5. Add localStorage persistence
+
+6. Connect form submission to an API
+
+7. Add asynchronous submitting/error states
+
+8. Add server-side validation handling
+
+9. Focus the first invalid field
+
+10. Test AddGroceryForm and GroceryList integration
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The complete Add Grocery Form workflow is:
+
+USER INPUT
+    ↓
+CONTROLLED FORM STATE
+    ↓
+FORM SUBMISSION
+    ↓
+VALIDATION
+    ↓
+NORMALIZATION
+    ↓
+NEW ITEM OBJECT
+    ↓
+PARENT CALLBACK
+    ↓
+SHARED GROCERY STATE
+    ↓
+UPDATED LIST
+
+
+A strong implementation keeps these responsibilities clear:
+
+AddGroceryForm:
+--------------------------------------------------------------------------------
+
+Capture + Validate + Create
+
+
+App:
+--------------------------------------------------------------------------------
+
+Own + Update Shared Grocery State
+
+
+GroceryList:
+--------------------------------------------------------------------------------
+
+Filter + Render
+
+
+GroceryItem:
+--------------------------------------------------------------------------------
+
+Display + Report User Actions
+
+
+================================================================================
+END OF LESSON 13
+ADD GROCERY FORM
+================================================================================
