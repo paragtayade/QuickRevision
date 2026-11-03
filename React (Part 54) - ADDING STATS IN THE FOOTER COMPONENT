@@ -1,0 +1,3313 @@
+LESSON 20: ADDING STATS IN THE FOOTER COMPONENT
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on calculating grocery-list statistics and displaying
+them in the Footer component.
+
+You will understand:
+
+• Calculating statistics from groceryItems
+
+• Creating a reusable calculateStats() function
+
+• Counting total items
+
+• Counting purchased items
+
+• Counting remaining items
+
+• Calculating total cost
+
+• Calculating purchased cost
+
+• Calculating remaining cost
+
+• Calculating completion percentage
+
+• Calculating average line cost
+
+• Passing statistics as props
+
+• Displaying statistics in Footer
+
+• Creating a progress bar
+
+• Updating statistics automatically
+
+• Handling an empty list safely
+
+• Styling statistics responsively
+
+• Testing calculations
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+The Grocery List already contains the information needed to calculate useful
+summary values.
+
+Examples:
+
+groceryItems
+      ↓
++-----------------------------+
+|                             |
+↓                             ↓
+Counts                       Costs
+|                             |
+↓                             ↓
+Total                       Total Cost
+Purchased                   Purchased Cost
+Remaining                   Remaining Cost
+
+
+Statistics should generally be:
+
+DERIVED DATA
+
+
+rather than additional state.
+
+
+The central pattern is:
+
+groceryItems
+     ↓
+calculateStats()
+     ↓
+stats
+     ↓
+Footer
+     ↓
+Statistics UI
+
+
+================================================================================
+PART 2: UNDERSTANDING STATISTICS
+================================================================================
+
+WHAT ARE STATISTICS?
+--------------------------------------------------------------------------------
+
+Statistics are values calculated from existing grocery data.
+
+Examples:
+
+• Number of grocery records
+
+• Number purchased
+
+• Number remaining
+
+• Total planned cost
+
+• Purchased cost
+
+• Remaining cost
+
+• Shopping completion percentage
+
+• Average cost per grocery-list entry
+
+
+================================================================================
+STATISTICS USED IN THIS LESSON
+================================================================================
+
++----------------------+-----------------------------------------------+
+| STATISTIC            | CALCULATION                                   |
++----------------------+-----------------------------------------------+
+| Total Items          | items.length                                  |
+| Purchased Items      | purchased records count                       |
+| Remaining Items      | total - purchased                             |
+| Total Cost           | SUM(price × quantity)                         |
+| Purchased Cost       | SUM(purchased price × quantity)               |
+| Remaining Cost       | total cost - purchased cost                   |
+| Completion           | purchased / total × 100                       |
+| Remaining %          | 100 - completion, when list is nonempty       |
+| Average Line Cost    | total cost / number of grocery records        |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+IMPORTANT: WHAT DOES "ITEM COUNT" MEAN?
+================================================================================
+
+Suppose:
+
+Milk:
+
+quantity = 2
+
+
+Bread:
+
+quantity = 1
+
+
+Then:
+
+items.length
+
+=
+2
+
+
+This means:
+
+TWO GROCERY-LIST RECORDS
+
+
+It does NOT mean:
+
+3 physical units
+
+
+In this lesson:
+
+"Total Items"
+
+means:
+
+NUMBER OF GROCERY-LIST ENTRIES
+
+
+If you wanted total physical units instead:
+
+items.reduce(
+  (sum, item) =>
+    sum + item.quantity,
+  0
+)
+
+
+would be a different statistic.
+
+
+================================================================================
+TOTAL COST
+================================================================================
+
+Each item's line cost is:
+
+price
+ ×
+quantity
+
+
+Example:
+
+Milk:
+
+2 × $3.99
+
+=
+$7.98
+
+
+The total grocery cost is:
+
+SUM OF ALL LINE COSTS
+
+
+================================================================================
+PURCHASED COST
+================================================================================
+
+Only purchased records contribute.
+
+Example:
+
+Milk:
+
+purchased = true
+
+
+Milk cost:
+
+$7.98
+
+
+Bread:
+
+purchased = false
+
+
+Bread contributes:
+
+$0.00
+
+
+Purchased Cost:
+
+$7.98
+
+
+================================================================================
+COMPLETION PERCENTAGE
+================================================================================
+
+Formula:
+
+purchasedItems
+      ÷
+totalItems
+      ×
+100
+
+
+Example:
+
+1 purchased
+
+out of:
+
+3 total
+
+
+Calculation:
+
+1 / 3 × 100
+
+=
+33.333...
+
+
+Rounded:
+
+33%
+
+
+================================================================================
+EMPTY-LIST EDGE CASE
+================================================================================
+
+If:
+
+totalItems = 0
+
+
+we must NOT perform:
+
+0 / 0
+
+
+Instead:
+
+percentageComplete = 0
+
+
+For this application, when the list is empty:
+
+percentageComplete:
+0
+
+
+percentageRemaining:
+0
+
+
+This avoids representing an empty grocery list as:
+
+100% remaining
+
+
+which would not be particularly useful.
+
+
+================================================================================
+PART 3: CALCULATING STATISTICS
+================================================================================
+
+Create a reusable utility function.
+
+
+File:
+
+src/utils/statsCalculator.js
+
+
+export function calculateStats(
+  items
+) {
+
+  // ============================================
+  // COUNTS
+  // ============================================
+
+  const totalItems =
+    items.length
+
+
+  const purchasedItems =
+    items.filter(
+      item =>
+        item.purchased
+    ).length
+
+
+  const remainingItems =
+    totalItems -
+    purchasedItems
+
+
+  // ============================================
+  // COSTS
+  // ============================================
+
+  const totalCost =
+    items.reduce(
+      (sum, item) =>
+
+        sum +
+        item.price *
+        item.quantity,
+
+      0
+    )
+
+
+  const purchasedCost =
+    items.reduce(
+      (sum, item) =>
+
+        item.purchased
+          ? sum +
+            item.price *
+            item.quantity
+          : sum,
+
+      0
+    )
+
+
+  const remainingCost =
+    totalCost -
+    purchasedCost
+
+
+  // ============================================
+  // PERCENTAGES
+  // ============================================
+
+  const percentageComplete =
+    totalItems === 0
+      ? 0
+      : Math.round(
+          (
+            purchasedItems /
+            totalItems
+          ) * 100
+        )
+
+
+  const percentageRemaining =
+    totalItems === 0
+      ? 0
+      : 100 -
+        percentageComplete
+
+
+  // ============================================
+  // AVERAGE
+  // ============================================
+
+  const averageLineCost =
+    totalItems === 0
+      ? 0
+      : totalCost /
+        totalItems
+
+
+  // ============================================
+  // RETURN
+  // ============================================
+
+  return {
+
+    totalItems,
+
+    purchasedItems,
+
+    remainingItems,
+
+    totalCost,
+
+    purchasedCost,
+
+    remainingCost,
+
+    percentageComplete,
+
+    percentageRemaining,
+
+    averageLineCost
+
+  }
+}
+
+
+================================================================================
+WHY RETURN NUMBERS INSTEAD OF STRINGS?
+================================================================================
+
+The original implementation used:
+
+totalCost.toFixed(2)
+
+
+inside the calculator.
+
+
+Problem:
+
+toFixed()
+
+returns a:
+
+STRING
+
+
+Example:
+
+const value =
+  (7.98).toFixed(2)
+
+
+value:
+
+"7.98"
+
+
+That makes the calculation layer mix:
+
+DATA CALCULATION
+
+with:
+
+DISPLAY FORMATTING
+
+
+Cleaner architecture:
+
+calculateStats()
+     ↓
+Numbers
+     ↓
+Footer
+     ↓
+Format Numbers for Display
+
+
+Therefore:
+
+stats.totalCost
+
+remains:
+
+17.98
+
+
+and Footer renders:
+
+stats.totalCost.toFixed(2)
+
+
+================================================================================
+CALCULATION EXPLANATION
+================================================================================
+
+TOTAL ITEMS:
+
+const totalItems =
+  items.length
+
+
+PURCHASED:
+
+const purchasedItems =
+  items.filter(
+    item =>
+      item.purchased
+  ).length
+
+
+REMAINING:
+
+const remainingItems =
+  totalItems -
+  purchasedItems
+
+
+TOTAL COST:
+
+const totalCost =
+  items.reduce(
+    (sum, item) =>
+      sum +
+      item.price *
+      item.quantity,
+    0
+  )
+
+
+PURCHASED COST:
+
+const purchasedCost =
+  items.reduce(
+    (sum, item) =>
+      item.purchased
+        ? sum +
+          item.price *
+          item.quantity
+        : sum,
+    0
+  )
+
+
+REMAINING COST:
+
+const remainingCost =
+  totalCost -
+  purchasedCost
+
+
+AVERAGE LINE COST:
+
+const averageLineCost =
+  totalItems === 0
+    ? 0
+    : totalCost /
+      totalItems
+
+
+================================================================================
+WHY "AVERAGE LINE COST"?
+================================================================================
+
+Suppose:
+
+Milk:
+
+quantity = 2
+
+price = $3.99
+
+line cost = $7.98
+
+
+Average calculation:
+
+totalCost /
+number of grocery records
+
+
+This is NOT:
+
+average price of every physical unit
+
+
+Therefore:
+
+Average Line Cost
+
+is more precise than:
+
+Average Item Cost
+
+
+================================================================================
+PURE FUNCTION PATTERN
+================================================================================
+
+calculateStats():
+
+• Receives items
+
+• Doesn't modify items
+
+• Calculates values
+
+• Returns an object
+
+
+Pattern:
+
+INPUT
+ ↓
+CALCULATION
+ ↓
+OUTPUT
+
+
+No React state is needed inside this utility.
+
+
+================================================================================
+PART 4: PASSING STATS TO FOOTER COMPONENT
+================================================================================
+
+The statistics are calculated from:
+
+groceryItems
+
+
+which already lives in:
+
+App
+
+
+Therefore App is a natural place to derive:
+
+stats
+
+
+================================================================================
+App.jsx
+================================================================================
+
+import { useState } from 'react'
+
+import Navigation
+  from './components/Navigation'
+
+import GroceryList
+  from './components/GroceryList'
+
+import AddGroceryForm
+  from './components/AddGroceryForm'
+
+import Footer
+  from './components/Footer'
+
+import {
+  FAKE_GROCERIES
+} from './data/fakeGroceries'
+
+import {
+  calculateStats
+} from './utils/statsCalculator'
+
+import './App.css'
+
+
+export default function App() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [
+    groceryItems,
+    setGroceryItems
+  ] = useState(
+    FAKE_GROCERIES
+  )
+
+
+  // ============================================
+  // DERIVED STATISTICS
+  // ============================================
+
+  const stats =
+    calculateStats(
+      groceryItems
+    )
+
+
+  // ============================================
+  // ADD
+  // ============================================
+
+  const handleAddItem = (
+    newItem
+  ) => {
+
+    setGroceryItems(
+      previousItems => [
+
+        newItem,
+
+        ...previousItems
+
+      ]
+    )
+  }
+
+
+  // ============================================
+  // TOGGLE
+  // ============================================
+
+  const handleToggleBought = (
+    id
+  ) => {
+
+    setGroceryItems(
+      previousItems =>
+
+        previousItems.map(
+          item =>
+
+            item.id === id
+              ? {
+                  ...item,
+
+                  purchased:
+                    !item.purchased
+                }
+              : item
+        )
+    )
+  }
+
+
+  // ============================================
+  // REMOVE
+  // ============================================
+
+  const handleRemoveItem = (
+    id
+  ) => {
+
+    setGroceryItems(
+      previousItems =>
+
+        previousItems.filter(
+          item =>
+            item.id !== id
+        )
+    )
+  }
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <div className="app">
+
+      <Navigation />
+
+
+      <main className="app-main">
+
+        <div className="app-container">
+
+
+          <header className="app-header">
+
+            <h1>
+              Grocery List App
+            </h1>
+
+            <p>
+              Manage your shopping list
+            </p>
+
+          </header>
+
+
+          <section className="form-section">
+
+            <AddGroceryForm
+              onAddItem={
+                handleAddItem
+              }
+            />
+
+          </section>
+
+
+          <section
+            id="grocery-list"
+            className="list-section"
+          >
+
+            <GroceryList
+              items={
+                groceryItems
+              }
+              onToggleBought={
+                handleToggleBought
+              }
+              onRemoveItem={
+                handleRemoveItem
+              }
+            />
+
+          </section>
+
+        </div>
+
+      </main>
+
+
+      <Footer
+        stats={
+          stats
+        }
+      />
+
+    </div>
+  )
+}
+
+
+================================================================================
+IMPORTANT: STATS ARE NOT STATE
+================================================================================
+
+Avoid:
+
+const [
+  stats,
+  setStats
+] = useState(...)
+
+
+followed by manually updating stats whenever groceries change.
+
+
+Why?
+
+stats can already be calculated from:
+
+groceryItems
+
+
+Therefore:
+
+const stats =
+  calculateStats(
+    groceryItems
+  )
+
+
+is enough.
+
+
+MEMORY:
+
+IF DATA CAN BE CALCULATED FROM EXISTING STATE,
+DERIVE IT INSTEAD OF DUPLICATING IT.
+
+
+================================================================================
+PROP FLOW
+================================================================================
+
+App:
+
+groceryItems
+      ↓
+calculateStats()
+      ↓
+stats
+
+
+Then:
+
+<Footer
+  stats={stats}
+/>
+
+
+Footer receives:
+
+function Footer({
+
+  stats
+
+})
+
+
+================================================================================
+PART 5: CREATING THE FOOTER COMPONENT WITH STATS
+================================================================================
+
+File:
+
+src/components/Footer.jsx
+
+
+import './Footer.css'
+
+
+export default function Footer({
+
+  stats
+
+}) {
+
+  const currentYear =
+    new Date()
+      .getFullYear()
+
+
+  return (
+    <footer className="footer">
+
+      <div className="footer-container">
+
+
+        {/* Brand */}
+
+        <div className="footer-brand">
+
+          <div className="footer-logo">
+
+            <i
+              className="bi bi-bag-check"
+              aria-hidden="true"
+            ></i>
+
+            <span className="footer-title">
+
+              GroceryList
+
+            </span>
+
+          </div>
+
+
+          <p className="footer-description">
+
+            Grocery shopping summary
+
+          </p>
+
+        </div>
+
+
+        {/* ======================================
+            STATISTICS
+            ====================================== */}
+
+        <section
+          className="footer-stats"
+          aria-labelledby="shopping-summary-title"
+        >
+
+          <h2
+            id="shopping-summary-title"
+            className="stats-title"
+          >
+
+            Shopping Summary
+
+          </h2>
+
+
+          <div className="stats-grid">
+
+
+            {/* Total */}
+
+            <div className="stat-card">
+
+              <div className="stat-icon">
+
+                <i
+                  className="bi bi-list-check"
+                  aria-hidden="true"
+                ></i>
+
+              </div>
+
+
+              <div className="stat-content">
+
+                <p className="stat-label">
+
+                  Total Items
+
+                </p>
+
+                <p className="stat-value">
+
+                  {stats.totalItems}
+
+                </p>
+
+              </div>
+
+            </div>
+
+
+            {/* Purchased */}
+
+            <div className="stat-card">
+
+              <div className="stat-icon purchased">
+
+                <i
+                  className="bi bi-check-circle-fill"
+                  aria-hidden="true"
+                ></i>
+
+              </div>
+
+
+              <div className="stat-content">
+
+                <p className="stat-label">
+
+                  Purchased
+
+                </p>
+
+                <p className="stat-value purchased">
+
+                  {stats.purchasedItems}
+
+                </p>
+
+              </div>
+
+            </div>
+
+
+            {/* Remaining */}
+
+            <div className="stat-card">
+
+              <div className="stat-icon remaining">
+
+                <i
+                  className="bi bi-circle"
+                  aria-hidden="true"
+                ></i>
+
+              </div>
+
+
+              <div className="stat-content">
+
+                <p className="stat-label">
+
+                  Remaining Items
+
+                </p>
+
+                <p className="stat-value remaining">
+
+                  {stats.remainingItems}
+
+                </p>
+
+              </div>
+
+            </div>
+
+
+            {/* Total Cost */}
+
+            <div className="stat-card">
+
+              <div className="stat-icon cost">
+
+                <i
+                  className="bi bi-currency-dollar"
+                  aria-hidden="true"
+                ></i>
+
+              </div>
+
+
+              <div className="stat-content">
+
+                <p className="stat-label">
+
+                  Total Cost
+
+                </p>
+
+                <p className="stat-value cost">
+
+                  ${stats.totalCost.toFixed(2)}
+
+                </p>
+
+              </div>
+
+            </div>
+
+
+            {/* Purchased Cost */}
+
+            <div className="stat-card">
+
+              <div className="stat-icon purchased-cost">
+
+                <i
+                  className="bi bi-wallet2"
+                  aria-hidden="true"
+                ></i>
+
+              </div>
+
+
+              <div className="stat-content">
+
+                <p className="stat-label">
+
+                  Purchased Cost
+
+                </p>
+
+                <p className="stat-value purchased-cost">
+
+                  ${stats.purchasedCost.toFixed(2)}
+
+                </p>
+
+              </div>
+
+            </div>
+
+
+            {/* Remaining Cost */}
+
+            <div className="stat-card">
+
+              <div className="stat-icon remaining-cost">
+
+                <i
+                  className="bi bi-piggy-bank"
+                  aria-hidden="true"
+                ></i>
+
+              </div>
+
+
+              <div className="stat-content">
+
+                <p className="stat-label">
+
+                  Remaining Cost
+
+                </p>
+
+                <p className="stat-value remaining-cost">
+
+                  ${stats.remainingCost.toFixed(2)}
+
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {/* ====================================
+              PROGRESS
+              ==================================== */}
+
+          <div className="progress-section">
+
+            <div className="progress-header">
+
+              <p className="progress-label">
+
+                Shopping Progress
+
+              </p>
+
+
+              <p className="progress-percentage">
+
+                {stats.percentageComplete}%
+                {' '}
+                Complete
+
+              </p>
+
+            </div>
+
+
+            <div
+              className="progress-bar"
+              role="progressbar"
+              aria-label="Shopping progress"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow={
+                stats.percentageComplete
+              }
+            >
+
+              <div
+                className="progress-fill"
+                style={{
+                  width:
+                    `${stats.percentageComplete}%`
+                }}
+              >
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {/* Average */}
+
+          <div className="average-cost">
+
+            <p className="average-label">
+
+              Average Line Cost:
+
+            </p>
+
+
+            <p className="average-value">
+
+              ${stats.averageLineCost.toFixed(2)}
+
+            </p>
+
+          </div>
+
+        </section>
+
+
+        {/* Footer Bottom */}
+
+        <div className="footer-bottom">
+
+          <p className="copyright">
+
+            © {currentYear} GroceryList.
+            All rights reserved.
+
+          </p>
+
+        </div>
+
+      </div>
+
+    </footer>
+  )
+}
+
+
+================================================================================
+FOOTER STATS PROP
+================================================================================
+
+Footer receives one structured object:
+
+stats
+
+
+Instead of many individual props:
+
+<Footer
+  totalItems={...}
+  purchasedItems={...}
+  remainingItems={...}
+  totalCost={...}
+  purchasedCost={...}
+  remainingCost={...}
+/>
+
+
+this lesson uses:
+
+<Footer
+  stats={stats}
+/>
+
+
+This is reasonable because the values form one cohesive:
+
+STATISTICS SUMMARY
+
+
+================================================================================
+ICON ACCESSIBILITY
+================================================================================
+
+Statistics already contain visible labels:
+
+Total Items
+
+Purchased
+
+Remaining Items
+
+Total Cost
+
+
+Therefore Bootstrap Icons are decorative:
+
+aria-hidden="true"
+
+
+They reinforce the visible label but do not provide the only meaning.
+
+
+================================================================================
+PROGRESS BAR ACCESSIBILITY
+================================================================================
+
+Visual CSS:
+
+width:
+`${stats.percentageComplete}%`
+
+
+Accessibility:
+
+role="progressbar"
+
+aria-valuemin="0"
+
+aria-valuemax="100"
+
+aria-valuenow={
+  stats.percentageComplete
+}
+
+
+Thus the progress value is not communicated only through:
+
+bar width
+
+or:
+
+color
+
+
+================================================================================
+PART 6: STYLING THE FOOTER STATS
+================================================================================
+
+File:
+
+src/components/Footer.css
+
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+.footer {
+
+  background:
+    linear-gradient(
+      135deg,
+      #2c3e50 0%,
+      #34495e 100%
+    );
+
+  color:
+    #ecf0f1;
+
+  margin-top:
+    60px;
+
+  border-top:
+    1px solid #1a252f;
+
+  padding:
+    40px 0 20px;
+}
+
+
+.footer-container {
+
+  max-width:
+    1200px;
+
+  margin:
+    0 auto;
+
+  padding:
+    0 20px;
+}
+
+
+/* ============================================
+   BRAND
+   ============================================ */
+
+.footer-brand {
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  gap:
+    15px;
+
+  margin-bottom:
+    40px;
+
+  padding-bottom:
+    30px;
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.12);
+}
+
+
+.footer-logo {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    10px;
+
+  font-size:
+    1.3rem;
+
+  font-weight:
+    700;
+}
+
+
+.footer-logo i {
+
+  color:
+    #5dade2;
+
+  font-size:
+    1.5rem;
+}
+
+
+.footer-title {
+
+  color:
+    #5dade2;
+}
+
+
+.footer-description {
+
+  color:
+    #d0d6da;
+
+  font-size:
+    0.95rem;
+
+  margin:
+    0;
+}
+
+
+/* ============================================
+   STATISTICS
+   ============================================ */
+
+.footer-stats {
+
+  margin-bottom:
+    40px;
+}
+
+
+.stats-title {
+
+  color:
+    #ecf0f1;
+
+  font-size:
+    1.2rem;
+
+  margin:
+    0 0 20px;
+
+  font-weight:
+    650;
+}
+
+
+/* ============================================
+   STATS GRID
+   ============================================ */
+
+.stats-grid {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(
+        160px,
+        1fr
+      )
+    );
+
+  gap:
+    15px;
+
+  margin-bottom:
+    30px;
+}
+
+
+/* ============================================
+   STAT CARD
+   ============================================ */
+
+.stat-card {
+
+  background:
+    rgba(255, 255, 255, 0.07);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.14);
+
+  border-radius:
+    8px;
+
+  padding:
+    15px;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    12px;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.stat-card:hover {
+
+  background:
+    rgba(255, 255, 255, 0.11);
+
+  border-color:
+    rgba(255, 255, 255, 0.22);
+
+  transform:
+    translateY(-2px);
+}
+
+
+/* ============================================
+   ICON
+   ============================================ */
+
+.stat-icon {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  width:
+    40px;
+
+  height:
+    40px;
+
+  flex-shrink:
+    0;
+
+  background:
+    rgba(93, 173, 226, 0.18);
+
+  border-radius:
+    6px;
+
+  color:
+    #85c1e9;
+
+  font-size:
+    1.3rem;
+}
+
+
+.stat-icon.purchased {
+
+  color:
+    #58d68d;
+}
+
+
+.stat-icon.remaining {
+
+  color:
+    #f7dc6f;
+}
+
+
+.stat-icon.cost {
+
+  color:
+    #f1948a;
+}
+
+
+.stat-icon.purchased-cost {
+
+  color:
+    #c39bd3;
+}
+
+
+.stat-icon.remaining-cost {
+
+  color:
+    #76d7c4;
+}
+
+
+/* ============================================
+   STAT CONTENT
+   ============================================ */
+
+.stat-content {
+
+  min-width:
+    0;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  gap:
+    4px;
+}
+
+
+.stat-label {
+
+  font-size:
+    0.8rem;
+
+  color:
+    #c4ccd1;
+
+  margin:
+    0;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    0.04em;
+}
+
+
+.stat-value {
+
+  font-size:
+    1.45rem;
+
+  font-weight:
+    700;
+
+  color:
+    #ffffff;
+
+  margin:
+    0;
+
+  overflow-wrap:
+    anywhere;
+}
+
+
+/* ============================================
+   PROGRESS
+   ============================================ */
+
+.progress-section {
+
+  background:
+    rgba(255, 255, 255, 0.07);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.14);
+
+  border-radius:
+    8px;
+
+  padding:
+    20px;
+
+  margin-bottom:
+    20px;
+}
+
+
+.progress-header {
+
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    center;
+
+  gap:
+    20px;
+
+  margin-bottom:
+    12px;
+}
+
+
+.progress-label {
+
+  color:
+    #ecf0f1;
+
+  font-weight:
+    650;
+
+  margin:
+    0;
+}
+
+
+.progress-percentage {
+
+  color:
+    #85c1e9;
+
+  font-weight:
+    700;
+
+  margin:
+    0;
+}
+
+
+.progress-bar {
+
+  width:
+    100%;
+
+  height:
+    10px;
+
+  background:
+    rgba(255, 255, 255, 0.13);
+
+  border-radius:
+    999px;
+
+  overflow:
+    hidden;
+}
+
+
+.progress-fill {
+
+  height:
+    100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      #5dade2 0%,
+      #58d68d 100%
+    );
+
+  border-radius:
+    inherit;
+
+  transition:
+    width 0.3s ease;
+}
+
+
+/* ============================================
+   AVERAGE
+   ============================================ */
+
+.average-cost {
+
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    center;
+
+  gap:
+    20px;
+
+  background:
+    rgba(255, 255, 255, 0.07);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.14);
+
+  border-radius:
+    8px;
+
+  padding:
+    15px 20px;
+}
+
+
+.average-label {
+
+  color:
+    #d0d6da;
+
+  margin:
+    0;
+
+  font-weight:
+    500;
+}
+
+
+.average-value {
+
+  color:
+    #85c1e9;
+
+  font-size:
+    1.3rem;
+
+  font-weight:
+    700;
+
+  margin:
+    0;
+}
+
+
+/* ============================================
+   FOOTER BOTTOM
+   ============================================ */
+
+.footer-bottom {
+
+  text-align:
+    center;
+
+  padding-top:
+    20px;
+
+  border-top:
+    1px solid
+    rgba(255, 255, 255, 0.12);
+}
+
+
+.copyright {
+
+  color:
+    #bdc3c7;
+
+  font-size:
+    0.85rem;
+
+  margin:
+    0;
+}
+
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+
+  .stats-grid {
+
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+}
+
+
+@media (max-width: 768px) {
+
+  .footer {
+
+    padding:
+      30px 0 15px;
+  }
+
+
+  .footer-container {
+
+    padding:
+      0 15px;
+  }
+
+
+  .stats-grid {
+
+    grid-template-columns:
+      repeat(2, 1fr);
+
+    gap:
+      12px;
+  }
+
+
+  .progress-header {
+
+    align-items:
+      flex-start;
+
+    flex-direction:
+      column;
+
+    gap:
+      6px;
+  }
+
+
+  .average-cost {
+
+    flex-direction:
+      column;
+
+    align-items:
+      flex-start;
+
+    gap:
+      6px;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .stats-grid {
+
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .stat-value {
+
+    font-size:
+      1.2rem;
+  }
+
+}
+
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .stat-card,
+  .progress-fill {
+
+    transition:
+      none;
+  }
+
+
+  .stat-card:hover {
+
+    transform:
+      none;
+  }
+
+}
+
+
+================================================================================
+CSS SUMMARY
+================================================================================
+
++-------------------------+---------------------------------------------+
+| CLASS                   | PURPOSE                                     |
++-------------------------+---------------------------------------------+
+| .footer                 | Footer container                            |
+| .footer-brand           | Brand area                                  |
+| .footer-stats           | Statistics area                             |
+| .stats-grid             | Responsive stat-card grid                   |
+| .stat-card              | Individual statistic                       |
+| .stat-icon              | Decorative visual icon                     |
+| .stat-content           | Label/value wrapper                         |
+| .stat-label             | Statistic description                      |
+| .stat-value             | Statistic value                            |
+| .progress-section       | Shopping progress area                      |
+| .progress-bar           | Background progress track                  |
+| .progress-fill          | Completion indicator                       |
+| .average-cost           | Average-line-cost summary                   |
+| .footer-bottom          | Bottom copyright section                   |
++-------------------------+---------------------------------------------+
+
+
+================================================================================
+PART 7: REAL-TIME STAT UPDATES
+================================================================================
+
+"REAL-TIME" IN THIS LESSON
+--------------------------------------------------------------------------------
+
+There is no server stream, WebSocket, polling, or background process.
+
+Here, "real-time" simply means:
+
+THE DISPLAY REACTS IMMEDIATELY
+TO THE CURRENT LOCAL REACT STATE.
+
+
+================================================================================
+TOGGLE FLOW
+================================================================================
+
+User checks Milk
+      ↓
+handleToggleBought()
+      ↓
+groceryItems changes
+      ↓
+App renders
+      ↓
+calculateStats(
+  groceryItems
+)
+      ↓
+New stats
+      ↓
+Footer receives stats
+      ↓
+Footer renders new values
+
+
+================================================================================
+ADD FLOW
+================================================================================
+
+AddGroceryForm
+      ↓
+onAddItem(newItem)
+      ↓
+groceryItems gets another record
+      ↓
+calculateStats()
+      ↓
+totalItems changes
+      ↓
+totalCost changes
+      ↓
+Footer updates
+
+
+================================================================================
+DELETE FLOW
+================================================================================
+
+Delete Item
+      ↓
+onRemoveItem(id)
+      ↓
+filter()
+      ↓
+groceryItems loses record
+      ↓
+calculateStats()
+      ↓
+Counts + Costs Recalculate
+      ↓
+Footer updates
+
+
+================================================================================
+NO MANUAL STATS SYNCHRONIZATION
+================================================================================
+
+Avoid:
+
+handleAddItem(...)
+ ↓
+setGroceryItems(...)
+ ↓
+setTotalItems(...)
+ ↓
+setTotalCost(...)
+ ↓
+setPurchasedCount(...)
+
+
+This creates unnecessary duplicated state.
+
+
+Better:
+
+groceryItems changes
+      ↓
+calculateStats()
+      ↓
+Everything derived from current items
+
+
+================================================================================
+DO WE NEED useMemo()?
+================================================================================
+
+For a small grocery list:
+
+const stats =
+  calculateStats(
+    groceryItems
+  )
+
+
+is simple and appropriate.
+
+
+Do not add optimization automatically.
+
+
+If profiling later showed the calculation to be meaningfully expensive for a
+large collection, memoization could be evaluated.
+
+For this small learning app:
+
+KEEP THE SIMPLE DERIVED CALCULATION.
+
+
+================================================================================
+PART 8: TESTING FOOTER STATS
+================================================================================
+
+IMPORTANT CALCULATION CORRECTION
+--------------------------------------------------------------------------------
+
+The original lesson's expected values did not match its sample data.
+
+Given:
+
+Milk:
+
+quantity:
+2
+
+price:
+$3.99
+
+
+Bread:
+
+quantity:
+1
+
+price:
+$2.50
+
+
+Apples:
+
+quantity:
+5
+
+price:
+$1.50
+
+
+Line costs are:
+
+Milk:
+
+2 × $3.99
+
+=
+$7.98
+
+
+Bread:
+
+1 × $2.50
+
+=
+$2.50
+
+
+Apples:
+
+5 × $1.50
+
+=
+$7.50
+
+
+TOTAL:
+
+$7.98
++
+$2.50
++
+$7.50
+
+=
+$17.98
+
+
+NOT:
+
+$7.99
+
+
+================================================================================
+SCENARIO 1: INITIAL LOAD
+================================================================================
+
+Assume:
+
+Milk:
+unpurchased
+
+
+Bread:
+unpurchased
+
+
+Apples:
+unpurchased
+
+
+Expected:
+
+Total Items:
+
+3
+
+
+Purchased:
+
+0
+
+
+Remaining:
+
+3
+
+
+Total Cost:
+
+$17.98
+
+
+Purchased Cost:
+
+$0.00
+
+
+Remaining Cost:
+
+$17.98
+
+
+Completion:
+
+0%
+
+
+Average Line Cost:
+
+$17.98 / 3
+
+=
+$5.9933...
+
+
+Displayed:
+
+$5.99
+
+
+================================================================================
+SCENARIO 2: MARK MILK PURCHASED
+================================================================================
+
+Milk cost:
+
+2 × $3.99
+
+=
+$7.98
+
+
+Expected:
+
+Total Items:
+
+3
+
+
+Purchased:
+
+1
+
+
+Remaining:
+
+2
+
+
+Total Cost:
+
+$17.98
+
+
+Purchased Cost:
+
+$7.98
+
+
+Remaining Cost:
+
+$17.98 - $7.98
+
+=
+$10.00
+
+
+Completion:
+
+1 / 3 × 100
+
+=
+33%
+
+
+Progress Bar:
+
+33%
+
+
+================================================================================
+SCENARIO 3: ADD CHEESE
+================================================================================
+
+Continue from Scenario 2.
+
+New item:
+
+Cheese
+
+
+Quantity:
+
+2
+
+
+Unit Price:
+
+$5.99
+
+
+Cheese line cost:
+
+2 × $5.99
+
+=
+$11.98
+
+
+Before:
+
+$17.98
+
+
+After:
+
+$17.98 + $11.98
+
+=
+$29.96
+
+
+Expected:
+
+Total Items:
+
+4
+
+
+Purchased:
+
+1
+
+
+Remaining:
+
+3
+
+
+Total Cost:
+
+$29.96
+
+
+Purchased Cost:
+
+$7.98
+
+
+Remaining Cost:
+
+$21.98
+
+
+Completion:
+
+1 / 4 × 100
+
+=
+25%
+
+
+================================================================================
+SCENARIO 4: DELETE BREAD
+================================================================================
+
+Continue from Scenario 3.
+
+Bread cost:
+
+$2.50
+
+
+Before:
+
+Total Items:
+4
+
+
+Total Cost:
+$29.96
+
+
+Delete Bread.
+
+
+Expected:
+
+Total Items:
+
+3
+
+
+Purchased:
+
+1
+
+
+Remaining:
+
+2
+
+
+Total Cost:
+
+$29.96 - $2.50
+
+=
+$27.46
+
+
+Purchased Cost:
+
+$7.98
+
+
+Remaining Cost:
+
+$19.48
+
+
+Completion:
+
+1 / 3
+
+=
+33%
+
+
+================================================================================
+SCENARIO 5: MARK ALL REMAINING ITEMS PURCHASED
+================================================================================
+
+After Scenario 4:
+
+3 records remain.
+
+
+Mark all three purchased.
+
+
+Expected:
+
+Purchased:
+
+3
+
+
+Remaining:
+
+0
+
+
+Completion:
+
+100%
+
+
+Purchased Cost:
+
+$27.46
+
+
+Remaining Cost:
+
+$0.00
+
+
+Progress Bar:
+
+100%
+
+
+================================================================================
+SCENARIO 6: EMPTY LIST
+================================================================================
+
+Delete all items.
+
+
+Expected:
+
+Total:
+
+0
+
+
+Purchased:
+
+0
+
+
+Remaining:
+
+0
+
+
+Total Cost:
+
+$0.00
+
+
+Purchased Cost:
+
+$0.00
+
+
+Remaining Cost:
+
+$0.00
+
+
+Completion:
+
+0%
+
+
+Remaining Percentage:
+
+0%
+
+
+Average Line Cost:
+
+$0.00
+
+
+Progress:
+
+0%
+
+
+Most importantly:
+
+NO DIVISION-BY-ZERO FAILURE
+
+
+================================================================================
+TESTING CHECKLIST
+================================================================================
+
+[ ] Total item-entry count is correct
+
+[ ] Purchased count is correct
+
+[ ] Remaining count is correct
+
+[ ] Total cost uses price × quantity
+
+[ ] Purchased cost includes only purchased records
+
+[ ] Remaining cost is correct
+
+[ ] Completion percentage is correct
+
+[ ] Empty list produces 0%
+
+[ ] Average line cost is correct
+
+[ ] Add recalculates statistics
+
+[ ] Toggle recalculates statistics
+
+[ ] Delete recalculates statistics
+
+[ ] Footer receives new stats
+
+[ ] Progress visual width is correct
+
+[ ] Progress has accessible ARIA values
+
+[ ] Layout responds on narrow screens
+
+[ ] Reduced-motion preference is respected
+
+
+================================================================================
+UNIT TESTING calculateStats()
+================================================================================
+
+Because calculateStats() is a pure function, it is easy to test independently.
+
+
+Example:
+
+import {
+  describe,
+  expect,
+  test
+} from 'vitest'
+
+import {
+  calculateStats
+} from './statsCalculator'
+
+
+describe(
+  'calculateStats',
+
+  () => {
+
+    test(
+      'calculates grocery statistics',
+
+      () => {
+
+        const items = [
+
+          {
+            id:
+              'milk',
+
+            quantity:
+              2,
+
+            price:
+              3.99,
+
+            purchased:
+              true
+          },
+
+
+          {
+            id:
+              'bread',
+
+            quantity:
+              1,
+
+            price:
+              2.50,
+
+            purchased:
+              false
+          }
+
+        ]
+
+
+        const stats =
+          calculateStats(
+            items
+          )
+
+
+        expect(
+          stats.totalItems
+        ).toBe(2)
+
+
+        expect(
+          stats.purchasedItems
+        ).toBe(1)
+
+
+        expect(
+          stats.remainingItems
+        ).toBe(1)
+
+
+        expect(
+          stats.totalCost
+        ).toBeCloseTo(
+          10.48
+        )
+
+
+        expect(
+          stats.purchasedCost
+        ).toBeCloseTo(
+          7.98
+        )
+
+
+        expect(
+          stats.remainingCost
+        ).toBeCloseTo(
+          2.50
+        )
+
+
+        expect(
+          stats.percentageComplete
+        ).toBe(50)
+
+      }
+    )
+
+
+    test(
+      'handles an empty list',
+
+      () => {
+
+        const stats =
+          calculateStats([])
+
+
+        expect(
+          stats.totalItems
+        ).toBe(0)
+
+
+        expect(
+          stats.totalCost
+        ).toBe(0)
+
+
+        expect(
+          stats.percentageComplete
+        ).toBe(0)
+
+
+        expect(
+          stats.averageLineCost
+        ).toBe(0)
+
+      }
+    )
+
+  }
+)
+
+
+================================================================================
+WHY is calculateStats() EASY TO TEST?
+================================================================================
+
+It doesn't depend on:
+
+• DOM
+
+• React rendering
+
+• Browser APIs
+
+• Component state
+
+
+It is simply:
+
+items
+ ↓
+calculateStats()
+ ↓
+stats
+
+
+That is one benefit of separating calculation logic from presentation.
+
+
+================================================================================
+PART 9: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE ACCOMPLISHED
+--------------------------------------------------------------------------------
+
+✓ Created a reusable statistics calculator
+
+✓ Kept stats derived from groceryItems
+
+✓ Counted total grocery entries
+
+✓ Counted purchased entries
+
+✓ Counted remaining entries
+
+✓ Calculated total cost
+
+✓ Calculated purchased cost
+
+✓ Calculated remaining cost
+
+✓ Calculated shopping completion
+
+✓ Safely handled an empty list
+
+✓ Calculated average line cost
+
+✓ Passed stats to Footer
+
+✓ Displayed statistics in responsive cards
+
+✓ Added an accessible progress bar
+
+✓ Updated statistics after Add
+
+✓ Updated statistics after Toggle
+
+✓ Updated statistics after Delete
+
+✓ Added unit-testable calculation logic
+
+
+================================================================================
+CRITICAL IMPLEMENTATION
+================================================================================
+
+CALCULATE:
+--------------------------------------------------------------------------------
+
+const stats =
+  calculateStats(
+    groceryItems
+  )
+
+
+PASS:
+--------------------------------------------------------------------------------
+
+<Footer
+  stats={stats}
+/>
+
+
+RECEIVE:
+--------------------------------------------------------------------------------
+
+function Footer({
+
+  stats
+
+}) {
+
+  ...
+}
+
+
+DISPLAY:
+--------------------------------------------------------------------------------
+
+{stats.totalItems}
+
+
+FORMAT COST:
+--------------------------------------------------------------------------------
+
+${stats.totalCost.toFixed(2)}
+
+
+PROGRESS:
+--------------------------------------------------------------------------------
+
+style={{
+  width:
+    `${stats.percentageComplete}%`
+}}
+
+
+================================================================================
+DON'T STORE DERIVED STATISTICS
+================================================================================
+
+Avoid:
+
+const [
+  totalItems,
+  setTotalItems
+] = useState(0)
+
+
+const [
+  totalCost,
+  setTotalCost
+] = useState(0)
+
+
+when both can be directly calculated from:
+
+groceryItems
+
+
+Better:
+
+groceryItems
+     ↓
+calculateStats()
+     ↓
+Derived Values
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++-------------------------+--------------------------------------------+
+| CONCEPT                 | REMEMBER                                   |
++-------------------------+--------------------------------------------+
+| calculateStats()        | Derive metrics from items                  |
+| items.length            | Grocery-entry count                        |
+| filter()                | Select purchased items                     |
+| reduce()                | Sum grocery costs                          |
+| price × quantity        | One record's line cost                     |
+| purchased / total       | Completion ratio                           |
+| Empty List Check        | Prevent invalid percentage calculation     |
+| stats prop              | Pass calculated summary to Footer          |
+| toFixed(2)              | Presentation formatting                    |
+| progressbar ARIA        | Communicate progress non-visually          |
++-------------------------+--------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - COUNTS
+================================================================================
+
+items
+ ↓
+length
+ ↓
+Total
+
+
+items
+ ↓
+filter(purchased)
+ ↓
+length
+ ↓
+Purchased
+
+
+Total
+ -
+Purchased
+ ↓
+Remaining
+
+
+================================================================================
+QUICK REVISION - COST
+================================================================================
+
+Each Item:
+
+price
+ ×
+quantity
+ ↓
+Line Cost
+
+
+All Items:
+
+Line Costs
+ ↓
+reduce()
+ ↓
+Total Cost
+
+
+Purchased Records:
+
+Purchased Line Costs
+ ↓
+reduce()
+ ↓
+Purchased Cost
+
+
+Total Cost
+ -
+Purchased Cost
+ ↓
+Remaining Cost
+
+
+================================================================================
+QUICK REVISION - PROGRESS
+================================================================================
+
+Purchased
+    ÷
+Total
+    ×
+100
+    ↓
+Round
+    ↓
+Completion %
+
+
+If Total = 0:
+
+Completion = 0%
+
+
+================================================================================
+QUICK REVISION - COMPONENT FLOW
+================================================================================
+
+App
+│
+├── groceryItems State
+│
+├── calculateStats(groceryItems)
+│        ↓
+│      stats
+│
+├── AddGroceryForm
+├── GroceryList
+│
+└── Footer
+     ↓
+   stats prop
+     ↓
+   Summary
+     ↓
+   Progress
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+TOTAL ITEMS:
+
+items.length
+
+
+PURCHASED:
+
+items.filter(
+  item =>
+    item.purchased
+).length
+
+
+REMAINING:
+
+totalItems
+-
+purchasedItems
+
+
+LINE COST:
+
+price
+×
+quantity
+
+
+TOTAL COST:
+
+SUM(
+  price
+  ×
+  quantity
+)
+
+
+PURCHASED COST:
+
+SUM(
+  purchased
+  price
+  ×
+  quantity
+)
+
+
+REMAINING COST:
+
+totalCost
+-
+purchasedCost
+
+
+PROGRESS:
+
+purchased
+÷
+total
+×
+100
+
+
+AVERAGE LINE COST:
+
+totalCost
+÷
+total grocery records
+
+
+DERIVED DATA:
+
+groceryItems
+     ↓
+calculateStats()
+     ↓
+stats
+
+
+MOST IMPORTANT RULE:
+
+groceryItems IS THE SOURCE OF TRUTH.
+
+STATISTICS SHOULD BE CALCULATED FROM IT,
+NOT MAINTAINED AS A SECOND COPY OF STATE.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Add category statistics
+
+2. Add quantity-based statistics
+
+3. Add Clear Purchased functionality
+
+4. Add budget tracking
+
+5. Persist grocery items
+
+6. Test Footer rendering from known stats
+
+7. Add additional visualizations only when they provide useful information
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The statistics architecture is:
+
+GROCERY ITEMS
+      ↓
+PURE CALCULATION
+      ↓
+STATS OBJECT
+      ↓
+FOOTER PROP
+      ↓
+STAT CARDS + PROGRESS
+
+
+When Add, Toggle, or Delete changes:
+
+groceryItems
+
+
+React renders again and calculates:
+
+stats
+
+
+from the current data.
+
+
+This gives the application:
+
+ONE SOURCE OF TRUTH
++
+DERIVED STATISTICS
++
+AUTOMATICALLY SYNCHRONIZED UI
+
+
+================================================================================
+END OF LESSON 20
+ADDING STATS IN THE FOOTER COMPONENT
+================================================================================
