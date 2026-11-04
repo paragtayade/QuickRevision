@@ -1,0 +1,1430 @@
+================================================================================
+LESSON 9: ADDING LOADING STATE IN REACT
+================================================================================
+
+
+LESSON OVERVIEW
+================================================================================
+
+This lesson explains how to show loading feedback while books are being
+fetched from an API.
+
+Main concepts:
+
+- Create an isLoading state
+- Set loading to true before the API call
+- Show a loading message or spinner
+- Set loading to false after the request finishes
+- Stop loading even when an error occurs
+- Use finally to avoid duplicate code
+- Use conditional rendering for different UI states
+
+
+================================================================================
+1. WHAT IS A LOADING STATE?
+================================================================================
+
+A loading state tells the application whether an asynchronous operation
+is currently running.
+
+Example:
+
+const [isLoading, setIsLoading] = useState(false);
+
+
+Values:
+
+-------------------+------------------------------------------
+isLoading         | Meaning
+-------------------+------------------------------------------
+false             | No API request is currently processing
+true              | API request is currently processing
+-------------------+------------------------------------------
+
+
+When:
+
+isLoading = true
+
+Show:
+
+Loading books...
+
+
+When:
+
+isLoading = false
+
+Show:
+
+Books / Error / No Results
+
+
+================================================================================
+2. WHY DO WE NEED A LOADING STATE?
+================================================================================
+
+Without Loading:
+
+User Clicks Search
+       |
+       v
+API Request
+       |
+       v
+Blank / Old Screen
+       |
+       v
+Books Suddenly Appear
+
+
+With Loading:
+
+User Clicks Search
+       |
+       v
+API Request
+       |
+       v
+"Loading books..."
+       |
+       v
+API Completes
+       |
+       v
+Books Displayed
+
+
+Benefits:
+
+- Gives immediate feedback to the user
+- Prevents confusion
+- Makes the application feel responsive
+- Helps when networks are slow
+- Provides a more professional user experience
+
+
+================================================================================
+3. CREATE THE LOADING STATE
+================================================================================
+
+Create state inside App:
+
+const [isLoading, setIsLoading] = useState(false);
+
+
+Explanation:
+
+---------------------------+----------------------------------------------
+Code                       | Purpose
+---------------------------+----------------------------------------------
+isLoading                  | Current loading status
+setIsLoading()             | Updates loading status
+useState(false)            | Initial loading value
+setIsLoading(true)         | Start loading
+setIsLoading(false)        | Stop loading
+---------------------------+----------------------------------------------
+
+
+================================================================================
+4. START LOADING BEFORE THE API CALL
+================================================================================
+
+Example:
+
+const fetchBooks = async (query) => {
+
+  setIsLoading(true);
+
+  const response = await fetch(URL);
+
+};
+
+
+What Happens:
+
+- fetchBooks() starts.
+- setIsLoading(true) requests a state update.
+- React re-renders.
+- Loading UI becomes visible.
+- API request continues in the background.
+
+
+Simple Flow:
+
+fetchBooks()
+     |
+     v
+setIsLoading(true)
+     |
+     v
+React Re-renders
+     |
+     v
+Show Loading
+     |
+     v
+fetch(URL)
+
+
+================================================================================
+5. STOP LOADING AFTER THE API CALL
+================================================================================
+
+Basic Example:
+
+const fetchBooks = async (query) => {
+
+  setIsLoading(true);
+
+  const response = await fetch(URL);
+
+  const data = await response.json();
+
+  setBooks(data.items || []);
+
+  setIsLoading(false);
+
+};
+
+
+Explanation:
+
+- Loading starts before fetch().
+- API request completes.
+- Books are stored in state.
+- Loading is changed back to false.
+- React re-renders with book results.
+
+
+================================================================================
+6. PROBLEM WITH THE BASIC APPROACH
+================================================================================
+
+Consider:
+
+const fetchBooks = async () => {
+
+  setIsLoading(true);
+
+  const response = await fetch(URL);
+
+  const data = await response.json();
+
+  setBooks(data.items || []);
+
+  setIsLoading(false);
+
+};
+
+
+Problem:
+
+If fetch() throws an error, execution may never reach:
+
+setIsLoading(false);
+
+
+Possible result:
+
+isLoading remains true
+
+and the screen keeps showing:
+
+Loading books...
+
+
+Therefore, loading must stop on both:
+
+- Success
+- Failure
+
+
+================================================================================
+7. USE try / catch / finally
+================================================================================
+
+Recommended:
+
+const fetchBooks = async (query) => {
+
+  try {
+
+    setIsLoading(true);
+    setError(null);
+
+    const URL =
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;
+
+    const response = await fetch(URL);
+
+    if (!response.ok) {
+
+      throw new Error(
+        `HTTP error! Status: ${response.status}`
+      );
+
+    }
+
+    const data = await response.json();
+
+    setBooks(data.items || []);
+
+  } catch (error) {
+
+    setError(error.message);
+    setBooks([]);
+
+  } finally {
+
+    setIsLoading(false);
+
+  }
+
+};
+
+
+WHAT THIS CODE DOES
+--------------------------------------------------------------------------------
+
+try:
+
+- Starts loading.
+- Clears previous errors.
+- Calls the API.
+- Reads the response.
+- Updates books.
+
+
+catch:
+
+- Executes when an error occurs.
+- Stores the error message.
+- Clears the books if appropriate.
+
+
+finally:
+
+- Executes after try/catch.
+- Runs whether the operation succeeds or fails.
+- Stops the loading state.
+
+
+================================================================================
+8. WHY finally IS IMPORTANT
+================================================================================
+
+Without finally:
+
+try {
+
+  ...
+
+  setIsLoading(false);
+
+} catch (error) {
+
+  ...
+
+  setIsLoading(false);
+
+}
+
+
+Problem:
+
+setIsLoading(false)
+
+is duplicated.
+
+
+Better:
+
+try {
+
+  ...
+
+} catch (error) {
+
+  ...
+
+} finally {
+
+  setIsLoading(false);
+
+}
+
+
+Benefits:
+
+- Less duplicate code
+- Easier to maintain
+- Loading reliably stops
+- Works for success and failure
+
+
+================================================================================
+9. COMPLETE LOADING FLOW
+================================================================================
+
+User Clicks Search
+       |
+       v
+handleSearchSubmit()
+       |
+       v
+fetchBooks(query)
+       |
+       v
+setIsLoading(true)
+       |
+       v
+React Re-renders
+       |
+       v
+Show Loading Indicator
+       |
+       v
+fetch(URL)
+       |
+       v
+Wait for API Response
+       |
+    +--+--+
+    |     |
+    v     v
+ Success Error
+    |     |
+    v     v
+setBooks setError
+    |     |
+    +--+--+
+       |
+       v
+    finally
+       |
+       v
+setIsLoading(false)
+       |
+       v
+React Re-renders
+       |
+    +--+--+
+    |     |
+    v     v
+ Books  Error
+
+
+================================================================================
+10. SIMPLE LOADING MESSAGE
+================================================================================
+
+Use conditional rendering:
+
+{isLoading && (
+  <p>Loading books...</p>
+)}
+
+
+Explanation:
+
+- && is used for conditional rendering.
+- If isLoading is true, the message appears.
+- If isLoading is false, nothing is rendered.
+
+
+Conceptually:
+
+isLoading === true
+
+-> Show Loading
+
+
+isLoading === false
+
+-> Hide Loading
+
+
+================================================================================
+11. BOOTSTRAP LOADING MESSAGE
+================================================================================
+
+{isLoading && (
+
+  <div
+    className="alert alert-info"
+    role="status"
+  >
+
+    Loading books...
+
+  </div>
+
+)}
+
+
+Bootstrap classes:
+
+-------------------+----------------------------------------
+Class              | Purpose
+-------------------+----------------------------------------
+alert              | Creates an alert box
+alert-info         | Applies informational styling
+-------------------+----------------------------------------
+
+
+================================================================================
+12. BOOTSTRAP SPINNER
+================================================================================
+
+A spinner provides better visual feedback.
+
+Example:
+
+{isLoading && (
+
+  <div
+    className="alert alert-info"
+    role="status"
+  >
+
+    <div
+      className="
+        spinner-border
+        spinner-border-sm
+        me-2
+      "
+      role="status"
+    >
+
+      <span className="visually-hidden">
+        Loading...
+      </span>
+
+    </div>
+
+    Loading books...
+
+  </div>
+
+)}
+
+
+Explanation:
+
+--------------------------------+-------------------------------------------
+Class / Attribute               | Purpose
+--------------------------------+-------------------------------------------
+spinner-border                  | Bootstrap spinning indicator
+spinner-border-sm               | Creates smaller spinner
+me-2                            | Adds spacing after spinner
+role="status"                   | Indicates status information
+visually-hidden                 | Screen-reader text
+--------------------------------+-------------------------------------------
+
+
+================================================================================
+13. CENTERED LOADING SPINNER
+================================================================================
+
+{isLoading && (
+
+  <div className="text-center py-5">
+
+    <div
+      className="spinner-border"
+      role="status"
+    >
+
+      <span className="visually-hidden">
+        Loading...
+      </span>
+
+    </div>
+
+    <p className="mt-2">
+      Loading books...
+    </p>
+
+  </div>
+
+)}
+
+
+Result:
+
+             [Spinner]
+
+         Loading books...
+
+
+================================================================================
+14. LOADING + ERROR + NO RESULTS + SUCCESS
+================================================================================
+
+A good application normally handles four UI states.
+
+
+----------------+--------------------------------------+------------------------
+State           | Condition                            | Display
+----------------+--------------------------------------+------------------------
+Loading         | isLoading                            | Loading indicator
+Error           | !isLoading && error                  | Error message
+No Results      | !isLoading && !error && books empty | No books message
+Success         | !isLoading && !error && books exist | Book cards
+----------------+--------------------------------------+------------------------
+
+
+================================================================================
+15. CONDITIONAL RENDERING
+================================================================================
+
+LOADING
+--------------------------------------------------------------------------------
+
+{isLoading && (
+
+  <div className="alert alert-info">
+    Loading books...
+  </div>
+
+)}
+
+
+ERROR
+--------------------------------------------------------------------------------
+
+{!isLoading && error && (
+
+  <div className="alert alert-danger">
+
+    Error: {error}
+
+  </div>
+
+)}
+
+
+NO RESULTS
+--------------------------------------------------------------------------------
+
+{!isLoading &&
+ !error &&
+ books.length === 0 && (
+
+  <div className="alert alert-warning">
+
+    No books found.
+
+  </div>
+
+)}
+
+
+SUCCESS
+--------------------------------------------------------------------------------
+
+{!isLoading &&
+ !error &&
+ books.length > 0 && (
+
+  <div className="row">
+
+    {books.map((book) => (
+
+      <div
+        key={book.id}
+        className="col-md-4 mb-4"
+      >
+
+        {book.volumeInfo?.title}
+
+      </div>
+
+    ))}
+
+  </div>
+
+)}
+
+
+================================================================================
+16. STATE TRANSITIONS
+================================================================================
+
+-------------------+-----------+---------------+-----------------+------------------
+Stage              | isLoading | books         | error           | UI
+-------------------+-----------+---------------+-----------------+------------------
+Initial            | false     | []            | null            | No results*
+Fetching           | true      | previous/[]   | null            | Loading
+Success            | false     | [books...]    | null            | Book cards
+Empty response     | false     | []            | null            | No books found
+Failure            | false     | []            | Error message   | Error
+-------------------+-----------+---------------+-----------------+------------------
+
+*If you do not want "No books found" to appear before the first search,
+you can maintain another state such as hasSearched.
+
+
+================================================================================
+17. OPTIONAL hasSearched STATE
+================================================================================
+
+Sometimes this initial UI is undesirable:
+
+Page Opens
+     |
+     v
+books.length === 0
+     |
+     v
+"No books found"
+
+
+But no search has happened yet.
+
+
+Create:
+
+const [hasSearched, setHasSearched] =
+  useState(false);
+
+
+After search completes:
+
+setHasSearched(true);
+
+
+No-results condition:
+
+{hasSearched &&
+ !isLoading &&
+ !error &&
+ books.length === 0 && (
+
+  <div className="alert alert-warning">
+    No books found.
+  </div>
+
+)}
+
+
+This clearly separates:
+
+"No search performed"
+
+from:
+
+"Search performed but returned zero books"
+
+
+================================================================================
+18. SIMPLE COMPLETE EXAMPLE
+================================================================================
+
+import { useState } from 'react';
+
+
+function App() {
+
+  const [books, setBooks] =
+    useState([]);
+
+  const [isLoading, setIsLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState(null);
+
+
+  const fetchBooks = async (query) => {
+
+    try {
+
+      setIsLoading(true);
+      setError(null);
+
+
+      const URL =
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;
+
+
+      const response =
+        await fetch(URL);
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          `HTTP error: ${response.status}`
+        );
+
+      }
+
+
+      const data =
+        await response.json();
+
+
+      setBooks(
+        data.items || []
+      );
+
+
+    } catch (error) {
+
+      setError(
+        error.message
+      );
+
+      setBooks([]);
+
+
+    } finally {
+
+      setIsLoading(false);
+
+    }
+
+  };
+
+
+  return (
+
+    <div className="container mt-5">
+
+
+      {isLoading && (
+
+        <div className="alert alert-info">
+
+          <div
+            className="
+              spinner-border
+              spinner-border-sm
+              me-2
+            "
+            role="status"
+          />
+
+          Loading books...
+
+        </div>
+
+      )}
+
+
+      {!isLoading && error && (
+
+        <div className="alert alert-danger">
+
+          Error: {error}
+
+        </div>
+
+      )}
+
+
+      {!isLoading &&
+       !error &&
+       books.length > 0 && (
+
+        <div className="row">
+
+          {books.map((book) => (
+
+            <div
+              key={book.id}
+              className="col-md-4 mb-4"
+            >
+
+              <div className="card">
+
+                <div className="card-body">
+
+                  <h5>
+
+                    {book.volumeInfo?.title
+                      || 'No Title'}
+
+                  </h5>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      )}
+
+    </div>
+
+  );
+
+}
+
+export default App;
+
+
+================================================================================
+19. WHAT THE CODE DOES
+================================================================================
+
+books State:
+--------------------------------------------------------------------------------
+
+const [books, setBooks] = useState([]);
+
+- Stores books returned by the API.
+
+
+Loading State:
+--------------------------------------------------------------------------------
+
+const [isLoading, setIsLoading] =
+  useState(false);
+
+- Tracks whether a request is running.
+
+
+Error State:
+--------------------------------------------------------------------------------
+
+const [error, setError] =
+  useState(null);
+
+- Stores an API error.
+
+
+Start Loading:
+--------------------------------------------------------------------------------
+
+setIsLoading(true);
+
+- Executed before the API call.
+- Causes the loading UI to appear.
+
+
+Clear Error:
+--------------------------------------------------------------------------------
+
+setError(null);
+
+- Removes errors from previous searches.
+
+
+Fetch:
+--------------------------------------------------------------------------------
+
+await fetch(URL);
+
+- Sends the API request.
+
+
+Store Data:
+--------------------------------------------------------------------------------
+
+setBooks(data.items || []);
+
+- Stores the returned books.
+
+
+Error Handling:
+--------------------------------------------------------------------------------
+
+catch (error) {
+  setError(error.message);
+}
+
+- Stores an error message when the request fails.
+
+
+Stop Loading:
+--------------------------------------------------------------------------------
+
+finally {
+  setIsLoading(false);
+}
+
+- Runs whether fetch succeeds or fails.
+- Hides the loading UI.
+
+
+================================================================================
+20. DISABLE SEARCH BUTTON WHILE LOADING
+================================================================================
+
+While loading, it can be useful to prevent repeated searches.
+
+Pass loading status to SearchBar:
+
+<SearchBar
+  searchTerm={searchTerm}
+  onSearchChange={handleSearchChange}
+  onSearch={handleSearchSubmit}
+  isLoading={isLoading}
+/>
+
+
+Inside SearchBar:
+
+function SearchBar({
+  searchTerm,
+  onSearchChange,
+  onSearch,
+  isLoading
+}) {
+
+  return (
+
+    <form onSubmit={onSearch}>
+
+      <div className="input-group">
+
+        <input
+          value={searchTerm}
+          onChange={onSearchChange}
+          className="form-control"
+        />
+
+
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={isLoading}
+        >
+
+          {isLoading
+            ? 'Searching...'
+            : 'Search'}
+
+        </button>
+
+      </div>
+
+    </form>
+
+  );
+
+}
+
+
+Benefits:
+
+- Prevents accidental duplicate searches.
+- Provides additional visual feedback.
+- Avoids multiple simultaneous requests from repeated clicks.
+
+
+================================================================================
+21. DIFFERENT TYPES OF LOADING INDICATORS
+================================================================================
+
+----------------------+-----------------------------------------------
+Type                  | Best Use
+----------------------+-----------------------------------------------
+Text                  | Simple applications
+Small Spinner         | Search/API requests
+Centered Spinner      | Main content loading
+Progress Bar          | Longer visible processes
+Skeleton Screen       | Content-heavy applications
+----------------------+-----------------------------------------------
+
+
+Simple Text:
+
+Loading books...
+
+
+Spinner:
+
+[Spinner] Loading books...
+
+
+Skeleton:
+
++--------------------+
+|                    |
+|     Placeholder    |
+|                    |
++--------------------+
+| ------------------ |
+| ----------         |
++--------------------+
+
+
+================================================================================
+22. SKELETON LOADING EXAMPLE
+================================================================================
+
+{isLoading && (
+
+  <div className="row">
+
+    {[1, 2, 3].map((item) => (
+
+      <div
+        key={item}
+        className="col-md-4 mb-4"
+      >
+
+        <div className="card">
+
+          <div
+            className="bg-light"
+            style={{
+              height: '250px'
+            }}
+          />
+
+          <div className="card-body">
+
+            <div
+              className="bg-light mb-2"
+              style={{
+                height: '20px'
+              }}
+            />
+
+            <div
+              className="bg-light"
+              style={{
+                height: '15px'
+              }}
+            />
+
+          </div>
+
+        </div>
+
+      </div>
+
+    ))}
+
+  </div>
+
+)}
+
+
+Purpose:
+
+- Shows a placeholder similar to the final book-card structure.
+- Helps maintain page layout while content is loading.
+
+
+================================================================================
+23. DEBUGGING LOADING STATE
+================================================================================
+
+Common mistake:
+
+setIsLoading(true);
+
+console.log(isLoading);
+
+
+You may expect:
+
+true
+
+
+But you may still see:
+
+false
+
+
+Reason:
+
+- React schedules the state update.
+- The current event handler belongs to the current render.
+- Calling the setter does not mutate the existing variable immediately.
+
+
+Better:
+
+useEffect(() => {
+
+  console.log(
+    'Loading changed:',
+    isLoading
+  );
+
+}, [isLoading]);
+
+
+This observes committed changes to isLoading.
+
+
+================================================================================
+24. COMMON PROBLEMS
+================================================================================
+
+PROBLEM: LOADING NEVER STOPS
+--------------------------------------------------------------------------------
+
+Possible cause:
+
+setIsLoading(false) is not reached after an error.
+
+
+Solution:
+
+finally {
+
+  setIsLoading(false);
+
+}
+
+
+PROBLEM: LOADING DOES NOT APPEAR
+--------------------------------------------------------------------------------
+
+Check:
+
+- Is setIsLoading(true) called before fetch()?
+- Is loading UI using isLoading?
+- Does the request complete so fast that the indicator is barely visible?
+
+
+PROBLEM: LOADING AND BOOKS DISPLAY TOGETHER
+--------------------------------------------------------------------------------
+
+Use:
+
+!isLoading && books.length > 0
+
+
+PROBLEM: ERROR AND LOADING DISPLAY TOGETHER
+--------------------------------------------------------------------------------
+
+Use mutually clear conditions:
+
+isLoading
+
+!isLoading && error
+
+
+PROBLEM: SEARCH CAN BE CLICKED REPEATEDLY
+--------------------------------------------------------------------------------
+
+Disable the button:
+
+disabled={isLoading}
+
+
+================================================================================
+25. QUICK REVISION
+================================================================================
+
+CREATE LOADING STATE
+--------------------------------------------------------------------------------
+
+const [isLoading, setIsLoading] =
+  useState(false);
+
+
+START LOADING
+--------------------------------------------------------------------------------
+
+setIsLoading(true);
+
+
+FETCH
+--------------------------------------------------------------------------------
+
+const response = await fetch(URL);
+
+
+STOP LOADING
+--------------------------------------------------------------------------------
+
+finally {
+
+  setIsLoading(false);
+
+}
+
+
+SHOW LOADING
+--------------------------------------------------------------------------------
+
+{isLoading && (
+  <p>Loading books...</p>
+)}
+
+
+SHOW ERROR
+--------------------------------------------------------------------------------
+
+{!isLoading && error && (
+  <p>Error: {error}</p>
+)}
+
+
+SHOW BOOKS
+--------------------------------------------------------------------------------
+
+{!isLoading &&
+ !error &&
+ books.length > 0 && (
+
+  // Render books
+
+)}
+
+
+DISABLE BUTTON
+--------------------------------------------------------------------------------
+
+<button disabled={isLoading}>
+
+  {isLoading
+    ? 'Searching...'
+    : 'Search'}
+
+</button>
+
+
+================================================================================
+26. INTERVIEW EXPLANATION
+================================================================================
+
+Question:
+
+How do you manage loading state during an API call in React?
+
+
+Answer:
+
+- I maintain a Boolean state such as isLoading using useState.
+
+- Before starting the API request, I set isLoading to true.
+
+- I conditionally render a loading message, spinner, or skeleton while
+  isLoading is true.
+
+- I handle the API call inside try/catch.
+
+- I reset isLoading to false in the finally block so loading stops for
+  both successful and failed requests.
+
+- I separately maintain error and data states so the UI can distinguish
+  between loading, error, no-results, and success conditions.
+
+- For user-triggered searches, I can also disable the Search button while
+  loading to avoid repeated requests.
+
+
+================================================================================
+27. KEY TAKEAWAYS
+================================================================================
+
+- isLoading is usually a Boolean state.
+
+- false means the app is not currently loading.
+
+- true means an asynchronous operation is in progress.
+
+- Set loading to true BEFORE the API request.
+
+- Display loading feedback while the request is running.
+
+- Always stop loading when processing finishes.
+
+- Use finally to avoid duplicating setIsLoading(false).
+
+- Keep loading, error, and data states separate.
+
+- Use conditional rendering to display the correct UI.
+
+- Disable repeated actions while a request is processing when appropriate.
+
+- React state setters schedule updates, so do not expect the current state
+  variable to mutate immediately after calling its setter.
+
+
+================================================================================
+FINAL FLOW
+================================================================================
+
+Search
+  |
+  v
+fetchBooks()
+  |
+  v
+setIsLoading(true)
+  |
+  v
+Show Spinner
+  |
+  v
+Call API
+  |
+  +----------------+
+  |                |
+  v                v
+Success           Failure
+  |                |
+  v                v
+setBooks()       setError()
+  |                |
+  +-------+--------+
+          |
+          v
+       finally
+          |
+          v
+setIsLoading(false)
+          |
+          v
+Hide Spinner
+          |
+     +----+----+
+     |         |
+     v         v
+Show Books   Show Error
+
+
+================================================================================
+FINAL FORMULA
+================================================================================
+
+Good API User Experience
+        =
+Loading State
+        +
+Visual Feedback
+        +
+Error Handling
+        +
+No-Results Handling
+        +
+Success Rendering
+
+
+Code Pattern:
+
+setIsLoading(true)
+
+        |
+        v
+
+try {
+    fetch data
+}
+catch {
+    handle error
+}
+finally {
+    setIsLoading(false)
+}
+
+
+================================================================================
+END
+================================================================================
