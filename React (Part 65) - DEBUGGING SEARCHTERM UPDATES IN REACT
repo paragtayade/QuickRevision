@@ -1,0 +1,1385 @@
+================================================================================
+LESSON 7: DEBUGGING SEARCHTERM UPDATES IN REACT
+================================================================================
+
+
+LESSON OVERVIEW
+================================================================================
+
+This lesson covers how to debug the SearchBar flow and verify that:
+
+- searchTerm state updates correctly
+- Props are passed correctly
+- Event handlers are called
+- API URL contains the correct search term
+- API requests are sent successfully
+- API responses contain book data
+- Loading and error states work correctly
+
+
+================================================================================
+1. WHAT IS DEBUGGING?
+================================================================================
+
+Debugging is the process of finding and fixing problems in an application.
+
+Common debugging tools:
+
+- console.log()
+- console.warn()
+- console.error()
+- Browser DevTools
+- Network tab
+- React DevTools
+- Breakpoints
+- Temporary debug UI
+
+
+================================================================================
+2. WHAT ARE WE DEBUGGING?
+================================================================================
+
+Search functionality has several steps:
+
+User Types
+    |
+    v
+SearchBar Input
+    |
+    v
+onChange
+    |
+    v
+handleSearchChange()
+    |
+    v
+setSearchTerm()
+    |
+    v
+State Updated
+    |
+    v
+New Prop Passed to SearchBar
+    |
+    v
+User Submits Search
+    |
+    v
+handleSearchSubmit()
+    |
+    v
+fetchBooks()
+    |
+    v
+API Request
+    |
+    v
+Books Displayed
+
+
+If any step fails, the search may not work correctly.
+
+
+================================================================================
+3. DEBUG SEARCH INPUT CHANGES
+================================================================================
+
+Add logging inside handleSearchChange():
+
+const handleSearchChange = (e) => {
+
+  const newValue = e.target.value;
+
+  console.log('Old searchTerm:', searchTerm);
+  console.log('New searchTerm:', newValue);
+
+  setSearchTerm(newValue);
+
+};
+
+
+Expected Output:
+
+Old searchTerm: javascript
+New searchTerm: react
+
+
+This verifies:
+
+- onChange is firing
+- Input value is available
+- setSearchTerm() is being called
+
+
+================================================================================
+4. IMPORTANT: REACT STATE UPDATES
+================================================================================
+
+React state updates are scheduled.
+
+Example:
+
+const handleSearchChange = (e) => {
+
+  const newValue = e.target.value;
+
+  setSearchTerm(newValue);
+
+  console.log(searchTerm);
+
+};
+
+
+Do not expect the log immediately after setSearchTerm() to always show
+the newly requested state value in the same handler.
+
+To inspect the new input value immediately, use:
+
+console.log(newValue);
+
+
+To observe committed searchTerm changes:
+
+useEffect(() => {
+
+  console.log(
+    'searchTerm updated:',
+    searchTerm
+  );
+
+}, [searchTerm]);
+
+
+================================================================================
+5. DEBUG SEARCH SUBMISSION
+================================================================================
+
+Add logs to the submit handler:
+
+const handleSearchSubmit = (e) => {
+
+  e.preventDefault();
+
+  console.log('=== SEARCH SUBMIT ===');
+  console.log('Search term:', searchTerm);
+
+  fetchBooks(searchTerm);
+
+};
+
+
+Expected:
+
+Search term: react
+
+
+This verifies that the correct search value reaches the submit handler.
+
+
+================================================================================
+6. DEBUG fetchBooks()
+================================================================================
+
+Recommended pattern:
+
+const fetchBooks = async (query) => {
+
+  try {
+
+    setIsLoading(true);
+    setError(null);
+
+
+    const URL =
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;
+
+
+    console.log('=== FETCH BOOKS ===');
+    console.log('Search term:', query);
+    console.log('API URL:', URL);
+
+
+    const response = await fetch(URL);
+
+
+    console.log(
+      'Response status:',
+      response.status
+    );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        `HTTP error! Status: ${response.status}`
+      );
+
+    }
+
+
+    const data = await response.json();
+
+    const bookList = data.items || [];
+
+
+    console.log('API Response:', data);
+
+    console.log(
+      'Books returned:',
+      bookList.length
+    );
+
+
+    setBooks(bookList);
+
+
+  } catch (error) {
+
+    console.error(
+      'Error fetching books:',
+      error
+    );
+
+    setError(error.message);
+    setBooks([]);
+
+
+  } finally {
+
+    setIsLoading(false);
+
+  }
+
+};
+
+
+================================================================================
+7. WHAT SHOULD YOU LOG?
+================================================================================
+
+SEARCH TERM
+--------------------------------------------------------------------------------
+
+console.log(
+  'Search term:',
+  searchTerm
+);
+
+Purpose:
+Verify the current search value.
+
+
+API URL
+--------------------------------------------------------------------------------
+
+console.log(
+  'API URL:',
+  URL
+);
+
+Purpose:
+Verify the query sent to the API.
+
+
+RESPONSE STATUS
+--------------------------------------------------------------------------------
+
+console.log(
+  'Status:',
+  response.status
+);
+
+Purpose:
+Verify the HTTP response.
+
+
+API RESPONSE
+--------------------------------------------------------------------------------
+
+console.log(
+  'API Response:',
+  data
+);
+
+Purpose:
+Inspect the complete API response.
+
+
+BOOK COUNT
+--------------------------------------------------------------------------------
+
+console.log(
+  'Number of books:',
+  bookList.length
+);
+
+Purpose:
+Check how many books were returned.
+
+
+================================================================================
+8. DEBUG useEffect()
+================================================================================
+
+For the initial API call:
+
+useEffect(() => {
+
+  console.log(
+    'Initial book fetch'
+  );
+
+  fetchBooks('javascript');
+
+}, []);
+
+
+If you specifically want to observe searchTerm:
+
+useEffect(() => {
+
+  console.log(
+    'searchTerm changed:',
+    searchTerm
+  );
+
+}, [searchTerm]);
+
+
+Difference:
+
+[]
+-> Runs after initial mount
+
+[searchTerm]
+-> Runs when searchTerm changes
+
+
+================================================================================
+9. DEBUG PROPS IN SEARCHBAR
+================================================================================
+
+SearchBar receives:
+
+function SearchBar({
+  searchTerm,
+  onSearchChange,
+  onSearch
+}) {
+
+  console.log(
+    'SearchBar searchTerm:',
+    searchTerm
+  );
+
+  return (
+
+    <form onSubmit={onSearch}>
+
+      <input
+        value={searchTerm}
+        onChange={onSearchChange}
+      />
+
+      <button type="submit">
+        Search
+      </button>
+
+    </form>
+
+  );
+
+}
+
+
+This helps verify that the parent is passing the correct value.
+
+
+================================================================================
+10. COMPLETE DEBUGGING FLOW
+================================================================================
+
+User Types "React"
+       |
+       v
+onChange Fires
+       |
+       v
+Log newValue
+       |
+       v
+setSearchTerm('React')
+       |
+       v
+App Re-renders
+       |
+       v
+SearchBar Receives
+searchTerm="React"
+       |
+       v
+User Clicks Search
+       |
+       v
+handleSearchSubmit()
+       |
+       v
+Log searchTerm
+       |
+       v
+fetchBooks('React')
+       |
+       v
+Create API URL
+       |
+       v
+Log API URL
+       |
+       v
+fetch(URL)
+       |
+       v
+Check HTTP Status
+       |
+       v
+response.json()
+       |
+       v
+Log API Response
+       |
+       v
+setBooks()
+       |
+       v
+Books Displayed
+
+
+================================================================================
+11. DISPLAY DEBUG INFORMATION ON SCREEN
+================================================================================
+
+During development, state can also be displayed directly in the UI.
+
+Example:
+
+<div className="alert alert-info">
+
+  <h5>Debug Information</h5>
+
+  <p>
+    Search Term: {searchTerm}
+  </p>
+
+  <p>
+    Books Found: {books.length}
+  </p>
+
+  <p>
+    Loading:
+    {isLoading ? ' Yes' : ' No'}
+  </p>
+
+  <p>
+    Error:
+    {error || ' None'}
+  </p>
+
+</div>
+
+
+This lets you visually verify the application's state.
+
+
+================================================================================
+12. USE THE BROWSER CONSOLE
+================================================================================
+
+Steps:
+
+1. Open the React application
+
+2. Right-click the page
+
+3. Select Inspect
+
+4. Open the Console tab
+
+5. Perform a search
+
+6. Check the logs
+
+
+Expected Example:
+
+=== SEARCH CHANGE ===
+
+New searchTerm: react
+
+
+=== SEARCH SUBMIT ===
+
+Search term: react
+
+
+=== FETCH BOOKS ===
+
+Search term: react
+
+API URL:
+https://www.googleapis.com/books/v1/volumes?q=react
+
+Response status: 200
+
+Books returned: 10
+
+
+================================================================================
+13. USE THE NETWORK TAB
+================================================================================
+
+The Network tab is one of the most useful tools for API debugging.
+
+Steps:
+
+1. Open Developer Tools
+
+2. Select Network
+
+3. Perform a book search
+
+4. Find the Google Books request
+
+5. Open the request
+
+6. Inspect the request and response
+
+
+Check:
+
+Request URL
+-> Is the correct search query present?
+
+Example:
+
+?q=react
+
+
+Request Method
+-> Usually GET
+
+
+Status
+-> 200 means the request succeeded
+
+
+Response
+-> Does it contain items?
+
+
+Example:
+
+{
+  "items": [
+    ...
+  ]
+}
+
+
+================================================================================
+14. DEBUGGING SEARCHTERM VS. API PROBLEMS
+================================================================================
+
+If searchTerm is wrong:
+
+User Input
+    |
+    X
+State / Props Problem
+
+
+If searchTerm is correct but URL is wrong:
+
+searchTerm
+    |
+    X
+URL Construction Problem
+
+
+If URL is correct but request fails:
+
+URL
+ |
+ X
+Network / API Problem
+
+
+If API succeeds but books do not display:
+
+API Response
+     |
+     X
+State / Rendering Problem
+
+
+This allows you to isolate the problem step by step.
+
+
+================================================================================
+15. CONDITIONAL LOGGING
+================================================================================
+
+Logging everything can make the console difficult to read.
+
+Only log important conditions.
+
+
+EMPTY SEARCH
+--------------------------------------------------------------------------------
+
+if (!searchTerm.trim()) {
+
+  console.warn(
+    'Search term is empty'
+  );
+
+  return;
+
+}
+
+
+HTTP ERROR
+--------------------------------------------------------------------------------
+
+if (!response.ok) {
+
+  console.error(
+    'API Error:',
+    response.status,
+    response.statusText
+  );
+
+}
+
+
+NO BOOKS
+--------------------------------------------------------------------------------
+
+if (!data.items?.length) {
+
+  console.warn(
+    'No books found for:',
+    searchTerm
+  );
+
+}
+
+
+================================================================================
+16. DEBUG HELPER FUNCTION
+================================================================================
+
+A helper can simplify debug logging:
+
+const debugMode = true;
+
+
+const debug = (label, data) => {
+
+  if (debugMode) {
+
+    console.log(
+      `[${label}]`,
+      data
+    );
+
+  }
+
+};
+
+
+Usage:
+
+debug(
+  'SEARCH CHANGE',
+  searchTerm
+);
+
+
+debug(
+  'FETCH START',
+  {
+    query,
+    URL
+  }
+);
+
+
+debug(
+  'BOOK COUNT',
+  books.length
+);
+
+
+================================================================================
+17. REACT DEVTOOLS
+================================================================================
+
+React DevTools can help inspect:
+
+- Components
+- Props
+- State
+- Component hierarchy
+
+
+Example:
+
+App
+ |
+ +-- searchTerm = "react"
+ |
+ +-- books = Array(...)
+ |
+ +-- isLoading = false
+ |
+ +-- SearchBar
+       |
+       +-- searchTerm = "react"
+       +-- onSearchChange = function
+       +-- onSearch = function
+
+
+Use it to confirm:
+
+App State
+    |
+    v
+SearchBar Props
+
+
+================================================================================
+18. COMMON DEBUGGING SCENARIOS
+================================================================================
+
+SCENARIO 1: SEARCH TERM DOES NOT CHANGE
+--------------------------------------------------------------------------------
+
+Check:
+
+- Is onChange connected?
+- Is handleSearchChange called?
+- Is e.target.value correct?
+- Is setSearchTerm() called?
+
+Debug:
+
+console.log(
+  'Input:',
+  e.target.value
+);
+
+
+SCENARIO 2: SEARCHBAR DOES NOT RECEIVE THE VALUE
+--------------------------------------------------------------------------------
+
+Check App:
+
+<SearchBar
+  searchTerm={searchTerm}
+/>
+
+
+Check SearchBar:
+
+function SearchBar({
+  searchTerm
+}) {
+  ...
+}
+
+
+SCENARIO 3: SEARCH BUTTON DOES NOTHING
+--------------------------------------------------------------------------------
+
+Check:
+
+<form
+  onSubmit={onSearch}
+>
+
+
+Check:
+
+const handleSearchSubmit = (e) => {
+
+  e.preventDefault();
+
+  fetchBooks(searchTerm);
+
+};
+
+
+SCENARIO 4: WRONG BOOKS ARE DISPLAYED
+--------------------------------------------------------------------------------
+
+Log:
+
+console.log(
+  'Search term:',
+  searchTerm
+);
+
+console.log(
+  'API URL:',
+  URL
+);
+
+
+Verify that they match.
+
+
+SCENARIO 5: API REQUEST FAILS
+--------------------------------------------------------------------------------
+
+Check the Network tab.
+
+Verify:
+
+- Request URL
+- HTTP status
+- Response
+- Console errors
+
+
+SCENARIO 6: API WORKS BUT NO BOOKS DISPLAY
+--------------------------------------------------------------------------------
+
+Check:
+
+console.log(data.items);
+
+
+Then verify:
+
+setBooks(data.items || []);
+
+
+Then verify rendering:
+
+books.map((book) => (
+  ...
+));
+
+
+================================================================================
+19. COMPLETE DEBUGGING EXAMPLE
+================================================================================
+
+import { useState, useEffect } from 'react';
+
+import SearchBar from './components/SearchBar';
+
+
+function App() {
+
+  const [books, setBooks] =
+    useState([]);
+
+  const [searchTerm, setSearchTerm] =
+    useState('javascript');
+
+  const [isLoading, setIsLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState(null);
+
+
+  const fetchBooks = async (query) => {
+
+    try {
+
+      setIsLoading(true);
+      setError(null);
+
+
+      if (!query.trim()) {
+
+        console.warn(
+          'Search term is empty'
+        );
+
+        return;
+
+      }
+
+
+      const URL =
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;
+
+
+      console.log(
+        'Fetching:',
+        query
+      );
+
+      console.log(
+        'URL:',
+        URL
+      );
+
+
+      const response =
+        await fetch(URL);
+
+
+      console.log(
+        'Status:',
+        response.status
+      );
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          `HTTP error: ${response.status}`
+        );
+
+      }
+
+
+      const data =
+        await response.json();
+
+
+      const bookList =
+        data.items || [];
+
+
+      console.log(
+        'Books:',
+        bookList.length
+      );
+
+
+      setBooks(bookList);
+
+
+    } catch (error) {
+
+      console.error(
+        'Fetch Error:',
+        error
+      );
+
+      setError(error.message);
+      setBooks([]);
+
+
+    } finally {
+
+      setIsLoading(false);
+
+    }
+
+  };
+
+
+  useEffect(() => {
+
+    fetchBooks('javascript');
+
+  }, []);
+
+
+  const handleSearchChange = (e) => {
+
+    const newValue =
+      e.target.value;
+
+    console.log(
+      'Search Input:',
+      newValue
+    );
+
+    setSearchTerm(newValue);
+
+  };
+
+
+  const handleSearchSubmit = (e) => {
+
+    e.preventDefault();
+
+    console.log(
+      'Submitting:',
+      searchTerm
+    );
+
+    fetchBooks(searchTerm);
+
+  };
+
+
+  return (
+
+    <main className="container mt-5">
+
+      <h1>Book Search</h1>
+
+
+      <div className="alert alert-info">
+
+        <p>
+          Search Term: {searchTerm}
+        </p>
+
+        <p>
+          Books: {books.length}
+        </p>
+
+        <p>
+          Loading:
+          {isLoading ? ' Yes' : ' No'}
+        </p>
+
+        <p>
+          Error:
+          {error || ' None'}
+        </p>
+
+      </div>
+
+
+      <SearchBar
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        onSearch={handleSearchSubmit}
+      />
+
+
+      {isLoading && (
+        <p>Loading books...</p>
+      )}
+
+
+      {error && (
+        <p style={{ color: 'red' }}>
+          Error: {error}
+        </p>
+      )}
+
+    </main>
+
+  );
+}
+
+export default App;
+
+
+================================================================================
+20. DEBUGGING CHECKLIST
+================================================================================
+
+[ ] SearchBar input accepts text
+
+[ ] onChange is triggered
+
+[ ] e.target.value contains correct value
+
+[ ] setSearchTerm() is called
+
+[ ] App searchTerm state changes
+
+[ ] SearchBar receives updated searchTerm prop
+
+[ ] Search form onSubmit works
+
+[ ] e.preventDefault() prevents page reload
+
+[ ] fetchBooks() is called
+
+[ ] Correct search query reaches fetchBooks()
+
+[ ] API URL contains correct query
+
+[ ] Network request is visible
+
+[ ] HTTP response is successful
+
+[ ] API response contains items
+
+[ ] books state is updated
+
+[ ] Books render on the screen
+
+[ ] Loading state starts and stops
+
+[ ] Errors are displayed correctly
+
+
+================================================================================
+21. DEBUGGING ORDER
+================================================================================
+
+When search is not working, debug in this order:
+
+1. INPUT
+   |
+   v
+   Is e.target.value correct?
+
+
+2. STATE
+   |
+   v
+   Is searchTerm updating?
+
+
+3. PROPS
+   |
+   v
+   Does SearchBar receive the correct value?
+
+
+4. SUBMISSION
+   |
+   v
+   Is handleSearchSubmit() called?
+
+
+5. FETCH FUNCTION
+   |
+   v
+   Does fetchBooks() receive the correct query?
+
+
+6. URL
+   |
+   v
+   Does URL contain the correct search term?
+
+
+7. NETWORK
+   |
+   v
+   Was the request actually sent?
+
+
+8. RESPONSE
+   |
+   v
+   Did the API return data?
+
+
+9. STATE UPDATE
+   |
+   v
+   Did setBooks() receive the data?
+
+
+10. UI
+    |
+    v
+    Are books rendered correctly?
+
+
+================================================================================
+22. QUICK REVISION
+================================================================================
+
+CHECK INPUT
+--------------------------------------------------------------------------------
+
+console.log(
+  e.target.value
+);
+
+
+CHECK STATE CHANGES
+--------------------------------------------------------------------------------
+
+useEffect(() => {
+
+  console.log(
+    'searchTerm:',
+    searchTerm
+  );
+
+}, [searchTerm]);
+
+
+CHECK SUBMISSION
+--------------------------------------------------------------------------------
+
+console.log(
+  'Submitting:',
+  searchTerm
+);
+
+
+CHECK URL
+--------------------------------------------------------------------------------
+
+console.log(
+  'URL:',
+  URL
+);
+
+
+CHECK RESPONSE
+--------------------------------------------------------------------------------
+
+console.log(
+  'API Response:',
+  data
+);
+
+
+CHECK BOOKS
+--------------------------------------------------------------------------------
+
+console.log(
+  'Books:',
+  data.items
+);
+
+
+CHECK ERRORS
+--------------------------------------------------------------------------------
+
+console.error(
+  'Error:',
+  error
+);
+
+
+================================================================================
+23. INTERVIEW EXPLANATION
+================================================================================
+
+Question:
+
+How do you debug a React search feature?
+
+
+Answer:
+
+"I debug the search flow step by step.
+
+First, I verify the input event and e.target.value.
+
+Then I confirm that the React state is updating and that the updated value
+is passed correctly to the child component through props.
+
+Next, I verify the form submission handler and log the query passed to the
+API function.
+
+I inspect the generated API URL and use the browser Network tab to check
+the request URL, HTTP status, and response.
+
+Finally, I verify that the API response updates state and that the
+component renders the new data.
+
+I also use React DevTools to inspect component state and props when
+necessary."
+
+
+================================================================================
+24. KEY TAKEAWAYS
+================================================================================
+
+1. Debug a problem step by step rather than guessing.
+
+2. Use console.log() to inspect values.
+
+3. Use console.warn() for unexpected conditions.
+
+4. Use console.error() for failures.
+
+5. Log the input value before debugging state.
+
+6. Remember that React state updates are scheduled.
+
+7. Use useEffect([searchTerm]) when you specifically need to observe
+   committed searchTerm changes.
+
+8. Verify props using React DevTools.
+
+9. Verify API calls using the Network tab.
+
+10. Check:
+
+    Input -> State -> Props -> Submit -> URL -> Network ->
+    Response -> State -> UI
+
+11. Log important information instead of logging everything.
+
+12. Remove or disable unnecessary debugging code before production.
+
+
+================================================================================
+FINAL DEBUGGING FLOW
+================================================================================
+
+User Input
+    |
+    v
+Check e.target.value
+    |
+    v
+Check searchTerm State
+    |
+    v
+Check SearchBar Props
+    |
+    v
+Check Submit Handler
+    |
+    v
+Check fetchBooks(query)
+    |
+    v
+Check API URL
+    |
+    v
+Check Network Request
+    |
+    v
+Check API Response
+    |
+    v
+Check books State
+    |
+    v
+Check UI Rendering
+
+
+================================================================================
+FINAL FORMULA
+================================================================================
+
+Effective React Debugging
+        =
+Check Input
+        +
+Check State
+        +
+Check Props
+        +
+Check Events
+        +
+Check API URL
+        +
+Check Network Request
+        +
+Check Response
+        +
+Check State Update
+        +
+Check Rendering
+
+
+================================================================================
+END
+================================================================================
