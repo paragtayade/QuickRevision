@@ -1,0 +1,1990 @@
+LESSON 4: SETTING UP LOADING STATE
+================================================================================
+PART 1: LESSON OVERVIEW
+================================================================================
+
+This lesson teaches you how to implement a loading state in React to provide
+clear user feedback while data is being fetched from a backend API.
+
+Instead of showing a blank screen while waiting for the server, the application
+can display:
+
+Loading...
+
+This makes the application easier to understand and improves the overall user
+experience.
+
+
+WHAT YOU'LL LEARN
+--------------------------------------------------------------------------------
+
+• What a loading state is
+
+• Why loading feedback is important
+
+• How to create loading state with useState
+
+• How to start loading before an API request
+
+• How to stop loading after the request completes
+
+• How to handle loading during errors
+
+• How to use loading state with useEffect
+
+• How to conditionally display Loading, Error, and Data states
+
+
+================================================================================
+PART 2: WHY DO WE NEED A LOADING STATE?
+================================================================================
+
+API calls are asynchronous.
+
+When React sends a request to a backend:
+
+React Application
+       ↓
+Send API Request
+       ↓
+Backend Processes Request
+       ↓
+Wait for Response
+       ↓
+Response Arrives
+       ↓
+Update React State
+       ↓
+Display Data
+
+
+The response may take:
+
+100 ms
+
+500 ms
+
+2 seconds
+
+5 seconds
+
+or longer.
+
+
+Without a loading indicator, users may see:
+
+Blank Screen
+     ↓
+No Feedback
+     ↓
+User Thinks:
+"Is the application broken?"
+
+
+With loading state:
+
+API Request
+     ↓
+Loading...
+     ↓
+Response Arrives
+     ↓
+Display Data
+
+
+================================================================================
+WHY LOADING STATE IS IMPORTANT
+================================================================================
+
+• API calls take time
+
+  You don't know exactly how long the backend will take to respond.
+
+
+• Better user experience
+
+  Users receive immediate feedback instead of seeing a blank screen.
+
+
+• Clear communication
+
+  The application tells the user that something is happening.
+
+
+• Professional appearance
+
+  Loading indicators make applications feel more polished and responsive.
+
+
+• Slow networks
+
+  Loading feedback becomes especially important when network connectivity
+  is slow.
+
+
+• Large datasets
+
+  Backend processing or transferring a large response may take additional
+  time.
+
+
+================================================================================
+PART 3: THE PROBLEM WE'RE SOLVING
+================================================================================
+
++--------------------------+--------------------------+--------------------------+
+| SCENARIO                 | WITHOUT LOADING STATE    | WITH LOADING STATE       |
++--------------------------+--------------------------+--------------------------+
+| User requests data       | Blank screen             | "Loading..." displayed   |
+|                          |                          |                          |
+| Data is being fetched    | No clear feedback        | User knows request is    |
+|                          |                          | processing               |
+|                          |                          |                          |
+| Network is slow          | User may think app       | Loading indicator        |
+|                          | is broken                | remains visible          |
+|                          |                          |                          |
+| Data finally arrives     | Data suddenly appears    | Loading transitions      |
+|                          |                          | to actual data           |
++--------------------------+--------------------------+--------------------------+
+
+
+CORE IDEA:
+
+REQUEST STARTS
+     ↓
+isLoading = true
+     ↓
+SHOW LOADING MESSAGE
+     ↓
+REQUEST FINISHES
+     ↓
+isLoading = false
+     ↓
+SHOW DATA / ERROR
+
+
+================================================================================
+PART 4: CREATING THE LOADING STATE
+================================================================================
+
+Import React Hooks:
+
+import {
+  useEffect,
+  useState
+} from 'react'
+
+
+Create component state:
+
+function MyComponent() {
+
+  const [
+    data,
+    setData
+  ] = useState(null)
+
+
+  const [
+    isLoading,
+    setIsLoading
+  ] = useState(false)
+
+
+  // Rest of component...
+
+}
+
+
+================================================================================
+LOADING STATE EXPLANATION
+================================================================================
+
++-----------------------------+--------------------------------------------+
+| CODE                        | EXPLANATION                                |
++-----------------------------+--------------------------------------------+
+| isLoading                   | Current loading status                     |
+| setIsLoading                | Function used to change loading status     |
+| useState(false)             | Initially no request is running            |
+| setIsLoading(true)          | Request has started                        |
+| setIsLoading(false)         | Request has completed                      |
++-----------------------------+--------------------------------------------+
+
+
+BOOLEAN MEANING:
+
+isLoading = true
+
+means:
+
+REQUEST IS IN PROGRESS
+
+
+isLoading = false
+
+means:
+
+REQUEST IS NOT CURRENTLY IN PROGRESS
+
+
+================================================================================
+PART 5: CHOOSING THE INITIAL LOADING VALUE
+================================================================================
+
+The correct initial value depends on how the component works.
+
+
+OPTION 1: REQUEST STARTS AFTER USER ACTION
+--------------------------------------------------------------------------------
+
+Example:
+
+User clicks:
+
+Search
+
+
+Then:
+
+const [
+  isLoading,
+  setIsLoading
+] = useState(false)
+
+
+Initially:
+
+isLoading = false
+
+
+After user clicks Search:
+
+isLoading = true
+
+
+This makes sense because there is no request during the initial render.
+
+
+================================================================================
+OPTION 2: REQUEST STARTS IMMEDIATELY
+================================================================================
+
+If the component automatically fetches data when it loads:
+
+useEffect(() => {
+
+  fetchData()
+
+}, [])
+
+
+then initializing loading to:
+
+true
+
+
+can be clearer:
+
+const [
+  isLoading,
+  setIsLoading
+] = useState(true)
+
+
+Initial UI:
+
+Loading...
+
+
+instead of temporarily showing an empty state before the request starts.
+
+
+MEMORY:
+
+INITIAL isLoading VALUE
+SHOULD MATCH THE INITIAL REQUEST STATE.
+
+
+================================================================================
+PART 6: STARTING THE LOADING STATE
+================================================================================
+
+Before calling the backend:
+
+setIsLoading(
+  true
+)
+
+
+Example:
+
+const getData =
+  async () => {
+
+    setIsLoading(
+      true
+    )
+
+
+    const response =
+      await fetch(
+        '/api/books'
+      )
+
+  }
+
+
+FLOW:
+
+getData()
+   ↓
+setIsLoading(true)
+   ↓
+React Re-renders
+   ↓
+Loading... displayed
+   ↓
+API Request
+
+
+================================================================================
+PART 7: COMPLETE LOADING STATE EXAMPLE
+================================================================================
+
+File:
+
+src/components/BookComponent.jsx
+
+
+import {
+  useEffect,
+  useState
+} from 'react'
+
+
+export default function BookComponent() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [
+    books,
+    setBooks
+  ] = useState([])
+
+
+  const [
+    isLoading,
+    setIsLoading
+  ] = useState(true)
+
+
+  const [
+    error,
+    setError
+  ] = useState(null)
+
+
+  // ============================================
+  // EFFECT
+  // ============================================
+
+  useEffect(() => {
+
+    const controller =
+      new AbortController()
+
+
+    const getData =
+      async () => {
+
+        try {
+
+          // ====================================
+          // START LOADING
+          // ====================================
+
+          setIsLoading(
+            true
+          )
+
+
+          setError(
+            null
+          )
+
+
+          // ====================================
+          // FETCH DATA
+          // ====================================
+
+          const response =
+            await fetch(
+              '/api/books',
+              {
+                signal:
+                  controller.signal
+              }
+            )
+
+
+          // ====================================
+          // CHECK HTTP RESPONSE
+          // ====================================
+
+          if (!response.ok) {
+
+            throw new Error(
+              `Failed to load books: ${response.status}`
+            )
+          }
+
+
+          // ====================================
+          // PARSE RESPONSE
+          // ====================================
+
+          const result =
+            await response.json()
+
+
+          // ====================================
+          // STORE DATA
+          // ====================================
+
+          setBooks(
+            result
+          )
+
+
+        } catch (error) {
+
+          // Ignore intentional cancellation.
+
+          if (
+            error.name ===
+            'AbortError'
+          ) {
+
+            return
+          }
+
+
+          // ====================================
+          // HANDLE ERROR
+          // ====================================
+
+          setError(
+            error instanceof Error
+              ? error.message
+              : 'Failed to load books.'
+          )
+
+
+        } finally {
+
+          // ====================================
+          // STOP LOADING
+          // ====================================
+
+          if (
+            !controller.signal.aborted
+          ) {
+
+            setIsLoading(
+              false
+            )
+          }
+
+        }
+      }
+
+
+    getData()
+
+
+    // ==========================================
+    // CLEANUP
+    // ==========================================
+
+    return () => {
+
+      controller.abort()
+
+    }
+
+  }, [])
+
+
+  // ============================================
+  // LOADING STATE
+  // ============================================
+
+  if (isLoading) {
+
+    return (
+
+      <p role="status">
+
+        Loading books...
+
+      </p>
+
+    )
+  }
+
+
+  // ============================================
+  // ERROR STATE
+  // ============================================
+
+  if (error) {
+
+    return (
+
+      <p role="alert">
+
+        Error:
+        {' '}
+        {error}
+
+      </p>
+
+    )
+  }
+
+
+  // ============================================
+  // EMPTY STATE
+  // ============================================
+
+  if (books.length === 0) {
+
+    return (
+
+      <p>
+
+        No books found.
+
+      </p>
+
+    )
+  }
+
+
+  // ============================================
+  // SUCCESS STATE
+  // ============================================
+
+  return (
+
+    <div className="book-list">
+
+      {books.map(
+        book => (
+
+          <div
+            key={book.id}
+            className="book-card"
+          >
+
+            <h3>
+
+              {book.title}
+
+            </h3>
+
+
+            <p>
+
+              {book.author}
+
+            </p>
+
+          </div>
+
+        )
+      )}
+
+    </div>
+
+  )
+}
+
+
+================================================================================
+PART 8: CODE BREAKDOWN
+================================================================================
+
++--------------------------+----------------------------------------------+
+| CODE                     | WHAT IT DOES                                 |
++--------------------------+----------------------------------------------+
+| books                    | Stores fetched book data                     |
+| setBooks                 | Updates book data                            |
+| isLoading                | Stores request loading status                |
+| setIsLoading             | Changes loading status                       |
+| error                    | Stores request failure                       |
+| setError                 | Updates error state                          |
+| setIsLoading(true)       | Indicates request has started                |
+| fetch('/api/books')      | Calls backend API                            |
+| response.ok              | Checks HTTP request result                   |
+| response.json()          | Converts response body to JavaScript data    |
+| setBooks(result)         | Stores successful response                   |
+| catch                    | Handles request failures                     |
+| finally                  | Runs after success or failure                 |
+| setIsLoading(false)      | Marks request as completed                   |
+| AbortController          | Cancels obsolete request                     |
++--------------------------+----------------------------------------------+
+
+
+================================================================================
+PART 9: THE THREE KEY LOADING POINTS
+================================================================================
+
+1. BEFORE FETCHING
+--------------------------------------------------------------------------------
+
+Set:
+
+isLoading = true
+
+
+Code:
+
+setIsLoading(
+  true
+)
+
+
+Why?
+
+The application needs to tell the user:
+
+THE REQUEST HAS STARTED.
+
+
+FLOW:
+
+Request Begins
+     ↓
+isLoading = true
+     ↓
+Loading UI
+
+
+================================================================================
+2. AFTER DATA ARRIVES
+================================================================================
+
+When the backend responds:
+
+const result =
+  await response.json()
+
+
+Store the response:
+
+setBooks(
+  result
+)
+
+
+The request eventually finishes:
+
+isLoading = false
+
+
+Then:
+
+Loading UI
+     ↓
+Book Data
+
+
+================================================================================
+3. AFTER AN ERROR
+================================================================================
+
+The loading indicator must also stop if the request fails.
+
+
+Example:
+
+catch (error) {
+
+  setError(
+    error.message
+  )
+
+}
+
+
+The failure path must eventually result in:
+
+isLoading = false
+
+
+Otherwise:
+
+Request Fails
+     ↓
+Loading remains true
+     ↓
+Loading...
+Loading...
+Loading...
+
+
+The user never sees the real error.
+
+
+================================================================================
+PART 10: WHY finally IS USEFUL
+================================================================================
+
+Without finally:
+
+try {
+
+  const response =
+    await fetch(
+      '/api/books'
+    )
+
+
+  const result =
+    await response.json()
+
+
+  setBooks(
+    result
+  )
+
+
+  setIsLoading(
+    false
+  )
+
+
+} catch (error) {
+
+  setError(
+    error.message
+  )
+
+
+  setIsLoading(
+    false
+  )
+
+}
+
+
+Notice:
+
+setIsLoading(false)
+
+
+is duplicated.
+
+
+================================================================================
+WITH finally
+================================================================================
+
+try {
+
+  // API request
+
+
+} catch (error) {
+
+  // Error handling
+
+
+} finally {
+
+  setIsLoading(
+    false
+  )
+
+}
+
+
+Now the shared request completion logic exists in one place.
+
+
+FLOW:
+
+          SUCCESS
+             \
+              \
+               ↓
+             finally
+               ↓
+      setIsLoading(false)
+               ↑
+              /
+             /
+           ERROR
+
+
+================================================================================
+CANCELLATION VERSION
+================================================================================
+
+When using AbortController:
+
+finally {
+
+  if (
+    !controller.signal.aborted
+  ) {
+
+    setIsLoading(
+      false
+    )
+  }
+
+}
+
+
+This prevents an obsolete aborted request from incorrectly controlling the
+loading status for a newer request.
+
+
+================================================================================
+PART 11: CONDITIONAL RENDERING
+================================================================================
+
+Loading state becomes useful when it controls what the user sees.
+
+
+================================================================================
+PATTERN 1: EARLY RETURN
+================================================================================
+
+if (isLoading) {
+
+  return (
+
+    <p>
+      Loading...
+    </p>
+
+  )
+}
+
+
+if (error) {
+
+  return (
+
+    <p>
+      Error:
+      {error}
+    </p>
+
+  )
+}
+
+
+return (
+
+  <Content />
+
+)
+
+
+This is often the easiest pattern to read.
+
+
+================================================================================
+PATTERN 2: TERNARY
+================================================================================
+
+return (
+
+  isLoading
+
+    ? <Loading />
+
+    : <Content />
+
+)
+
+
+Use this for simple two-state rendering.
+
+
+================================================================================
+PATTERN 3: MULTIPLE UI STATES
+================================================================================
+
+if (isLoading) {
+
+  return (
+    <Loading />
+  )
+}
+
+
+if (error) {
+
+  return (
+    <ErrorMessage />
+  )
+}
+
+
+if (books.length === 0) {
+
+  return (
+    <EmptyState />
+  )
+}
+
+
+return (
+  <BookList
+    books={books}
+  />
+)
+
+
+This gives us:
+
+LOADING
+
+ERROR
+
+EMPTY
+
+SUCCESS
+
+
+================================================================================
+PART 12: LOADING STATE FLOW
+================================================================================
+
+Component Mounts
+        ↓
+useEffect Runs
+        ↓
+getData()
+        ↓
+setIsLoading(true)
+        ↓
+React Re-renders
+        ↓
+Loading books...
+        ↓
+HTTP Request
+        ↓
+Wait for Backend
+        ↓
+       / \
+      /   \
+ SUCCESS   ERROR
+    ↓        ↓
+ setBooks  setError
+      \      /
+       \    /
+        ↓  ↓
+       finally
+        ↓
+setIsLoading(false)
+        ↓
+React Re-renders
+        ↓
+Final UI
+
+
+================================================================================
+STATE TRANSITION TABLE
+================================================================================
+
++----------------------+-------------+----------------+-------------------------+
+| STAGE                | isLoading   | DATA           | UI                      |
++----------------------+-------------+----------------+-------------------------+
+| Initial Request      | true        | []             | Loading                 |
+| Request Pending      | true        | []             | Loading                 |
+| Success With Data    | false       | [books...]     | Book list               |
+| Success Empty        | false       | []             | No books found          |
+| Failure              | false       | []             | Error message           |
++----------------------+-------------+----------------+-------------------------+
+
+
+================================================================================
+PART 13: INITIAL LOADING VS BACKGROUND REFRESH
+================================================================================
+
+INITIAL LOADING
+--------------------------------------------------------------------------------
+
+The application does not have data yet.
+
+
+Example:
+
+books:
+
+[]
+
+
+Request:
+
+pending
+
+
+UI:
+
+Loading books...
+
+
+================================================================================
+BACKGROUND REFRESH
+================================================================================
+
+The application already has data:
+
+Book A
+
+Book B
+
+Book C
+
+
+Then it refreshes the backend.
+
+
+A better UX may be:
+
+Book A
+
+Book B
+
+Book C
+
+Refreshing...
+
+
+instead of removing everything and displaying:
+
+Loading...
+
+
+================================================================================
+POSSIBLE STATE
+================================================================================
+
+const [
+  isLoading,
+  setIsLoading
+] = useState(true)
+
+
+const [
+  isRefreshing,
+  setIsRefreshing
+] = useState(false)
+
+
+Meaning:
+
+isLoading
+--------------------------------------------------------------------------------
+
+Initial data is unavailable.
+
+
+isRefreshing
+--------------------------------------------------------------------------------
+
+Existing data is available but newer data is being requested.
+
+
+================================================================================
+PART 14: APPLYING LOADING STATE TO THE GROCERY APP
+================================================================================
+
+State:
+
+const [
+  groceryItems,
+  setGroceryItems
+] = useState([])
+
+
+const [
+  isLoading,
+  setIsLoading
+] = useState(true)
+
+
+const [
+  error,
+  setError
+] = useState(null)
+
+
+================================================================================
+GROCERY FETCH EFFECT
+================================================================================
+
+useEffect(() => {
+
+  const controller =
+    new AbortController()
+
+
+  const loadGroceries =
+    async () => {
+
+      try {
+
+        setIsLoading(
+          true
+        )
+
+
+        setError(
+          null
+        )
+
+
+        const response =
+          await fetch(
+            '/api/groceries',
+            {
+              signal:
+                controller.signal
+            }
+          )
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            `Unable to load groceries: ${response.status}`
+          )
+        }
+
+
+        const groceries =
+          await response.json()
+
+
+        setGroceryItems(
+          groceries
+        )
+
+
+      } catch (error) {
+
+        if (
+          error.name ===
+          'AbortError'
+        ) {
+
+          return
+        }
+
+
+        setError(
+          error instanceof Error
+
+            ? error.message
+
+            : 'Unable to load groceries'
+        )
+
+
+      } finally {
+
+        if (
+          !controller.signal.aborted
+        ) {
+
+          setIsLoading(
+            false
+          )
+        }
+
+      }
+    }
+
+
+  loadGroceries()
+
+
+  return () => {
+
+    controller.abort()
+
+  }
+
+}, [])
+
+
+================================================================================
+GROCERY UI
+================================================================================
+
+if (isLoading) {
+
+  return (
+
+    <p role="status">
+
+      Loading groceries...
+
+    </p>
+
+  )
+}
+
+
+if (error) {
+
+  return (
+
+    <p role="alert">
+
+      {error}
+
+    </p>
+
+  )
+}
+
+
+if (
+  groceryItems.length === 0
+) {
+
+  return (
+
+    <p>
+
+      No grocery items found.
+
+    </p>
+
+  )
+}
+
+
+return (
+
+  <GroceryList
+    items={
+      groceryItems
+    }
+    onToggleBought={
+      handleToggleBought
+    }
+    onRemoveItem={
+      handleRemoveItem
+    }
+  />
+
+)
+
+
+================================================================================
+GROCERY FLOW
+================================================================================
+
+App Loads
+   ↓
+isLoading = true
+   ↓
+Loading groceries...
+   ↓
+GET /api/groceries
+   ↓
+Backend
+   ↓
+Response
+   ↓
+setGroceryItems()
+   ↓
+isLoading = false
+   ↓
+GroceryList
+
+
+================================================================================
+PART 15: BETTER LOADING UI
+================================================================================
+
+OPTION 1: TEXT
+--------------------------------------------------------------------------------
+
+<p role="status">
+
+  Loading groceries...
+
+</p>
+
+
+Simple and clear.
+
+
+================================================================================
+OPTION 2: SPINNER + TEXT
+================================================================================
+
+<div
+  className="loading-container"
+  role="status"
+>
+
+  <span
+    className="spinner"
+    aria-hidden="true"
+  >
+  </span>
+
+
+  <span>
+
+    Loading groceries...
+
+  </span>
+
+</div>
+
+
+The spinner is decorative.
+
+The text communicates the actual status.
+
+
+================================================================================
+OPTION 3: SKELETON
+================================================================================
+
+Example:
+
++--------------------------------+
+| ███████████                    |
+| ██████                         |
++--------------------------------+
+
++--------------------------------+
+| █████████                      |
+| █████                          |
++--------------------------------+
+
+
+Useful when loading:
+
+• Lists
+
+• Cards
+
+• Dashboards
+
+• Larger page sections
+
+
+================================================================================
+LOADING UI COMPARISON
+================================================================================
+
++----------------------+-------------------------+---------------------------+
+| TYPE                 | BEST FOR                | EXAMPLE                   |
++----------------------+-------------------------+---------------------------+
+| Text                 | Simple requests         | Loading groceries...      |
+| Spinner + Text       | Visible waiting         | Spinner + Loading...      |
+| Skeleton             | Structured content      | Placeholder cards         |
+| Refresh Indicator    | Existing data refresh   | Refreshing...             |
++----------------------+-------------------------+---------------------------+
+
+
+================================================================================
+PART 16: ACCESSIBILITY
+================================================================================
+
+LOADING STATUS
+--------------------------------------------------------------------------------
+
+Use:
+
+role="status"
+
+
+Example:
+
+<p role="status">
+
+  Loading groceries...
+
+</p>
+
+
+================================================================================
+ERROR STATUS
+================================================================================
+
+Example:
+
+<p role="alert">
+
+  Unable to load groceries.
+
+</p>
+
+
+================================================================================
+DECORATIVE SPINNER
+================================================================================
+
+<span
+  className="spinner"
+  aria-hidden="true"
+></span>
+
+
+The visual spinner doesn't need to be separately announced if visible text
+already says:
+
+Loading groceries...
+
+
+================================================================================
+aria-busy
+================================================================================
+
+For an updating region:
+
+<section
+  aria-busy={
+    isRefreshing
+  }
+>
+
+  Existing Content
+
+</section>
+
+
+This can communicate that a region is being updated.
+
+
+================================================================================
+PART 17: TESTING LOADING STATE
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Loading appears while request is pending
+
+[ ] Loading disappears after success
+
+[ ] Loading disappears after failure
+
+[ ] Data appears after success
+
+[ ] Empty state appears for an empty successful response
+
+[ ] Error message appears after failure
+
+[ ] HTTP errors such as 500 are handled
+
+[ ] Cancellation is not displayed as backend failure
+
+[ ] Loading message has accessible status
+
+[ ] Existing content remains appropriate during background refresh
+
+[ ] No request starts during render
+
+[ ] Loading never becomes permanently stuck
+
+
+================================================================================
+TEST 1: SUCCESS
+================================================================================
+
+INITIAL:
+
+isLoading:
+
+true
+
+
+UI:
+
+Loading books...
+
+
+BACKEND:
+
+200 OK
+
+
+RESULT:
+
+isLoading:
+
+false
+
+
+books:
+
+[
+  ...
+]
+
+
+UI:
+
+Book List
+
+
+================================================================================
+TEST 2: HTTP ERROR
+================================================================================
+
+BACKEND:
+
+500
+
+
+response.ok:
+
+false
+
+
+RESULT:
+
+error:
+
+Unable to load books...
+
+
+isLoading:
+
+false
+
+
+UI:
+
+Error Message
+
+
+================================================================================
+TEST 3: EMPTY RESPONSE
+================================================================================
+
+BACKEND:
+
+200 OK
+
+
+Body:
+
+[]
+
+
+RESULT:
+
+isLoading:
+
+false
+
+
+books:
+
+[]
+
+
+UI:
+
+No books found.
+
+
+================================================================================
+TEST 4: SLOW NETWORK
+================================================================================
+
+Use browser developer tools:
+
+1. Open Developer Tools
+
+2. Open Network panel
+
+3. Select an available network throttling profile
+
+4. Reload or trigger request
+
+5. Confirm loading indicator remains visible while request is pending
+
+6. Confirm final data/error state appears afterward
+
+
+================================================================================
+TEST 5: CANCELLATION
+================================================================================
+
+Request A starts.
+
+        ↓
+
+Component/resource changes.
+
+        ↓
+
+Cleanup executes.
+
+        ↓
+
+controller.abort()
+
+        ↓
+
+Request A becomes obsolete.
+
+        ↓
+
+AbortError ignored.
+
+        ↓
+
+Current request/UI remains authoritative.
+
+
+================================================================================
+PART 18: COMMON MISTAKES
+================================================================================
+
+MISTAKE 1:
+
+FORGETTING TO START LOADING
+--------------------------------------------------------------------------------
+
+Request begins
+
+but:
+
+isLoading remains false
+
+
+Result:
+
+No loading feedback.
+
+
+================================================================================
+MISTAKE 2:
+
+STOPPING LOADING ONLY ON SUCCESS
+--------------------------------------------------------------------------------
+
+try {
+
+  ...
+
+  setIsLoading(false)
+
+} catch (error) {
+
+  setError(
+    error.message
+  )
+}
+
+
+Problem:
+
+Failure can leave:
+
+isLoading = true
+
+
+================================================================================
+MISTAKE 3:
+
+NO HTTP STATUS CHECK
+--------------------------------------------------------------------------------
+
+const response =
+  await fetch(url)
+
+
+const data =
+  await response.json()
+
+
+Problem:
+
+HTTP 500 may be treated like a normal response.
+
+
+Use:
+
+if (!response.ok) {
+
+  throw new Error(...)
+}
+
+
+================================================================================
+MISTAKE 4:
+
+CONFUSING EMPTY WITH LOADING
+--------------------------------------------------------------------------------
+
+books = []
+
+
+can mean:
+
+• Request hasn't finished
+
+or:
+
+• Request successfully returned no records
+
+
+That's why:
+
+isLoading
+
+
+is separate from:
+
+books
+
+
+================================================================================
+MISTAKE 5:
+
+SHOWING FULL-SCREEN LOADING DURING EVERY REFRESH
+--------------------------------------------------------------------------------
+
+If existing data is already available, replacing everything with:
+
+Loading...
+
+
+can cause unnecessary UI flicker.
+
+
+Consider:
+
+Existing Content
++
+Refreshing...
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++-------------------------+--------------------------------------------+
+| CONCEPT                 | REMEMBER                                   |
++-------------------------+--------------------------------------------+
+| isLoading               | Is relevant request currently pending?     |
+| setIsLoading(true)      | Start loading                              |
+| setIsLoading(false)     | Finish loading                             |
+| data                    | Successful backend result                  |
+| error                   | Request failure                            |
+| finally                 | Shared completion logic                    |
+| Empty State             | Successful request with zero records       |
+| AbortController         | Cancel obsolete request                    |
+| role="status"           | Accessible loading feedback                |
+| role="alert"            | Accessible error feedback                  |
+| isRefreshing            | Background refresh state                   |
++-------------------------+--------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - FOUR UI STATES
+================================================================================
+
+1. LOADING
+
+Request in progress
+
+
+2. ERROR
+
+Request failed
+
+
+3. EMPTY
+
+Request succeeded but returned no data
+
+
+4. SUCCESS
+
+Request succeeded and returned data
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+START:
+
+setIsLoading(true)
+
+
+SUCCESS:
+
+setData(result)
+
+
+ERROR:
+
+setError(message)
+
+
+FINISH:
+
+setIsLoading(false)
+
+
+COMPLETE:
+
+REQUEST
+ ↓
+LOADING
+ ↓
+SUCCESS / FAILURE
+ ↓
+FINAL UI
+
+
+LOADING STATE:
+
+isLoading === true
+
+means:
+
+REQUEST PENDING
+
+
+EMPTY STATE:
+
+isLoading === false
+
+AND
+
+data.length === 0
+
+means:
+
+REQUEST FINISHED
+BUT NO DATA
+
+
+================================================================================
+MOST IMPORTANT RULE
+================================================================================
+
+LOADING IS NOT THE SAME AS EMPTY.
+
+LOADING:
+
+THE RESPONSE HAS NOT FINISHED YET.
+
+
+EMPTY:
+
+THE RESPONSE FINISHED SUCCESSFULLY,
+BUT THERE ARE NO RECORDS.
+
+
+A GOOD BACKEND-DRIVEN REACT UI SHOULD CLEARLY REPRESENT:
+
+LOADING
++
+ERROR
++
+EMPTY
++
+SUCCESS
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Add Retry functionality
+
+2. Build a reusable Loading component
+
+3. Add skeleton cards
+
+4. Connect GET /api/groceries
+
+5. Handle POST loading state
+
+6. Handle PATCH loading state
+
+7. Handle DELETE loading state
+
+8. Add per-item pending indicators
+
+9. Distinguish initial loading from background refresh
+
+10. Add automated loading/error/success tests
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The complete request lifecycle is:
+
+REQUEST START
+      ↓
+isLoading = true
+      ↓
+LOADING UI
+      ↓
+BACKEND REQUEST
+      ↓
++-------------------------+
+|                         |
+SUCCESS                 FAILURE
+|                         |
+↓                         ↓
+DATA                    ERROR
+|                         |
++-----------+-------------+
+            ↓
+      REQUEST FINISHED
+            ↓
+     isLoading = false
+            ↓
+         FINAL UI
+
+
+Loading state provides users with immediate feedback while React communicates
+with the backend.
+
+It turns:
+
+"Nothing is happening."
+
+
+into:
+
+"The application is working and waiting for the server."
+
+
+================================================================================
+END OF LESSON 4
+SETTING UP LOADING STATE
+================================================================================
