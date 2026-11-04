@@ -1,0 +1,1349 @@
+================================================================================
+LESSON 6: SETUP SEARCHBAR AND PROPS IN REACT
+================================================================================
+
+
+LESSON OVERVIEW
+================================================================================
+
+This lesson covers how to:
+
+- Create a separate SearchBar component
+- Move search UI out of App.jsx
+- Understand React props
+- Pass state from parent to child
+- Pass functions from parent to child
+- Handle input changes through props
+- Handle form submission through props
+- Use destructured props
+
+
+================================================================================
+1. WHAT IS A SEARCHBAR COMPONENT?
+================================================================================
+
+SearchBar is a reusable component that handles the search UI.
+
+Responsibilities:
+
+- Display search input
+- Display Search button
+- Handle user input events
+- Handle form submission
+- Receive data and functions through props
+
+
+Benefits:
+
+- Reusable
+- Maintainable
+- Easier to test
+- Keeps App.jsx cleaner
+- Better separation of concerns
+
+
+================================================================================
+2. BEFORE VS. AFTER
+================================================================================
+
+BEFORE
+--------------------------------------------------------------------------------
+
+App.jsx contains:
+
+- API logic
+- Search state
+- Search form
+- Search input
+- Search button
+- Book display
+- Loading/error handling
+
+Problem:
+
+App.jsx becomes large and difficult to maintain.
+
+
+AFTER
+--------------------------------------------------------------------------------
+
+App.jsx:
+- Maintains application state
+- Fetches books
+- Passes search data/functions to SearchBar
+
+SearchBar.jsx:
+- Displays search form
+- Displays input
+- Displays Search button
+- Calls functions received from App
+
+
+Structure:
+
+App
+ |
+ +-- NavBar
+ |
+ +-- SearchBar
+ |
+ +-- Books
+ |
+ +-- Footer
+
+
+================================================================================
+3. CREATE SEARCHBAR COMPONENT
+================================================================================
+
+File:
+
+src/components/SearchBar.jsx
+
+
+Basic Component:
+
+function SearchBar() {
+
+  return (
+    <div>
+      SearchBar
+    </div>
+  );
+
+}
+
+export default SearchBar;
+
+
+================================================================================
+4. ADD THE SEARCH FORM
+================================================================================
+
+function SearchBar() {
+
+  return (
+
+    <div className="mb-4">
+
+      <form>
+
+        <div className="input-group">
+
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search for books..."
+          />
+
+          <button
+            className="btn btn-primary"
+            type="submit"
+          >
+            Search
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  );
+}
+
+export default SearchBar;
+
+
+Bootstrap Classes:
+--------------------------------------------------------------------------------
+
+mb-4
+-> Adds bottom margin
+
+input-group
+-> Groups input and button
+
+form-control
+-> Styles the input
+
+btn
+-> Bootstrap button
+
+btn-primary
+-> Primary Bootstrap button color
+
+
+================================================================================
+5. WHAT ARE PROPS?
+================================================================================
+
+Props = Properties
+
+Props allow a parent component to pass information to a child component.
+
+
+Example:
+
+App
+ |
+ |  searchTerm
+ |  onSearchChange
+ |  onSearch
+ |
+ v
+SearchBar
+
+
+Props can contain:
+
+- Strings
+- Numbers
+- Booleans
+- Arrays
+- Objects
+- Functions
+- Components
+
+
+KEY RULE
+--------------------------------------------------------------------------------
+
+Props flow from:
+
+Parent -> Child
+
+
+Example:
+
+App -> SearchBar
+
+
+Props received by a child should be treated as read-only.
+
+The child does not directly modify the parent's state.
+
+Instead, the parent can pass a function to the child.
+
+
+================================================================================
+6. PROPS ARE LIKE FUNCTION PARAMETERS
+================================================================================
+
+Normal JavaScript:
+
+function greet(name) {
+  console.log(name);
+}
+
+greet('Parag');
+
+
+React:
+
+function SearchBar({ searchTerm }) {
+
+  return (
+    <input value={searchTerm} />
+  );
+
+}
+
+
+Parent passes:
+
+<SearchBar searchTerm="javascript" />
+
+
+Conceptually:
+
+Component + Props
+       =
+Function + Parameters
+
+
+================================================================================
+7. ADD PROPS TO SEARCHBAR
+================================================================================
+
+function SearchBar(props) {
+
+  return (
+
+    <div className="mb-4">
+
+      <form onSubmit={props.onSearch}>
+
+        <div className="input-group">
+
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search for books..."
+            value={props.searchTerm}
+            onChange={props.onSearchChange}
+          />
+
+          <button
+            className="btn btn-primary"
+            type="submit"
+          >
+            Search
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  );
+}
+
+export default SearchBar;
+
+
+================================================================================
+8. PROPS USED BY SEARCHBAR
+================================================================================
+
+searchTerm
+--------------------------------------------------------------------------------
+
+Type:
+String
+
+Purpose:
+Stores/displays the current search value.
+
+Usage:
+
+value={props.searchTerm}
+
+
+onSearchChange
+--------------------------------------------------------------------------------
+
+Type:
+Function
+
+Purpose:
+Called when the user types.
+
+Usage:
+
+onChange={props.onSearchChange}
+
+
+onSearch
+--------------------------------------------------------------------------------
+
+Type:
+Function
+
+Purpose:
+Called when the user submits the form.
+
+Usage:
+
+onSubmit={props.onSearch}
+
+
+================================================================================
+9. DESTRUCTURING PROPS
+================================================================================
+
+Instead of:
+
+function SearchBar(props) {
+
+  return (
+    <input
+      value={props.searchTerm}
+      onChange={props.onSearchChange}
+    />
+  );
+
+}
+
+
+Use destructuring:
+
+function SearchBar({
+  searchTerm,
+  onSearchChange,
+  onSearch
+}) {
+
+  return (
+
+    <form onSubmit={onSearch}>
+
+      <input
+        value={searchTerm}
+        onChange={onSearchChange}
+      />
+
+      <button type="submit">
+        Search
+      </button>
+
+    </form>
+
+  );
+
+}
+
+
+Benefits:
+
+- Cleaner syntax
+- Less repetition
+- Easier to read
+
+
+================================================================================
+10. COMPLETE SEARCHBAR COMPONENT
+================================================================================
+
+File:
+
+src/components/SearchBar.jsx
+
+
+function SearchBar({
+  searchTerm,
+  onSearchChange,
+  onSearch
+}) {
+
+  return (
+
+    <div className="mb-4">
+
+      <form onSubmit={onSearch}>
+
+        <div className="input-group">
+
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search for books..."
+            value={searchTerm}
+            onChange={onSearchChange}
+            aria-label="Search for books"
+          />
+
+          <button
+            className="btn btn-primary"
+            type="submit"
+          >
+            Search
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  );
+}
+
+export default SearchBar;
+
+
+================================================================================
+11. PARENT COMPONENT: APP.JSX
+================================================================================
+
+The parent owns the state:
+
+const [searchTerm, setSearchTerm] =
+  useState('javascript');
+
+
+Input change handler:
+
+const handleSearchChange = (e) => {
+
+  setSearchTerm(e.target.value);
+
+};
+
+
+Search submit handler:
+
+const handleSearchSubmit = (e) => {
+
+  e.preventDefault();
+
+  const query = searchTerm.trim();
+
+  if (!query) {
+    return;
+  }
+
+  fetchBooks(query);
+
+};
+
+
+================================================================================
+12. IMPORT SEARCHBAR
+================================================================================
+
+In App.jsx:
+
+import SearchBar from './components/SearchBar';
+
+
+Then render:
+
+<SearchBar
+  searchTerm={searchTerm}
+  onSearchChange={handleSearchChange}
+  onSearch={handleSearchSubmit}
+/>
+
+
+================================================================================
+13. PASSING STATE AS A PROP
+================================================================================
+
+Parent State:
+
+const [searchTerm, setSearchTerm] =
+  useState('javascript');
+
+
+Pass:
+
+<SearchBar
+  searchTerm={searchTerm}
+/>
+
+
+Child receives:
+
+function SearchBar({ searchTerm }) {
+
+  // searchTerm = value from App
+
+}
+
+
+Flow:
+
+App State
+   |
+   | searchTerm
+   v
+SearchBar
+   |
+   v
+Input Value
+
+
+================================================================================
+14. PASSING FUNCTIONS AS PROPS
+================================================================================
+
+Parent Function:
+
+const handleSearchChange = (e) => {
+
+  setSearchTerm(e.target.value);
+
+};
+
+
+Pass Function:
+
+<SearchBar
+  onSearchChange={handleSearchChange}
+/>
+
+
+Child Uses Function:
+
+<input
+  onChange={onSearchChange}
+/>
+
+
+Flow:
+
+User Types
+    |
+    v
+SearchBar onChange
+    |
+    v
+onSearchChange()
+    |
+    v
+App.handleSearchChange()
+    |
+    v
+setSearchTerm()
+    |
+    v
+App State Updated
+
+
+================================================================================
+15. COMPLETE PROPS FLOW
+================================================================================
+
+             APP COMPONENT
+                (Parent)
+                   |
+         +---------+---------+
+         |         |         |
+         v         v         v
+    searchTerm  Change     Submit
+       State    Handler    Handler
+         |         |         |
+         +---------+---------+
+                   |
+                   v
+              Pass Props
+                   |
+                   v
+             SEARCHBAR
+               (Child)
+                   |
+         +---------+---------+
+         |                   |
+         v                   v
+       Input               Form
+         |                   |
+      onChange            onSubmit
+         |                   |
+         +---------+---------+
+                   |
+                   v
+           Parent Functions
+                   |
+                   v
+             Update State
+                   |
+                   v
+          Parent Re-renders
+                   |
+                   v
+         New Props Passed Down
+
+
+================================================================================
+16. USER INPUT DATA FLOW
+================================================================================
+
+User Types "React"
+       |
+       v
+SearchBar Input
+       |
+       v
+onChange Fires
+       |
+       v
+onSearchChange(e)
+       |
+       v
+handleSearchChange(e)
+in App
+       |
+       v
+setSearchTerm('React')
+       |
+       v
+App State Changes
+       |
+       v
+App Re-renders
+       |
+       v
+searchTerm Prop = 'React'
+       |
+       v
+SearchBar Re-renders
+       |
+       v
+Input Displays "React"
+
+
+================================================================================
+17. SEARCH SUBMISSION FLOW
+================================================================================
+
+User Clicks Search
+       |
+       v
+<form onSubmit={onSearch}>
+       |
+       v
+handleSearchSubmit()
+in App
+       |
+       v
+e.preventDefault()
+       |
+       v
+Read searchTerm
+       |
+       v
+fetchBooks(searchTerm)
+       |
+       v
+Google Books API
+       |
+       v
+setBooks()
+       |
+       v
+App Re-renders
+       |
+       v
+Books Displayed
+
+
+================================================================================
+18. PROPS VS. STATE
+================================================================================
+
+PROPS
+--------------------------------------------------------------------------------
+
+Purpose:
+Pass data/configuration between components
+
+Owned By:
+Parent component
+
+Received By:
+Child component
+
+Child Behavior:
+Read-only
+
+Example:
+
+<SearchBar
+  searchTerm={searchTerm}
+/>
+
+
+Inside Child:
+
+function SearchBar({ searchTerm }) {
+  ...
+}
+
+
+STATE
+--------------------------------------------------------------------------------
+
+Purpose:
+Store changing component/application data
+
+Created With:
+
+useState()
+
+Example:
+
+const [searchTerm, setSearchTerm] =
+  useState('javascript');
+
+
+Updated With:
+
+setSearchTerm('react');
+
+
+Simple Rule:
+
+STATE
+-> Component owns the data
+
+PROPS
+-> Component receives the data
+
+
+================================================================================
+19. COMPLETE APP + SEARCHBAR STRUCTURE
+================================================================================
+
+App
+ |
+ +-- State
+ |    |
+ |    +-- books
+ |    +-- searchTerm
+ |    +-- isLoading
+ |    +-- error
+ |
+ +-- Functions
+ |    |
+ |    +-- fetchBooks()
+ |    +-- handleSearchChange()
+ |    +-- handleSearchSubmit()
+ |
+ +-- NavBar
+ |
+ +-- SearchBar
+ |    |
+ |    +-- searchTerm
+ |    +-- onSearchChange
+ |    +-- onSearch
+ |
+ +-- Book Results
+ |
+ +-- Footer
+
+
+================================================================================
+20. COMPLETE APP EXAMPLE
+================================================================================
+
+import { useState, useEffect } from 'react';
+
+import NavBar from './components/NavBar';
+import SearchBar from './components/SearchBar';
+import Footer from './components/Footer';
+
+import './App.css';
+
+
+function App() {
+
+  const [books, setBooks] = useState([]);
+
+  const [searchTerm, setSearchTerm] =
+    useState('javascript');
+
+  const [isLoading, setIsLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState(null);
+
+
+  const fetchBooks = async (query) => {
+
+    try {
+
+      setIsLoading(true);
+      setError(null);
+
+
+      const URL =
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;
+
+
+      const response = await fetch(URL);
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          `HTTP error! Status: ${response.status}`
+        );
+
+      }
+
+
+      const data = await response.json();
+
+      setBooks(data.items || []);
+
+
+    } catch (error) {
+
+      setError(error.message);
+      setBooks([]);
+
+
+    } finally {
+
+      setIsLoading(false);
+
+    }
+
+  };
+
+
+  useEffect(() => {
+
+    fetchBooks('javascript');
+
+  }, []);
+
+
+  const handleSearchChange = (e) => {
+
+    setSearchTerm(e.target.value);
+
+  };
+
+
+  const handleSearchSubmit = (e) => {
+
+    e.preventDefault();
+
+    const query = searchTerm.trim();
+
+    if (!query) {
+      return;
+    }
+
+    fetchBooks(query);
+
+  };
+
+
+  return (
+
+    <div className="App">
+
+      <NavBar />
+
+
+      <main className="container mt-5">
+
+        <h1>Book Search</h1>
+
+
+        <SearchBar
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
+          onSearch={handleSearchSubmit}
+        />
+
+
+        {isLoading && (
+          <p>Loading books...</p>
+        )}
+
+
+        {error && (
+          <p style={{ color: 'red' }}>
+            Error: {error}
+          </p>
+        )}
+
+
+        {!isLoading && !error && (
+
+          <div className="row">
+
+            {books.map((book) => (
+
+              <div
+                key={book.id}
+                className="col-md-4 mb-4"
+              >
+
+                <div className="card">
+
+                  <div className="card-body">
+
+                    <h5>
+                      {book.volumeInfo?.title
+                        || 'No Title'}
+                    </h5>
+
+                    <p>
+                      {book.volumeInfo?.authors?.join(', ')
+                        || 'Unknown Author'}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </main>
+
+
+      <Footer />
+
+    </div>
+
+  );
+}
+
+export default App;
+
+
+================================================================================
+21. BEFORE VS. AFTER REFACTORING
+================================================================================
+
+BEFORE
+--------------------------------------------------------------------------------
+
+App.jsx contains:
+
+<form>
+  <input />
+  <button />
+</form>
+
+
+Problem:
+
+- Search UI mixed with App
+- App becomes larger
+- Search UI is difficult to reuse
+
+
+AFTER
+--------------------------------------------------------------------------------
+
+App.jsx:
+
+<SearchBar
+  searchTerm={searchTerm}
+  onSearchChange={handleSearchChange}
+  onSearch={handleSearchSubmit}
+/>
+
+
+SearchBar.jsx:
+
+function SearchBar({
+  searchTerm,
+  onSearchChange,
+  onSearch
+}) {
+  ...
+}
+
+
+Result:
+
+- Cleaner App.jsx
+- Reusable SearchBar
+- Clear responsibility
+- Easier maintenance
+
+
+================================================================================
+22. IMPORTANT CONCEPT: CHILD DOES NOT MODIFY PROPS
+================================================================================
+
+Wrong:
+
+function SearchBar({ searchTerm }) {
+
+  searchTerm = 'react';
+
+}
+
+
+Instead:
+
+Pass a parent function:
+
+<SearchBar
+  searchTerm={searchTerm}
+  onSearchChange={handleSearchChange}
+/>
+
+
+Then child calls:
+
+onChange={onSearchChange}
+
+
+The parent function updates state:
+
+setSearchTerm(e.target.value);
+
+
+Key Flow:
+
+Child Event
+    |
+    v
+Parent Callback
+    |
+    v
+Update Parent State
+    |
+    v
+New Props
+    |
+    v
+Child Re-renders
+
+
+================================================================================
+23. QUICK REVISION
+================================================================================
+
+PARENT STATE
+--------------------------------------------------------------------------------
+
+const [searchTerm, setSearchTerm] =
+  useState('javascript');
+
+
+PARENT CHANGE HANDLER
+--------------------------------------------------------------------------------
+
+const handleSearchChange = (e) => {
+
+  setSearchTerm(e.target.value);
+
+};
+
+
+PARENT SUBMIT HANDLER
+--------------------------------------------------------------------------------
+
+const handleSearchSubmit = (e) => {
+
+  e.preventDefault();
+
+  fetchBooks(searchTerm);
+
+};
+
+
+PASS PROPS
+--------------------------------------------------------------------------------
+
+<SearchBar
+  searchTerm={searchTerm}
+  onSearchChange={handleSearchChange}
+  onSearch={handleSearchSubmit}
+/>
+
+
+RECEIVE PROPS
+--------------------------------------------------------------------------------
+
+function SearchBar({
+  searchTerm,
+  onSearchChange,
+  onSearch
+}) {
+  ...
+}
+
+
+USE STATE PROP
+--------------------------------------------------------------------------------
+
+value={searchTerm}
+
+
+USE FUNCTION PROP
+--------------------------------------------------------------------------------
+
+onChange={onSearchChange}
+
+
+USE SUBMIT PROP
+--------------------------------------------------------------------------------
+
+onSubmit={onSearch}
+
+
+================================================================================
+24. PROPS CHECKLIST
+================================================================================
+
+[ ] SearchBar component created
+
+[ ] SearchBar imported into App
+
+[ ] searchTerm state exists in App
+
+[ ] searchTerm passed as prop
+
+[ ] onSearchChange function passed as prop
+
+[ ] onSearch function passed as prop
+
+[ ] Input value connected to searchTerm
+
+[ ] Input onChange connected
+
+[ ] Form onSubmit connected
+
+[ ] Props destructured
+
+[ ] Bootstrap styling added
+
+[ ] Search functionality tested
+
+
+================================================================================
+25. INTERVIEW EXPLANATION
+================================================================================
+
+Question:
+
+What are props in React and how would you use them in a SearchBar?
+
+
+Answer:
+
+"Props are read-only values passed from a parent component to a child
+component.
+
+For example, the App component can own the searchTerm state and pass it
+to SearchBar as a prop.
+
+App can also pass callback functions such as handleSearchChange and
+handleSearchSubmit.
+
+SearchBar uses searchTerm as the input value and calls those functions
+when the user types or submits the form.
+
+This keeps the state in the parent while making SearchBar reusable and
+maintaining React's one-way data flow."
+
+
+================================================================================
+26. KEY TAKEAWAYS
+================================================================================
+
+1. SearchBar should be a separate reusable component.
+
+2. App is the parent and SearchBar is the child.
+
+3. Props pass data from parent to child.
+
+4. Props should be treated as read-only by the child.
+
+5. State is owned and updated by the component responsible for it.
+
+6. State can be passed as a prop:
+
+   searchTerm={searchTerm}
+
+7. Functions can also be passed as props:
+
+   onSearchChange={handleSearchChange}
+
+8. The child can call the function to request a parent-state update.
+
+9. Destructuring props makes components easier to read.
+
+10. Controlled input:
+
+    value={searchTerm}
+    onChange={onSearchChange}
+
+11. Form submission:
+
+    onSubmit={onSearch}
+
+12. Separating components improves:
+
+    - Reusability
+    - Maintainability
+    - Testability
+    - Readability
+    - Separation of concerns
+
+
+================================================================================
+FINAL DATA FLOW
+================================================================================
+
+                   APP
+                (Parent)
+                   |
+              Owns State
+                   |
+                   v
+              searchTerm
+                   |
+               PROPS
+                   |
+                   v
+               SEARCHBAR
+                (Child)
+                   |
+                User Types
+                   |
+                   v
+             onSearchChange
+                   |
+              CALLBACK PROP
+                   |
+                   v
+                   APP
+                   |
+                   v
+            setSearchTerm()
+                   |
+                   v
+              New State
+                   |
+                   v
+              New Props
+                   |
+                   v
+               SEARCHBAR
+
+
+================================================================================
+FINAL FORMULA
+================================================================================
+
+Reusable SearchBar
+        =
+Separate Component
+        +
+Parent State
+        +
+Props
+        +
+Callback Functions
+        +
+Controlled Input
+        +
+One-Way Data Flow
+
+
+React Pattern:
+
+Parent State
+     |
+     v
+Pass Data as Props
+     |
+     v
+Child Component
+     |
+     v
+User Interaction
+     |
+     v
+Call Parent Function
+     |
+     v
+Update Parent State
+     |
+     v
+Re-render Child with New Props
+
+
+================================================================================
+END
+================================================================================
