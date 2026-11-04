@@ -1,0 +1,3044 @@
+LESSON 1: CONNECTING TO THE BACK END
+UNDERSTANDING SIDE EFFECTS, HOOKS AND useEffect
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson introduces React side effects and the useEffect Hook.
+
+You will understand:
+
+• What side effects are
+
+• What React Hooks are
+
+• What useEffect does
+
+• When useEffect is appropriate
+
+• When useEffect is NOT necessary
+
+• How dependency arrays work
+
+• How effect cleanup works
+
+• How to fetch data from a backend
+
+• How to manage loading state
+
+• How to manage error state
+
+• How to cancel obsolete HTTP requests
+
+• How to avoid race conditions
+
+• How effects run during component lifecycle
+
+• How to keep rendering logic pure
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+So far, most Grocery List behavior has happened entirely inside React.
+
+Examples:
+
+Add Item
+Toggle Item
+Delete Item
+Calculate Statistics
+
+
+These operations use:
+
+React State
+     ↓
+React Rendering
+     ↓
+UI
+
+
+Real applications also interact with systems outside React.
+
+Examples:
+
+React Application
+      ↓
+HTTP Request
+      ↓
+Backend API
+      ↓
+Database
+      ↓
+HTTP Response
+      ↓
+React State
+      ↓
+UI
+
+
+The important concept is:
+
+RENDERING
++
+SIDE EFFECTS
+
+
+Rendering determines:
+
+WHAT THE UI SHOULD LOOK LIKE
+
+
+Effects synchronize the component with:
+
+SOMETHING OUTSIDE REACT
+
+
+================================================================================
+PART 2: UNDERSTANDING SIDE EFFECTS
+================================================================================
+
+WHAT IS A SIDE EFFECT?
+--------------------------------------------------------------------------------
+
+A side effect is work that interacts with something outside the pure rendering
+calculation of a React component.
+
+Examples:
+
+• HTTP requests
+
+• Browser storage
+
+• Timers
+
+• Browser event listeners
+
+• WebSocket connections
+
+• Third-party libraries
+
+• Analytics
+
+• Notifications
+
+• Geolocation
+
+• Direct integration with browser APIs
+
+
+================================================================================
+EXAMPLES
+================================================================================
+
+HTTP REQUEST:
+
+fetch(
+  '/api/groceries'
+)
+
+
+LOCAL STORAGE:
+
+localStorage.setItem(
+  'groceries',
+  JSON.stringify(items)
+)
+
+
+TIMER:
+
+setTimeout(
+  callback,
+  1000
+)
+
+
+EVENT LISTENER:
+
+window.addEventListener(
+  'resize',
+  handleResize
+)
+
+
+WEBSOCKET:
+
+const socket =
+  new WebSocket(
+    url
+  )
+
+
+DOCUMENT API:
+
+document.title =
+  'Grocery List'
+
+
+================================================================================
+SIDE EFFECT TABLE
+================================================================================
+
++----------------------+--------------------------------+-----------------------+
+| SIDE EFFECT          | EXAMPLE                        | PURPOSE               |
++----------------------+--------------------------------+-----------------------+
+| HTTP Request         | fetch()                        | Backend communication |
+| Storage              | localStorage.setItem()         | Browser persistence   |
+| Event Listener       | addEventListener()             | Observe browser event |
+| Timer                | setTimeout()                   | Delayed work          |
+| Interval             | setInterval()                  | Repeated work         |
+| Subscription         | subscribe()                    | External updates      |
+| WebSocket            | new WebSocket()                | Real-time connection  |
+| Analytics            | analytics.track()              | Usage tracking        |
+| Document API         | document.title                 | Browser integration   |
+| Geolocation          | navigator.geolocation          | Device/location API   |
++----------------------+--------------------------------+-----------------------+
+
+
+================================================================================
+SIDE EFFECTS SHOULD NOT RUN DURING RENDER
+================================================================================
+
+Avoid:
+
+function GroceryList() {
+
+  fetch(
+    '/api/groceries'
+  )
+
+  return (
+    ...
+  )
+}
+
+
+Why?
+
+The component function can run whenever React renders.
+
+That could cause:
+
+Render
+  ↓
+fetch()
+  ↓
+State Update
+  ↓
+Render
+  ↓
+fetch()
+  ↓
+State Update
+  ↓
+...
+
+
+Instead, synchronize with the external API using an appropriate Effect or
+data-fetching architecture.
+
+
+================================================================================
+IMPORTANT: NOT EVERY ACTION NEEDS useEffect
+================================================================================
+
+Suppose the user clicks:
+
+Delete Item
+
+
+You already know WHY the deletion should happen:
+
+THE USER CLICKED DELETE
+
+
+Therefore the operation can normally begin from the event handler.
+
+
+Example:
+
+const handleDelete = () => {
+
+  deleteItem(
+    item.id
+  )
+}
+
+
+You do NOT need to create state merely so an Effect notices it and performs
+the delete.
+
+
+RULE:
+
+USER EVENT
+    ↓
+EVENT HANDLER
+
+
+EXTERNAL SYNCHRONIZATION CAUSED BY RENDERED STATE
+    ↓
+EFFECT
+
+
+================================================================================
+SIDE EFFECT EXAMPLES IN OUR GROCERY APP
+================================================================================
+
+Possible future side effects:
+
+Load Groceries
+      ↓
+GET /api/groceries
+
+
+Add Grocery
+      ↓
+POST /api/groceries
+
+
+Update Purchased State
+      ↓
+PATCH /api/groceries/{id}
+
+
+Delete Grocery
+      ↓
+DELETE /api/groceries/{id}
+
+
+Persist Locally
+      ↓
+localStorage
+
+
+These operations connect our React application to systems outside React.
+
+
+================================================================================
+PART 3: UNDERSTANDING REACT HOOKS
+================================================================================
+
+WHAT ARE REACT HOOKS?
+--------------------------------------------------------------------------------
+
+Hooks are functions that let function components use React features.
+
+Examples:
+
+• State
+
+• Context
+
+• Effects
+
+• References
+
+• Reducers
+
+• Memoization
+
+
+================================================================================
+COMMON REACT HOOKS
+================================================================================
+
+useState
+--------------------------------------------------------------------------------
+
+Stores component state.
+
+
+Example:
+
+const [
+  items,
+  setItems
+] = useState([])
+
+
+useEffect
+--------------------------------------------------------------------------------
+
+Synchronizes a component with an external system.
+
+
+Example:
+
+useEffect(() => {
+
+  // Synchronization
+
+}, [])
+
+
+useContext
+--------------------------------------------------------------------------------
+
+Reads a React Context value.
+
+
+useReducer
+--------------------------------------------------------------------------------
+
+Manages state using reducer logic.
+
+
+useRef
+--------------------------------------------------------------------------------
+
+Stores a mutable reference that does not itself cause rendering when changed.
+
+It is also commonly used to reference DOM elements.
+
+
+useMemo
+--------------------------------------------------------------------------------
+
+Caches a calculated value when appropriate.
+
+
+useCallback
+--------------------------------------------------------------------------------
+
+Caches a function reference when appropriate.
+
+
+useId
+--------------------------------------------------------------------------------
+
+Generates IDs useful for accessibility relationships.
+
+
+useLayoutEffect
+--------------------------------------------------------------------------------
+
+Runs an effect in a timing suitable for layout measurement or synchronous
+visual adjustments before the browser paints.
+
+
+================================================================================
+HOOK SUMMARY
+================================================================================
+
++------------------+-----------------------------------------------+
+| HOOK             | PRIMARY PURPOSE                               |
++------------------+-----------------------------------------------+
+| useState         | Component state                               |
+| useEffect        | External synchronization                      |
+| useContext       | Read context                                  |
+| useReducer       | Reducer-based state                           |
+| useRef           | Persistent mutable/DOM reference              |
+| useMemo          | Cache calculated value                        |
+| useCallback      | Cache function reference                      |
+| useId            | Stable accessibility IDs                      |
+| useLayoutEffect  | Layout-related synchronization                |
++------------------+-----------------------------------------------+
+
+
+================================================================================
+RULES OF HOOKS
+================================================================================
+
+Hooks should be called:
+
+• At the top level of React components
+
+• At the top level of custom Hooks
+
+
+Avoid calling Hooks conditionally:
+
+if (condition) {
+
+  useEffect(...)
+}
+
+
+Avoid:
+
+for (...) {
+
+  useState(...)
+}
+
+
+Avoid:
+
+function handleClick() {
+
+  useEffect(...)
+}
+
+
+Instead:
+
+function MyComponent() {
+
+  const [state, setState] =
+    useState(...)
+
+
+  useEffect(() => {
+
+    ...
+
+  }, [])
+
+
+  ...
+}
+
+
+================================================================================
+CUSTOM HOOKS
+================================================================================
+
+Reusable Hook logic can be extracted into custom Hooks.
+
+Examples:
+
+useGroceries()
+
+useWindowSize()
+
+useLocalStorage()
+
+useUser()
+
+
+Custom Hooks normally begin with:
+
+use
+
+
+================================================================================
+PART 4: UNDERSTANDING useEffect
+================================================================================
+
+WHAT IS useEffect?
+--------------------------------------------------------------------------------
+
+useEffect is a React Hook used to synchronize a component with an external
+system.
+
+Basic structure:
+
+useEffect(() => {
+
+  // Setup / synchronization logic
+
+
+  return () => {
+
+    // Optional cleanup
+
+  }
+
+}, [
+  dependencies
+])
+
+
+================================================================================
+IMPORT
+================================================================================
+
+import {
+  useEffect
+} from 'react'
+
+
+With state:
+
+import {
+  useEffect,
+  useState
+} from 'react'
+
+
+================================================================================
+BASIC EXAMPLE
+================================================================================
+
+useEffect(() => {
+
+  document.title =
+    'Grocery List'
+
+}, [])
+
+
+Effect:
+
+Component renders
+      ↓
+React commits update
+      ↓
+Effect executes
+      ↓
+Browser title synchronized
+
+
+================================================================================
+DEPENDENCY ARRAY
+================================================================================
+
+Example:
+
+useEffect(() => {
+
+  fetchUser(
+    userId
+  )
+
+}, [
+  userId
+])
+
+
+Meaning:
+
+This effect depends on:
+
+userId
+
+
+When the relevant dependency changes:
+
+React performs the effect lifecycle again.
+
+
+================================================================================
+CLEANUP
+================================================================================
+
+Example:
+
+useEffect(() => {
+
+  window.addEventListener(
+    'resize',
+    handleResize
+  )
+
+
+  return () => {
+
+    window.removeEventListener(
+      'resize',
+      handleResize
+    )
+
+  }
+
+}, [])
+
+
+Pattern:
+
+SETUP
+  ↓
+USE RESOURCE
+  ↓
+CLEANUP
+
+
+================================================================================
+PART 5: useEffect DEPENDENCY ARRAYS
+================================================================================
+
+CASE 1: NO DEPENDENCY ARRAY
+--------------------------------------------------------------------------------
+
+useEffect(() => {
+
+  console.log(
+    'Effect'
+  )
+
+})
+
+
+This effect runs after every committed render where the Effect is scheduled.
+
+
+Do NOT say:
+
+"Never use this."
+
+
+Sometimes it is intentional.
+
+But usually you should understand why an Effect needs to run after every
+render before using this form.
+
+
+================================================================================
+CASE 2: EMPTY DEPENDENCY ARRAY
+================================================================================
+
+useEffect(() => {
+
+  console.log(
+    'Initial synchronization'
+  )
+
+}, [])
+
+
+Normal conceptual model:
+
+Run after initial mounting.
+
+
+Useful when synchronization does not depend on changing reactive values.
+
+
+================================================================================
+IMPORTANT DEVELOPMENT NOTE
+================================================================================
+
+Do NOT memorize:
+
+[] = GUARANTEED EXACTLY ONCE
+
+
+In development, React Strict Mode can intentionally perform additional setup
+and cleanup cycles to help expose effect bugs.
+
+
+Therefore think:
+
+[] =
+NO REACTIVE DEPENDENCIES
+
+
+rather than:
+
+[] =
+EXACTLY ONE EXECUTION UNDER EVERY ENVIRONMENT
+
+
+================================================================================
+CASE 3: ONE DEPENDENCY
+================================================================================
+
+useEffect(() => {
+
+  fetchUserData(
+    userId
+  )
+
+}, [
+  userId
+])
+
+
+Effect setup runs:
+
+• After mounting
+
+• Again when userId changes
+
+
+Before rerunning an existing Effect, React runs its previous cleanup when one
+was returned.
+
+
+================================================================================
+CASE 4: MULTIPLE DEPENDENCIES
+================================================================================
+
+useEffect(() => {
+
+  searchProducts(
+    userId,
+    category
+  )
+
+}, [
+  userId,
+  category
+])
+
+
+The Effect responds when one of its reactive dependencies changes.
+
+
+================================================================================
+DEPENDENCY TABLE
+================================================================================
+
++----------------------+-----------------------------------------------+
+| DEPENDENCIES         | CONCEPTUAL BEHAVIOR                           |
++----------------------+-----------------------------------------------+
+| omitted              | Effect after every relevant render            |
+| []                   | No changing reactive dependencies              |
+| [userId]             | Mount + userId changes                        |
+| [userId, category]   | Mount + either dependency changes             |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+DEPENDENCIES ARE NOT JUST A SCHEDULING TRICK
+================================================================================
+
+Don't think:
+
+"I will remove userId from the dependency array because I only want the
+Effect to run once."
+
+
+Instead ask:
+
+DOES THE EFFECT READ userId?
+
+
+If yes, then:
+
+userId
+
+is part of the Effect's reactive logic.
+
+
+Example:
+
+useEffect(() => {
+
+  fetchUserData(
+    userId
+  )
+
+}, [
+  userId
+])
+
+
+================================================================================
+INFINITE LOOP EXAMPLE
+================================================================================
+
+Be careful with effects that update state used by their own dependencies.
+
+
+Example:
+
+useEffect(() => {
+
+  setCount(
+    count + 1
+  )
+
+}, [
+  count
+])
+
+
+Flow:
+
+count changes
+   ↓
+Effect
+   ↓
+setCount()
+   ↓
+count changes
+   ↓
+Effect
+   ↓
+...
+
+
+This creates a loop.
+
+
+================================================================================
+PART 6: useEffect FOR API CALLS
+================================================================================
+
+We can use an Effect when a component needs to synchronize displayed data with
+a backend resource identified by a prop.
+
+
+Example:
+
+UserProfile
++
+userId
+
+
+When:
+
+userId changes
+
+
+we need:
+
+new backend data.
+
+
+================================================================================
+UserProfile.jsx
+================================================================================
+
+import {
+  useEffect,
+  useState
+} from 'react'
+
+
+export default function UserProfile({
+
+  userId
+
+}) {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [
+    user,
+    setUser
+  ] = useState(null)
+
+
+  const [
+    loading,
+    setLoading
+  ] = useState(false)
+
+
+  const [
+    error,
+    setError
+  ] = useState(null)
+
+
+  // ============================================
+  // EFFECT
+  // ============================================
+
+  useEffect(() => {
+
+    if (!userId) {
+
+      setUser(null)
+
+      setLoading(false)
+
+      setError(null)
+
+      return
+    }
+
+
+    const controller =
+      new AbortController()
+
+
+    const fetchUserData =
+      async () => {
+
+        try {
+
+          setLoading(true)
+
+          setError(null)
+
+
+          const response =
+            await fetch(
+              `/api/users/${userId}`,
+              {
+                signal:
+                  controller.signal
+              }
+            )
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              `Request failed with status ${response.status}`
+            )
+          }
+
+
+          const data =
+            await response.json()
+
+
+          setUser(
+            data
+          )
+
+
+        } catch (error) {
+
+          if (
+            error.name ===
+            'AbortError'
+          ) {
+
+            return
+          }
+
+
+          setUser(null)
+
+
+          setError(
+            error instanceof Error
+              ? error.message
+              : 'Unable to load user'
+          )
+
+
+        } finally {
+
+          if (
+            !controller.signal.aborted
+          ) {
+
+            setLoading(false)
+          }
+
+        }
+      }
+
+
+    fetchUserData()
+
+
+    return () => {
+
+      controller.abort()
+
+    }
+
+  }, [
+    userId
+  ])
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  if (loading) {
+
+    return (
+      <p role="status">
+
+        Loading user data...
+
+      </p>
+    )
+  }
+
+
+  if (error) {
+
+    return (
+      <p role="alert">
+
+        Error:
+        {' '}
+        {error}
+
+      </p>
+    )
+  }
+
+
+  if (!user) {
+
+    return (
+      <p>
+        No user data.
+      </p>
+    )
+  }
+
+
+  return (
+    <section className="user-profile">
+
+      <h1>
+        {user.name}
+      </h1>
+
+      <p>
+        Email:
+        {' '}
+        {user.email}
+      </p>
+
+      <p>
+        Phone:
+        {' '}
+        {user.phone}
+      </p>
+
+    </section>
+  )
+}
+
+
+================================================================================
+API FLOW
+================================================================================
+
+Component Render
+      ↓
+Effect Runs
+      ↓
+Loading = true
+      ↓
+fetch()
+      ↓
+Backend API
+      ↓
+HTTP Response
+      ↓
+response.ok?
+   /       \
+ NO        YES
+ ↓          ↓
+Error     response.json()
+            ↓
+          Data
+            ↓
+        setUser(data)
+            ↓
+          Render
+
+
+================================================================================
+WHY NOT MAKE THE EFFECT CALLBACK async?
+================================================================================
+
+Avoid:
+
+useEffect(
+  async () => {
+
+    const response =
+      await fetch(...)
+
+  },
+  []
+)
+
+
+The Effect callback can return:
+
+• Nothing
+
+or
+
+• A cleanup function
+
+
+An `async` function returns a Promise.
+
+
+Instead:
+
+useEffect(() => {
+
+  const loadData =
+    async () => {
+
+      ...
+    }
+
+
+  loadData()
+
+
+  return () => {
+
+    ...
+
+  }
+
+}, [])
+
+
+================================================================================
+FETCH DOES NOT AUTOMATICALLY REJECT ALL HTTP ERRORS
+================================================================================
+
+A network failure may reject:
+
+fetch()
+
+
+But an HTTP response such as:
+
+404
+
+or:
+
+500
+
+
+still produces a Response object.
+
+
+Therefore check:
+
+if (!response.ok) {
+
+  throw new Error(...)
+
+}
+
+
+================================================================================
+LOADING STATE
+================================================================================
+
+Before request:
+
+loading =
+true
+
+
+After a successful/error response:
+
+loading =
+false
+
+
+UI can display:
+
+Loading user data...
+
+
+================================================================================
+ERROR STATE
+================================================================================
+
+If request fails:
+
+error =
+message
+
+
+UI:
+
+Error:
+Request failed...
+
+
+================================================================================
+SUCCESS STATE
+================================================================================
+
+If request succeeds:
+
+user =
+data
+
+
+UI renders:
+
+user.name
+
+user.email
+
+user.phone
+
+
+================================================================================
+PART 7: useEffect CLEANUP FUNCTION
+================================================================================
+
+WHAT IS CLEANUP?
+--------------------------------------------------------------------------------
+
+An Effect may create a resource that needs to be stopped, removed, disconnected,
+or cancelled.
+
+
+Examples:
+
+• Event listener
+
+• Timer
+
+• Subscription
+
+• WebSocket
+
+• Network request
+
+• MutationObserver
+
+
+Cleanup reverses that setup.
+
+
+================================================================================
+GENERAL PATTERN
+================================================================================
+
+useEffect(() => {
+
+  // Setup
+
+
+  return () => {
+
+    // Cleanup
+
+  }
+
+}, [
+  dependencies
+])
+
+
+================================================================================
+EXAMPLE 1: EVENT LISTENER
+================================================================================
+
+useEffect(() => {
+
+  const handleResize = () => {
+
+    console.log(
+      window.innerWidth
+    )
+  }
+
+
+  window.addEventListener(
+    'resize',
+    handleResize
+  )
+
+
+  return () => {
+
+    window.removeEventListener(
+      'resize',
+      handleResize
+    )
+
+  }
+
+}, [])
+
+
+SETUP:
+
+addEventListener()
+
+
+CLEANUP:
+
+removeEventListener()
+
+
+================================================================================
+EXAMPLE 2: TIMER
+================================================================================
+
+useEffect(() => {
+
+  const timerId =
+    setTimeout(
+      () => {
+
+        console.log(
+          'Timer finished'
+        )
+
+      },
+      1000
+    )
+
+
+  return () => {
+
+    clearTimeout(
+      timerId
+    )
+
+  }
+
+}, [])
+
+
+SETUP:
+
+setTimeout()
+
+
+CLEANUP:
+
+clearTimeout()
+
+
+================================================================================
+EXAMPLE 3: INTERVAL
+================================================================================
+
+useEffect(() => {
+
+  const intervalId =
+    setInterval(
+      () => {
+
+        console.log(
+          'Refresh'
+        )
+
+      },
+      5000
+    )
+
+
+  return () => {
+
+    clearInterval(
+      intervalId
+    )
+
+  }
+
+}, [])
+
+
+================================================================================
+EXAMPLE 4: SUBSCRIPTION
+================================================================================
+
+useEffect(() => {
+
+  const unsubscribe =
+    dataStore.subscribe(
+      handleUpdate
+    )
+
+
+  return () => {
+
+    unsubscribe()
+
+  }
+
+}, [])
+
+
+================================================================================
+EXAMPLE 5: WEBSOCKET
+================================================================================
+
+useEffect(() => {
+
+  const socket =
+    new WebSocket(
+      socketUrl
+    )
+
+
+  return () => {
+
+    socket.close()
+
+  }
+
+}, [
+  socketUrl
+])
+
+
+================================================================================
+EXAMPLE 6: CANCEL FETCH
+================================================================================
+
+useEffect(() => {
+
+  const controller =
+    new AbortController()
+
+
+  const loadData =
+    async () => {
+
+      try {
+
+        const response =
+          await fetch(
+            '/api/data',
+            {
+              signal:
+                controller.signal
+            }
+          )
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            `Request failed: ${response.status}`
+          )
+        }
+
+
+        const data =
+          await response.json()
+
+
+        setData(
+          data
+        )
+
+
+      } catch (error) {
+
+        if (
+          error.name !==
+          'AbortError'
+        ) {
+
+          setError(
+            error.message
+          )
+
+        }
+      }
+    }
+
+
+  loadData()
+
+
+  return () => {
+
+    controller.abort()
+
+  }
+
+}, [])
+
+
+================================================================================
+WHY ABORTING IS USEFUL
+================================================================================
+
+Suppose:
+
+userId = 10
+
+
+Request starts:
+
+GET /api/users/10
+
+
+Before it completes:
+
+userId changes to 20
+
+
+New request:
+
+GET /api/users/20
+
+
+Without proper handling, responses can arrive in an unexpected order.
+
+
+Example:
+
+Request 20
+ ↓
+finishes first
+
+
+Request 10
+ ↓
+finishes later
+
+
+The old response could overwrite newer information if the logic does not guard
+against obsolete requests.
+
+
+Using cleanup with:
+
+AbortController
+
+
+helps cancel the obsolete request.
+
+
+================================================================================
+CLEANUP TABLE
+================================================================================
+
++----------------------+-------------------------+---------------------------+
+| RESOURCE             | SETUP                   | CLEANUP                   |
++----------------------+-------------------------+---------------------------+
+| Event Listener       | addEventListener()      | removeEventListener()     |
+| Timeout              | setTimeout()            | clearTimeout()            |
+| Interval             | setInterval()           | clearInterval()           |
+| Subscription         | subscribe()             | unsubscribe()             |
+| Fetch                | fetch(signal)           | controller.abort()        |
+| WebSocket            | new WebSocket()         | socket.close()            |
+| MutationObserver     | observe()               | disconnect()              |
++----------------------+-------------------------+---------------------------+
+
+
+================================================================================
+CLEANUP DOES NOT MEAN EVERY EFFECT NEEDS CLEANUP
+================================================================================
+
+Example:
+
+useEffect(() => {
+
+  document.title =
+    'Grocery List'
+
+}, [])
+
+
+This may not require cleanup for the application.
+
+
+Cleanup is needed when the Effect establishes something that should be:
+
+• Removed
+
+• Disconnected
+
+• Cancelled
+
+• Reversed
+
+
+================================================================================
+PART 8: useEffect EXECUTION FLOW
+================================================================================
+
+CONCEPTUAL EFFECT LIFECYCLE
+--------------------------------------------------------------------------------
+
+Render
+  ↓
+React Commits Update
+  ↓
+Effect Setup Runs
+
+
+If dependency changes:
+
+Render
+  ↓
+Commit
+  ↓
+Previous Cleanup
+  ↓
+New Effect Setup
+
+
+When component is removed:
+
+Cleanup
+  ↓
+Component No Longer Present
+
+
+================================================================================
+MOUNT EXAMPLE
+================================================================================
+
+Component Appears
+      ↓
+Render
+      ↓
+Commit
+      ↓
+Effect Setup
+
+
+================================================================================
+DEPENDENCY CHANGE
+================================================================================
+
+userId:
+
+10
+ ↓
+20
+
+
+Component Renders with:
+
+userId = 20
+
+
+Then:
+
+Previous Effect Cleanup
+      ↓
+Abort Request for User 10
+      ↓
+New Effect Setup
+      ↓
+Request User 20
+
+
+================================================================================
+UNMOUNT
+================================================================================
+
+Component Removed
+      ↓
+Effect Cleanup
+      ↓
+Cancel/Disconnect Resource
+
+
+================================================================================
+IMPORTANT STRICT MODE NOTE
+================================================================================
+
+During development with React Strict Mode, React may intentionally perform an
+additional setup/cleanup cycle.
+
+
+Conceptually you may observe:
+
+Setup
+ ↓
+Cleanup
+ ↓
+Setup
+
+
+This helps expose Effects whose setup and cleanup logic are not symmetrical.
+
+
+Therefore:
+
+DO NOT ASSUME DUPLICATE DEVELOPMENT LOGS
+ALWAYS MEAN YOUR APPLICATION IS BROKEN.
+
+
+Your Effect should be written so that:
+
+SETUP
+and
+CLEANUP
+
+
+can safely happen as needed.
+
+
+================================================================================
+EFFECT TIMELINE TABLE
+================================================================================
+
++----------------------+-----------------------------------------------+
+| SITUATION            | EFFECT BEHAVIOR                               |
++----------------------+-----------------------------------------------+
+| Component mounts     | Setup after commit                            |
+| Dependency changes   | Old cleanup, then new setup                   |
+| Dependency unchanged | Effect does not rerun for that dependency     |
+| Component unmounts   | Cleanup                                      |
+| Strict Mode dev      | May perform extra setup/cleanup cycle         |
++----------------------+-----------------------------------------------+
+
+
+================================================================================
+PART 9: COMMON useEffect PATTERNS
+================================================================================
+
+PATTERN 1: SYNCHRONIZE ON MOUNT
+--------------------------------------------------------------------------------
+
+useEffect(() => {
+
+  connect()
+
+
+  return () => {
+
+    disconnect()
+
+  }
+
+}, [])
+
+
+================================================================================
+PATTERN 2: SYNCHRONIZE WHEN PROP CHANGES
+================================================================================
+
+useEffect(() => {
+
+  loadUser(
+    userId
+  )
+
+}, [
+  userId
+])
+
+
+================================================================================
+PATTERN 3: EVENT LISTENER
+================================================================================
+
+useEffect(() => {
+
+  window.addEventListener(
+    'resize',
+    handleResize
+  )
+
+
+  return () => {
+
+    window.removeEventListener(
+      'resize',
+      handleResize
+    )
+
+  }
+
+}, [])
+
+
+================================================================================
+PATTERN 4: MULTIPLE DEPENDENCIES
+================================================================================
+
+useEffect(() => {
+
+  loadResults(
+    userId,
+    filter
+  )
+
+}, [
+  userId,
+  filter
+])
+
+
+================================================================================
+PATTERN 5: CONDITIONAL EFFECT LOGIC
+================================================================================
+
+useEffect(() => {
+
+  if (!userId) {
+
+    return
+  }
+
+
+  loadUser(
+    userId
+  )
+
+}, [
+  userId
+])
+
+
+The Hook itself is still called unconditionally.
+
+The logic INSIDE the Effect is conditional.
+
+
+GOOD:
+
+useEffect(() => {
+
+  if (userId) {
+
+    ...
+
+  }
+
+}, [
+  userId
+])
+
+
+AVOID:
+
+if (userId) {
+
+  useEffect(...)
+
+}
+
+
+================================================================================
+PATTERN 6: MULTIPLE EFFECTS
+================================================================================
+
+Use separate Effects when they synchronize with different external systems.
+
+
+Example:
+
+useEffect(() => {
+
+  // User API synchronization
+
+}, [
+  userId
+])
+
+
+useEffect(() => {
+
+  // Resize listener
+
+  return () => {
+
+    // Listener cleanup
+
+  }
+
+}, [])
+
+
+useEffect(() => {
+
+  document.title =
+    user
+      ? `User: ${user.name}`
+      : 'Users'
+
+}, [
+  user
+])
+
+
+================================================================================
+PATTERN 7: LOCAL STORAGE
+================================================================================
+
+useEffect(() => {
+
+  localStorage.setItem(
+    'groceries',
+    JSON.stringify(
+      groceryItems
+    )
+  )
+
+}, [
+  groceryItems
+])
+
+
+Flow:
+
+groceryItems Changes
+      ↓
+Effect
+      ↓
+localStorage Updated
+
+
+================================================================================
+PATTERN 8: WEBSOCKET CONNECTION
+================================================================================
+
+useEffect(() => {
+
+  const socket =
+    new WebSocket(
+      socketUrl
+    )
+
+
+  return () => {
+
+    socket.close()
+
+  }
+
+}, [
+  socketUrl
+])
+
+
+================================================================================
+PART 10: useEffect BEST PRACTICES
+================================================================================
+
+1. KEEP RENDERING PURE
+--------------------------------------------------------------------------------
+
+Avoid:
+
+function Component() {
+
+  fetch(...)
+
+  localStorage.setItem(...)
+
+  window.addEventListener(...)
+
+  return (...)
+}
+
+
+Rendering should calculate JSX.
+
+
+================================================================================
+2. USE EFFECTS FOR EXTERNAL SYNCHRONIZATION
+================================================================================
+
+Good Effect examples:
+
+• HTTP resource tied to component state/props
+
+• Browser event listener
+
+• WebSocket
+
+• Timer
+
+• Third-party widget
+
+• Document API
+
+
+================================================================================
+3. DON'T USE EFFECTS FOR SIMPLE DERIVED VALUES
+================================================================================
+
+Avoid:
+
+const [
+  total,
+  setTotal
+] = useState(0)
+
+
+useEffect(() => {
+
+  setTotal(
+    items.length
+  )
+
+}, [
+  items
+])
+
+
+Better:
+
+const total =
+  items.length
+
+
+Remember Lesson 20:
+
+DERIVE WHAT CAN BE CALCULATED.
+
+
+================================================================================
+4. DON'T USE EFFECT FOR A USER EVENT WHEN AN EVENT HANDLER IS ENOUGH
+================================================================================
+
+Avoid:
+
+const [
+  shouldDelete,
+  setShouldDelete
+] = useState(false)
+
+
+useEffect(() => {
+
+  if (shouldDelete) {
+
+    deleteItem()
+
+  }
+
+}, [
+  shouldDelete
+])
+
+
+when Delete can simply happen from:
+
+handleDelete()
+
+
+================================================================================
+5. INCLUDE REACTIVE DEPENDENCIES
+================================================================================
+
+If an Effect reads:
+
+userId
+
+
+then normally:
+
+userId
+
+
+belongs in the dependency array.
+
+
+Use linting support rather than manually hiding dependency warnings.
+
+
+================================================================================
+6. CLEAN UP EXTERNAL RESOURCES
+================================================================================
+
+If you add:
+
+Listener
+
+
+remove:
+
+Listener
+
+
+If you start:
+
+Timer
+
+
+clear:
+
+Timer
+
+
+If you subscribe:
+
+Subscription
+
+
+unsubscribe.
+
+
+If you start an obsolete cancellable request:
+
+Abort it when appropriate.
+
+
+================================================================================
+7. HANDLE HTTP FAILURES
+================================================================================
+
+Use:
+
+if (!response.ok) {
+
+  throw new Error(...)
+
+}
+
+
+because not every HTTP error causes `fetch()` itself to reject.
+
+
+================================================================================
+8. HANDLE RACE CONDITIONS
+================================================================================
+
+If a changing dependency starts multiple requests:
+
+Old Request
++
+New Request
+
+
+ensure an obsolete response cannot incorrectly replace the latest data.
+
+
+AbortController is useful for fetch-based workflows.
+
+
+================================================================================
+9. KEEP EFFECTS FOCUSED
+================================================================================
+
+Avoid one huge Effect that:
+
+• Fetches data
+
+• Adds listeners
+
+• Updates title
+
+• Creates WebSocket
+
+• Starts timer
+
+
+Prefer separate Effects when each represents a different synchronization
+process.
+
+
+================================================================================
+10. DON'T OVERUSE useEffect
+================================================================================
+
+Ask:
+
+"Am I synchronizing with something outside React?"
+
+
+If:
+
+NO
+
+
+you might not need an Effect.
+
+
+Examples often NOT requiring useEffect:
+
+• Calculating totals
+
+• Filtering an array for rendering
+
+• Handling a button click
+
+• Updating state from an input event
+
+• Formatting data for display
+
+
+================================================================================
+11. DON'T MAKE THE EFFECT FUNCTION async
+================================================================================
+
+Avoid:
+
+useEffect(
+  async () => {
+
+    ...
+
+  },
+  []
+)
+
+
+Instead:
+
+useEffect(() => {
+
+  const run =
+    async () => {
+
+      ...
+    }
+
+
+  run()
+
+}, [])
+
+
+================================================================================
+12. REMOVE DEBUG LOGGING WHEN DONE
+================================================================================
+
+Temporary:
+
+console.log(
+  'Fetching'
+)
+
+
+can be helpful.
+
+
+But permanent excessive logging:
+
+• Creates noise
+
+• Makes debugging harder
+
+• Can expose unnecessary application details
+
+
+Keep production behavior deliberate.
+
+
+================================================================================
+BEST PRACTICES TABLE
+================================================================================
+
++--------------------------+--------------------------------------------+
+| PRACTICE                 | REASON                                     |
++--------------------------+--------------------------------------------+
+| Keep render pure         | Predictable rendering                     |
+| Use Effects for sync     | Clear external-system boundary            |
+| Include dependencies     | Correct synchronization                   |
+| Cleanup resources        | Prevent stale work/resources              |
+| Check response.ok        | Handle HTTP failures                      |
+| Abort obsolete requests  | Avoid stale/racing fetches                |
+| Separate concerns        | Easier maintenance                        |
+| Derive simple values     | Avoid duplicated state                    |
+| Use event handlers       | Best for user-triggered operations        |
+| Avoid unnecessary Effect | Simpler components                        |
++--------------------------+--------------------------------------------+
+
+
+================================================================================
+COMMON MISTAKES
+================================================================================
+
+MISTAKE 1:
+FETCHING DURING RENDER
+--------------------------------------------------------------------------------
+
+Wrong:
+
+function Component() {
+
+  fetch(...)
+
+  return ...
+}
+
+
+================================================================================
+MISTAKE 2:
+MISSING REQUIRED DEPENDENCY
+================================================================================
+
+Effect reads:
+
+userId
+
+
+but dependency array:
+
+[]
+
+
+Result:
+
+Effect can synchronize using stale assumptions.
+
+
+================================================================================
+MISTAKE 3:
+STATE LOOP
+================================================================================
+
+useEffect(() => {
+
+  setCount(
+    count + 1
+  )
+
+}, [
+  count
+])
+
+
+Effect changes the dependency that triggers itself.
+
+
+================================================================================
+MISTAKE 4:
+NO CLEANUP
+================================================================================
+
+Effect:
+
+window.addEventListener(...)
+
+
+No:
+
+removeEventListener(...)
+
+
+Result:
+
+Unnecessary/stale listeners can remain.
+
+
+================================================================================
+MISTAKE 5:
+ASYNC EFFECT CALLBACK
+================================================================================
+
+Avoid:
+
+useEffect(
+  async () => {
+    ...
+  },
+  []
+)
+
+
+================================================================================
+MISTAKE 6:
+IGNORING HTTP STATUS
+================================================================================
+
+Avoid:
+
+const response =
+  await fetch(url)
+
+
+const data =
+  await response.json()
+
+
+without considering:
+
+response.ok
+
+
+================================================================================
+MISTAKE 7:
+USING EFFECT FOR DERIVED STATE
+================================================================================
+
+Avoid:
+
+Effect
+ ↓
+Calculate Item Count
+ ↓
+setItemCount()
+
+
+when:
+
+const itemCount =
+  items.length
+
+
+is sufficient.
+
+
+================================================================================
+PART 11: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE ACCOMPLISHED
+--------------------------------------------------------------------------------
+
+✓ Understood side effects
+
+✓ Understood React Hooks
+
+✓ Learned useEffect syntax
+
+✓ Learned dependency arrays
+
+✓ Learned Effect setup
+
+✓ Learned Effect cleanup
+
+✓ Learned backend fetching
+
+✓ Added loading state
+
+✓ Added error state
+
+✓ Checked HTTP responses
+
+✓ Used AbortController
+
+✓ Understood request cancellation
+
+✓ Understood race-condition risk
+
+✓ Understood development Strict Mode behavior
+
+✓ Learned when useEffect is unnecessary
+
+✓ Separated rendering from external synchronization
+
+
+================================================================================
+CRITICAL useEffect CONCEPTS
+================================================================================
+
+IMPORT:
+--------------------------------------------------------------------------------
+
+import {
+  useEffect,
+  useState
+} from 'react'
+
+
+BASIC EFFECT:
+--------------------------------------------------------------------------------
+
+useEffect(() => {
+
+  // External synchronization
+
+}, [
+  dependencies
+])
+
+
+CLEANUP:
+--------------------------------------------------------------------------------
+
+useEffect(() => {
+
+  // Setup
+
+
+  return () => {
+
+    // Cleanup
+
+  }
+
+}, [
+  dependencies
+])
+
+
+================================================================================
+DEPENDENCY MEMORY
+================================================================================
+
+NO ARRAY:
+
+Effect after every relevant render
+
+
+EMPTY ARRAY:
+
+No changing reactive dependencies
+
+
+ONE DEPENDENCY:
+
+[userId]
+
+
+Effect responds to:
+
+userId
+
+
+MULTIPLE:
+
+[userId, filter]
+
+
+Effect responds to:
+
+userId
+
+or:
+
+filter
+
+
+================================================================================
+API FETCH PATTERN
+================================================================================
+
+useEffect(() => {
+
+  const controller =
+    new AbortController()
+
+
+  const fetchData =
+    async () => {
+
+      try {
+
+        setLoading(true)
+
+        setError(null)
+
+
+        const response =
+          await fetch(
+            `/api/data/${id}`,
+            {
+              signal:
+                controller.signal
+            }
+          )
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            `Request failed: ${response.status}`
+          )
+        }
+
+
+        const result =
+          await response.json()
+
+
+        setData(
+          result
+        )
+
+
+      } catch (error) {
+
+        if (
+          error.name ===
+          'AbortError'
+        ) {
+
+          return
+        }
+
+
+        setError(
+          error instanceof Error
+            ? error.message
+            : 'Request failed'
+        )
+
+
+      } finally {
+
+        if (
+          !controller.signal.aborted
+        ) {
+
+          setLoading(false)
+        }
+
+      }
+    }
+
+
+  fetchData()
+
+
+  return () => {
+
+    controller.abort()
+
+  }
+
+}, [
+  id
+])
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++-------------------------+---------------------------------------------+
+| CONCEPT                 | REMEMBER                                    |
++-------------------------+---------------------------------------------+
+| Side Effect             | Interaction outside pure rendering         |
+| Hook                    | Function using React capabilities           |
+| useEffect               | External synchronization                    |
+| Dependency              | Reactive value used by Effect               |
+| Cleanup                 | Reverse/stop setup work                     |
+| fetch()                 | HTTP request                                |
+| response.ok             | HTTP success check                          |
+| AbortController         | Cancel obsolete fetch                       |
+| loading                 | Request-in-progress UI                      |
+| error                   | Failure state                               |
+| Event Handler           | User-triggered work                         |
+| Derived Value           | Usually calculate directly                 |
++-------------------------+---------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - EFFECT FLOW
+================================================================================
+
+Render
+  ↓
+Commit
+  ↓
+Effect Setup
+  ↓
+External System
+
+
+Dependency Changes
+  ↓
+Render
+  ↓
+Commit
+  ↓
+Previous Cleanup
+  ↓
+New Setup
+
+
+Unmount
+  ↓
+Cleanup
+
+
+================================================================================
+QUICK REVISION - BACKEND FLOW
+================================================================================
+
+React Component
+      ↓
+useEffect
+      ↓
+fetch()
+      ↓
+Backend API
+      ↓
+HTTP Response
+      ↓
+response.ok
+      ↓
+JSON
+      ↓
+setState()
+      ↓
+Render
+      ↓
+UI
+
+
+================================================================================
+QUICK REVISION - REQUEST STATES
+================================================================================
+
+REQUEST STARTS:
+
+loading = true
+
+error = null
+
+
+SUCCESS:
+
+data = response
+
+loading = false
+
+
+FAILURE:
+
+error = message
+
+loading = false
+
+
+ABORT:
+
+Ignore obsolete request result
+
+
+================================================================================
+QUICK REVISION - CLEANUP
+================================================================================
+
+SETUP:
+
+addEventListener
+      ↓
+CLEANUP:
+removeEventListener
+
+
+SETUP:
+
+setTimeout
+      ↓
+CLEANUP:
+clearTimeout
+
+
+SETUP:
+
+subscribe
+      ↓
+CLEANUP:
+unsubscribe
+
+
+SETUP:
+
+fetch + signal
+      ↓
+CLEANUP:
+abort()
+
+
+SETUP:
+
+WebSocket
+      ↓
+CLEANUP:
+close()
+
+
+================================================================================
+WHEN TO USE useEffect
+================================================================================
+
+GOOD CANDIDATES:
+
+React
+ ↓
+External System
+
+
+Examples:
+
+API
+
+WebSocket
+
+Timer
+
+Browser Listener
+
+Third-Party Widget
+
+Document API
+
+
+================================================================================
+WHEN YOU MAY NOT NEED useEffect
+================================================================================
+
+CALCULATING:
+
+totalCost
+
+
+Use:
+
+reduce()
+
+
+NOT:
+
+useEffect + setTotalCost
+
+
+FILTERING:
+
+purchasedItems
+
+
+Use:
+
+filter()
+
+
+NOT:
+
+useEffect + setPurchasedItems
+
+
+BUTTON ACTION:
+
+Delete
+
+
+Use:
+
+onClick
+
+
+NOT:
+
+state flag + useEffect
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+EFFECT:
+
+RENDER
+ ↓
+COMMIT
+ ↓
+SYNCHRONIZE
+
+
+DEPENDENCY CHANGE:
+
+OLD CLEANUP
+ ↓
+NEW SETUP
+
+
+UNMOUNT:
+
+CLEANUP
+
+
+FETCH:
+
+Effect
+ ↓
+HTTP Request
+ ↓
+Response
+ ↓
+State
+ ↓
+Render
+
+
+CANCEL:
+
+AbortController
+ ↓
+signal
+ ↓
+fetch
+ ↓
+cleanup
+ ↓
+abort()
+
+
+DERIVED DATA:
+
+Existing State
+ ↓
+Calculate Directly
+
+
+USER ACTION:
+
+Event
+ ↓
+Event Handler
+
+
+MOST IMPORTANT RULE:
+
+USE useEffect TO SYNCHRONIZE REACT
+WITH AN EXTERNAL SYSTEM.
+
+DON'T USE useEffect FOR EVERYTHING
+THAT HAPPENS AFTER A RENDER.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Connect GroceryList to a backend API
+
+2. Replace fake grocery data with GET /api/groceries
+
+3. Add loading UI
+
+4. Add backend error UI
+
+5. POST a new grocery item
+
+6. PATCH purchased status
+
+7. DELETE grocery items on the backend
+
+8. Keep server and client state synchronized
+
+9. Handle request failures
+
+10. Decide how optimistic vs confirmed updates should work
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The core model is:
+
+REACT RENDERING
+      ↓
+DESCRIBES UI
+
+
+useEffect
+      ↓
+SYNCHRONIZES WITH EXTERNAL SYSTEMS
+
+
+For backend data:
+
+COMPONENT
+    ↓
+useEffect
+    ↓
+HTTP REQUEST
+    ↓
+BACKEND
+    ↓
+HTTP RESPONSE
+    ↓
+STATE UPDATE
+    ↓
+RENDER
+    ↓
+UPDATED UI
+
+
+And always remember:
+
+EVENT-DRIVEN WORK
+      ↓
+EVENT HANDLER
+
+
+EXTERNAL STATE SYNCHRONIZATION
+      ↓
+useEffect
+
+
+DERIVED UI DATA
+      ↓
+CALCULATE DIRECTLY
+
+
+================================================================================
+END OF LESSON 1
+CONNECTING TO THE BACK END
+UNDERSTANDING SIDE EFFECTS, HOOKS AND useEffect
+================================================================================
