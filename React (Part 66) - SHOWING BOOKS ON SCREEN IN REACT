@@ -1,0 +1,1572 @@
+================================================================================
+LESSON 8: SHOWING BOOKS ON SCREEN IN REACT
+================================================================================
+
+
+LESSON OVERVIEW
+================================================================================
+
+This lesson explains how to display books fetched from an API on the screen.
+
+Main concepts:
+
+- Store books in React state
+- Use map() to loop through books
+- Extract information from volumeInfo
+- Create one UI card for each book
+- Display title, author, publisher, description, and image
+- Handle missing API fields
+- Use optional chaining
+- Provide fallback values
+- Use Bootstrap cards and responsive grids
+- Handle loading, error, no-results, and success states
+
+
+================================================================================
+1. WHAT DOES "SHOWING BOOKS ON SCREEN" MEAN?
+================================================================================
+
+The API gives us book data as JavaScript objects.
+
+Example:
+
+{
+  "items": [
+    {
+      "id": "abc123",
+      "volumeInfo": {
+        "title": "JavaScript: The Good Parts",
+        "authors": ["Douglas Crockford"],
+        "publisher": "O'Reilly Media",
+        "publishedDate": "2008-05-01",
+        "description": "Book description...",
+        "pageCount": 172,
+        "categories": ["Computers"],
+        "imageLinks": {
+          "thumbnail": "book-image-url"
+        },
+        "previewLink": "google-books-preview-url"
+      }
+    }
+  ]
+}
+
+
+Our job is to convert this data into UI elements.
+
+Flow:
+
+API Response
+     |
+     v
+data.items
+     |
+     v
+setBooks(bookList)
+     |
+     v
+books State
+     |
+     v
+books.map(...)
+     |
+     v
+Create Book Cards
+     |
+     v
+Display on Screen
+
+
+================================================================================
+2. UNDERSTANDING THE BOOK OBJECT
+================================================================================
+
+Most useful information is inside:
+
+book.volumeInfo
+
+
+Book information:
+
+--------------------------------+--------------------------------------+------------------
+Information                     | Property                             | Data Type
+--------------------------------+--------------------------------------+------------------
+Book ID                         | book.id                              | String
+Title                           | book.volumeInfo.title                | String
+Authors                         | book.volumeInfo.authors              | Array
+Publisher                       | book.volumeInfo.publisher            | String
+Published Date                  | book.volumeInfo.publishedDate        | String
+Description                     | book.volumeInfo.description          | String
+Page Count                      | book.volumeInfo.pageCount            | Number
+Categories                      | book.volumeInfo.categories           | Array
+Thumbnail                       | book.volumeInfo.imageLinks.thumbnail | String
+Preview Link                    | book.volumeInfo.previewLink          | String
+--------------------------------+--------------------------------------+------------------
+
+
+Examples:
+
+book.volumeInfo.title
+
+-> "JavaScript: The Good Parts"
+
+
+book.volumeInfo.authors
+
+-> ["Douglas Crockford"]
+
+
+book.volumeInfo.pageCount
+
+-> 172
+
+
+================================================================================
+3. STORE BOOKS IN STATE
+================================================================================
+
+Create the books state:
+
+const [books, setBooks] = useState([]);
+
+
+Explanation:
+
+- books contains the books returned by the API.
+- setBooks() updates the books state.
+- [] means the application initially contains no books.
+
+
+After API response:
+
+const data = await response.json();
+
+const bookList = data.items || [];
+
+setBooks(bookList);
+
+
+Flow:
+
+API
+ |
+ v
+data.items
+ |
+ v
+setBooks()
+ |
+ v
+books State Updated
+ |
+ v
+React Re-renders
+
+
+================================================================================
+4. USE map() TO DISPLAY BOOKS
+================================================================================
+
+map() is commonly used in React to convert an array into JSX elements.
+
+Example:
+
+{books.map((book) => (
+
+  <div key={book.id}>
+
+    <h3>
+      {book.volumeInfo?.title}
+    </h3>
+
+  </div>
+
+))}
+
+
+Explanation:
+
+- books is the array containing book objects.
+- map() loops through every book.
+- book represents the current book.
+- JSX is returned for every book.
+- React displays the generated JSX elements.
+- key={book.id} gives React a stable identifier.
+
+
+================================================================================
+5. HOW map() WORKS
+================================================================================
+
+Suppose books contains:
+
+books = [
+  { id: '1', title: 'Java' },
+  { id: '2', title: 'React' },
+  { id: '3', title: 'Spring Boot' }
+];
+
+
+map() processes:
+
+Iteration 1
+-> Java
+
+Iteration 2
+-> React
+
+Iteration 3
+-> Spring Boot
+
+
+Conceptually:
+
+books.map(book => createCard(book))
+
+
+Result:
+
+Book 1 -> Card 1
+
+Book 2 -> Card 2
+
+Book 3 -> Card 3
+
+
+================================================================================
+6. WHY DOES REACT NEED A key?
+================================================================================
+
+Each element generated from map() should have a unique key.
+
+Recommended:
+
+key={book.id}
+
+
+Example:
+
+{books.map((book) => (
+
+  <div key={book.id}>
+    {book.volumeInfo?.title}
+  </div>
+
+))}
+
+
+Why?
+
+- Helps React identify individual list items.
+- Helps React efficiently update the UI.
+- Prevents unnecessary list-rendering problems.
+
+
+Prefer:
+
+key={book.id}
+
+
+Instead of:
+
+key={index}
+
+
+Reason:
+
+- book.id represents the actual book.
+- Array positions can change when data changes.
+- A stable API ID is usually a better React key.
+
+
+================================================================================
+7. SIMPLE BOOK DISPLAY
+================================================================================
+
+Example:
+
+<div className="row">
+
+  {books.map((book) => (
+
+    <div
+      key={book.id}
+      className="col-md-4 mb-4"
+    >
+
+      <div className="card">
+
+        <div className="card-body">
+
+          <h5 className="card-title">
+
+            {book.volumeInfo?.title || 'No Title'}
+
+          </h5>
+
+
+          <p className="card-text">
+
+            {book.volumeInfo?.authors?.join(', ')
+              || 'Unknown Author'}
+
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  ))}
+
+</div>
+
+
+WHAT THE CODE DOES
+--------------------------------------------------------------------------------
+
+- books.map() loops through the books array.
+
+- key={book.id} uniquely identifies each card.
+
+- col-md-4 creates a Bootstrap grid column.
+
+- mb-4 adds spacing below each card.
+
+- card creates the Bootstrap card.
+
+- card-body contains the actual book information.
+
+- book.volumeInfo?.title gets the book title.
+
+- || 'No Title' provides a fallback when title is unavailable.
+
+- authors is an array.
+
+- join(', ') converts the authors array into readable text.
+
+
+Example:
+
+["John Smith", "David Miller"]
+
+becomes:
+
+John Smith, David Miller
+
+
+================================================================================
+8. HANDLING MISSING API DATA
+================================================================================
+
+Not every book returned by an API contains every field.
+
+One book may have:
+
+- Title
+- Authors
+- Description
+- Image
+
+Another may only contain:
+
+- Title
+
+
+Therefore this can be dangerous:
+
+book.volumeInfo.authors.join(', ')
+
+
+If authors is missing, the application can fail.
+
+
+Use optional chaining:
+
+book.volumeInfo?.authors?.join(', ')
+
+
+Add a fallback:
+
+book.volumeInfo?.authors?.join(', ')
+  || 'Unknown Author'
+
+
+================================================================================
+9. OPTIONAL CHAINING
+================================================================================
+
+Optional chaining uses:
+
+?.
+
+
+Example:
+
+book.volumeInfo?.title
+
+
+Meaning:
+
+"If volumeInfo exists, access title."
+
+
+Comparison:
+
+---------------------------------------------+---------------------------+-----------------
+Code                                         | Missing Data              | Result
+---------------------------------------------+---------------------------+-----------------
+book.volumeInfo.title                        | volumeInfo missing        | Runtime error
+book.volumeInfo?.title                       | volumeInfo missing        | undefined
+book.volumeInfo?.title || 'No Title'         | title missing             | No Title
+book.volumeInfo?.authors?.join(', ')         | authors missing           | undefined
+book.volumeInfo?.authors?.join(', ')         | authors exists            | Joined authors
+---------------------------------------------+---------------------------+-----------------
+
+
+Recommended:
+
+{book.volumeInfo?.title || 'No Title'}
+
+{book.volumeInfo?.authors?.join(', ')
+  || 'Unknown Author'}
+
+
+================================================================================
+10. DISPLAY THE BOOK COVER
+================================================================================
+
+The thumbnail can normally be accessed from:
+
+book.volumeInfo.imageLinks.thumbnail
+
+
+Because imageLinks may be missing, check it first:
+
+{book.volumeInfo?.imageLinks?.thumbnail && (
+
+  <img
+    src={book.volumeInfo.imageLinks.thumbnail}
+    className="card-img-top"
+    alt={book.volumeInfo?.title || 'Book cover'}
+  />
+
+)}
+
+
+Explanation:
+
+- imageLinks?.thumbnail safely checks for an image.
+- && means render the image only when a thumbnail exists.
+- src contains the book image URL.
+- alt provides accessible alternative text.
+- card-img-top applies Bootstrap image styling.
+
+
+Flow:
+
+Thumbnail Exists?
+      |
+   +--+--+
+   |     |
+  Yes    No
+   |     |
+   v     v
+Show    Don't
+Image   Render Image
+
+
+================================================================================
+11. DISPLAY AUTHORS
+================================================================================
+
+The API returns authors as an array.
+
+Example:
+
+"authors": [
+  "Robert C. Martin",
+  "Michael Feathers"
+]
+
+
+Convert the array to text:
+
+book.volumeInfo?.authors?.join(', ')
+
+
+Result:
+
+Robert C. Martin, Michael Feathers
+
+
+Recommended JSX:
+
+<p>
+
+  <strong>Author:</strong>{' '}
+
+  {book.volumeInfo?.authors?.join(', ')
+    || 'Unknown Author'}
+
+</p>
+
+
+================================================================================
+12. DISPLAY DESCRIPTION
+================================================================================
+
+Descriptions may be very long.
+
+Instead of displaying the entire description:
+
+{book.volumeInfo?.description}
+
+
+Display only part of it:
+
+{book.volumeInfo?.description
+  ? `${book.volumeInfo.description.substring(0, 150)}...`
+  : 'No description available'}
+
+
+Explanation:
+
+- Checks whether description exists.
+- substring(0, 150) keeps the first 150 characters.
+- Adds "..." after truncated text.
+- Displays fallback text when description is missing.
+
+
+================================================================================
+13. DISPLAY OPTIONAL INFORMATION
+================================================================================
+
+Some information should only be shown when available.
+
+
+Publisher:
+
+{book.volumeInfo?.publisher && (
+
+  <p>
+    <strong>Publisher:</strong>{' '}
+    {book.volumeInfo.publisher}
+  </p>
+
+)}
+
+
+Published Date:
+
+{book.volumeInfo?.publishedDate && (
+
+  <p>
+    <strong>Published:</strong>{' '}
+    {book.volumeInfo.publishedDate}
+  </p>
+
+)}
+
+
+Page Count:
+
+{book.volumeInfo?.pageCount && (
+
+  <p>
+    <strong>Pages:</strong>{' '}
+    {book.volumeInfo.pageCount}
+  </p>
+
+)}
+
+
+Categories:
+
+{book.volumeInfo?.categories && (
+
+  <p>
+
+    <strong>Category:</strong>{' '}
+
+    {book.volumeInfo.categories.join(', ')}
+
+  </p>
+
+)}
+
+
+================================================================================
+14. DISPLAY GOOGLE BOOKS PREVIEW LINK
+================================================================================
+
+Some books contain:
+
+book.volumeInfo.previewLink
+
+
+Render the link only when it exists:
+
+{book.volumeInfo?.previewLink && (
+
+  <a
+    href={book.volumeInfo.previewLink}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="btn btn-primary btn-sm"
+  >
+    View Book
+  </a>
+
+)}
+
+
+Explanation:
+
+- href contains the preview URL.
+- target="_blank" opens it in another tab.
+- rel="noopener noreferrer" is appropriate for links opening a new tab.
+- btn creates Bootstrap button styling.
+- btn-primary gives the button the primary color.
+- btn-sm creates a smaller button.
+
+
+================================================================================
+15. BOOTSTRAP RESPONSIVE GRID
+================================================================================
+
+Bootstrap uses a 12-column grid.
+
+Example:
+
+<div className="row">
+
+  <div className="col-md-4">
+    Book
+  </div>
+
+</div>
+
+
+col-md-4 means:
+
+12 / 4 = 3
+
+
+Therefore:
+
+3 cards per row at the md breakpoint and above.
+
+
+Common layouts:
+
+-------------+------------------------+-----------------------------
+Class        | Width                  | Typical Layout
+-------------+------------------------+-----------------------------
+col-12       | 12 / 12 = 100%        | 1 card per row
+col-sm-6     |  6 / 12 = 50%         | 2 cards per row
+col-md-4     |  4 / 12 = 33.33%      | 3 cards per row
+col-lg-3     |  3 / 12 = 25%         | 4 cards per row
+-------------+------------------------+-----------------------------
+
+
+A good responsive combination:
+
+className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"
+
+
+Meaning:
+
+Mobile:
+-> 1 book per row
+
+Small:
+-> 2 books per row
+
+Medium:
+-> 3 books per row
+
+Large:
+-> 4 books per row
+
+
+================================================================================
+16. BOOTSTRAP BOOK CARD
+================================================================================
+
+Recommended structure:
+
+<div className="card h-100 shadow-sm">
+
+  <img ... />
+
+  <div className="card-body d-flex flex-column">
+
+    <h5 className="card-title">
+      Title
+    </h5>
+
+    <p className="card-text">
+      Author
+    </p>
+
+    <p className="card-text">
+      Description
+    </p>
+
+    <a className="btn btn-primary mt-auto">
+      View Book
+    </a>
+
+  </div>
+
+</div>
+
+
+Bootstrap Classes:
+
+----------------------+-------------------------------------------------
+Class                 | Purpose
+----------------------+-------------------------------------------------
+card                  | Creates Bootstrap card
+card-body             | Main content section
+card-title            | Styles title
+card-text             | Styles text
+card-img-top          | Styles image at top
+h-100                 | Makes cards equal available height
+shadow-sm             | Adds small shadow
+d-flex                | Enables flexbox
+flex-column           | Arranges content vertically
+mt-auto               | Pushes button toward bottom
+mb-4                  | Adds bottom spacing
+----------------------+-------------------------------------------------
+
+
+================================================================================
+17. BOOK CARD VISUAL STRUCTURE
+================================================================================
+
++---------------------------------------+
+|                                       |
+|             BOOK IMAGE                |
+|                                       |
++---------------------------------------+
+|                                       |
+| Title: Clean Code                     |
+|                                       |
+| Author: Robert C. Martin              |
+|                                       |
+| Publisher: Prentice Hall              |
+| Published: 2008                       |
+| Pages: 464                            |
+|                                       |
+| Description: Even bad code can...     |
+|                                       |
+|              [View Book]              |
+|                                       |
++---------------------------------------+
+
+
+================================================================================
+18. CONDITIONAL RENDERING STATES
+================================================================================
+
+The application should normally handle four UI states:
+
+1. Loading
+2. Error
+3. No Results
+4. Success
+
+
+----------------+--------------------------------------+-----------------------
+State           | Condition                            | UI
+----------------+--------------------------------------+-----------------------
+Loading         | isLoading                            | Loading books...
+Error           | error                                | Error message
+No Results      | !isLoading && !error && !books.length| No books found
+Success         | !isLoading && !error && books.length | Book cards
+----------------+--------------------------------------+-----------------------
+
+
+================================================================================
+19. LOADING STATE
+================================================================================
+
+{isLoading && (
+
+  <div className="alert alert-info">
+    Loading books...
+  </div>
+
+)}
+
+
+Purpose:
+
+- Tells the user that data is being fetched.
+- Avoids displaying an apparently empty screen.
+
+
+================================================================================
+20. ERROR STATE
+================================================================================
+
+{error && (
+
+  <div className="alert alert-danger">
+
+    Error: {error}
+
+  </div>
+
+)}
+
+
+Purpose:
+
+- Displays API/network errors.
+- Makes failures understandable to the user.
+
+
+================================================================================
+21. NO RESULTS STATE
+================================================================================
+
+{!isLoading &&
+ !error &&
+ books.length === 0 && (
+
+  <div className="alert alert-warning">
+
+    No books found.
+    Try another search.
+
+  </div>
+
+)}
+
+
+Purpose:
+
+- Distinguishes "no results" from an application error.
+
+
+================================================================================
+22. SUCCESS STATE
+================================================================================
+
+{!isLoading &&
+ !error &&
+ books.length > 0 && (
+
+  <div className="row">
+
+    {books.map((book) => (
+
+      // Book card
+
+    ))}
+
+  </div>
+
+)}
+
+
+Purpose:
+
+- Displays cards only when valid book results are available.
+
+
+================================================================================
+23. COMPLETE BOOK DISPLAY CODE
+================================================================================
+
+function BookList({
+  books,
+  isLoading,
+  error,
+  searchTerm
+}) {
+
+  if (isLoading) {
+
+    return (
+      <div className="alert alert-info">
+        Loading books...
+      </div>
+    );
+
+  }
+
+
+  if (error) {
+
+    return (
+      <div className="alert alert-danger">
+        Error: {error}
+      </div>
+    );
+
+  }
+
+
+  if (books.length === 0) {
+
+    return (
+      <div className="alert alert-warning">
+
+        No books found for "{searchTerm}".
+
+      </div>
+    );
+
+  }
+
+
+  return (
+
+    <div>
+
+      <p className="text-muted">
+
+        Found <strong>{books.length}</strong> books
+
+      </p>
+
+
+      <div className="row">
+
+        {books.map((book) => {
+
+          const info = book.volumeInfo || {};
+
+          return (
+
+            <div
+              key={book.id}
+              className="
+                col-12
+                col-sm-6
+                col-md-4
+                col-lg-3
+                mb-4
+              "
+            >
+
+              <div className="card h-100 shadow-sm">
+
+
+                {info.imageLinks?.thumbnail && (
+
+                  <img
+                    src={info.imageLinks.thumbnail}
+                    className="card-img-top"
+                    alt={info.title || 'Book cover'}
+                    style={{
+                      height: '250px',
+                      objectFit: 'cover'
+                    }}
+                  />
+
+                )}
+
+
+                <div className="card-body d-flex flex-column">
+
+
+                  <h5 className="card-title">
+
+                    {info.title || 'No Title'}
+
+                  </h5>
+
+
+                  <p className="card-text text-muted">
+
+                    <strong>Author:</strong>{' '}
+
+                    {info.authors?.join(', ')
+                      || 'Unknown Author'}
+
+                  </p>
+
+
+                  {info.publisher && (
+
+                    <p className="card-text small">
+
+                      <strong>Publisher:</strong>{' '}
+                      {info.publisher}
+
+                    </p>
+
+                  )}
+
+
+                  {info.publishedDate && (
+
+                    <p className="card-text small">
+
+                      <strong>Published:</strong>{' '}
+                      {info.publishedDate}
+
+                    </p>
+
+                  )}
+
+
+                  {info.pageCount && (
+
+                    <p className="card-text small">
+
+                      <strong>Pages:</strong>{' '}
+                      {info.pageCount}
+
+                    </p>
+
+                  )}
+
+
+                  {info.categories?.length > 0 && (
+
+                    <p className="card-text small">
+
+                      <strong>Category:</strong>{' '}
+
+                      {info.categories.join(', ')}
+
+                    </p>
+
+                  )}
+
+
+                  <p className="card-text small flex-grow-1">
+
+                    {info.description
+                      ? `${info.description.substring(0, 150)}...`
+                      : 'No description available'}
+
+                  </p>
+
+
+                  {info.previewLink && (
+
+                    <a
+                      href={info.previewLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary btn-sm mt-auto"
+                    >
+
+                      View on Google Books
+
+                    </a>
+
+                  )}
+
+                </div>
+
+              </div>
+
+            </div>
+
+          );
+
+        })}
+
+      </div>
+
+    </div>
+
+  );
+
+}
+
+export default BookList;
+
+
+================================================================================
+24. WHAT THE COMPLETE CODE DOES
+================================================================================
+
+BookList Props:
+--------------------------------------------------------------------------------
+
+- books
+  Contains books returned by the API.
+
+- isLoading
+  Indicates whether the API request is still running.
+
+- error
+  Contains an error message when fetching fails.
+
+- searchTerm
+  Contains the current book search.
+
+
+Loading Check:
+--------------------------------------------------------------------------------
+
+if (isLoading)
+
+- Stops normal book rendering.
+- Displays the loading message.
+
+
+Error Check:
+--------------------------------------------------------------------------------
+
+if (error)
+
+- Displays the error.
+- Prevents invalid results from being displayed.
+
+
+Empty Check:
+--------------------------------------------------------------------------------
+
+if (books.length === 0)
+
+- Detects an empty search result.
+- Displays "No books found."
+
+
+map():
+--------------------------------------------------------------------------------
+
+books.map((book) => ...)
+
+- Runs once for every book.
+- Generates one card for every book.
+
+
+volumeInfo:
+--------------------------------------------------------------------------------
+
+const info = book.volumeInfo || {};
+
+- Creates a shorter variable for book data.
+- Prevents repeated book.volumeInfo references.
+
+
+Book ID:
+--------------------------------------------------------------------------------
+
+key={book.id}
+
+- Provides React with a stable list identifier.
+
+
+Image:
+--------------------------------------------------------------------------------
+
+info.imageLinks?.thumbnail
+
+- Displays the image only if one exists.
+
+
+Title:
+--------------------------------------------------------------------------------
+
+info.title || 'No Title'
+
+- Displays the real title when available.
+- Otherwise displays "No Title."
+
+
+Authors:
+--------------------------------------------------------------------------------
+
+info.authors?.join(', ') || 'Unknown Author'
+
+- Converts author array into readable text.
+- Provides fallback when authors are missing.
+
+
+Description:
+--------------------------------------------------------------------------------
+
+info.description.substring(0, 150)
+
+- Truncates long descriptions.
+
+
+Preview:
+--------------------------------------------------------------------------------
+
+info.previewLink
+
+- Displays the Google Books button only when a preview URL exists.
+
+
+Responsive Grid:
+--------------------------------------------------------------------------------
+
+col-12 col-sm-6 col-md-4 col-lg-3
+
+- Mobile  -> 1 card
+- Small   -> 2 cards
+- Medium  -> 3 cards
+- Large   -> 4 cards
+
+
+================================================================================
+25. USING BOOKLIST FROM APP.JSX
+================================================================================
+
+Import:
+
+import BookList from './components/BookList';
+
+
+Use:
+
+<BookList
+  books={books}
+  isLoading={isLoading}
+  error={error}
+  searchTerm={searchTerm}
+/>
+
+
+Component Structure:
+
+App
+ |
+ +-- NavBar
+ |
+ +-- SearchBar
+ |
+ +-- BookList
+ |     |
+ |     +-- Book Card 1
+ |     +-- Book Card 2
+ |     +-- Book Card 3
+ |     +-- ...
+ |
+ +-- Footer
+
+
+Benefits:
+
+- App.jsx remains cleaner.
+- Rendering logic stays separate.
+- BookList can be reused.
+- Easier to maintain and test.
+
+
+================================================================================
+26. API DATA TO SCREEN - COMPLETE FLOW
+================================================================================
+
+Google Books API
+       |
+       v
+JSON Response
+       |
+       v
+data.items
+       |
+       v
+setBooks(data.items || [])
+       |
+       v
+books State
+       |
+       v
+React Re-renders
+       |
+       v
+<BookList books={books} />
+       |
+       v
+books.map()
+       |
+       +--> Book 1 -> Card
+       |
+       +--> Book 2 -> Card
+       |
+       +--> Book 3 -> Card
+       |
+       +--> Book N -> Card
+       |
+       v
+Responsive Bootstrap Grid
+       |
+       v
+Books Displayed
+
+
+================================================================================
+27. COMMON PROBLEMS
+================================================================================
+
+PROBLEM: NOTHING DISPLAYS
+--------------------------------------------------------------------------------
+
+Check:
+
+console.log(books);
+
+Verify that books contains data.
+
+
+PROBLEM: "Cannot read properties of undefined"
+--------------------------------------------------------------------------------
+
+Cause:
+
+An API property is missing.
+
+Bad:
+
+book.volumeInfo.authors.join(', ')
+
+
+Better:
+
+book.volumeInfo?.authors?.join(', ')
+  || 'Unknown Author';
+
+
+PROBLEM: AUTHORS DISPLAY AS AN ARRAY
+--------------------------------------------------------------------------------
+
+Instead of:
+
+{info.authors}
+
+
+Use:
+
+{info.authors?.join(', ')}
+
+
+PROBLEM: DESCRIPTION IS TOO LONG
+--------------------------------------------------------------------------------
+
+Use:
+
+info.description.substring(0, 150)
+
+
+PROBLEM: IMAGE IS MISSING
+--------------------------------------------------------------------------------
+
+Check:
+
+info.imageLinks?.thumbnail
+
+
+Render the image conditionally.
+
+
+PROBLEM: REACT KEY WARNING
+--------------------------------------------------------------------------------
+
+Use:
+
+key={book.id}
+
+
+Avoid array indexes when a stable unique ID is available.
+
+
+================================================================================
+28. QUICK REVISION
+================================================================================
+
+LOOP THROUGH BOOKS
+--------------------------------------------------------------------------------
+
+books.map((book) => (
+  ...
+));
+
+
+UNIQUE KEY
+--------------------------------------------------------------------------------
+
+key={book.id}
+
+
+TITLE
+--------------------------------------------------------------------------------
+
+book.volumeInfo?.title || 'No Title'
+
+
+AUTHORS
+--------------------------------------------------------------------------------
+
+book.volumeInfo?.authors?.join(', ')
+  || 'Unknown Author'
+
+
+DESCRIPTION
+--------------------------------------------------------------------------------
+
+book.volumeInfo?.description?.substring(0, 150)
+
+
+IMAGE
+--------------------------------------------------------------------------------
+
+book.volumeInfo?.imageLinks?.thumbnail
+
+
+PREVIEW LINK
+--------------------------------------------------------------------------------
+
+book.volumeInfo?.previewLink
+
+
+BOOTSTRAP CARD
+--------------------------------------------------------------------------------
+
+<div className="card h-100 shadow-sm">
+
+
+RESPONSIVE GRID
+--------------------------------------------------------------------------------
+
+className="
+  col-12
+  col-sm-6
+  col-md-4
+  col-lg-3
+  mb-4
+"
+
+
+================================================================================
+29. INTERVIEW EXPLANATION
+================================================================================
+
+Question:
+
+How do you display API data as a list in React?
+
+
+Answer:
+
+- I store the API response in state using useState.
+
+- After the API call completes, I update the state with the returned array.
+
+- React re-renders when the state changes.
+
+- I use map() to iterate over the array and return JSX for each item.
+
+- Each rendered item gets a stable unique key, such as book.id.
+
+- Because external API fields may be missing, I use optional chaining and
+  fallback values.
+
+- I use conditional rendering for loading, error, empty, and success states.
+
+- For the UI, I can use Bootstrap grid and card classes to create a
+  responsive layout.
+
+
+================================================================================
+30. KEY TAKEAWAYS
+================================================================================
+
+- Use map() to render an array of books.
+
+- Each book produces one JSX card.
+
+- Prefer book.id as the React key.
+
+- Most Google Books information is available under volumeInfo.
+
+- Use optional chaining for potentially missing fields.
+
+- Use fallback values for title and author.
+
+- Use join(', ') to format multiple authors.
+
+- Truncate long descriptions when necessary.
+
+- Render images only when a thumbnail is available.
+
+- Render the preview button only when previewLink exists.
+
+- Use Bootstrap cards to organize information.
+
+- Use Bootstrap's responsive grid for multiple screen sizes.
+
+- Handle all main UI states:
+
+  Loading
+  Error
+  No Results
+  Success
+
+
+================================================================================
+FINAL FORMULA
+================================================================================
+
+Showing Books on Screen
+        =
+API Data
+        +
+books State
+        +
+map()
+        +
+Unique key
+        +
+volumeInfo
+        +
+Optional Chaining
+        +
+Fallback Values
+        +
+Conditional Rendering
+        +
+Bootstrap Grid
+        +
+Bootstrap Cards
+
+
+FINAL FLOW:
+
+API
+ |
+ v
+data.items
+ |
+ v
+setBooks()
+ |
+ v
+books State
+ |
+ v
+React Re-render
+ |
+ v
+books.map()
+ |
+ v
+Extract volumeInfo
+ |
+ v
+Create Book Cards
+ |
+ v
+Responsive Grid
+ |
+ v
+Display Books
+
+
+================================================================================
+END
+================================================================================
