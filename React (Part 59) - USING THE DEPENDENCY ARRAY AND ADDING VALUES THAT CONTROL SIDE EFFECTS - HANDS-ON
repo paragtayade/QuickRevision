@@ -1,0 +1,2421 @@
+LESSON 5: USING THE DEPENDENCY ARRAY
+AND ADDING VALUES THAT CONTROL SIDE EFFECTS - HANDS-ON
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN
+--------------------------------------------------------------------------------
+
+This lesson focuses on using the dependency array in useEffect to control when
+an Effect needs to synchronize with an external system.
+
+You will understand:
+
+• What a dependency array is
+
+• Why dependencies are important
+
+• Effect behavior with no dependency array
+
+• Effect behavior with an empty dependency array
+
+• Effect behavior with one dependency
+
+• Effect behavior with multiple dependencies
+
+• How React compares dependencies
+
+• How state and props become dependencies
+
+• How cleanup works when dependencies change
+
+• Creating an adjustable timer
+
+• Fetching data when search values change
+
+• Debouncing search requests
+
+• Cancelling obsolete requests
+
+• Avoiding unnecessary Effect executions
+
+• Avoiding dependency-related loops
+
+
+================================================================================
+PART 2: WHAT IS A DEPENDENCY ARRAY?
+================================================================================
+
+A dependency array is the second argument passed to useEffect.
+
+Basic syntax:
+
+useEffect(() => {
+
+  // Effect setup
+
+}, [
+  dependencies
+])
+
+
+Example:
+
+useEffect(() => {
+
+  console.log(
+    searchTerm
+  )
+
+}, [
+  searchTerm
+])
+
+
+Here:
+
+searchTerm
+
+
+is a dependency.
+
+
+================================================================================
+WHAT DOES THE DEPENDENCY ARRAY DO?
+================================================================================
+
+The dependency array describes the reactive values used by the Effect.
+
+Conceptually:
+
+Effect Uses Value
+      ↓
+Value Included as Dependency
+      ↓
+Value Changes
+      ↓
+Previous Cleanup
+      ↓
+Effect Synchronizes Again
+
+
+Example:
+
+searchTerm:
+
+'java'
+
+
+changes to:
+
+'spring'
+
+
+Effect:
+
+Runs again using:
+
+'spring'
+
+
+================================================================================
+IMPORTANT MENTAL MODEL
+================================================================================
+
+Avoid thinking:
+
+"The dependency array is just a manual switch telling React when I want the
+Effect to run."
+
+
+Better:
+
+THE DEPENDENCY ARRAY DESCRIBES
+THE REACTIVE VALUES USED BY THE EFFECT.
+
+
+If an Effect uses:
+
+userId
+
+
+then:
+
+userId
+
+
+normally belongs in the dependency array.
+
+
+================================================================================
+PART 3: THE THREE DEPENDENCY ARRAY PATTERNS
+================================================================================
+
++----------------------+-------------------------------+------------------------+
+| PATTERN              | BEHAVIOR                      | COMMON USE             |
++----------------------+-------------------------------+------------------------+
+| No array             | After every relevant          | Synchronization needed |
+|                      | committed render              | after every render     |
+|                      |                               |                        |
+| []                   | No changing reactive          | Initial setup/resource |
+|                      | dependencies                  | synchronization        |
+|                      |                               |                        |
+| [value]              | Mount + value changes         | Resource depends on    |
+|                      |                               | value                  |
+|                      |                               |                        |
+| [a, b]               | Mount + a or b changes        | Resource depends on    |
+|                      |                               | multiple values        |
++----------------------+-------------------------------+------------------------+
+
+
+================================================================================
+PATTERN 1: NO DEPENDENCY ARRAY
+================================================================================
+
+useEffect(() => {
+
+  console.log(
+    'Effect executed'
+  )
+
+})
+
+
+Conceptually:
+
+Render
+ ↓
+Effect
+
+
+Render Again
+ ↓
+Effect Again
+
+
+IMPORTANT:
+
+This is NOT automatically incorrect.
+
+
+But if the Effect performs:
+
+fetch()
+
+setState()
+
+subscriptions
+
+or expensive synchronization
+
+
+after every render, it may be unnecessary or may create a loop.
+
+
+================================================================================
+PATTERN 2: EMPTY DEPENDENCY ARRAY
+================================================================================
+
+useEffect(() => {
+
+  connect()
+
+
+  return () => {
+
+    disconnect()
+  }
+
+}, [])
+
+
+Conceptually:
+
+The Effect does not depend on changing reactive values.
+
+
+================================================================================
+IMPORTANT [] CORRECTION
+================================================================================
+
+Do NOT memorize:
+
+[] =
+GUARANTEED EXACTLY ONCE
+
+
+A better mental model is:
+
+[] =
+NO CHANGING REACTIVE DEPENDENCIES
+
+
+In development, React Strict Mode can intentionally perform:
+
+Setup
+ ↓
+Cleanup
+ ↓
+Setup
+
+
+to help detect incorrect Effects.
+
+
+================================================================================
+PATTERN 3: VALUES IN DEPENDENCY ARRAY
+================================================================================
+
+useEffect(() => {
+
+  fetchUser(
+    userId
+  )
+
+}, [
+  userId
+])
+
+
+Effect depends on:
+
+userId
+
+
+When:
+
+userId changes
+
+
+React performs the synchronization using the new value.
+
+
+================================================================================
+PART 4: THE PROBLEM WE'RE SOLVING
+================================================================================
+
+Suppose the application searches for books.
+
+State:
+
+searchTerm
+
+
+The backend request depends on:
+
+searchTerm
+
+
+Flow:
+
+User Changes Search
+        ↓
+searchTerm Changes
+        ↓
+Effect Dependency Changes
+        ↓
+Search Effect Runs
+        ↓
+Backend Request
+        ↓
+New Results
+
+
+================================================================================
+COMPARISON TABLE
+================================================================================
+
++--------------------------+---------------------------+-------------------------+
+| SCENARIO                 | POORLY CONTROLLED EFFECT  | DEPENDENCY-DRIVEN       |
++--------------------------+---------------------------+-------------------------+
+| Search value unchanged   | May fetch unnecessarily   | No new search Effect    |
+|                          |                           |                         |
+| Search value changes     | Fetch timing unclear      | Effect responds         |
+|                          |                           |                         |
+| Component renders for    | May request again         | No request unless       |
+| unrelated reason         |                           | dependency changed      |
+|                          |                           |                         |
+| Resource synchronization | Harder to reason about    | Linked to reactive data |
++--------------------------+---------------------------+-------------------------+
+
+
+================================================================================
+IMPORTANT SEARCH CLARIFICATION
+================================================================================
+
+If:
+
+searchTerm
+
+
+is a dependency, then the Effect runs whenever:
+
+searchTerm changes.
+
+
+If searchTerm changes on every keystroke:
+
+J
+ ↓
+Ja
+ ↓
+Jav
+ ↓
+Java
+
+
+then the Effect can still respond to every keystroke.
+
+
+The dependency array alone does NOT debounce the search.
+
+
+To avoid making a request after every keystroke, use:
+
+DEBOUNCING
+
+
+which we cover later in this lesson.
+
+
+================================================================================
+PART 5: BASIC SEARCH DEPENDENCY EXAMPLE
+================================================================================
+
+import {
+  useEffect,
+  useState
+} from 'react'
+
+
+export default function SearchComponent() {
+
+  const [
+    searchTerm,
+    setSearchTerm
+  ] = useState('')
+
+
+  const [
+    results,
+    setResults
+  ] = useState([])
+
+
+  useEffect(() => {
+
+    console.log(
+      'Search changed:',
+      searchTerm
+    )
+
+  }, [
+    searchTerm
+  ])
+
+
+  return (
+    <div>
+
+      <input
+        type="search"
+        value={
+          searchTerm
+        }
+        onChange={
+          event =>
+            setSearchTerm(
+              event.target.value
+            )
+        }
+        placeholder="Search..."
+      />
+
+
+      <p>
+
+        Results:
+        {' '}
+        {results.length}
+
+      </p>
+
+    </div>
+  )
+}
+
+
+================================================================================
+FLOW
+================================================================================
+
+Initial:
+
+searchTerm = ''
+
+
+User types:
+
+J
+
+
+State:
+
+searchTerm = 'J'
+
+
+Dependency changed:
+
+YES
+
+
+Effect executes.
+
+
+User types:
+
+a
+
+
+State:
+
+searchTerm = 'Ja'
+
+
+Dependency changed:
+
+YES
+
+
+Effect executes again.
+
+
+================================================================================
+PART 6: HANDS-ON - ADJUSTABLE TIMER
+================================================================================
+
+This example clearly demonstrates how dependency changes trigger:
+
+CLEANUP
++
+NEW SETUP
+
+
+================================================================================
+IMPORTANT NAMING CORRECTION
+================================================================================
+
+Avoid:
+
+const [
+  interval,
+  setInterval
+] = useState(1000)
+
+
+Why?
+
+The name:
+
+setInterval
+
+
+conflicts conceptually with the browser's:
+
+setInterval()
+
+
+function.
+
+
+Use:
+
+intervalMs
+
+setIntervalMs
+
+
+instead.
+
+
+================================================================================
+COMPLETE AdjustableTimer.jsx
+================================================================================
+
+import {
+  useEffect,
+  useState
+} from 'react'
+
+
+export default function AdjustableTimer() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [
+    count,
+    setCount
+  ] = useState(0)
+
+
+  const [
+    intervalMs,
+    setIntervalMs
+  ] = useState(1000)
+
+
+  // ============================================
+  // TIMER EFFECT
+  // ============================================
+
+  useEffect(() => {
+
+    if (
+      intervalMs <= 0
+    ) {
+
+      return
+    }
+
+
+    const timerId =
+      window.setInterval(
+        () => {
+
+          setCount(
+            previousCount =>
+              previousCount + 1
+          )
+
+        },
+        intervalMs
+      )
+
+
+    // ==========================================
+    // CLEANUP
+    // ==========================================
+
+    return () => {
+
+      window.clearInterval(
+        timerId
+      )
+
+    }
+
+  }, [
+    intervalMs
+  ])
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <section>
+
+      <h1>
+
+        Timer:
+        {' '}
+        {count}
+
+      </h1>
+
+
+      <label htmlFor="interval">
+
+        Interval (ms):
+
+      </label>
+
+
+      <input
+        id="interval"
+        type="number"
+        min="100"
+        step="100"
+        value={
+          intervalMs
+        }
+        onChange={
+          event =>
+            setIntervalMs(
+              Number(
+                event.target.value
+              )
+            )
+        }
+      />
+
+
+      <p>
+
+        Current interval:
+        {' '}
+        {intervalMs}ms
+
+      </p>
+
+    </section>
+  )
+}
+
+
+================================================================================
+CODE BREAKDOWN
+================================================================================
+
++----------------------------+-------------------------------------------+
+| CODE                       | PURPOSE                                   |
++----------------------------+-------------------------------------------+
+| count                      | Number of timer ticks                     |
+| setCount                   | Updates timer count                       |
+| intervalMs                 | Current timer delay                       |
+| setIntervalMs              | Updates delay                            |
+| useEffect                  | Synchronizes timer                       |
+| [intervalMs]               | Timer depends on interval value           |
+| window.setInterval()       | Starts repeating timer                   |
+| previousCount => + 1       | Updates from previous count              |
+| clearInterval(timerId)     | Stops previous timer                     |
++----------------------------+-------------------------------------------+
+
+
+================================================================================
+WHY count IS NOT A DEPENDENCY
+================================================================================
+
+Inside the interval callback:
+
+setCount(
+  previousCount =>
+    previousCount + 1
+)
+
+
+We use a functional state update.
+
+
+The callback does NOT need to read:
+
+count
+
+
+directly.
+
+
+Therefore the Effect doesn't need:
+
+count
+
+
+as a dependency.
+
+
+This avoids resetting the timer on every count change.
+
+
+================================================================================
+BAD TIMER PATTERN
+================================================================================
+
+useEffect(() => {
+
+  const timerId =
+    setInterval(() => {
+
+      setCount(
+        count + 1
+      )
+
+    }, intervalMs)
+
+
+  return () =>
+    clearInterval(
+      timerId
+    )
+
+}, [
+  intervalMs,
+  count
+])
+
+
+Problem:
+
+Every count update changes:
+
+count
+
+
+which causes:
+
+Cleanup
+ ↓
+New Timer
+ ↓
+Count Changes
+ ↓
+Cleanup
+ ↓
+New Timer
+
+
+The timer is unnecessarily recreated on every tick.
+
+
+================================================================================
+BETTER TIMER PATTERN
+================================================================================
+
+setCount(
+  previous =>
+    previous + 1
+)
+
+
+Dependencies:
+
+[
+  intervalMs
+]
+
+
+The Effect depends only on the value controlling the timer setup.
+
+
+================================================================================
+PART 7: HOW THE DEPENDENCY CHANGE WORKS
+================================================================================
+
+Initial:
+
+intervalMs:
+
+1000
+
+
+Effect setup:
+
+setInterval(..., 1000)
+
+
+Timer:
+
+Tick every 1 second
+
+
+================================================================================
+USER CHANGES TO 2000
+================================================================================
+
+State:
+
+intervalMs:
+
+1000
+ ↓
+2000
+
+
+React renders using:
+
+2000
+
+
+Then:
+
+Previous Effect Cleanup
+      ↓
+clearInterval(oldTimer)
+      ↓
+New Effect Setup
+      ↓
+setInterval(..., 2000)
+
+
+Now:
+
+Timer ticks every 2 seconds.
+
+
+================================================================================
+FLOW
+================================================================================
+
+intervalMs = 1000
+       ↓
+Effect Setup
+       ↓
+Timer A = 1000ms
+       ↓
+User Changes intervalMs
+       ↓
+intervalMs = 2000
+       ↓
+Render
+       ↓
+Cleanup Timer A
+       ↓
+Effect Setup
+       ↓
+Timer B = 2000ms
+
+
+================================================================================
+PART 8: PRACTICAL TIMER BUTTON EXAMPLE
+================================================================================
+
+import {
+  useEffect,
+  useState
+} from 'react'
+
+
+export default function TimerDemo() {
+
+  const [
+    seconds,
+    setSeconds
+  ] = useState(0)
+
+
+  const [
+    intervalMs,
+    setIntervalMs
+  ] = useState(1000)
+
+
+  useEffect(() => {
+
+    const timerId =
+      window.setInterval(
+        () => {
+
+          setSeconds(
+            previous =>
+              previous + 1
+          )
+
+        },
+        intervalMs
+      )
+
+
+    return () => {
+
+      window.clearInterval(
+        timerId
+      )
+
+    }
+
+  }, [
+    intervalMs
+  ])
+
+
+  return (
+    <section>
+
+      <h2>
+
+        Seconds:
+        {' '}
+        {seconds}
+
+      </h2>
+
+
+      <p>
+
+        Current Interval:
+        {' '}
+        {intervalMs}ms
+
+      </p>
+
+
+      <button
+        type="button"
+        onClick={() =>
+          setIntervalMs(
+            500
+          )
+        }
+      >
+
+        Fast (500ms)
+
+      </button>
+
+
+      <button
+        type="button"
+        onClick={() =>
+          setIntervalMs(
+            1000
+          )
+        }
+      >
+
+        Normal (1000ms)
+
+      </button>
+
+
+      <button
+        type="button"
+        onClick={() =>
+          setIntervalMs(
+            3000
+          )
+        }
+      >
+
+        Slow (3000ms)
+
+      </button>
+
+
+      <button
+        type="button"
+        onClick={() =>
+          setIntervalMs(
+            9000
+          )
+        }
+      >
+
+        Very Slow (9000ms)
+
+      </button>
+
+    </section>
+  )
+}
+
+
+================================================================================
+BUTTON BEHAVIOR TABLE
+================================================================================
+
++----------------------+-----------------------+-------------+-------------------+
+| BUTTON               | intervalMs            | EFFECT?     | NEW TIMING        |
++----------------------+-----------------------+-------------+-------------------+
+| Fast                 | 1000 -> 500           | Yes         | Every 500 ms      |
+| Normal               | 500 -> 1000           | Yes         | Every 1 second    |
+| Slow                 | 1000 -> 3000          | Yes         | Every 3 seconds   |
+| Very Slow            | 3000 -> 9000          | Yes         | Every 9 seconds   |
++----------------------+-----------------------+-------------+-------------------+
+
+
+================================================================================
+PART 9: UNDERSTANDING CLEANUP
+================================================================================
+
+Timer Effect:
+
+useEffect(() => {
+
+  const timerId =
+    setInterval(
+      callback,
+      intervalMs
+    )
+
+
+  return () => {
+
+    clearInterval(
+      timerId
+    )
+
+  }
+
+}, [
+  intervalMs
+])
+
+
+================================================================================
+WHEN DOES CLEANUP RUN?
+================================================================================
+
+Cleanup runs:
+
+• Before the Effect is set up again because dependencies changed
+
+• When the component leaves the UI
+
+• During additional development Effect checks where applicable
+
+
+================================================================================
+WITHOUT CLEANUP
+================================================================================
+
+Timer 1:
+
+1000ms
+
+
+User changes:
+
+2000ms
+
+
+Timer 2 starts.
+
+
+But Timer 1 remains active.
+
+
+Result:
+
+Timer 1
++
+Timer 2
++
+Potential future timers
+
+
+This creates incorrect timer behavior.
+
+
+================================================================================
+WITH CLEANUP
+================================================================================
+
+Old Timer
+    ↓
+clearInterval()
+    ↓
+Stopped
+    ↓
+New Timer
+    ↓
+Only Current Timer Active
+
+
+================================================================================
+CLEANUP COMPARISON
+================================================================================
+
++--------------------------+---------------------------+
+| WITHOUT CLEANUP          | WITH CLEANUP              |
++--------------------------+---------------------------+
+| Old timer keeps running  | Old timer stops           |
+| Multiple timers possible | One current timer         |
+| Incorrect count speed    | Predictable behavior      |
+| Resources wasted         | Proper resource cleanup   |
++--------------------------+---------------------------+
+
+
+================================================================================
+PART 10: MULTIPLE DEPENDENCIES
+================================================================================
+
+Suppose backend results depend on:
+
+searchTerm
+
+category
+
+sortBy
+
+
+Effect:
+
+useEffect(() => {
+
+  fetchBooks(
+    searchTerm,
+    category,
+    sortBy
+  )
+
+}, [
+  searchTerm,
+  category,
+  sortBy
+])
+
+
+================================================================================
+WHEN DOES IT RE-SYNCHRONIZE?
+================================================================================
+
+Search changes:
+
+YES
+
+
+Category changes:
+
+YES
+
+
+Sort changes:
+
+YES
+
+
+Unrelated state changes:
+
+NO
+
+assuming none of the listed dependency values changed.
+
+
+================================================================================
+MULTIPLE DEPENDENCY FLOW
+================================================================================
+
+searchTerm
+    \
+     \
+category ----> Effect
+     /
+    /
+sortBy
+
+
+If any relevant dependency changes:
+
+Cleanup Previous Synchronization
+         ↓
+Create New Synchronization
+
+
+================================================================================
+PART 11: REAL-WORLD SEARCH EXAMPLE
+================================================================================
+
+A search box commonly changes on every keystroke.
+
+
+Example:
+
+User types:
+
+R
+Re
+Rea
+Reac
+React
+
+
+Without debounce:
+
+Potential request for each value:
+
+R
+
+Re
+
+Rea
+
+Reac
+
+React
+
+
+Dependency arrays don't automatically prevent this.
+
+
+================================================================================
+DEBOUNCING
+================================================================================
+
+Debouncing means:
+
+WAIT UNTIL THE USER PAUSES TYPING
+
+
+Example:
+
+Search Changes
+      ↓
+Wait 500ms
+      ↓
+No New Change?
+   /       \
+ NO        YES
+ ↓          ↓
+Reset      Fetch
+Timer      Search
+
+
+================================================================================
+PART 12: SEARCH BOOKS WITH DEPENDENCY + DEBOUNCE
+================================================================================
+
+import {
+  useEffect,
+  useState
+} from 'react'
+
+
+export default function BookSearch() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [
+    searchTerm,
+    setSearchTerm
+  ] = useState('')
+
+
+  const [
+    books,
+    setBooks
+  ] = useState([])
+
+
+  const [
+    isLoading,
+    setIsLoading
+  ] = useState(false)
+
+
+  const [
+    error,
+    setError
+  ] = useState(null)
+
+
+  // ============================================
+  // SEARCH EFFECT
+  // ============================================
+
+  useEffect(() => {
+
+    const trimmedSearch =
+      searchTerm.trim()
+
+
+    // Empty search
+
+    if (!trimmedSearch) {
+
+      setBooks([])
+
+      setError(null)
+
+      setIsLoading(false)
+
+      return
+    }
+
+
+    const controller =
+      new AbortController()
+
+
+    const timerId =
+      window.setTimeout(
+        async () => {
+
+          try {
+
+            setIsLoading(
+              true
+            )
+
+
+            setError(
+              null
+            )
+
+
+            const response =
+              await fetch(
+                `/api/books?search=${encodeURIComponent(
+                  trimmedSearch
+                )}`,
+                {
+                  signal:
+                    controller.signal
+                }
+              )
+
+
+            if (!response.ok) {
+
+              throw new Error(
+                `Search failed: ${response.status}`
+              )
+            }
+
+
+            const data =
+              await response.json()
+
+
+            setBooks(
+              data
+            )
+
+
+          } catch (error) {
+
+            if (
+              error.name ===
+              'AbortError'
+            ) {
+
+              return
+            }
+
+
+            setError(
+              error instanceof Error
+                ? error.message
+                : 'Unable to search books'
+            )
+
+
+          } finally {
+
+            if (
+              !controller.signal.aborted
+            ) {
+
+              setIsLoading(
+                false
+              )
+            }
+
+          }
+
+        },
+        500
+      )
+
+
+    // ==========================================
+    // CLEANUP
+    // ==========================================
+
+    return () => {
+
+      window.clearTimeout(
+        timerId
+      )
+
+
+      controller.abort()
+
+    }
+
+  }, [
+    searchTerm
+  ])
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  return (
+    <section>
+
+      <label htmlFor="book-search">
+
+        Search Books
+
+      </label>
+
+
+      <input
+        id="book-search"
+        type="search"
+        value={
+          searchTerm
+        }
+        onChange={
+          event =>
+            setSearchTerm(
+              event.target.value
+            )
+        }
+        placeholder="Search for books..."
+      />
+
+
+      {isLoading && (
+
+        <p role="status">
+
+          Searching...
+
+        </p>
+
+      )}
+
+
+      {error && (
+
+        <p role="alert">
+
+          {error}
+
+        </p>
+
+      )}
+
+
+      {!isLoading &&
+        !error &&
+        searchTerm.trim() &&
+        books.length === 0 &&
+        (
+
+          <p>
+
+            No books found.
+
+          </p>
+
+        )
+      }
+
+
+      <ul>
+
+        {books.map(
+          book => (
+
+            <li key={book.id}>
+
+              {book.title}
+
+            </li>
+
+          )
+        )}
+
+      </ul>
+
+    </section>
+  )
+}
+
+
+================================================================================
+IMPORTANT CORRECTION TO THE ORIGINAL SEARCH EXAMPLE
+================================================================================
+
+The original cleanup used only:
+
+clearTimeout(timer)
+
+
+and described that as:
+
+"cancel fetch if component unmounts."
+
+
+That is only partially correct.
+
+
+clearTimeout():
+
+Cancels the delayed function IF it has not started yet.
+
+
+Once:
+
+fetch()
+
+
+has already started:
+
+clearTimeout()
+
+
+does NOT cancel the HTTP request.
+
+
+Therefore the stronger pattern uses BOTH:
+
+clearTimeout(timerId)
+
+AND:
+
+controller.abort()
+
+
+================================================================================
+DEBOUNCED SEARCH FLOW
+================================================================================
+
+User Types:
+
+R
+ ↓
+500ms Timer A
+
+
+Before A completes:
+
+User Types:
+
+Re
+ ↓
+Cleanup
+ ↓
+Cancel Timer A
+ ↓
+500ms Timer B
+
+
+User pauses.
+
+
+Timer B completes.
+
+      ↓
+
+Fetch:
+
+search=Re
+
+
+If search changes while the fetch runs:
+
+Cleanup
+ ↓
+Abort Previous Fetch
+ ↓
+New Debounce Timer
+
+
+================================================================================
+PART 13: ENCODING QUERY PARAMETERS
+================================================================================
+
+Avoid:
+
+`/api/books?search=${searchTerm}`
+
+
+when user text may contain:
+
+spaces
+
+&
+
+?
+
+/
+
+
+Use:
+
+encodeURIComponent(
+  trimmedSearch
+)
+
+
+Example:
+
+const url =
+  `/api/books?search=${encodeURIComponent(
+    trimmedSearch
+  )}`
+
+
+Search:
+
+Spring Boot & React
+
+
+becomes safe for use as a query value.
+
+
+================================================================================
+PART 14: EMPTY SEARCH HANDLING
+================================================================================
+
+Suppose:
+
+searchTerm = ''
+
+
+Do we want:
+
+GET /api/books?search=
+
+
+for every empty search?
+
+
+Maybe not.
+
+
+This lesson uses:
+
+if (!trimmedSearch) {
+
+  setBooks([])
+
+  setError(null)
+
+  setIsLoading(false)
+
+  return
+}
+
+
+Meaning:
+
+EMPTY SEARCH
+     ↓
+NO SEARCH REQUEST
+     ↓
+CLEAR RESULTS
+
+
+================================================================================
+PART 15: DEPENDENCY COMPARISON
+================================================================================
+
+React compares dependency values between renders.
+
+
+Conceptually:
+
+Previous dependency
+
+vs
+
+Current dependency
+
+
+If values differ according to React's dependency comparison:
+
+Effect needs to synchronize again.
+
+
+================================================================================
+PRIMITIVE EXAMPLE
+================================================================================
+
+Previous:
+
+searchTerm = 'java'
+
+
+Current:
+
+searchTerm = 'spring'
+
+
+Different:
+
+YES
+
+
+Effect re-synchronizes.
+
+
+================================================================================
+OBJECT REFERENCE EXAMPLE
+================================================================================
+
+Be careful with objects created during render.
+
+
+Example:
+
+const filters = {
+
+  category,
+
+  sortBy
+
+}
+
+
+useEffect(() => {
+
+  fetchBooks(
+    filters
+  )
+
+}, [
+  filters
+])
+
+
+Each render can create a new object reference.
+
+
+Even if the contents look the same:
+
+Previous Object
+ !==
+New Object
+
+
+Effect may therefore run more often than intended.
+
+
+================================================================================
+BETTER
+================================================================================
+
+useEffect(() => {
+
+  const filters = {
+
+    category,
+
+    sortBy
+
+  }
+
+
+  fetchBooks(
+    filters
+  )
+
+}, [
+  category,
+  sortBy
+])
+
+
+Dependencies now describe the real reactive inputs.
+
+
+================================================================================
+PART 16: DON'T REMOVE DEPENDENCIES JUST TO STOP AN EFFECT
+================================================================================
+
+Suppose:
+
+useEffect(() => {
+
+  fetchUser(
+    userId
+  )
+
+}, [
+  userId
+])
+
+
+You notice it runs whenever:
+
+userId changes.
+
+
+Do NOT simply change it to:
+
+useEffect(() => {
+
+  fetchUser(
+    userId
+  )
+
+}, [])
+
+
+just to stop reruns.
+
+
+Now the Effect uses:
+
+userId
+
+
+but does not describe it as a dependency.
+
+
+That can result in stale synchronization.
+
+
+================================================================================
+GOOD QUESTION
+================================================================================
+
+Ask:
+
+WHY DOES THIS EFFECT RUN?
+
+
+Then inspect:
+
+• What reactive values does it read?
+
+• Does it update state?
+
+• Does that state change its dependencies?
+
+• Are objects/functions recreated during render?
+
+• Is the Effect actually needed?
+
+
+================================================================================
+PART 17: DEPENDENCY ARRAY COMPARISON TABLE
+================================================================================
+
++-----------------------+--------------------------------+-----------------------+
+| DEPENDENCY ARRAY      | EFFECT BEHAVIOR                | EXAMPLE USE           |
++-----------------------+--------------------------------+-----------------------+
+| omitted               | After every relevant render    | Special sync cases    |
+| []                    | No changing reactive deps      | Initial connection    |
+| [searchTerm]          | searchTerm changes             | Search                |
+| [userId]              | userId changes                 | Load user             |
+| [category, sortBy]    | Either value changes           | Filtering             |
+| [intervalMs]          | Interval changes               | Timer setup           |
++-----------------------+--------------------------------+-----------------------+
+
+
+================================================================================
+PART 18: COMMON MISTAKES
+================================================================================
+
+MISTAKE 1:
+ASSUMING [] MEANS GUARANTEED EXACTLY ONCE
+--------------------------------------------------------------------------------
+
+Better mental model:
+
+[] =
+No changing reactive dependencies
+
+
+Development Strict Mode may perform additional setup/cleanup cycles.
+
+
+================================================================================
+MISTAKE 2:
+OMITTING A DEPENDENCY THAT EFFECT USES
+================================================================================
+
+Effect:
+
+fetchUser(
+  userId
+)
+
+
+Dependency:
+
+[]
+
+
+Problem:
+
+Effect uses userId but doesn't react when it changes.
+
+
+================================================================================
+MISTAKE 3:
+ADDING count TO TIMER DEPENDENCIES UNNECESSARILY
+================================================================================
+
+If timer uses:
+
+setCount(
+  previous =>
+    previous + 1
+)
+
+
+then:
+
+count
+
+
+doesn't need to be read by the Effect.
+
+
+================================================================================
+MISTAKE 4:
+FORGETTING TIMER CLEANUP
+================================================================================
+
+Without:
+
+clearInterval()
+
+
+old timers can remain active.
+
+
+================================================================================
+MISTAKE 5:
+THINKING clearTimeout CANCELS AN ACTIVE FETCH
+================================================================================
+
+clearTimeout():
+
+Cancels the timer before callback starts.
+
+
+AbortController:
+
+Cancels the fetch after it has started.
+
+
+================================================================================
+MISTAKE 6:
+SEARCHING ON EVERY KEYSTROKE WHEN NOT DESIRED
+================================================================================
+
+Dependency:
+
+[searchTerm]
+
+
+does NOT automatically debounce.
+
+
+Add:
+
+setTimeout()
+
+
+with cleanup.
+
+
+================================================================================
+MISTAKE 7:
+OBJECT CREATED DURING RENDER AS DEPENDENCY
+================================================================================
+
+const filters = {
+  category
+}
+
+
+Dependency:
+
+[filters]
+
+
+This may retrigger unnecessarily because the object reference is recreated.
+
+
+================================================================================
+PART 19: TESTING THE TIMER
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Timer begins with 1000ms interval
+
+[ ] Count increments
+
+[ ] 500ms button speeds timer up
+
+[ ] 3000ms button slows timer down
+
+[ ] Old timer is cleared
+
+[ ] Only one timer remains active
+
+[ ] Timer cleanup occurs when component is removed
+
+[ ] Invalid/zero interval does not create a bad timer
+
+
+================================================================================
+TEST FLOW
+================================================================================
+
+Start:
+
+intervalMs = 1000
+
+
+Wait:
+
+Count increases approximately once per second.
+
+
+Click:
+
+Fast (500ms)
+
+
+Expected:
+
+Old 1000ms timer cleared
+
+New 500ms timer created
+
+
+Click:
+
+Slow (3000ms)
+
+
+Expected:
+
+500ms timer cleared
+
+3000ms timer created
+
+
+================================================================================
+PART 20: TESTING SEARCH
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Empty search does not request data
+
+[ ] Typing updates searchTerm
+
+[ ] Rapid typing resets debounce timer
+
+[ ] Request starts after pause
+
+[ ] Query is encoded
+
+[ ] HTTP errors are handled
+
+[ ] Loading state appears
+
+[ ] Error state appears when request fails
+
+[ ] Obsolete request is aborted
+
+[ ] Current search controls results
+
+[ ] Empty successful response shows no-results UI
+
+
+================================================================================
+SEARCH TEST EXAMPLE
+================================================================================
+
+User types quickly:
+
+R
+
+Re
+
+Rea
+
+Reac
+
+React
+
+
+Expected:
+
+Earlier debounce timers:
+
+cancelled
+
+
+Final search:
+
+React
+
+
+After approximately:
+
+500ms pause
+
+
+Request:
+
+GET /api/books?search=React
+
+
+================================================================================
+PART 21: KEY CONCEPTS SUMMARY
+================================================================================
+
++-------------------------+--------------------------------------------+
+| CONCEPT                 | MEANING                                    |
++-------------------------+--------------------------------------------+
+| Dependency Array        | Reactive values used by Effect             |
+| []                      | No changing reactive dependencies          |
+| [x]                     | Effect responds when x changes             |
+| [x, y]                  | Effect responds when x or y changes        |
+| Cleanup                 | Stop previous Effect synchronization       |
+| Functional State Update | Update from previous state                 |
+| Debounce                | Wait for user to pause                     |
+| clearTimeout            | Cancel pending debounce callback           |
+| clearInterval           | Stop repeating timer                       |
+| AbortController         | Cancel obsolete fetch                      |
+| encodeURIComponent      | Safely encode query input                  |
++-------------------------+--------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - TIMER
+================================================================================
+
+intervalMs
+     ↓
+Dependency Changes
+     ↓
+Cleanup Old Timer
+     ↓
+Create New Timer
+
+
+TIMER CALLBACK:
+
+setCount(
+  previous =>
+    previous + 1
+)
+
+
+DEPENDENCY:
+
+[
+  intervalMs
+]
+
+
+================================================================================
+QUICK REVISION - SEARCH
+================================================================================
+
+User Types
+    ↓
+searchTerm Changes
+    ↓
+Effect
+    ↓
+Start 500ms Timer
+    ↓
+User Types Again?
+ /          \
+YES          NO
+↓             ↓
+Cleanup      Fetch
+↓
+Cancel Timer
+
+
+================================================================================
+QUICK REVISION - MULTIPLE DEPENDENCIES
+================================================================================
+
+Effect uses:
+
+searchTerm
+
+category
+
+sortBy
+
+
+Dependency array:
+
+[
+  searchTerm,
+  category,
+  sortBy
+]
+
+
+If any relevant value changes:
+
+Cleanup
+ ↓
+New Setup
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+NO ARRAY:
+
+Effect after every relevant render
+
+
+EMPTY ARRAY:
+
+No changing reactive dependencies
+
+
+ONE VALUE:
+
+[value]
+ ↓
+Synchronize when value changes
+
+
+MULTIPLE VALUES:
+
+[a, b, c]
+ ↓
+Synchronize when relevant value changes
+
+
+TIMER:
+
+interval changes
+ ↓
+clear old timer
+ ↓
+create new timer
+
+
+DEBOUNCE:
+
+Input changes
+ ↓
+wait
+ ↓
+input changes again?
+ ↓
+reset wait
+
+
+CANCEL PENDING TIMER:
+
+clearTimeout()
+
+
+STOP ACTIVE INTERVAL:
+
+clearInterval()
+
+
+CANCEL ACTIVE FETCH:
+
+AbortController.abort()
+
+
+QUERY:
+
+User Text
+ ↓
+encodeURIComponent()
+ ↓
+Safe Query Parameter
+
+
+================================================================================
+MOST IMPORTANT RULE
+================================================================================
+
+THE DEPENDENCY ARRAY SHOULD DESCRIBE
+THE REACTIVE VALUES USED BY THE EFFECT.
+
+DO NOT:
+
+ADD OR REMOVE DEPENDENCIES JUST TO FORCE
+A PARTICULAR NUMBER OF EFFECT EXECUTIONS.
+
+
+Instead understand:
+
+WHAT EXTERNAL SYSTEM IS THIS EFFECT SYNCHRONIZING?
+
+AND:
+
+WHICH REACTIVE VALUES CONTROL THAT SYNCHRONIZATION?
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Fetch groceries when a filter changes
+
+2. Add category-based backend filtering
+
+3. Add debounced grocery search
+
+4. Cancel obsolete search requests
+
+5. Add sorting dependencies
+
+6. Extract search logic into a custom Hook
+
+7. Understand stale closures
+
+8. Learn when useCallback/useMemo may be useful
+
+9. Test Effect setup and cleanup
+
+10. Build backend-driven Grocery List filtering
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The dependency array connects:
+
+REACTIVE VALUES
+
+to:
+
+EXTERNAL SYNCHRONIZATION
+
+
+Example:
+
+intervalMs
+     ↓
+Timer Setup
+
+
+searchTerm
+     ↓
+Backend Search
+
+
+userId
+     ↓
+User API Request
+
+
+When a dependency changes:
+
+RENDER
+ ↓
+COMMIT
+ ↓
+CLEAN UP PREVIOUS EFFECT
+ ↓
+SET UP EFFECT WITH CURRENT VALUES
+
+
+The goal is not:
+
+"Make the Effect run as little as possible."
+
+
+The goal is:
+
+"Make the Effect synchronize correctly
+with the values it actually depends on."
+
+
+================================================================================
+END OF LESSON 5
+USING THE DEPENDENCY ARRAY
+AND ADDING VALUES THAT CONTROL SIDE EFFECTS - HANDS-ON
+================================================================================
