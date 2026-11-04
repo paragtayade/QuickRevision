@@ -1,0 +1,2315 @@
+LESSON 2: FETCHING DATA FROM A SERVER THE WRONG WAY
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN IN THIS LESSON
+--------------------------------------------------------------------------------
+
+This lesson focuses on common mistakes when fetching backend data in React.
+
+You will understand:
+
+• Why fetching during render is dangerous
+
+• How repeated Effects can create excessive requests
+
+• When an omitted dependency array is actually a problem
+
+• How dependency-driven loops happen
+
+• How unstable object/function dependencies can retrigger Effects
+
+• Why state objects are different from objects created during render
+
+• Why obsolete requests can cause race conditions
+
+• Why request cancellation can be useful
+
+• How missing error handling affects the UI
+
+• Why response.ok must be checked
+
+• How loading states can become stuck
+
+• How to identify network-request problems
+
+• How to debug Effect execution
+
+• How to recognize incorrect fetching patterns
+
+
+WHY THIS LESSON IS IMPORTANT
+--------------------------------------------------------------------------------
+
+Backend communication introduces several moving parts:
+
+React Render
+     ↓
+Effect
+     ↓
+HTTP Request
+     ↓
+Backend
+     ↓
+HTTP Response
+     ↓
+State Update
+     ↓
+Render
+
+
+If these steps are organized incorrectly, you can create:
+
+• Repeated HTTP requests
+
+• Infinite state/effect loops
+
+• Stale data
+
+• Race conditions
+
+• Stuck loading indicators
+
+• Unhandled errors
+
+• Obsolete requests
+
+• Incorrect UI state
+
+
+The goal of this lesson is:
+
+UNDERSTAND THE FAILURE MODES
+
+before implementing the correct backend pattern.
+
+
+================================================================================
+PART 2: UNDERSTANDING THE WRONG WAYS
+================================================================================
+
+COMMON DATA-FETCHING PROBLEMS
+--------------------------------------------------------------------------------
+
+1. Calling fetch() during render
+
+2. Running a fetching Effect more often than intended
+
+3. Creating an Effect/state feedback loop
+
+4. Using unstable dependencies
+
+5. Ignoring race conditions
+
+6. Not cancelling obsolete requests where useful
+
+7. Ignoring network errors
+
+8. Ignoring HTTP error responses
+
+9. Leaving loading state stuck
+
+10. Updating the UI with an old response
+
+11. Duplicating fetching logic
+
+12. Using Effects where event handlers are sufficient
+
+
+================================================================================
+IMPORTANT DISTINCTIONS
+================================================================================
+
+These statements are TOO BROAD:
+
+"An Effect without a dependency array is always wrong."
+
+"Any object dependency creates an infinite loop."
+
+"Every fetch Effect must have cleanup."
+
+"Every state update after unmount causes a memory leak."
+
+"fetch() rejects for HTTP 404 and 500."
+
+"Unhandled Promise rejection always crashes the application."
+
+
+A better approach is to understand WHY each pattern can become problematic.
+
+
+================================================================================
+PROBLEM SUMMARY
+================================================================================
+
++------------------------+--------------------------------------------+
+| PROBLEM                | POSSIBLE RESULT                            |
++------------------------+--------------------------------------------+
+| Fetch during render    | Repeated requests/render impurity          |
+| Effect every render    | Repeated requests if Effect fetches        |
+| Effect feedback loop   | Continuous rerender/request cycle          |
+| Unstable dependency    | Effect runs more often than intended       |
+| No HTTP check          | 404/500 treated like successful response   |
+| No error handling      | Rejected Promise / poor error UI           |
+| No request control     | Obsolete response can win race             |
+| No loading handling    | Stuck or misleading loading UI             |
+| No cleanup when needed | Stale listeners/connections/requests       |
++------------------------+--------------------------------------------+
+
+
+================================================================================
+PART 3: MISTAKE 1 - DIRECT API CALL DURING RENDER
+================================================================================
+
+WRONG PATTERN
+--------------------------------------------------------------------------------
+
+File:
+
+src/components/WrongWay1.jsx
+
+
+import {
+  useState
+} from 'react'
+
+
+export default function WrongWay1() {
+
+  const [
+    data,
+    setData
+  ] = useState(null)
+
+
+  const [
+    loading,
+    setLoading
+  ] = useState(true)
+
+
+  // WRONG:
+  // Side effect started during render.
+
+  fetch(
+    '/api/data'
+  )
+    .then(
+      response =>
+        response.json()
+    )
+    .then(
+      result => {
+
+        setData(
+          result
+        )
+
+        setLoading(
+          false
+        )
+
+      }
+    )
+
+
+  if (loading) {
+
+    return (
+      <p>
+        Loading...
+      </p>
+    )
+  }
+
+
+  return (
+
+    <h1>
+      {data?.name}
+    </h1>
+
+  )
+}
+
+
+================================================================================
+WHAT'S WRONG?
+================================================================================
+
+The component function is part of React rendering.
+
+Rendering should calculate:
+
+WHAT THE UI SHOULD LOOK LIKE
+
+
+It should not start backend synchronization every time it runs.
+
+
+Possible flow:
+
+Render
+  ↓
+fetch()
+  ↓
+Response
+  ↓
+setData()
+  ↓
+Render
+  ↓
+fetch()
+  ↓
+Response
+  ↓
+State Update / Render
+  ↓
+More Requests
+
+
+Even when React can avoid some identical state updates, fetching during render
+remains the wrong architecture because rendering can occur multiple times for
+many reasons.
+
+
+================================================================================
+IMPORTANT CORRECTION
+================================================================================
+
+Avoid claiming:
+
+"Calling fetch in render ALWAYS creates a strict infinite loop."
+
+
+The exact behavior depends on:
+
+• Which state values are changed
+
+• Whether React bails out of identical updates
+
+• Parent renders
+
+• Development behavior
+
+• Concurrent rendering behavior
+
+
+The fundamental issue is simpler:
+
+RENDER MUST REMAIN PURE.
+
+NETWORK REQUESTS SHOULD NOT BE STARTED AS A RENDER SIDE EFFECT.
+
+
+================================================================================
+WHY THIS IS DANGEROUS
+================================================================================
+
+Rendering can happen because:
+
+• Local state changes
+
+• Parent renders
+
+• Context changes
+
+• Props change
+
+• Development checks
+
+• Other React rendering behavior
+
+
+You do not want each render attempt to mean:
+
+SEND ANOTHER HTTP REQUEST
+
+
+================================================================================
+BETTER MENTAL MODEL
+================================================================================
+
+WRONG:
+
+Render
+ ↓
+Network
+
+
+CORRECT DIRECTION:
+
+Render
+ ↓
+Commit
+ ↓
+Effect
+ ↓
+Network
+
+
+when fetching is synchronization with an external resource.
+
+
+================================================================================
+PART 4: MISTAKE 2 - UNINTENDED EFFECT AFTER EVERY RENDER
+================================================================================
+
+CONDITIONALLY WRONG PATTERN
+--------------------------------------------------------------------------------
+
+useEffect(() => {
+
+  fetchData()
+
+})
+
+
+There is no dependency array.
+
+
+This means the Effect runs after every committed render.
+
+
+IMPORTANT:
+
+THIS IS NOT AUTOMATICALLY A BUG.
+
+
+It becomes a problem when the Effect performs work that should not happen
+after every render.
+
+
+================================================================================
+FETCH EXAMPLE
+================================================================================
+
+useEffect(() => {
+
+  const fetchData =
+    async () => {
+
+      const response =
+        await fetch(
+          '/api/data'
+        )
+
+
+      const result =
+        await response.json()
+
+
+      setData(
+        result
+      )
+    }
+
+
+  fetchData()
+
+})
+
+
+Potential cycle:
+
+Render
+ ↓
+Effect
+ ↓
+Fetch
+ ↓
+setData()
+ ↓
+Render
+ ↓
+Effect
+ ↓
+Fetch
+ ↓
+...
+
+
+================================================================================
+WHY "MISSING DEPENDENCY ARRAY" IS AN OVERSIMPLIFICATION
+================================================================================
+
+This code is legal:
+
+useEffect(() => {
+
+  console.log(
+    'Rendered'
+  )
+
+})
+
+
+The issue is not syntax.
+
+The question is:
+
+SHOULD THIS EFFECT RUN AFTER EVERY RENDER?
+
+
+For an initial data load:
+
+usually:
+
+NO
+
+
+Therefore you would typically use an Effect whose dependencies reflect the
+resource being synchronized.
+
+
+================================================================================
+FETCH WITH NO CHANGING DEPENDENCY
+================================================================================
+
+Conceptually:
+
+useEffect(() => {
+
+  loadInitialData()
+
+}, [])
+
+
+But remember from Lesson 1:
+
+[] does NOT mean:
+
+"Guaranteed exactly one call under every development configuration."
+
+
+Development Strict Mode can intentionally perform additional setup/cleanup
+cycles.
+
+
+Think:
+
+[] =
+NO CHANGING REACTIVE DEPENDENCIES
+
+
+================================================================================
+FETCH DEPENDING ON ID
+================================================================================
+
+If the resource depends on:
+
+userId
+
+
+then:
+
+useEffect(() => {
+
+  loadUser(
+    userId
+  )
+
+}, [
+  userId
+])
+
+
+not:
+
+[]
+
+
+================================================================================
+PART 5: MISTAKE 3 - DEPENDENCY-DRIVEN LOOPS
+================================================================================
+
+IMPORTANT CORRECTION
+--------------------------------------------------------------------------------
+
+The original example claimed this creates a new object every render:
+
+const [
+  filters,
+  setFilters
+] = useState({})
+
+
+That is NOT correct.
+
+
+React preserves the current state value between renders.
+
+Therefore:
+
+filters
+
+
+does NOT automatically become a new object merely because the component
+rendered again.
+
+
+================================================================================
+THIS IS NOT AUTOMATICALLY WRONG
+================================================================================
+
+const [
+  filters,
+  setFilters
+] = useState({})
+
+
+useEffect(() => {
+
+  fetchFilteredData(
+    filters
+  )
+
+}, [
+  filters
+])
+
+
+The Effect executes when the stored filters reference changes.
+
+
+For example:
+
+setFilters({})
+
+
+creates a new object.
+
+
+That is a real state change by reference and can legitimately trigger the
+Effect.
+
+
+================================================================================
+ACTUAL PROBLEM: OBJECT CREATED DURING RENDER
+================================================================================
+
+Consider:
+
+const filters = {
+
+  category:
+    selectedCategory
+
+}
+
+
+useEffect(() => {
+
+  fetchFilteredData(
+    filters
+  )
+
+}, [
+  filters
+])
+
+
+On each render:
+
+filters
+
+is a newly created object.
+
+
+Conceptually:
+
+Render 1:
+
+filters → Object A
+
+
+Render 2:
+
+filters → Object B
+
+
+Even if:
+
+Object A
+
+and:
+
+Object B
+
+
+contain the same properties:
+
+Object A !== Object B
+
+
+Therefore the dependency is considered changed.
+
+
+================================================================================
+POTENTIAL LOOP
+================================================================================
+
+Render
+ ↓
+Create Object A
+ ↓
+Effect
+ ↓
+Fetch
+ ↓
+setData()
+ ↓
+Render
+ ↓
+Create Object B
+ ↓
+Dependency Changed
+ ↓
+Effect
+ ↓
+Fetch
+ ↓
+...
+
+
+================================================================================
+UNSTABLE FUNCTION DEPENDENCY
+================================================================================
+
+The same idea can apply to functions created during rendering.
+
+
+Example:
+
+const buildUrl = () => {
+
+  return `/api/data?category=${category}`
+}
+
+
+useEffect(() => {
+
+  fetch(
+    buildUrl()
+  )
+
+}, [
+  buildUrl
+])
+
+
+Each render creates a new:
+
+buildUrl
+
+
+function reference.
+
+
+This can cause the Effect to run more often than expected.
+
+
+================================================================================
+BETTER PATTERN 1: DEPEND ON PRIMITIVE VALUES
+================================================================================
+
+Instead of:
+
+const filters = {
+
+  category,
+
+  sort
+
+}
+
+
+useEffect(() => {
+
+  fetchData(
+    filters
+  )
+
+}, [
+  filters
+])
+
+
+prefer when practical:
+
+useEffect(() => {
+
+  fetchData({
+
+    category,
+
+    sort
+
+  })
+
+}, [
+  category,
+  sort
+])
+
+
+Dependencies:
+
+category
+
+sort
+
+
+are the actual reactive inputs.
+
+
+================================================================================
+BETTER PATTERN 2: CREATE OBJECT INSIDE EFFECT
+================================================================================
+
+useEffect(() => {
+
+  const filters = {
+
+    category,
+
+    sort
+
+  }
+
+
+  fetchData(
+    filters
+  )
+
+}, [
+  category,
+  sort
+])
+
+
+This removes the render-created object from the dependency array.
+
+
+================================================================================
+DON'T REACH FOR useMemo AUTOMATICALLY
+================================================================================
+
+You could sometimes stabilize an object with:
+
+useMemo()
+
+
+But if the object can simply be built inside the Effect:
+
+THAT IS OFTEN EASIER.
+
+
+Use memoization when it solves a real problem rather than as an automatic fix.
+
+
+================================================================================
+ACTUAL EFFECT LOOP CONDITION
+================================================================================
+
+An Effect loop normally requires BOTH:
+
+1. Effect causes a state update
+
+AND
+
+2. That update causes an Effect dependency to differ again
+
+
+Pattern:
+
+Effect
+ ↓
+setState()
+ ↓
+Render
+ ↓
+Dependency Changes
+ ↓
+Effect
+ ↓
+setState()
+ ↓
+...
+
+
+================================================================================
+PART 6: MISTAKE 4 - NO CONTROL OF OBSOLETE REQUESTS
+================================================================================
+
+The biggest fetch-cleanup concern is often:
+
+STALE / OBSOLETE REQUESTS
+
+and:
+
+RACE CONDITIONS
+
+
+rather than simply:
+
+"setState after unmount always creates a memory leak."
+
+
+================================================================================
+EXAMPLE PROBLEM
+================================================================================
+
+Suppose:
+
+userId = 1
+
+
+Effect starts:
+
+GET /api/users/1
+
+
+Before it completes:
+
+userId = 2
+
+
+Now Effect starts:
+
+GET /api/users/2
+
+
+Network timing:
+
+Request 2
+ ↓
+finishes quickly
+
+
+Request 1
+ ↓
+finishes later
+
+
+Without protection:
+
+User 2 displayed
+      ↓
+Old User 1 response arrives
+      ↓
+User 1 overwrites UI
+
+
+Result:
+
+STALE DATA
+
+
+================================================================================
+WRONG PATTERN
+================================================================================
+
+useEffect(() => {
+
+  const fetchUser =
+    async () => {
+
+      const response =
+        await fetch(
+          `/api/users/${userId}`
+        )
+
+
+      const data =
+        await response.json()
+
+
+      setUser(
+        data
+      )
+    }
+
+
+  fetchUser()
+
+}, [
+  userId
+])
+
+
+There is no cancellation/obsolete-response control.
+
+
+================================================================================
+BETTER PATTERN WITH AbortController
+================================================================================
+
+useEffect(() => {
+
+  const controller =
+    new AbortController()
+
+
+  const fetchUser =
+    async () => {
+
+      try {
+
+        const response =
+          await fetch(
+            `/api/users/${userId}`,
+            {
+              signal:
+                controller.signal
+            }
+          )
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            `Request failed: ${response.status}`
+          )
+        }
+
+
+        const data =
+          await response.json()
+
+
+        setUser(
+          data
+        )
+
+
+      } catch (error) {
+
+        if (
+          error.name ===
+          'AbortError'
+        ) {
+
+          return
+        }
+
+
+        setError(
+          error.message
+        )
+      }
+    }
+
+
+  fetchUser()
+
+
+  return () => {
+
+    controller.abort()
+
+  }
+
+}, [
+  userId
+])
+
+
+================================================================================
+WHAT CLEANUP DOES
+================================================================================
+
+When:
+
+userId changes
+
+
+React cleans up the previous Effect:
+
+controller.abort()
+
+
+Then the new Effect establishes:
+
+a new request
+
+
+Flow:
+
+User 1 Request
+      ↓
+userId changes
+      ↓
+Cleanup
+      ↓
+Abort User 1 Request
+      ↓
+Start User 2 Request
+
+
+================================================================================
+IMPORTANT CORRECTION: RE-RENDER != UNMOUNT
+================================================================================
+
+The original lesson described:
+
+User clicks Next User
+ ↓
+Component re-renders
+ ↓
+First response updates "UNMOUNTED component"
+
+
+That is incorrect.
+
+
+A re-render does NOT mean the component unmounted.
+
+
+If the same component remains in the tree:
+
+IT IS STILL MOUNTED.
+
+
+The real issue in this example is:
+
+THE OLD REQUEST MAY BE OBSOLETE
+
+
+not:
+
+"the component became unmounted because it rendered again."
+
+
+================================================================================
+IMPORTANT MODERN REACT CLARIFICATION
+================================================================================
+
+Avoid relying on the old warning:
+
+"Can't perform a React state update on an unmounted component"
+
+
+as the primary explanation for fetch cancellation.
+
+
+Modern React's behavior and warnings have evolved.
+
+Cancellation is still valuable because it can:
+
+• Stop obsolete network work
+
+• Avoid stale responses
+
+• Reduce wasted work
+
+• Keep synchronization logic correct
+
+
+================================================================================
+NOT EVERY FETCH ABSOLUTELY REQUIRES ABORT
+================================================================================
+
+Do not memorize:
+
+"Every fetch without AbortController is automatically a memory leak."
+
+
+That is too strong.
+
+
+Use cancellation when:
+
+• Request can become obsolete
+
+• Dependency changes can start another request
+
+• Component can stop needing the result
+
+• Resource usage matters
+
+
+The important principle is:
+
+THE UI SHOULD NOT BE UPDATED BY OBSOLETE DATA.
+
+
+================================================================================
+PART 7: MISTAKE 5 - POOR ERROR HANDLING
+================================================================================
+
+WRONG PATTERN
+--------------------------------------------------------------------------------
+
+useEffect(() => {
+
+  fetch(
+    '/api/data'
+  )
+    .then(
+      response =>
+        response.json()
+    )
+    .then(
+      data => {
+
+        setData(
+          data
+        )
+
+        setLoading(
+          false
+        )
+      }
+    )
+
+}, [])
+
+
+Problems:
+
+• Rejected request isn't handled
+
+• HTTP status isn't checked
+
+• Loading may remain true after failure
+
+• User receives no useful error UI
+
+
+================================================================================
+NETWORK ERROR
+================================================================================
+
+Example:
+
+fetch(
+  '/api/data'
+)
+
+
+may reject because of:
+
+• Network connection failure
+
+• DNS failure
+
+• Request cancellation
+
+• Certain browser/network failures
+
+
+Without rejection handling:
+
+Promise rejection
+      ↓
+No error state
+      ↓
+Loading may stay true
+
+
+================================================================================
+HTTP 404/500 IS DIFFERENT
+================================================================================
+
+Very important:
+
+fetch() does NOT automatically reject merely because the server returned:
+
+404
+
+500
+
+503
+
+
+Instead:
+
+const response =
+  await fetch(
+    '/api/data'
+  )
+
+
+Then inspect:
+
+response.ok
+
+
+Example:
+
+if (!response.ok) {
+
+  throw new Error(
+    `Request failed: ${response.status}`
+  )
+}
+
+
+================================================================================
+BETTER ERROR PATTERN
+================================================================================
+
+try {
+
+  const response =
+    await fetch(
+      '/api/data'
+    )
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      `Request failed: ${response.status}`
+    )
+  }
+
+
+  const result =
+    await response.json()
+
+
+  setData(
+    result
+  )
+
+
+} catch (error) {
+
+  setError(
+    error instanceof Error
+      ? error.message
+      : 'Unable to load data'
+  )
+
+}
+
+
+================================================================================
+LOADING STATE
+================================================================================
+
+A robust flow should handle:
+
+START
+
+SUCCESS
+
+FAILURE
+
+
+Example:
+
+try {
+
+  setLoading(
+    true
+  )
+
+  setError(
+    null
+  )
+
+
+  // request
+
+
+} catch (error) {
+
+  setError(
+    ...
+  )
+
+
+} finally {
+
+  setLoading(
+    false
+  )
+
+}
+
+
+If using cancellation, be careful not to treat:
+
+AbortError
+
+
+as a real application failure.
+
+
+================================================================================
+DO UNHANDLED REJECTIONS GUARANTEE AN APP CRASH?
+================================================================================
+
+No.
+
+
+An unhandled Promise rejection is serious and should be fixed.
+
+But saying:
+
+"Unhandled rejection always crashes the React application"
+
+
+is too absolute.
+
+
+Possible effects include:
+
+• Console errors
+
+• Broken workflow
+
+• Loading stuck
+
+• Missing error UI
+
+• Environment-dependent failure behavior
+
+
+The practical rule:
+
+ALWAYS HANDLE EXPECTED REQUEST FAILURES.
+
+
+================================================================================
+PART 8: SUMMARY OF WRONG WAYS
+================================================================================
+
+WRONG WAY 1:
+SIDE EFFECT DURING RENDER
+--------------------------------------------------------------------------------
+
+function Component() {
+
+  fetch(...)
+
+  return (...)
+}
+
+
+Problem:
+
+Rendering is no longer pure.
+
+
+================================================================================
+WRONG WAY 2:
+UNINTENDED EVERY-RENDER EFFECT
+================================================================================
+
+useEffect(() => {
+
+  fetchData()
+
+})
+
+
+Potential problem:
+
+Fetching occurs after every render even when not desired.
+
+
+================================================================================
+WRONG WAY 3:
+UNSTABLE DEPENDENCY
+================================================================================
+
+const options = {
+
+  category
+
+}
+
+
+useEffect(() => {
+
+  fetchData(
+    options
+  )
+
+}, [
+  options
+])
+
+
+Problem:
+
+options is recreated during render.
+
+
+================================================================================
+WRONG WAY 4:
+OBSOLETE REQUEST NOT CONTROLLED
+================================================================================
+
+useEffect(() => {
+
+  fetchUser(
+    userId
+  )
+
+}, [
+  userId
+])
+
+
+Potential problem:
+
+Old response arrives after new response and overwrites current data.
+
+
+================================================================================
+WRONG WAY 5:
+NO ERROR HANDLING
+================================================================================
+
+fetch(url)
+  .then(
+    response =>
+      response.json()
+  )
+  .then(
+    setData
+  )
+
+
+Problems:
+
+• Rejection not handled
+
+• HTTP status not checked
+
+
+================================================================================
+WRONG WAY 6:
+LOADING ONLY STOPS ON SUCCESS
+================================================================================
+
+setLoading(
+  true
+)
+
+
+try {
+
+  // request
+
+  setLoading(
+    false
+  )
+
+
+} catch (error) {
+
+  setError(
+    error.message
+  )
+}
+
+
+Problem:
+
+failure path can leave:
+
+loading = true
+
+
+================================================================================
+COMPARISON TABLE
+================================================================================
+
++--------------------------+-------------------------------------------+
+| WRONG PATTERN            | REAL PROBLEM                              |
++--------------------------+-------------------------------------------+
+| Fetch in render          | Impure render/repeated requests           |
+| Effect every render      | Repeated synchronization                  |
+| Unstable dependency      | Excess Effect executions                  |
+| Effect → dependency loop | Infinite state/effect cycle               |
+| No obsolete control      | Race/stale results                        |
+| No rejection handling    | Failed asynchronous workflow              |
+| No response.ok check     | HTTP errors treated incorrectly           |
+| Loading only on success  | Stuck loading state                       |
++--------------------------+-------------------------------------------+
+
+
+================================================================================
+PART 9: IDENTIFYING WRONG WAYS IN YOUR CODE
+================================================================================
+
+RED FLAG 1:
+REPEATED NETWORK REQUESTS
+--------------------------------------------------------------------------------
+
+Open:
+
+Browser DevTools
+ ↓
+Network
+
+
+If you see:
+
+GET /api/groceries
+
+GET /api/groceries
+
+GET /api/groceries
+
+GET /api/groceries
+
+GET /api/groceries
+
+
+in rapid succession, investigate:
+
+• Fetch inside render
+
+• Effect without intended dependencies
+
+• Effect/setState loop
+
+• Unstable dependencies
+
+
+================================================================================
+RED FLAG 2:
+LOADING NEVER FINISHES
+================================================================================
+
+UI:
+
+Loading...
+
+Loading...
+
+Loading...
+
+
+Possible causes:
+
+• Request rejected
+
+• Error path didn't clear loading
+
+• Response parsing failed
+
+• Backend never completed
+
+• Request logic repeatedly restarts
+
+
+Do NOT assume:
+
+"infinite fetch loop"
+
+
+without checking actual network activity.
+
+
+================================================================================
+RED FLAG 3:
+OLD DATA APPEARS
+================================================================================
+
+Example:
+
+Select User 1
+
+then quickly:
+
+Select User 2
+
+
+UI briefly shows User 2
+
+then suddenly:
+
+User 1
+
+
+Likely problem:
+
+REQUEST RACE
+
+
+Investigate obsolete request handling.
+
+
+================================================================================
+RED FLAG 4:
+Uncaught (in promise)
+--------------------------------------------------------------------------------
+
+Console:
+
+Uncaught (in promise)
+
+
+Likely:
+
+Rejected Promise wasn't handled somewhere.
+
+
+Investigate:
+
+try/catch
+
+or:
+
+.catch()
+
+
+================================================================================
+RED FLAG 5:
+404/500 PRODUCES STRANGE DATA ERROR
+--------------------------------------------------------------------------------
+
+Possible problem:
+
+response.ok
+
+was never checked.
+
+
+Backend returned:
+
+500
+
+
+Code tried:
+
+response.json()
+
+
+and continued as though the request were successful.
+
+
+================================================================================
+RED FLAG 6:
+EFFECT RUNS MORE THAN EXPECTED
+================================================================================
+
+Check:
+
+• Effect dependencies
+
+• Objects/functions created during render
+
+• State updated by the Effect
+
+• Development Strict Mode behavior
+
+
+Do not immediately remove dependencies to silence the issue.
+
+
+================================================================================
+RED FLAG 7:
+DUPLICATE DEVELOPMENT FETCHES
+================================================================================
+
+If development logs show more Effect setup than expected:
+
+Check whether:
+
+StrictMode
+
+
+is enabled before concluding that there is an infinite loop.
+
+
+But your Effect should still be safe under:
+
+setup
+ ↓
+cleanup
+ ↓
+setup
+
+
+================================================================================
+DEBUGGING WORKFLOW
+================================================================================
+
+STEP 1:
+
+Open Console.
+
+
+Check:
+
+• Runtime errors
+
+• Promise errors
+
+• Request errors
+
+
+STEP 2:
+
+Open Network tab.
+
+
+Check:
+
+• Request count
+
+• Request URL
+
+• Method
+
+• Status
+
+• Duration
+
+• Response
+
+
+STEP 3:
+
+Inspect dependencies.
+
+
+Ask:
+
+What reactive values does the Effect read?
+
+
+STEP 4:
+
+Check whether Effect updates state.
+
+
+Ask:
+
+Does that state change an Effect dependency again?
+
+
+STEP 5:
+
+Check object/function dependencies.
+
+
+Ask:
+
+Is this value recreated on every render?
+
+
+STEP 6:
+
+Check HTTP handling.
+
+
+Look for:
+
+response.ok
+
+
+STEP 7:
+
+Check rejection handling.
+
+
+Look for:
+
+try/catch
+
+or:
+
+.catch()
+
+
+STEP 8:
+
+Check obsolete requests.
+
+
+Look for:
+
+AbortController
+
+or another stale-response strategy.
+
+
+STEP 9:
+
+Check loading paths.
+
+
+Make sure loading ends after:
+
+• Success
+
+• Failure
+
+and behaves sensibly after:
+
+• Cancellation
+
+
+================================================================================
+DEBUGGING TABLE
+================================================================================
+
++--------------------------+-------------------------------------------+
+| SYMPTOM                  | INVESTIGATE                               |
++--------------------------+-------------------------------------------+
+| Repeated requests        | Render fetch / Effect dependencies        |
+| Loading forever          | Error/loading paths                       |
+| Wrong user/data shown    | Race condition                            |
+| Uncaught Promise         | Missing error handling                    |
+| 404 treated as data      | Missing response.ok                       |
+| Effect constantly runs   | Dependency identity/state loop            |
+| Duplicate dev setup      | Strict Mode + cleanup correctness         |
++--------------------------+-------------------------------------------+
+
+
+================================================================================
+PART 10: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE LEARNED
+--------------------------------------------------------------------------------
+
+✓ Why fetching during render is incorrect
+
+✓ Why an Effect can accidentally fetch repeatedly
+
+✓ Why omitted dependencies are not automatically wrong
+
+✓ How real state/effect loops occur
+
+✓ Why useState objects remain stable until state changes
+
+✓ Why render-created objects can be unstable dependencies
+
+✓ Why function references can also become unstable dependencies
+
+✓ How stale requests cause race conditions
+
+✓ Why rerender does not mean unmount
+
+✓ Why request cancellation can be useful
+
+✓ Why fetch needs error handling
+
+✓ Why HTTP status requires response.ok
+
+✓ Why loading must be handled on failure
+
+✓ How to inspect repeated requests
+
+✓ How to debug Effect dependency problems
+
+
+================================================================================
+CRITICAL CORRECTIONS TO REMEMBER
+================================================================================
+
+WRONG IDEA:
+
+"Never use useEffect without a dependency array."
+
+
+BETTER:
+
+An Effect without a dependency array runs after every committed render.
+
+Use it only when that behavior is actually required.
+
+
+--------------------------------------------------------------------------------
+
+WRONG IDEA:
+
+"Any object in the dependency array causes a loop."
+
+
+BETTER:
+
+A state object remains its current reference until state changes.
+
+An object newly created during rendering gets a new reference each render.
+
+
+--------------------------------------------------------------------------------
+
+WRONG IDEA:
+
+"Every fetch without cleanup is automatically a memory leak."
+
+
+BETTER:
+
+Cancellation is especially useful for obsolete requests, race prevention,
+and avoiding unnecessary network work.
+
+
+--------------------------------------------------------------------------------
+
+WRONG IDEA:
+
+"A rerender means the component unmounted."
+
+
+BETTER:
+
+A component can rerender many times while remaining mounted.
+
+
+--------------------------------------------------------------------------------
+
+WRONG IDEA:
+
+"fetch rejects for every HTTP error."
+
+
+BETTER:
+
+Check:
+
+response.ok
+
+
+for HTTP status errors.
+
+
+================================================================================
+THE BAD FEEDBACK LOOP
+================================================================================
+
+Effect
+  ↓
+Request
+  ↓
+setState()
+  ↓
+Render
+  ↓
+Dependency Changes
+  ↓
+Effect
+  ↓
+Request
+  ↓
+...
+
+
+To debug:
+
+IDENTIFY WHAT CHANGED THE DEPENDENCY.
+
+
+================================================================================
+THE RACE CONDITION
+================================================================================
+
+Request A
+   ↓
+slow
+
+
+Request B
+   ↓
+fast
+   ↓
+UI = B
+
+
+Request A finishes later
+   ↓
+UI = A
+
+
+Problem:
+
+OLDER RESPONSE WON
+
+
+Possible solution:
+
+Abort obsolete Request A.
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++--------------------------+--------------------------------------------+
+| PROBLEM                  | REMEMBER                                   |
++--------------------------+--------------------------------------------+
+| Fetch in render          | Render should stay pure                    |
+| Effect every render      | Valid only when actually intended          |
+| Unstable object          | Render-created object has new identity     |
+| Effect state loop        | Effect changes dependency repeatedly       |
+| Race condition           | Older request may finish later             |
+| No HTTP check            | Inspect response.ok                        |
+| No catch                 | Promise failure isn't handled              |
+| Stuck loading            | Handle failure path                        |
+| No cancellation          | Obsolete work may continue                 |
++--------------------------+--------------------------------------------+
+
+
+================================================================================
+WRONG VS BETTER
+================================================================================
+
+WRONG:
+
+function Component() {
+
+  fetch(
+    '/api/data'
+  )
+
+  return (...)
+}
+
+
+BETTER:
+
+useEffect(() => {
+
+  // Synchronize with API
+
+}, [
+  dependencies
+])
+
+
+--------------------------------------------------------------------------------
+
+WRONG:
+
+const options = {
+  category
+}
+
+
+useEffect(() => {
+
+  fetchData(
+    options
+  )
+
+}, [
+  options
+])
+
+
+BETTER:
+
+useEffect(() => {
+
+  fetchData({
+
+    category
+
+  })
+
+}, [
+  category
+])
+
+
+--------------------------------------------------------------------------------
+
+INCOMPLETE:
+
+const response =
+  await fetch(url)
+
+
+const data =
+  await response.json()
+
+
+BETTER:
+
+const response =
+  await fetch(url)
+
+
+if (!response.ok) {
+
+  throw new Error(
+    `Request failed: ${response.status}`
+  )
+}
+
+
+const data =
+  await response.json()
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+DON'T FETCH:
+
+RENDER
+ ↓
+fetch()
+
+
+FETCH FOR EXTERNAL SYNCHRONIZATION:
+
+RENDER
+ ↓
+COMMIT
+ ↓
+EFFECT
+ ↓
+fetch()
+
+
+INFINITE LOOP:
+
+Effect
+ ↓
+State Update
+ ↓
+Dependency Changes
+ ↓
+Effect
+
+
+UNSTABLE DEPENDENCY:
+
+Render
+ ↓
+New Object/Function
+ ↓
+Dependency Different
+
+
+RACE:
+
+Old Request
++
+New Request
+ ↓
+Responses Arrive Out of Order
+
+
+HTTP:
+
+fetch()
+ ↓
+response
+ ↓
+response.ok
+ ↓
+JSON
+
+
+ERROR:
+
+Request
+ ↓
+try/catch
+ ↓
+error state
+
+
+LOADING:
+
+START
+ ↓
+loading = true
+ ↓
+success/error
+ ↓
+loading = false
+
+
+MOST IMPORTANT RULE:
+
+DON'T MEMORIZE A LIST OF "NEVER" RULES.
+
+UNDERSTAND:
+
+WHAT TRIGGERS THE EFFECT,
+WHAT THE EFFECT CHANGES,
+AND WHETHER AN OLD REQUEST CAN BECOME OBSOLETE.
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Fetch GroceryList data correctly
+
+2. Add an AbortController
+
+3. Add loading UI
+
+4. Add error UI
+
+5. Check HTTP response status
+
+6. Prevent obsolete requests from winning races
+
+7. Replace fake groceries with backend data
+
+8. Connect GET /api/groceries
+
+9. Later connect POST, PATCH, and DELETE operations
+
+10. Add automated tests for loading/error/success behavior
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+Most broken data-fetching code comes from one of three areas:
+
+1. WRONG PLACE
+
+   Example:
+   fetch during render
+
+
+2. WRONG TRIGGER
+
+   Example:
+   Effect runs repeatedly because its dependency keeps changing
+
+
+3. WRONG ASYNC HANDLING
+
+   Example:
+   stale response, missing error handling, or stuck loading state
+
+
+The debugging model is:
+
+WHEN DID THE REQUEST START?
+        ↓
+WHY DID THE EFFECT RUN?
+        ↓
+WHAT DEPENDENCY CHANGED?
+        ↓
+DID THE REQUEST SUCCEED?
+        ↓
+IS THIS RESPONSE STILL CURRENT?
+        ↓
+DID THE UI HANDLE SUCCESS/ERROR/CANCELLATION?
+
+
+Once those questions are clear, most React data-fetching problems become much
+easier to diagnose.
+
+
+================================================================================
+END OF LESSON 2
+FETCHING DATA FROM A SERVER THE WRONG WAY
+================================================================================
