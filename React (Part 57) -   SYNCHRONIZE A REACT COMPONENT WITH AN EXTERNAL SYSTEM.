@@ -1,0 +1,1940 @@
+LESSON 3: FETCHING DATA FROM THE BACKEND THE RIGHT WAY
+WITH THE useEffect HOOK
+================================================================================
+PART 1: OVERVIEW OF THE LESSON
+================================================================================
+
+WHAT YOU'LL LEARN
+--------------------------------------------------------------------------------
+
+This lesson focuses on fetching backend data safely from a React component.
+
+You will understand:
+
+• Fetching data after rendering
+
+• Using useEffect for external synchronization
+
+• Keeping network requests out of render
+
+• Managing data state
+
+• Managing loading state
+
+• Managing error state
+
+• Checking HTTP response status
+
+• Using dependency arrays correctly
+
+• Cancelling obsolete requests
+
+• Avoiding stale-response race conditions
+
+• Rendering loading/error/success UI
+
+• Understanding development Strict Mode behavior
+
+
+================================================================================
+WHY THIS LESSON IS IMPORTANT
+================================================================================
+
+In Lesson 2 we saw several incorrect patterns:
+
+Render
+ ↓
+fetch()
+ ↓
+setState()
+ ↓
+Render
+ ↓
+fetch()
+
+
+A better architecture is:
+
+Render
+ ↓
+React Commits UI
+ ↓
+useEffect
+ ↓
+HTTP Request
+ ↓
+Backend
+ ↓
+Response
+ ↓
+setState()
+ ↓
+Render Updated UI
+
+
+CORE RULE:
+
+RENDERING
+should calculate the UI.
+
+useEffect
+should synchronize with external systems when an Effect is the appropriate
+owner of that synchronization.
+
+
+================================================================================
+PART 2: WHAT PROBLEM ARE WE SOLVING?
+================================================================================
+
+WRONG
+--------------------------------------------------------------------------------
+
+function MyComponent() {
+
+  fetch(
+    '/api/data'
+  )
+
+  return (...)
+}
+
+
+Problem:
+
+The network request starts during render.
+
+
+================================================================================
+BETTER
+================================================================================
+
+function MyComponent() {
+
+  useEffect(() => {
+
+    // Start synchronization here.
+
+  }, [])
+
+
+  return (...)
+}
+
+
+Now:
+
+Render
+ ↓
+Commit
+ ↓
+Effect
+ ↓
+Request
+
+
+================================================================================
+COMMON PROBLEMS
+================================================================================
+
++-------------------------+--------------------------------------------+
+| PROBLEM                 | RESULT                                     |
++-------------------------+--------------------------------------------+
+| fetch() during render   | Impure rendering/repeated requests         |
+| Wrong dependencies      | Missing or excessive fetching              |
+| No HTTP check           | 404/500 may be handled incorrectly         |
+| No error state          | User receives no useful failure feedback   |
+| No loading state        | User doesn't know request is pending       |
+| Request race            | Older response may overwrite newer data    |
+| Obsolete request        | Unnecessary external work continues        |
++-------------------------+--------------------------------------------+
+
+
+================================================================================
+PART 3: BASIC useEffect FETCH PATTERN
+================================================================================
+
+IMPORT
+--------------------------------------------------------------------------------
+
+import {
+
+  useEffect,
+
+  useState
+
+} from 'react'
+
+
+================================================================================
+BASIC STRUCTURE
+================================================================================
+
+useEffect(() => {
+
+  const loadData =
+    async () => {
+
+      // Fetch backend data.
+
+    }
+
+
+  loadData()
+
+}, [])
+
+
+================================================================================
+WHY IS THE ASYNC FUNCTION INSIDE THE EFFECT?
+================================================================================
+
+Avoid:
+
+useEffect(
+  async () => {
+
+    const response =
+      await fetch(...)
+
+  },
+  []
+)
+
+
+An async function returns:
+
+Promise
+
+
+But an Effect callback should return:
+
+nothing
+
+or:
+
+a cleanup function
+
+
+Therefore use:
+
+useEffect(() => {
+
+  const loadData =
+    async () => {
+
+      ...
+    }
+
+
+  loadData()
+
+
+  return () => {
+
+    // Optional cleanup.
+
+  }
+
+}, [])
+
+
+================================================================================
+PART 4: COMPLETE DATA-FETCHING EXAMPLE
+================================================================================
+
+File:
+
+src/components/MyComponent.jsx
+
+
+import {
+
+  useEffect,
+
+  useState
+
+} from 'react'
+
+
+export default function MyComponent() {
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [
+    data,
+    setData
+  ] = useState(null)
+
+
+  const [
+    loading,
+    setLoading
+  ] = useState(true)
+
+
+  const [
+    error,
+    setError
+  ] = useState(null)
+
+
+  // ============================================
+  // EFFECT
+  // ============================================
+
+  useEffect(() => {
+
+    const controller =
+      new AbortController()
+
+
+    const getData =
+      async () => {
+
+        try {
+
+          setLoading(true)
+
+          setError(null)
+
+
+          const response =
+            await fetch(
+              '/api/data',
+              {
+                signal:
+                  controller.signal
+              }
+            )
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              `Request failed with status ${response.status}`
+            )
+          }
+
+
+          const result =
+            await response.json()
+
+
+          setData(
+            result
+          )
+
+
+        } catch (error) {
+
+          if (
+            error.name ===
+            'AbortError'
+          ) {
+
+            return
+          }
+
+
+          setError(
+            error instanceof Error
+              ? error.message
+              : 'Unable to load data'
+          )
+
+
+        } finally {
+
+          if (
+            !controller.signal.aborted
+          ) {
+
+            setLoading(
+              false
+            )
+          }
+
+        }
+      }
+
+
+    getData()
+
+
+    // ==========================================
+    // CLEANUP
+    // ==========================================
+
+    return () => {
+
+      controller.abort()
+
+    }
+
+  }, [])
+
+
+  // ============================================
+  // RENDER
+  // ============================================
+
+  if (loading) {
+
+    return (
+
+      <p role="status">
+
+        Loading...
+
+      </p>
+
+    )
+  }
+
+
+  if (error) {
+
+    return (
+
+      <p role="alert">
+
+        Error:
+        {' '}
+        {error}
+
+      </p>
+
+    )
+  }
+
+
+  if (!data) {
+
+    return (
+
+      <p>
+
+        No data available.
+
+      </p>
+
+    )
+  }
+
+
+  return (
+
+    <section>
+
+      <h1>
+
+        {data.name}
+
+      </h1>
+
+    </section>
+
+  )
+}
+
+
+================================================================================
+CODE BREAKDOWN
+================================================================================
+
++----------------------------+------------------------------------------+
+| CODE                       | PURPOSE                                  |
++----------------------------+------------------------------------------+
+| useState(null)             | Store backend data                       |
+| useState(true)             | Track request progress                   |
+| useState(null)             | Store request error                      |
+| useEffect(...)             | Synchronize with API                     |
+| AbortController()          | Control obsolete request                 |
+| fetch()                    | Send HTTP request                        |
+| response.ok                | Check HTTP success                       |
+| response.json()            | Parse JSON body                          |
+| setData()                  | Store successful response                |
+| setError()                 | Store failure information                |
+| setLoading()               | Control loading UI                       |
+| controller.abort()         | Cancel obsolete request                  |
++----------------------------+------------------------------------------+
+
+
+================================================================================
+PART 5: HOW THE REQUEST WORKS STEP BY STEP
+================================================================================
+
+STEP 1
+--------------------------------------------------------------------------------
+
+Component renders.
+
+
+State:
+
+data:
+
+null
+
+
+loading:
+
+true
+
+
+error:
+
+null
+
+
+UI:
+
+Loading...
+
+
+================================================================================
+STEP 2
+================================================================================
+
+React commits the render.
+
+Then the Effect setup runs.
+
+
+================================================================================
+STEP 3
+================================================================================
+
+AbortController is created:
+
+const controller =
+  new AbortController()
+
+
+================================================================================
+STEP 4
+================================================================================
+
+Request begins:
+
+fetch(
+  '/api/data',
+  {
+    signal:
+      controller.signal
+  }
+)
+
+
+================================================================================
+STEP 5
+================================================================================
+
+Backend responds.
+
+
+Example:
+
+HTTP 200
+
+
+================================================================================
+STEP 6
+================================================================================
+
+Check:
+
+response.ok
+
+
+If:
+
+false
+
+
+throw an error.
+
+
+================================================================================
+STEP 7
+================================================================================
+
+Parse:
+
+const result =
+  await response.json()
+
+
+================================================================================
+STEP 8
+================================================================================
+
+Update:
+
+setData(
+  result
+)
+
+
+================================================================================
+STEP 9
+================================================================================
+
+Request finishes:
+
+setLoading(
+  false
+)
+
+
+================================================================================
+STEP 10
+================================================================================
+
+React renders again.
+
+
+Now:
+
+data:
+
+result
+
+
+loading:
+
+false
+
+
+error:
+
+null
+
+
+UI displays the backend data.
+
+
+================================================================================
+COMPLETE REQUEST FLOW
+================================================================================
+
+Initial Render
+      ↓
+Loading UI
+      ↓
+Effect Setup
+      ↓
+fetch()
+      ↓
+Backend API
+      ↓
+Response
+      ↓
+response.ok?
+   /       \
+ NO        YES
+ ↓          ↓
+Error     Parse JSON
+ ↓          ↓
+error     data
+  \        /
+   \      /
+    ↓    ↓
+ loading=false
+      ↓
+    Render
+      ↓
+Final UI
+
+
+================================================================================
+PART 6: DEPENDENCY ARRAY
+================================================================================
+
+CASE 1: NO CHANGING REACTIVE DEPENDENCY
+--------------------------------------------------------------------------------
+
+useEffect(() => {
+
+  loadInitialData()
+
+}, [])
+
+
+Conceptually:
+
+Component appears
+      ↓
+Effect establishes initial synchronization
+
+
+================================================================================
+IMPORTANT CORRECTION
+================================================================================
+
+Do NOT memorize:
+
+[] =
+EXACTLY ONCE FOREVER
+
+
+A better meaning is:
+
+[] =
+THIS EFFECT USES NO CHANGING REACTIVE DEPENDENCIES
+
+
+Development Strict Mode may intentionally perform:
+
+Setup
+ ↓
+Cleanup
+ ↓
+Setup
+
+
+to help expose broken Effect logic.
+
+
+Therefore Effects should be written safely rather than relying on the idea
+that setup can physically happen only once.
+
+
+================================================================================
+CASE 2: RESOURCE DEPENDS ON userId
+================================================================================
+
+useEffect(() => {
+
+  loadUser(
+    userId
+  )
+
+}, [
+  userId
+])
+
+
+Flow:
+
+userId = 10
+      ↓
+Fetch User 10
+
+
+Later:
+
+userId = 20
+      ↓
+Cleanup old request
+      ↓
+Fetch User 20
+
+
+================================================================================
+CASE 3: MULTIPLE DEPENDENCIES
+================================================================================
+
+useEffect(() => {
+
+  loadProducts(
+    category,
+    searchText
+  )
+
+}, [
+  category,
+  searchText
+])
+
+
+Effect synchronizes when:
+
+category
+
+or:
+
+searchText
+
+
+changes.
+
+
+================================================================================
+DEPENDENCY TABLE
+================================================================================
+
++------------------------+---------------------------------------------+
+| DEPENDENCIES           | BEHAVIOR                                    |
++------------------------+---------------------------------------------+
+| omitted                | Runs after every relevant committed render  |
+| []                     | No changing reactive dependencies           |
+| [userId]               | Reacts to userId                            |
+| [category, searchText] | Reacts to either dependency                 |
++------------------------+---------------------------------------------+
+
+
+================================================================================
+PART 7: ERROR HANDLING
+================================================================================
+
+NETWORK ERROR
+--------------------------------------------------------------------------------
+
+Example:
+
+Network unavailable
+
+
+Then:
+
+fetch()
+
+
+may reject.
+
+
+The catch block handles:
+
+catch (error) {
+
+  ...
+}
+
+
+================================================================================
+HTTP ERROR
+================================================================================
+
+Example:
+
+404
+
+500
+
+503
+
+
+Important:
+
+fetch() does NOT automatically reject merely because the server returned an
+HTTP error status.
+
+
+Therefore:
+
+if (!response.ok) {
+
+  throw new Error(
+    `Request failed with status ${response.status}`
+  )
+}
+
+
+================================================================================
+ERROR FLOW
+================================================================================
+
+fetch()
+  ↓
+Something fails
+  ↓
+catch
+  ↓
+AbortError?
+ /        \
+YES       NO
+↓          ↓
+Ignore    setError()
+            ↓
+          UI Error
+
+
+================================================================================
+ERROR UI
+================================================================================
+
+if (error) {
+
+  return (
+
+    <p role="alert">
+
+      Error:
+      {' '}
+      {error}
+
+    </p>
+
+  )
+}
+
+
+This gives the user actual feedback instead of leaving:
+
+Loading...
+
+
+forever.
+
+
+================================================================================
+PART 8: REQUEST CANCELLATION AND RACE CONDITIONS
+================================================================================
+
+WHY USE AbortController?
+--------------------------------------------------------------------------------
+
+Consider:
+
+userId = 10
+
+
+Request A:
+
+GET /api/users/10
+
+
+Before it finishes:
+
+userId = 20
+
+
+Request B:
+
+GET /api/users/20
+
+
+Suppose:
+
+Request B finishes FIRST.
+
+
+UI:
+
+User 20
+
+
+Then Request A finishes later.
+
+
+Without protection:
+
+UI could incorrectly become:
+
+User 10
+
+
+This is a:
+
+RACE CONDITION
+
+
+================================================================================
+WITH CLEANUP
+================================================================================
+
+useEffect(() => {
+
+  const controller =
+    new AbortController()
+
+
+  fetch(
+    `/api/users/${userId}`,
+    {
+      signal:
+        controller.signal
+    }
+  )
+
+
+  return () => {
+
+    controller.abort()
+
+  }
+
+}, [
+  userId
+])
+
+
+Flow:
+
+Request User 10
+      ↓
+userId changes
+      ↓
+Cleanup
+      ↓
+Abort User 10 Request
+      ↓
+Request User 20
+      ↓
+Latest Data Wins
+
+
+================================================================================
+WHY IGNORE AbortError?
+================================================================================
+
+Cancellation is expected behavior.
+
+
+It does NOT mean:
+
+"The server failed."
+
+
+Therefore:
+
+catch (error) {
+
+  if (
+    error.name ===
+    'AbortError'
+  ) {
+
+    return
+  }
+
+
+  setError(
+    error.message
+  )
+}
+
+
+================================================================================
+PART 9: CONNECTING THIS TO GROCERYLIST
+================================================================================
+
+So far the Grocery List used:
+
+FAKE_GROCERIES
+
+
+Eventually we want:
+
+Backend API
+    ↓
+GET /api/groceries
+    ↓
+React State
+    ↓
+GroceryList
+
+
+================================================================================
+CONCEPTUAL App.jsx
+================================================================================
+
+import {
+
+  useEffect,
+
+  useState
+
+} from 'react'
+
+
+export default function App() {
+
+  const [
+    groceryItems,
+    setGroceryItems
+  ] = useState([])
+
+
+  const [
+    loading,
+    setLoading
+  ] = useState(true)
+
+
+  const [
+    error,
+    setError
+  ] = useState(null)
+
+
+  useEffect(() => {
+
+    const controller =
+      new AbortController()
+
+
+    const loadGroceries =
+      async () => {
+
+        try {
+
+          setLoading(true)
+
+          setError(null)
+
+
+          const response =
+            await fetch(
+              '/api/groceries',
+              {
+                signal:
+                  controller.signal
+              }
+            )
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              `Unable to load groceries: ${response.status}`
+            )
+          }
+
+
+          const groceries =
+            await response.json()
+
+
+          setGroceryItems(
+            groceries
+          )
+
+
+        } catch (error) {
+
+          if (
+            error.name ===
+            'AbortError'
+          ) {
+
+            return
+          }
+
+
+          setError(
+            error instanceof Error
+              ? error.message
+              : 'Unable to load groceries'
+          )
+
+
+        } finally {
+
+          if (
+            !controller.signal.aborted
+          ) {
+
+            setLoading(
+              false
+            )
+          }
+
+        }
+      }
+
+
+    loadGroceries()
+
+
+    return () => {
+
+      controller.abort()
+
+    }
+
+  }, [])
+
+
+  if (loading) {
+
+    return (
+      <p role="status">
+
+        Loading groceries...
+
+      </p>
+    )
+  }
+
+
+  if (error) {
+
+    return (
+      <p role="alert">
+
+        {error}
+
+      </p>
+    )
+  }
+
+
+  return (
+
+    <GroceryList
+      items={
+        groceryItems
+      }
+    />
+
+  )
+}
+
+
+================================================================================
+GROCERY BACKEND FLOW
+================================================================================
+
+App Mounts
+    ↓
+groceryItems = []
+    ↓
+Loading UI
+    ↓
+useEffect
+    ↓
+GET /api/groceries
+    ↓
+Backend
+    ↓
+JSONArray
+    ↓
+setGroceryItems()
+    ↓
+React Renders
+    ↓
+GroceryList
+    ↓
+GroceryItem Cards
+
+
+================================================================================
+IMPORTANT ARCHITECTURE NOTE
+================================================================================
+
+The backend request replaces:
+
+FAKE_GROCERIES
+
+
+as the initial data source.
+
+
+App remains the owner of:
+
+groceryItems
+
+
+Therefore our previous architecture still works:
+
+App
+│
+├── groceryItems
+├── handleAddItem
+├── handleToggleBought
+├── handleRemoveItem
+│
+├── AddGroceryForm
+│
+└── GroceryList
+
+
+Only the initial data source changes:
+
+BEFORE:
+
+FAKE_GROCERIES
+
+
+AFTER:
+
+BACKEND API
+
+
+================================================================================
+PART 10: WHAT useEffect FIXES AND WHAT IT DOESN'T
+================================================================================
+
+useEffect HELPS WITH:
+--------------------------------------------------------------------------------
+
+• Keeping fetch outside rendering
+
+• Defining synchronization dependencies
+
+• Cleanup
+
+• Request cancellation
+
+• Responding to resource identifiers
+
+
+================================================================================
+useEffect DOES NOT AUTOMATICALLY SOLVE:
+================================================================================
+
+• HTTP error handling
+
+• Loading UI
+
+• Request cancellation
+
+• Data validation
+
+• Authentication
+
+• Retries
+
+• Caching
+
+• Pagination
+
+• Deduplication
+
+• Race conditions unless handled correctly
+
+• Server-side failures
+
+
+You still need to implement appropriate request behavior.
+
+
+================================================================================
+IMPORTANT: DON'T SAY "ALWAYS USE useEffect FOR DATA FETCHING"
+================================================================================
+
+That is too broad.
+
+
+Sometimes data fetching is handled by:
+
+• Framework loaders
+
+• Server Components
+
+• Router data APIs
+
+• Dedicated server-state libraries
+
+• Event handlers
+
+• Application-specific data layers
+
+
+Within the client-side Effect-based pattern taught here:
+
+useEffect
+
+
+is appropriate for synchronizing a component with a backend resource.
+
+
+================================================================================
+EVENT-DRIVEN REQUESTS
+================================================================================
+
+Suppose:
+
+User clicks:
+
+Save Grocery
+
+
+The POST request may naturally belong in:
+
+handleSubmit()
+
+
+Example conceptual flow:
+
+Submit Button
+     ↓
+handleSubmit()
+     ↓
+POST /api/groceries
+
+
+You do NOT need:
+
+setShouldSave(true)
+     ↓
+useEffect observes shouldSave
+     ↓
+POST
+
+
+just to make the request happen.
+
+
+================================================================================
+PART 11: TESTING THE FETCHING FLOW
+================================================================================
+
+TESTING CHECKLIST
+--------------------------------------------------------------------------------
+
+[ ] Component initially shows loading
+
+[ ] Request uses correct endpoint
+
+[ ] Successful response updates data
+
+[ ] HTTP error creates error state
+
+[ ] Network error creates error state
+
+[ ] Loading ends after success
+
+[ ] Loading ends after failure
+
+[ ] Aborted request is not shown as failure
+
+[ ] Changing dependency cancels obsolete request
+
+[ ] Old response cannot overwrite newer data
+
+[ ] No fetch occurs during render
+
+[ ] Empty response/data state is handled
+
+[ ] Backend data renders correctly
+
+
+================================================================================
+SCENARIO 1: SUCCESS
+================================================================================
+
+Request:
+
+GET /api/groceries
+
+
+Response:
+
+200 OK
+
+
+Body:
+
+[
+  {
+    "id": "milk-1",
+    "name": "Milk"
+  }
+]
+
+
+Expected:
+
+Loading
+ ↓
+Request
+ ↓
+Data
+ ↓
+Grocery List
+
+
+================================================================================
+SCENARIO 2: HTTP ERROR
+================================================================================
+
+Response:
+
+500
+
+
+Expected:
+
+response.ok:
+
+false
+
+
+Then:
+
+Error state
+
+
+UI:
+
+Unable to load groceries...
+
+
+================================================================================
+SCENARIO 3: NETWORK ERROR
+================================================================================
+
+Network unavailable.
+
+
+Expected:
+
+fetch rejects
+ ↓
+catch
+ ↓
+setError()
+ ↓
+Error UI
+
+
+================================================================================
+SCENARIO 4: CANCELLATION
+================================================================================
+
+Request A begins.
+
+Dependency changes.
+
+Cleanup:
+
+controller.abort()
+
+
+Expected:
+
+AbortError
+
+
+Do NOT display:
+
+"Backend failure"
+
+
+because cancellation was intentional.
+
+
+================================================================================
+SCENARIO 5: RAPID DEPENDENCY CHANGES
+================================================================================
+
+userId:
+
+1
+ ↓
+2
+ ↓
+3
+
+
+Expected:
+
+Old requests become obsolete.
+
+
+Final UI:
+
+User 3
+
+
+not:
+
+whichever network request happens to finish last.
+
+
+================================================================================
+PART 12: SUMMARY AND KEY TAKEAWAYS
+================================================================================
+
+WHAT YOU'VE LEARNED
+--------------------------------------------------------------------------------
+
+✓ Fetch data outside render
+
+✓ Use an Effect for external synchronization when appropriate
+
+✓ Create async functions inside the Effect
+
+✓ Manage data state
+
+✓ Manage loading state
+
+✓ Manage error state
+
+✓ Check response.ok
+
+✓ Parse JSON responses
+
+✓ Use dependency arrays correctly
+
+✓ Understand why [] is not simply "guaranteed once"
+
+✓ Use AbortController
+
+✓ Cancel obsolete requests
+
+✓ Protect against race conditions
+
+✓ Handle cancellation separately from errors
+
+✓ Connect GroceryList to backend data
+
+✓ Understand when an event handler is more appropriate than an Effect
+
+
+================================================================================
+THE CORE FETCH PATTERN
+================================================================================
+
+useEffect(() => {
+
+  const controller =
+    new AbortController()
+
+
+  const loadData =
+    async () => {
+
+      try {
+
+        setLoading(
+          true
+        )
+
+        setError(
+          null
+        )
+
+
+        const response =
+          await fetch(
+            url,
+            {
+              signal:
+                controller.signal
+            }
+          )
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            `Request failed: ${response.status}`
+          )
+        }
+
+
+        const result =
+          await response.json()
+
+
+        setData(
+          result
+        )
+
+
+      } catch (error) {
+
+        if (
+          error.name ===
+          'AbortError'
+        ) {
+
+          return
+        }
+
+
+        setError(
+          error.message
+        )
+
+
+      } finally {
+
+        if (
+          !controller.signal.aborted
+        ) {
+
+          setLoading(
+            false
+          )
+        }
+
+      }
+    }
+
+
+  loadData()
+
+
+  return () => {
+
+    controller.abort()
+
+  }
+
+}, [
+  /* real dependencies */
+])
+
+
+================================================================================
+QUICK REVISION TABLE
+================================================================================
+
++------------------------+---------------------------------------------+
+| CONCEPT                | REMEMBER                                    |
++------------------------+---------------------------------------------+
+| useEffect              | External synchronization                    |
+| useState               | Store request/UI state                      |
+| fetch                  | Send HTTP request                           |
+| response.ok            | Check HTTP result                           |
+| response.json()        | Parse JSON body                             |
+| loading                | Request-in-progress state                   |
+| error                  | Request-failure state                       |
+| Dependency Array       | Reactive inputs used by Effect              |
+| AbortController        | Cancel obsolete fetch                       |
+| Cleanup                | Abort/disconnect old synchronization        |
+| Race Condition         | Old request can overwrite newer result      |
++------------------------+---------------------------------------------+
+
+
+================================================================================
+QUICK REVISION - SUCCESS FLOW
+================================================================================
+
+Render
+ ↓
+Loading
+ ↓
+Effect
+ ↓
+fetch()
+ ↓
+200 Response
+ ↓
+response.json()
+ ↓
+setData()
+ ↓
+loading=false
+ ↓
+Render Data
+
+
+================================================================================
+QUICK REVISION - ERROR FLOW
+================================================================================
+
+Request
+ ↓
+Network/API Problem
+ ↓
+catch
+ ↓
+setError()
+ ↓
+loading=false
+ ↓
+Error UI
+
+
+================================================================================
+QUICK REVISION - RACE PROTECTION
+================================================================================
+
+Request A
+ ↓
+
+Dependency Changes
+ ↓
+
+Cleanup
+ ↓
+
+Abort A
+ ↓
+
+Request B
+ ↓
+
+B Response
+ ↓
+
+Current UI
+
+
+================================================================================
+DEPENDENCY MEMORY
+================================================================================
+
+[]:
+
+No changing reactive dependencies
+
+
+React to userId changes
+
+
+[category, search]:
+
+React to category or search changes
+
+
+OMITTED:
+
+Effect after every relevant committed render
+
+
+================================================================================
+ONE-LINE MEMORY FORMULAS
+================================================================================
+
+FETCH:
+
+Effect
+ ↓
+fetch
+ ↓
+response
+ ↓
+JSON
+ ↓
+state
+
+
+SUCCESS:
+
+Request
+ ↓
+Data
+ ↓
+setData()
+
+
+ERROR:
+
+Request
+ ↓
+catch
+ ↓
+setError()
+
+
+HTTP ERROR:
+
+response
+ ↓
+response.ok === false
+ ↓
+throw
+
+
+CLEANUP:
+
+Effect Setup
+ ↓
+AbortController
+ ↓
+cleanup
+ ↓
+abort()
+
+
+BACKEND GROCERY DATA:
+
+GET /api/groceries
+      ↓
+JSON
+      ↓
+setGroceryItems
+      ↓
+GroceryList
+
+
+MOST IMPORTANT RULE:
+
+DO NOT FETCH DURING RENDER.
+
+WHEN AN EFFECT OWNS BACKEND SYNCHRONIZATION,
+MAKE THE REQUEST LIFECYCLE COMPLETE:
+
+LOADING
++
+HTTP CHECKING
++
+DATA
++
+ERROR
++
+CANCELLATION
++
+CLEANUP
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+You're now ready to:
+
+1. Create the Grocery backend endpoint
+
+2. Fetch GET /api/groceries
+
+3. Replace FAKE_GROCERIES with backend data
+
+4. Define the expected JSON structure
+
+5. Add backend timeout/error handling
+
+6. POST new groceries
+
+7. PATCH purchased status
+
+8. DELETE groceries
+
+9. Decide between optimistic and server-confirmed updates
+
+10. Introduce a reusable backend/API service layer
+
+
+================================================================================
+KEY TAKEAWAY
+================================================================================
+
+The correct client-side Effect-based pattern is:
+
+RENDER
+ ↓
+COMMIT
+ ↓
+useEffect
+ ↓
+HTTP REQUEST
+ ↓
+BACKEND
+ ↓
+HTTP RESPONSE
+ ↓
+STATE UPDATE
+ ↓
+RENDER
+ ↓
+UPDATED UI
+
+
+But remember:
+
+useEffect IS NOT "THE FETCH HOOK."
+
+
+Its broader purpose is:
+
+SYNCHRONIZE A REACT COMPONENT
+WITH AN EXTERNAL SYSTEM.
+
+
+Backend fetching is one important example of that pattern.
+
+
+================================================================================
+END OF LESSON 3
+FETCHING DATA FROM THE BACKEND THE RIGHT WAY
+WITH THE useEffect HOOK
+================================================================================
