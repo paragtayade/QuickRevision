@@ -1,0 +1,1428 @@
+================================================================================
+LESSON 4: PULLING BOOKS FROM API IN REACT
+================================================================================
+
+
+LESSON OVERVIEW
+================================================================================
+
+This lesson covers how to:
+
+- Fetch books from an external API
+- Use the Google Books API
+- Make API calls using fetch()
+- Use async/await
+- Store fetched data using useState
+- Fetch data using useEffect
+- Handle loading and errors
+- Display fetched books in React
+
+
+================================================================================
+1. WHAT IS AN API?
+================================================================================
+
+API = Application Programming Interface
+
+An API allows different applications to communicate and exchange data.
+
+Example:
+
+React Application
+       |
+       v
+Google Books API
+       |
+       v
+Book Data
+       |
+       v
+React Application
+
+
+Google Books API provides information such as:
+
+- Book title
+- Authors
+- Publisher
+- Published date
+- Description
+- Page count
+- Categories
+- Book thumbnail
+
+
+Most APIs return data in JSON format.
+
+
+================================================================================
+2. WHY FETCH DATA FROM AN API?
+================================================================================
+
+HARDCODED DATA
+--------------------------------------------------------------------------------
+
+- Data stored directly in application code
+- Static data
+- Must be updated manually
+- Limited scalability
+
+
+API DATA
+--------------------------------------------------------------------------------
+
+- Data comes from an external service
+- Dynamic content
+- Can access large datasets
+- Easier to maintain
+- Common in real-world applications
+
+
+================================================================================
+3. GOOGLE BOOKS API
+================================================================================
+
+Example Endpoint:
+
+https://www.googleapis.com/books/v1/volumes?q=javascript
+
+
+URL Breakdown:
+--------------------------------------------------------------------------------
+
+Base URL:
+
+https://www.googleapis.com/books/v1/
+
+
+Resource:
+
+volumes
+
+
+Query Parameter:
+
+q=javascript
+
+
+Meaning:
+
+Search Google Books for books related to:
+
+javascript
+
+
+Structure:
+
+Base URL
+   +
+Resource
+   +
+Query Parameter
+
+Example:
+
+https://www.googleapis.com/books/v1/
+            |
+            +-- volumes
+                   |
+                   +-- ?q=javascript
+
+
+================================================================================
+4. API RESPONSE STRUCTURE
+================================================================================
+
+A simplified response looks like:
+
+{
+  "kind": "books#volumes",
+
+  "totalItems": 1234,
+
+  "items": [
+
+    {
+      "id": "abc123",
+
+      "volumeInfo": {
+
+        "title": "JavaScript: The Good Parts",
+
+        "authors": [
+          "Douglas Crockford"
+        ],
+
+        "publisher": "O'Reilly Media",
+
+        "publishedDate": "2008-05-01",
+
+        "description": "Book description...",
+
+        "pageCount": 172,
+
+        "categories": [
+          "Computers"
+        ],
+
+        "imageLinks": {
+          "thumbnail": "book-thumbnail-url"
+        }
+      }
+    }
+  ]
+}
+
+
+IMPORTANT STRUCTURE
+--------------------------------------------------------------------------------
+
+data
+ |
+ +-- totalItems
+ |
+ +-- items[]
+       |
+       +-- book
+            |
+            +-- id
+            |
+            +-- volumeInfo
+                  |
+                  +-- title
+                  +-- authors
+                  +-- publisher
+                  +-- description
+                  +-- pageCount
+                  +-- categories
+                  +-- imageLinks
+
+
+================================================================================
+5. ACCESSING BOOK INFORMATION
+================================================================================
+
+Title:
+
+book.volumeInfo.title
+
+
+Authors:
+
+book.volumeInfo.authors
+
+
+Publisher:
+
+book.volumeInfo.publisher
+
+
+Published Date:
+
+book.volumeInfo.publishedDate
+
+
+Description:
+
+book.volumeInfo.description
+
+
+Page Count:
+
+book.volumeInfo.pageCount
+
+
+Categories:
+
+book.volumeInfo.categories
+
+
+Thumbnail:
+
+book.volumeInfo.imageLinks.thumbnail
+
+
+================================================================================
+6. CREATE STATE FOR BOOKS
+================================================================================
+
+Import React hooks:
+
+import { useState, useEffect } from 'react';
+
+
+Create books state:
+
+const [books, setBooks] = useState([]);
+
+
+Meaning:
+
+books
+-> Stores the fetched books
+
+setBooks()
+-> Updates the books state
+
+[]
+-> Initially there are no books
+
+
+================================================================================
+7. CREATE THE FETCH FUNCTION
+================================================================================
+
+const URL =
+  'https://www.googleapis.com/books/v1/volumes?q=javascript';
+
+
+const fetchBooks = async () => {
+
+  try {
+
+    const response = await fetch(URL);
+
+    const data = await response.json();
+
+    const bookList = data.items || [];
+
+    setBooks(bookList);
+
+  } catch (error) {
+
+    console.error('Error fetching books:', error);
+
+  }
+
+};
+
+
+HOW IT WORKS
+--------------------------------------------------------------------------------
+
+1. fetch(URL)
+
+   Sends HTTP request to the API.
+
+
+2. await
+
+   Waits for the asynchronous operation to complete.
+
+
+3. response.json()
+
+   Converts the API response into JavaScript data.
+
+
+4. data.items
+
+   Gets the books array.
+
+
+5. data.items || []
+
+   Returns an empty array if items does not exist.
+
+
+6. setBooks(bookList)
+
+   Stores fetched books in React state.
+
+
+================================================================================
+8. FETCH BOOKS USING useEffect
+================================================================================
+
+useEffect(() => {
+
+  fetchBooks();
+
+}, []);
+
+
+Meaning:
+
+useEffect()
+-> Runs side-effect logic
+
+fetchBooks()
+-> Calls the API
+
+[]
+-> Runs the effect after the initial component mount
+
+
+Flow:
+
+Component Mounts
+       |
+       v
+useEffect Runs
+       |
+       v
+fetchBooks()
+       |
+       v
+Call API
+       |
+       v
+Receive Data
+       |
+       v
+setBooks()
+       |
+       v
+Component Re-renders
+
+
+================================================================================
+9. BASIC COMPLETE EXAMPLE
+================================================================================
+
+import { useState, useEffect } from 'react';
+
+import NavBar from './components/NavBar';
+import Footer from './components/Footer';
+
+import './App.css';
+
+
+function App() {
+
+  const [books, setBooks] = useState([]);
+
+
+  const URL =
+    'https://www.googleapis.com/books/v1/volumes?q=javascript';
+
+
+  const fetchBooks = async () => {
+
+    try {
+
+      const response = await fetch(URL);
+
+      const data = await response.json();
+
+      const bookList = data.items || [];
+
+      setBooks(bookList);
+
+      console.log('Books fetched:', bookList);
+
+    } catch (error) {
+
+      console.error(
+        'Error fetching books:',
+        error
+      );
+
+    }
+
+  };
+
+
+  useEffect(() => {
+
+    fetchBooks();
+
+  }, []);
+
+
+  return (
+
+    <div className="App">
+
+      <NavBar />
+
+
+      <main className="container mt-5">
+
+        <h1>
+          Welcome to Bookshelf
+        </h1>
+
+        <p>
+          Total books loaded: {books.length}
+        </p>
+
+      </main>
+
+
+      <Footer />
+
+    </div>
+
+  );
+}
+
+export default App;
+
+
+================================================================================
+10. ADD LOADING AND ERROR STATES
+================================================================================
+
+Create three states:
+
+const [books, setBooks] = useState([]);
+
+const [isLoading, setIsLoading] = useState(true);
+
+const [error, setError] = useState(null);
+
+
+Purpose:
+
+books
+-> Stores API data
+
+isLoading
+-> Tracks whether API request is running
+
+error
+-> Stores API error information
+
+
+================================================================================
+11. FETCH WITH LOADING AND ERROR HANDLING
+================================================================================
+
+const fetchBooks = async () => {
+
+  try {
+
+    setIsLoading(true);
+    setError(null);
+
+
+    const response = await fetch(URL);
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        `HTTP error! Status: ${response.status}`
+      );
+
+    }
+
+
+    const data = await response.json();
+
+    setBooks(data.items || []);
+
+
+  } catch (error) {
+
+    console.error(
+      'Error fetching books:',
+      error
+    );
+
+    setError(error.message);
+
+    setBooks([]);
+
+
+  } finally {
+
+    setIsLoading(false);
+
+  }
+
+};
+
+
+WHY response.ok?
+--------------------------------------------------------------------------------
+
+fetch() does not automatically throw an exception for every HTTP error
+response.
+
+Therefore check:
+
+if (!response.ok) {
+  throw new Error(...);
+}
+
+
+WHY finally?
+--------------------------------------------------------------------------------
+
+finally always runs after try/catch.
+
+Success:
+-> Stop loading
+
+Error:
+-> Stop loading
+
+Therefore:
+
+finally {
+  setIsLoading(false);
+}
+
+
+================================================================================
+12. DISPLAY LOADING, ERROR, AND SUCCESS
+================================================================================
+
+LOADING
+--------------------------------------------------------------------------------
+
+{isLoading && (
+  <p>Loading books...</p>
+)}
+
+
+ERROR
+--------------------------------------------------------------------------------
+
+{error && (
+  <p style={{ color: 'red' }}>
+    Error: {error}
+  </p>
+)}
+
+
+SUCCESS
+--------------------------------------------------------------------------------
+
+{!isLoading && !error && (
+
+  <p>
+    Total books loaded: {books.length}
+  </p>
+
+)}
+
+
+================================================================================
+13. DISPLAY BOOKS USING map()
+================================================================================
+
+<div className="row">
+
+  {books.map((book) => (
+
+    <div
+      key={book.id}
+      className="col-md-4 mb-4"
+    >
+
+      <div className="card">
+
+        <div className="card-body">
+
+          <h5 className="card-title">
+
+            {book.volumeInfo?.title || 'No Title'}
+
+          </h5>
+
+
+          <p className="card-text">
+
+            {book.volumeInfo?.authors?.join(', ')
+              || 'Unknown Author'}
+
+          </p>
+
+
+          <p className="card-text small">
+
+            {book.volumeInfo?.description
+              ? `${book.volumeInfo.description.substring(0, 100)}...`
+              : 'No description'}
+
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  ))}
+
+</div>
+
+
+================================================================================
+14. WHY USE OPTIONAL CHAINING?
+================================================================================
+
+API data may contain missing fields.
+
+Unsafe:
+
+book.volumeInfo.authors.join(', ')
+
+
+If authors does not exist, the code can fail.
+
+
+Safer:
+
+book.volumeInfo?.authors?.join(', ')
+
+
+Example:
+
+book.volumeInfo?.title || 'No Title'
+
+book.volumeInfo?.authors?.join(', ') || 'Unknown Author'
+
+book.volumeInfo?.publisher || 'Unknown Publisher'
+
+
+Optional Chaining:
+
+?.
+
+
+Purpose:
+
+Safely access nested properties that may be missing.
+
+
+================================================================================
+15. COMPLETE API FETCH FLOW
+================================================================================
+
+Component Mounts
+       |
+       v
+useEffect()
+       |
+       v
+fetchBooks()
+       |
+       v
+setIsLoading(true)
+       |
+       v
+Show "Loading books..."
+       |
+       v
+fetch(URL)
+       |
+       v
+Wait for API
+       |
+       v
+Check response.ok
+       |
+    +--+--+
+    |     |
+ Success Error
+    |     |
+    v     v
+response  catch
+.json()    |
+    |      v
+    |   setError()
+    v
+data.items
+    |
+    v
+setBooks()
+    |
+    +------+
+           |
+           v
+        finally
+           |
+           v
+setIsLoading(false)
+           |
+           v
+Component Re-renders
+           |
+      +----+----+
+      |         |
+      v         v
+ Display     Display
+ Books       Error
+
+
+================================================================================
+16. COMPLETE EXAMPLE
+================================================================================
+
+import { useState, useEffect } from 'react';
+
+import NavBar from './components/NavBar';
+import Footer from './components/Footer';
+
+import './App.css';
+
+
+function App() {
+
+  const [books, setBooks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+
+  const URL =
+    'https://www.googleapis.com/books/v1/volumes?q=javascript';
+
+
+  const fetchBooks = async () => {
+
+    try {
+
+      setIsLoading(true);
+      setError(null);
+
+
+      const response = await fetch(URL);
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          `HTTP error! Status: ${response.status}`
+        );
+
+      }
+
+
+      const data = await response.json();
+
+      setBooks(data.items || []);
+
+
+    } catch (error) {
+
+      setError(error.message);
+      setBooks([]);
+
+
+    } finally {
+
+      setIsLoading(false);
+
+    }
+
+  };
+
+
+  useEffect(() => {
+
+    fetchBooks();
+
+  }, []);
+
+
+  return (
+
+    <div className="App">
+
+      <NavBar />
+
+
+      <main className="container mt-5">
+
+        <h1>
+          Welcome to Bookshelf
+        </h1>
+
+
+        {isLoading && (
+          <p>Loading books...</p>
+        )}
+
+
+        {error && (
+          <p style={{ color: 'red' }}>
+            Error: {error}
+          </p>
+        )}
+
+
+        {!isLoading && !error && (
+
+          <>
+
+            <p>
+              Total books loaded: {books.length}
+            </p>
+
+
+            <div className="row">
+
+              {books.map((book) => (
+
+                <div
+                  key={book.id}
+                  className="col-md-4 mb-4"
+                >
+
+                  <div className="card">
+
+                    <div className="card-body">
+
+                      <h5 className="card-title">
+
+                        {book.volumeInfo?.title
+                          || 'No Title'}
+
+                      </h5>
+
+
+                      <p className="card-text">
+
+                        {book.volumeInfo?.authors?.join(', ')
+                          || 'Unknown Author'}
+
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              ))}
+
+            </div>
+
+          </>
+
+        )}
+
+      </main>
+
+
+      <Footer />
+
+    </div>
+
+  );
+}
+
+export default App;
+
+
+================================================================================
+17. ADD SEARCH FUNCTIONALITY
+================================================================================
+
+Instead of always searching for:
+
+javascript
+
+allow the user to enter a search term.
+
+
+State:
+
+const [searchTerm, setSearchTerm] =
+  useState('javascript');
+
+
+Fetch Function:
+
+const fetchBooks = async (query) => {
+
+  const URL =
+    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`;
+
+  const response = await fetch(URL);
+
+  const data = await response.json();
+
+  setBooks(data.items || []);
+
+};
+
+
+Important:
+
+encodeURIComponent(query)
+
+makes the user-entered search text safer to include inside the URL.
+
+
+Example:
+
+User Searches:
+
+spring boot
+
+
+API Query:
+
+?q=spring%20boot
+
+
+================================================================================
+18. SEARCH FLOW
+================================================================================
+
+User Enters Search
+       |
+       v
+Submit Form
+       |
+       v
+e.preventDefault()
+       |
+       v
+Update Search Term
+       |
+       v
+Call fetchBooks()
+       |
+       v
+Google Books API
+       |
+       v
+Receive Results
+       |
+       v
+setBooks()
+       |
+       v
+Display Books
+
+
+================================================================================
+19. DEBUGGING API DATA
+================================================================================
+
+Use console.log() to inspect API responses.
+
+Example:
+
+const data = await response.json();
+
+console.log('Full data:', data);
+
+console.log('Books array:', data.items);
+
+console.log('First book:', data.items?.[0]);
+
+console.log(
+  'First book title:',
+  data.items?.[0]?.volumeInfo?.title
+);
+
+
+How to Check:
+--------------------------------------------------------------------------------
+
+1. Open browser Developer Tools
+
+2. Open the Console tab
+
+3. Look at the logged response
+
+4. Expand objects and arrays
+
+5. Check the nested properties
+
+
+================================================================================
+20. RESPONSE DATA LEVELS
+================================================================================
+
+LEVEL 1
+
+data
+
+Type:
+Object
+
+Contains:
+- kind
+- totalItems
+- items
+
+
+LEVEL 2
+
+data.items
+
+Type:
+Array
+
+Contains:
+- Book objects
+
+
+LEVEL 3
+
+data.items[0]
+
+Type:
+Object
+
+Contains:
+- id
+- kind
+- volumeInfo
+
+
+LEVEL 4
+
+data.items[0].volumeInfo
+
+Type:
+Object
+
+Contains:
+- title
+- authors
+- description
+- publisher
+- pageCount
+- imageLinks
+
+
+LEVEL 5
+
+data.items[0].volumeInfo.authors
+
+Type:
+Array
+
+Contains:
+- Author names
+
+
+================================================================================
+21. IMPORTANT REACT CONCEPTS
+================================================================================
+
+useState
+--------------------------------------------------------------------------------
+
+Stores API data and UI state.
+
+Example:
+
+const [books, setBooks] = useState([]);
+
+
+useEffect
+--------------------------------------------------------------------------------
+
+Runs the API-fetching side effect.
+
+Example:
+
+useEffect(() => {
+  fetchBooks();
+}, []);
+
+
+async / await
+--------------------------------------------------------------------------------
+
+Handles asynchronous operations in a readable way.
+
+
+fetch()
+--------------------------------------------------------------------------------
+
+Makes an HTTP request.
+
+
+response.json()
+--------------------------------------------------------------------------------
+
+Reads and parses the JSON response body.
+
+
+try / catch
+--------------------------------------------------------------------------------
+
+Handles errors.
+
+
+finally
+--------------------------------------------------------------------------------
+
+Runs cleanup logic regardless of success or failure.
+
+
+Optional Chaining
+--------------------------------------------------------------------------------
+
+?.
+
+Safely accesses properties that may not exist.
+
+
+================================================================================
+22. COMMON ISSUES
+================================================================================
+
+ISSUE: books IS EMPTY
+--------------------------------------------------------------------------------
+
+Check:
+
+console.log(data);
+
+The response may not contain items.
+
+Use:
+
+setBooks(data.items || []);
+
+
+ISSUE: PAGE CRASHES WHEN AUTHORS ARE MISSING
+--------------------------------------------------------------------------------
+
+Avoid:
+
+book.volumeInfo.authors.join(', ')
+
+Use:
+
+book.volumeInfo?.authors?.join(', ')
+  || 'Unknown Author';
+
+
+ISSUE: HTTP ERROR NOT ENTERING catch
+--------------------------------------------------------------------------------
+
+Check:
+
+if (!response.ok) {
+  throw new Error(
+    `HTTP error! Status: ${response.status}`
+  );
+}
+
+
+ISSUE: API RUNS REPEATEDLY
+--------------------------------------------------------------------------------
+
+Check the useEffect dependency array.
+
+For a fetch intended only on initial mount:
+
+useEffect(() => {
+  fetchBooks();
+}, []);
+
+
+ISSUE: LOADING NEVER STOPS
+--------------------------------------------------------------------------------
+
+Use:
+
+finally {
+  setIsLoading(false);
+}
+
+
+================================================================================
+23. QUICK REVISION
+================================================================================
+
+CREATE STATE
+--------------------------------------------------------------------------------
+
+const [books, setBooks] = useState([]);
+
+
+API URL
+--------------------------------------------------------------------------------
+
+const URL =
+  'https://www.googleapis.com/books/v1/volumes?q=javascript';
+
+
+FETCH
+--------------------------------------------------------------------------------
+
+const response = await fetch(URL);
+
+
+CHECK RESPONSE
+--------------------------------------------------------------------------------
+
+if (!response.ok) {
+  throw new Error(`HTTP error: ${response.status}`);
+}
+
+
+CONVERT JSON
+--------------------------------------------------------------------------------
+
+const data = await response.json();
+
+
+GET BOOKS
+--------------------------------------------------------------------------------
+
+const bookList = data.items || [];
+
+
+UPDATE STATE
+--------------------------------------------------------------------------------
+
+setBooks(bookList);
+
+
+CALL ON COMPONENT MOUNT
+--------------------------------------------------------------------------------
+
+useEffect(() => {
+  fetchBooks();
+}, []);
+
+
+DISPLAY BOOKS
+--------------------------------------------------------------------------------
+
+books.map((book) => (
+  <div key={book.id}>
+    {book.volumeInfo?.title}
+  </div>
+));
+
+
+================================================================================
+24. INTERVIEW EXPLANATION
+================================================================================
+
+Question:
+
+How do you fetch API data in React?
+
+
+Answer:
+
+"In React, I usually store the API response in state using useState.
+
+I call the API using fetch with async/await, check response.ok for HTTP
+errors, and convert the response using response.json().
+
+For data that should load when the component mounts, I trigger the fetch
+from useEffect.
+
+I maintain loading and error states to provide proper user feedback.
+
+Once the response is received, I update state, which causes React to
+re-render and display the fetched data.
+
+For nested API properties that may be missing, I use optional chaining
+to avoid runtime errors."
+
+
+================================================================================
+25. KEY TAKEAWAYS
+================================================================================
+
+1. API provides external data to the application.
+
+2. fetch() makes the HTTP request.
+
+3. async/await handles asynchronous processing.
+
+4. response.json() parses JSON response data.
+
+5. useState stores fetched books.
+
+6. useEffect can trigger the initial API request.
+
+7. data.items contains the Google Books results in this example.
+
+8. volumeInfo contains most book information.
+
+9. Always handle API errors.
+
+10. Check response.ok for HTTP failure responses.
+
+11. Use loading state for better UX.
+
+12. Use optional chaining for properties that may be missing.
+
+13. Use:
+
+    data.items || []
+
+    when the result may have no items.
+
+14. When rendering a book list, prefer a stable API identifier:
+
+    key={book.id}
+
+    instead of array index when possible.
+
+
+================================================================================
+FINAL API FLOW
+================================================================================
+
+React Component
+      |
+      v
+useEffect()
+      |
+      v
+fetchBooks()
+      |
+      v
+fetch(API)
+      |
+      v
+Google Books API
+      |
+      v
+JSON Response
+      |
+      v
+data.items
+      |
+      v
+setBooks()
+      |
+      v
+React Re-renders
+      |
+      v
+books.map()
+      |
+      v
+Books Displayed
+
+
+================================================================================
+FINAL FORMULA
+================================================================================
+
+API Integration
+      =
+useEffect
+      +
+fetch()
+      +
+async / await
+      +
+response.json()
+      +
+useState
+      +
+Loading State
+      +
+Error Handling
+      +
+Optional Chaining
+      +
+Render with map()
+
+
+================================================================================
+END
+================================================================================
